@@ -1,0 +1,155 @@
+[
+ ;; Partitions
+ {:db/id #db/id [:db.part/db]
+  :db/ident :users
+  :db.install/_partition :db.part/db}
+
+ {:db/id #db/id [:db.part/db]
+  :db/ident :data
+  :db.install/_partition :db.part/db}
+
+ ;; Users
+ {:db/ident :user/id
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :user/password
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :user/salt
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :user/email
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :user/role
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/index true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ ;; Roles
+ {:db/ident :role/id
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/unique :db.unique/identity
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :role/label
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+
+ {:db/ident :thunk/label
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :thunk/fact
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/index true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :thunk/role
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/index true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ ;; Facts
+ {:db/ident :fact/attribute
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/index true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :fact/value
+  :db/valueType :db.type/ref
+  ;; sets of items should be across datoms and the UI should group
+  ;; them by :fact/attribute
+  :db/cardinality :db.cardinality/one
+  :db/index true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :fact/representation
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :fact/hook
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :fact/role
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/index true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+
+ ;; Values
+ {:db/ident :value/uri
+  :db/valueType :db.type/uri
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :value/image-uri
+  :db/valueType :db.type/uri
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :value/string
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :value/function
+  :db/valueType :db.type/keyword
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :value/integer
+  :db/valueType :db.type/bigint
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :value/decimal
+  :db/valueType :db.type/bigdec
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ ]
