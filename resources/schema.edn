@@ -71,7 +71,7 @@
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
- {:db/ident :thunk/role
+ {:db/ident :entity/role
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
   :db/index true
@@ -106,14 +106,6 @@
   :db/cardinality :db.cardinality/many
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
-
- {:db/ident :fact/role
-  :db/valueType :db.type/ref
-  :db/cardinality :db.cardinality/many
-  :db/index true
-  :db/id #db/id[:db.part/db]
-  :db.install/_attribute :db.part/db}
-
 
  ;; Values
  {:db/ident :value/uri

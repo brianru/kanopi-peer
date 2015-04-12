@@ -1,4 +1,5 @@
 (ns nebula.storage.datomic
+  "Datomic database component and datomic-specific helper functions."
   (:require [datomic.api :as d]
             [com.stuartsierra.component :as component]))
 
@@ -11,18 +12,19 @@
       @(d/transact conn (read-string (slurp "resources/schema.edn")))
       conn)))
 
-(defrecord Database
-    [host port conn]
+(defrecord Database [host port conn]
   component/Lifecycle
-  (start [component]
+  (start [this]
     (println "Starting database")
-    (when-not conn
-      (assoc component :conn (connect-to-database host port))))
+    (if conn this
+      (assoc this :conn (connect-to-database host port))))
 
-  (stop [component]
+  (stop [this]
     (println "Stopping database")
-    (when conn
-      (assoc component :conn nil))))
+    (if-not conn this
+      (do
+        (d/release conn)
+        (assoc this :conn nil)))))
 
 (defn database [host port]
   (map->Database {:host host :port port}))
