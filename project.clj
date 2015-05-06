@@ -9,6 +9,18 @@
                  [leiningen "2.5.1"]
                  [environ "1.0.0"]
 
+                 ;; Client
+                 [org.clojure/clojurescript "0.0-3119"]
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [org.omcljs/om "0.8.8"
+                  :exclusions [cljsjs/react cljsjs/react-with-addons]]
+                 [cljsjs/react-with-addons "0.12.2-8"]
+                 [secretary "1.2.1"]
+                 [shodan "0.4.1"]
+                 [cljs-ajax "0.3.10"]
+                 [sablono "0.3.4"
+                  :exclusions [cljsjs/react cljsjs/react-with-addons]]
+
                  ;; Database
                  [com.datomic/datomic-free "0.9.5153" :exclusions [joda-time]]
 
