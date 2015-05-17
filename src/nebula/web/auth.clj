@@ -15,13 +15,22 @@
     (-> handler
         (friend/authenticate friend-m))))
 
+(def user-map
+  "dummy in-memory user database."
+  {"root" {:username "root"
+           :password (creds/hash-bcrypt "admin_password")
+           :roles #{:admin}}
+   "jane" {:username "jane"
+           :password (creds/hash-bcrypt "user_password")
+           :roles #{:user}}})
+
 (defrecord AuthenticationService
     [config database user-lookup-fn]
   component/Lifecycle
   (start [this]
-    (assoc this :user-lookup-fn (constantly nil)))
+    (assoc this :user-lookup-fn user-map))
   (stop [this]
-    (dissoc this :user-lookup-fn)))
+    (assoc this :user-lookup-fn nil)))
 
 (defn new-authentication-service
   ([]

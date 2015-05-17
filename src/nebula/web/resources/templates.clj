@@ -1,5 +1,6 @@
 (ns nebula.web.resources.templates
-  (:require [hiccup.page :refer (html5 include-js include-css)]))
+  (:require [hiccup.page :refer (html5 include-js include-css)]
+            [cemerick.friend :as friend]))
 
 (defn include-bootstrap []
   (include-css "//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"))
@@ -19,9 +20,11 @@
 (defn body [& content]
   (into [:body] content))
 
-(defn om-page [{:keys [title] :as opts}]
+(defn om-page [ctx {:keys [title] :as opts}]
   (html5
    (header title)
    [:body
+    [:p
+     (-> ctx :request friend/current-authentication str)]
     [:div#app-container]
     (include-om)]))

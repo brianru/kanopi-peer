@@ -40,7 +40,9 @@
       (let [http-handler ((:handler config))]
         (-> http-handler
             (authentication-middleware (:user-lookup-fn authenticator))
-            (defaults/wrap-defaults defaults/site-defaults)
+            (defaults/wrap-defaults (-> defaults/site-defaults
+                                        (dissoc :session)
+                                        (assoc :security false)))
             (cond-> (:dev config)
               (wrap-trace :header :ui))
             (wrap-ensure-session)

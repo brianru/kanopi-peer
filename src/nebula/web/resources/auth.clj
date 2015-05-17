@@ -14,10 +14,11 @@
        [:div.jumbotron
         {:style "top: 20vh; position: relative;"}
         [:div.row
-         [:div.col-md-3]
+         [:div.col-md-3
+          ]
          [:div.col-md-6
           [:h1 "nebula"]
-          (when (= "Y" (get params :login-failed))
+          (when (= "Y" (get params :login_failed))
             [:div
              [:div.glyphicon.glyphicon-warning-sign.pull-left
               {:style "padding-right: 10px;"}

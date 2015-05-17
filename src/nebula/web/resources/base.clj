@@ -114,7 +114,7 @@
   (let [not-found (comp rep/ring-response (route/not-found "Route not found!"))
         base      {"text/html" not-found}]
     {:authorized?
-     (constantly nil)
+     (constantly true)
 
      :handle-unauthorized
      (fn [req]

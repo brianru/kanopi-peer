@@ -4,7 +4,7 @@
             [nebula.web.resources.templates :as html]))
 
 (defn spa [ctx]
-  (html/om-page {:title "nebula"}))
+  (html/om-page ctx {:title "nebula"}))
 
 (defresource spa-resource base/requires-authentication
   :allowed-methods [:get]
