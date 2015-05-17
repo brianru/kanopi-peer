@@ -2,6 +2,7 @@
   (:require [cemerick.friend :as friend]
             [cemerick.friend.workflows :as workflows]
             [cemerick.friend.credentials :as creds]
+            [datomic.api :as d]
             [com.stuartsierra.component :as component]))
 
 (defn authentication-middleware
@@ -19,16 +20,32 @@
   "dummy in-memory user database."
   {"root" {:username "root"
            :password (creds/hash-bcrypt "admin_password")
-           :roles #{:admin}}
-   "jane" {:username "jane"
-           :password (creds/hash-bcrypt "user_password")
-           :roles #{:user}}})
+           }
+   "hannah" {:username "jane"
+             :password (creds/hash-bcrypt "hannah")
+             }})
+
+(defprotocol IAuthenticate
+  (credentials [this username])
+  (register! [this username password])
+  )
 
 (defrecord AuthenticationService
     [config database user-lookup-fn]
+  IAuthenticate
+  (credentials [this username]
+    nil)
+  (register! [this username password]
+    (let [txdata []
+          {:keys [db-after]} @(d/transact (:connection database) txdata)]
+      )
+    )
+
   component/Lifecycle
   (start [this]
-    (assoc this :user-lookup-fn user-map))
+    #_(assoc this :user-lookup-fn (partial credentials this))
+    (assoc this :user-lookup-fn user-map)
+    )
   (stop [this]
     (assoc this :user-lookup-fn nil)))
 

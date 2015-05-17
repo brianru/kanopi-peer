@@ -10,7 +10,8 @@
                 :host    "0.0.0.0"}
    :web-app    {:handler #'routes/app-routes}
    :datomic    {:schema  ["resources/schema.edn"]
-                :data    []}
+                :data    ["resources/test-data.edn"
+                          "resources/init-data.edn"]}
    :dev true})
 
 (defn -main [& args]

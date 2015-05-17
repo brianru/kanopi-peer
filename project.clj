@@ -7,7 +7,6 @@
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [com.stuartsierra/component "0.2.3"]
                  [com.taoensso/timbre "3.4.0"]
-                 ;;[leiningen "2.5.1"]
                  [environ "1.0.0"]
 
                  ;; Client
@@ -16,7 +15,7 @@
                  [org.omcljs/om "0.8.8"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [cljsjs/react-with-addons "0.12.2-8"]
-                 [secretary "1.2.1"]
+                 [secretary "1.2.3"]
                  [shodan "0.4.1"]
                  [cljs-ajax "0.3.10"]
                  [sablono "0.3.4"
@@ -45,4 +44,13 @@
                                   [ring/ring-devel "1.3.1"]]
                    :env {:dev true}
                    :source-paths ["dev"]
-                   :repl-options {:init-ns user}}})
+                   :repl-options {:init-ns user}}}
+
+  :cljsbuild {:builds
+              {:dev {:source-paths ["src-cljs/nebula/"]
+                     :compiler {:output-to "target/public/js/main.js"
+                                :output-dir "target/public/js/out"
+                                :optimizations :simple
+                                :pretty-print true
+                                :source-map "target/public/js/source_map.js"}}
+               }})

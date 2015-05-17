@@ -3,14 +3,23 @@
   (:require [datomic.api :as d]
             [com.stuartsierra.component :as component]))
 
+(defn- load-files! [conn files]
+  (for [file-path files]
+    (println "loading " file-path)
+    @(d/transact conn (read-string (slurp file-path)))) )
+
 (defn- connect-to-database
   [host port config]
   (let [uri (str "datomic:mem://nebula")]
     (d/delete-database uri)
     (d/create-database uri)
     (let [conn (d/connect uri)]
-      (for [file-path (:schema config)]
-        @(d/transact conn (read-string (slurp file-path))))
+      (println "load schema")
+      (load-files! conn (:schema config))
+
+      (println "load data")
+      (load-files! conn (:data config))
+
       conn)))
 
 (defrecord Database [config host port conn]

@@ -114,13 +114,13 @@
   (let [not-found (comp rep/ring-response (route/not-found "Route not found!"))
         base      {"text/html" not-found}]
     {:authorized?
-     (constantly true)
+     (fn [ctx] (-> ctx :request friend/current-authentication))
 
      :handle-unauthorized
-     (fn [req]
+     (fn [ctx]
        (friend/throw-unauthorized
-        (friend/identity req)
-        {::friend/wrapped-handler (-> req :resource :allowed?)}))
+        (friend/identity ctx)
+        {::friend/wrapped-handler (-> ctx :resource :allowed?)}))
 
      :handle-not-acceptable
      (->> {"application/json" {:success false

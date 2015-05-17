@@ -6,7 +6,10 @@
             ))
 
 (def app-container (. js/document (getElementById "app-container")))
-
+(def app-state
+  (atom {:tempo {:pulse nil}
+         :user  {:actions {}}
+         :data  {}}))
 (defn root
   [props owner opts]
   (reify

@@ -11,8 +11,8 @@
     (display-name [_]
       (str "fact-handle-" (:id props)))
 
-    om/IRender
-    (render-state [_ {:keys [mode] :as state}
+    om/IRenderState
+    (render-state [_ {:keys [mode] :as state}]
       (let []
         (html
          [:div.fact-handle
@@ -41,7 +41,7 @@
     (display-name [_]
       (str "fact-value-" (:id props)))
 
-    om/IRender
+    om/IRenderState
     (render-state [_ {:keys [mode] :as state}]
       (let []
         (html
@@ -69,8 +69,8 @@
            (om/build handle props {:state (select-keys state [:mode])})]
 
           [:div.inline-90-percent
-           (om/build attribute props {:state (select-keys state [:mode])
-           (om/build value     props {:state (select-keys state [:mode])]
+           (om/build attribute props {:state (select-keys state [:mode])})
+           (om/build value     props {:state (select-keys state [:mode])})]
           ])))
     ))
 

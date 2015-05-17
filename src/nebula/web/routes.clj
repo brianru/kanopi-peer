@@ -1,7 +1,7 @@
 (ns nebula.web.routes
   (:require [compojure.core  :refer (routes GET POST PUT ANY)]
             [compojure.route :as route]
-            [nebula.web.resources.auth :refer (login-resource logout-resource)]
+            [nebula.web.resources.auth :as auth]
             [nebula.web.resources.api  :refer (api-resource)]
             [nebula.web.resources.spa  :refer (spa-resource)]
             ))
@@ -10,8 +10,9 @@
   (->
    (routes
     ;; authentication
-    (GET "/login"  [] login-resource)
-    (GET "/logout" [] logout-resource)
+    (ANY "/register" [] auth/registration-resource)
+    (GET "/login"    [] auth/login-resource)
+    (GET "/logout"   [] auth/logout-resource)
 
     (GET "/" [] spa-resource)
     (ANY "/api/:entity-id" [] api-resource)

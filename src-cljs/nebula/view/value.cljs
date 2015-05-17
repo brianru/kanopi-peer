@@ -10,7 +10,7 @@
 (defn thumbnail [])
 (defn link [])
 (defn text [])
-(defn map [])
+(defn interactive-map [])
 
 (defn stub-rendering
   [props owner opts])

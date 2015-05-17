@@ -33,7 +33,7 @@
       "goal-monitor")
 
     om/IWillMount
-    (Will-mount [_]
+    (will-mount [_]
       ;; apply goal monitor
       ;; take stream of user actions -- interpret user's current goal
       )
