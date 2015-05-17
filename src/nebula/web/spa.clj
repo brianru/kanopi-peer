@@ -1,4 +1,4 @@
-(ns nebula.web.spa
+(ns nebula.web.resources.spa
   (:require [liberator.core :refer [defresource]]
             [hiccup.page :refer [html5 include-js include-css]]))
 

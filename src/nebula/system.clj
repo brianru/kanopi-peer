@@ -8,13 +8,12 @@
             ))
 
 (defn new-system
-  "TODO: move data to config map"
   ([] (new-system env))
   ([config]
    (let [{:keys [port env]} config
          with-dev #(util/select-with-merge config % [:dev])]
     (component/system-map
-     :database   (database "localhost" 4334)
+     :database   (database "localhost" 4334 (with-dev :datomic))
      :web-app    (component/using
                   (app/new-web-app (with-dev :web-app))
                   {:database :database})

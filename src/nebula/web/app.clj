@@ -1,4 +1,4 @@
-(ns nebula.web.app
+(ns nebula.web.resources.app
   (:require [com.stuartsierra.component :as component]
             [immutant.web.middleware :refer [wrap-session]]
             [liberator.dev :refer [wrap-trace]]

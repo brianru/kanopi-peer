@@ -4,27 +4,28 @@
             [com.stuartsierra.component :as component]))
 
 (defn- connect-to-database
-  [host port]
+  [host port config]
   (let [uri (str "datomic:mem://nebula")]
     (d/delete-database uri)
     (d/create-database uri)
     (let [conn (d/connect uri)]
-      @(d/transact conn (read-string (slurp "resources/schema.edn")))
+      (for [file-path (:schema config)]
+        @(d/transact conn (read-string (slurp file-path))))
       conn)))
 
-(defrecord Database [host port conn]
+(defrecord Database [config host port conn]
   component/Lifecycle
   (start [this]
-    (println "Starting database")
+    (println "starting database")
     (if conn this
-      (assoc this :conn (connect-to-database host port))))
+        (assoc this :conn (connect-to-database host port config))))
 
   (stop [this]
-    (println "Stopping database")
+    (println "stopping database")
     (if-not conn this
-      (do
-        (d/release conn)
-        (assoc this :conn nil)))))
+            (do
+              (d/release conn)
+              (assoc this :conn nil)))))
 
-(defn database [host port]
-  (map->Database {:host host :port port}))
+(defn database [host port config]
+  (map->Database {:host host, :port port, :config config}))

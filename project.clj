@@ -35,8 +35,9 @@
                  ;; Test
                  [org.clojure/test.check "0.7.0"]
                  ]
-  :main nebular.main
-  :plugins [[lein-marginalia "0.8.0"]]
+  :main nebula.main
+  :plugins [[lein-marginalia "0.8.0"]
+            [lein-cljsbuild "1.0.6"]]
   :profiles {:dev {:plugins [[lein-environ "1.0.0"]
                              [lein-ancient "0.6.6"]]
                    :dependencies [[org.clojure/tools.namespace "0.2.10"]
