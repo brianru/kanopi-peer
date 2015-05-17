@@ -2,7 +2,8 @@
   (:require [liberator.core :refer [defresource]]
             [cemerick.friend :as friend]
             [nebula.web.resources.templates :as html]
-            [hiccup.page :refer (html5 inlcude-js include-css)]))
+            [ring.util.response :as r]
+            [hiccup.page :refer (html5 include-js include-css)]))
 
 (defn login-page [ctx]
   (let [{:keys [params]} (get ctx :request)]
