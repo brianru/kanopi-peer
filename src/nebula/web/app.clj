@@ -32,14 +32,14 @@
         (assoc response :session (assoc session :key key))))))
 
 (defrecord WebApp
-    [config datomic app-handler authentication-service]
+    [config datomic app-handler authenticator]
   component/Lifecycle
   (start [this]
     (if app-handler
       this
       (let [http-handler ((:handler config))]
         (-> http-handler
-            (authentication-middleware (:user-lookup-fn authentication-service))
+            (authentication-middleware (:user-lookup-fn authenticator))
             (defaults/wrap-defaults defaults/site-defaults)
             (cond-> (:dev config)
               (wrap-trace :header :ui))

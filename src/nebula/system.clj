@@ -14,13 +14,21 @@
    (let [{:keys [port env]} config
          with-dev #(util/select-with-merge config % [:dev])]
     (component/system-map
-     :database   (database "localhost" 4334 (with-dev :datomic))
-     :authenticator (component/using
-                     (auth/new-authentication-service)
-                     {:database :database})
-     :web-app    (component/using
-                  (app/new-web-app (with-dev :web-app))
-                  {:database :database})
-     :web-server (component/using
-                  (server/new-web-server (with-dev :web-server))
-                  {:web-app :web-app})))))
+     :database
+     (database "localhost" 4334 (with-dev :datomic))
+
+     :authenticator
+     (component/using
+      (auth/new-authentication-service)
+      {:database :database})
+
+     :web-app
+     (component/using
+      (app/new-web-app (with-dev :web-app))
+      {:database :database
+       :authenticator :authenticator})
+
+     :web-server
+     (component/using
+      (server/new-web-server (with-dev :web-server))
+      {:web-app :web-app})))))
