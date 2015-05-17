@@ -1,4 +1,4 @@
-(ns nebula.web.api
+(ns nebula.web.resources.api
   (:require [liberator.core :refer [defresource]]))
 
 (defresource api-resource
