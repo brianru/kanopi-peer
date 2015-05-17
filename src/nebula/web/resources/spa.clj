@@ -3,7 +3,7 @@
             [nebula.web.resources.templates :as html]))
 
 (defn spa [ctx]
-  (html/page {:title "nebula"} (html/include-om)))
+  (html/om-page {:title "nebula"}))
 
 (defresource spa-resource
   :allowed-methods [:get]

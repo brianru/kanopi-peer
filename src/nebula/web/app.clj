@@ -4,47 +4,51 @@
             [liberator.dev :refer [wrap-trace]]
             [liberator.representation :as rep]
             [ring.middleware.defaults :as defaults]
+            [nebula.web.auth :refer (authentication-middleware)]
             [nebula.util.core :as util]))
 
 (defn wrap-ensure-session
   "Ensures that a session exists and has a key set. Also ensures that it's added
-   to the response if missing."
+  to the response if missing."
   [h]
   (fn [req]
     (let [session (:session req)
           has-key? (contains? session :key)
           key (or (:key session) (str (util/random-uuid)))
           response (h (cond-> req
-                              (not has-key?)
-                              (assoc-in [:session :key] key)))]
+                        (not has-key?)
+                        (assoc-in [:session :key] key)))]
       (cond
 
-       (or has-key?
-           (= key (get-in response [:session :key]))
-           (and (contains? response :session) (nil? (:session response))))
-       response
+        (or has-key?
+            (= key (get-in response [:session :key]))
+            (and (contains? response :session) (nil? (:session response))))
+        response
 
-       (:session response)
-       (assoc-in response [:session :key] key)
+        (:session response)
+        (assoc-in response [:session :key] key)
 
-       :else
-       (assoc response :session (assoc session :key key))))))
+        :else
+        (assoc response :session (assoc session :key key))))))
 
 (defrecord WebApp
-    [config datomic app-handler]
+    [config datomic app-handler authentication-service]
   component/Lifecycle
   (start [this]
-    (if app-handler this
-        (-> defaults/site-defaults
-            (->> (defaults/wrap-defaults ((:handler config))))
+    (if app-handler
+      this
+      (let [http-handler ((:handler config))]
+        (-> http-handler
+            (authentication-middleware (:user-lookup-fn authentication-service))
+            (defaults/wrap-defaults defaults/site-defaults)
             (cond-> (:dev config)
               (wrap-trace :header :ui))
             (wrap-ensure-session)
             (wrap-session {:timeout 0})
-            (->> (assoc this :app-handler)))))
+            (->> (assoc this :app-handler))))))
   (stop [this]
     (if-not app-handler this
-      (assoc this :app-handler nil))))
+            (assoc this :app-handler nil))))
 
 (defn get-handler [web-app]
   (:app-handler web-app))

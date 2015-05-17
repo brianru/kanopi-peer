@@ -1,12 +1,13 @@
 (defproject nebula "0.1.0-SNAPSHOT"
-  :description "FIXME: write description"
+  :description "A tool for exploring, expressing and documenting your mind."
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
+  :min-lein-version "2.0.0"
   :dependencies [[org.clojure/clojure "1.6.0"]
                  [com.stuartsierra/component "0.2.3"]
                  [com.taoensso/timbre "3.4.0"]
-                 [leiningen "2.5.1"]
+                 ;;[leiningen "2.5.1"]
                  [environ "1.0.0"]
 
                  ;; Client
@@ -25,7 +26,7 @@
                  [com.datomic/datomic-free "0.9.5153" :exclusions [joda-time]]
 
                  ;; Web
-                 [org.immutant/web "2.0.0-beta2"]
+                 [org.immutant/web "2.0.0"]
                  [compojure "1.3.3"]
                  [liberator "0.12.2"]
                  [com.cemerick/friend "0.2.1"]

@@ -5,7 +5,7 @@
   (include-css "//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"))
 
 (defn include-om []
-  [:div#app-container (include-js "js/main.js")])
+  (include-js "js/main.js"))
 
 (defn header [title]
   (vector :head
@@ -19,6 +19,9 @@
 (defn body [& content]
   (into [:body] content))
 
-(defn page [{:keys [title] :as opts} & content]
-  (header title)
-  (apply body content))
+(defn om-page [{:keys [title] :as opts}]
+  (html5
+   (header title)
+   [:body
+    [:div#app-container]
+    (include-om)]))
