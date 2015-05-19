@@ -25,3 +25,11 @@
 (defn reset []
   (stop)
   (refresh :after 'user/go))
+
+(comment
+  (require '[nebula.web.auth :as auth])
+
+  (auth/register! (get system :authenticator) "brian" "rubinton")
+
+  (get system :authenticator)
+  )

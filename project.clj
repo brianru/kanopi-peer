@@ -22,7 +22,8 @@
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
 
                  ;; Database
-                 [com.datomic/datomic-free "0.9.5153" :exclusions [joda-time]]
+                 [com.datomic/datomic-free "0.9.5153"
+                  :exclusions [joda-time]]
 
                  ;; Web
                  [org.immutant/web "2.0.0"]

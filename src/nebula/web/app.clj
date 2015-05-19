@@ -31,6 +31,10 @@
         :else
         (assoc response :session (assoc session :key key))))))
 
+(defn wrap-add-to-req [h k payload]
+  (fn [req]
+    (h (assoc req k payload))))
+
 (defrecord WebApp
     [config datomic app-handler authenticator]
   component/Lifecycle
@@ -39,13 +43,14 @@
       this
       (let [http-handler ((:handler config))]
         (-> http-handler
-            (authentication-middleware (:user-lookup-fn authenticator))
+            (authentication-middleware (:credential-fn authenticator))
             (defaults/wrap-defaults (-> defaults/site-defaults
                                         (dissoc :session)
                                         (assoc :security false)))
             (cond-> (:dev config)
               (wrap-trace :header :ui))
             (wrap-ensure-session)
+            (wrap-add-to-req :authenticator authenticator)
             (wrap-session {:timeout 0})
             (->> (assoc this :app-handler))))))
   (stop [this]

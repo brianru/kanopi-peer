@@ -4,14 +4,13 @@
             [com.stuartsierra.component :as component]))
 
 (defn- load-files! [conn files]
-  (for [file-path files]
+  (doseq [file-path files]
     (println "loading " file-path)
-    @(d/transact conn (read-string (slurp file-path)))) )
+    @(d/transact conn (read-string (slurp file-path)))))
 
 (defn- connect-to-database
   [host port config]
   (let [uri (str "datomic:mem://nebula")]
-    (d/delete-database uri)
     (d/create-database uri)
     (let [conn (d/connect uri)]
       (println "load schema")
@@ -22,19 +21,22 @@
 
       conn)))
 
-(defrecord Database [config host port conn]
+(defrecord Database [config host port connection]
   component/Lifecycle
   (start [this]
     (println "starting database")
-    (if conn this
-        (assoc this :conn (connect-to-database host port config))))
+    (if connection
+      this
+      (assoc this :connection
+             (connect-to-database host port config))))
 
   (stop [this]
     (println "stopping database")
-    (if-not conn this
-            (do
-              (d/release conn)
-              (assoc this :conn nil)))))
+    (if-not connection
+      this
+      (do
+        (d/release connection)
+        (assoc this :connection nil)))))
 
 (defn database [host port config]
   (map->Database {:host host, :port port, :config config}))

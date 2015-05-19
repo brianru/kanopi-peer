@@ -2,6 +2,7 @@
   (:require [liberator.core :refer [defresource]]
             [cemerick.friend :as friend]
             [nebula.web.resources.templates :as html]
+            [nebula.web.auth :as auth]
             [ring.util.response :as r]
             [hiccup.page :refer (html5 include-js include-css)]))
 
@@ -96,8 +97,14 @@
             "Register"]
            ]]]]]])))
 
-(defn register! [ctx]
-  nil)
+(defn register!
+  "TODO: if success, redirect to internal page
+  TODO: if failure, redirect to same page with fail msg in route params"
+  [ctx]
+  (let [{:keys [username password]} (get-in ctx [:request :params])
+        authenticator (get-in ctx [:request :authenticator])
+        res @(auth/register! authenticator username password)]
+    (str res)))
 
 (defresource logout-resource
   :allowed-methods [:get]

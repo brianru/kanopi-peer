@@ -6,9 +6,9 @@
             [com.stuartsierra.component :as component]))
 
 (defn authentication-middleware
-  [handler credential-lookup-fn]
+  [handler credential-fn]
   (let [friend-m
-        {:credential-fn (partial creds/bcrypt-credential-fn credential-lookup-fn)
+        {:credential-fn (partial creds/bcrypt-credential-fn credential-fn)
          :login-uri "/login"
          :default-landing-uri "/"
          :workflows [(workflows/http-basic :realm "/")
@@ -16,38 +16,45 @@
     (-> handler
         (friend/authenticate friend-m))))
 
-(def user-map
-  "dummy in-memory user database."
-  {"root" {:username "root"
-           :password (creds/hash-bcrypt "admin_password")
-           }
-   "hannah" {:username "jane"
-             :password (creds/hash-bcrypt "hannah")
-             }})
-
 (defprotocol IAuthenticate
-  (credentials [this username])
-  (register! [this username password])
-  )
+  (credentials  [this username])
+  (verify-creds [this input-creds])
+  (register!    [this username password]))
 
 (defrecord AuthenticationService
     [config database user-lookup-fn]
   IAuthenticate
   (credentials [this username]
-    nil)
-  (register! [this username password]
-    (let [txdata []
-          {:keys [db-after]} @(d/transact (:connection database) txdata)]
-      )
+    (let [creds (->> [:user/id username]
+                     (d/entity (d/db (:connection database)))
+                     (into {}))
+          ]
+      {:username (:user/id creds)
+       :password (:user/password creds)})
     )
+
+  (verify-creds [this {:keys [username password]}]
+    (->> (credentials this username)
+         :user/password
+         (creds/bcrypt-verify password)))
+
+  (register! [this username password]
+    (let [txdata [
+                  {:db/id #db/id [:db.part/user -1000]
+                   :role/id username}
+                  {:db/id #db/id [:db.part/user]
+                   :user/id username
+                   :user/password (creds/hash-bcrypt password)
+                   :user/role #db/id [:db.part/user -1000]}
+                  ]
+          ]
+      (d/transact (:connection database) txdata)))
 
   component/Lifecycle
   (start [this]
-    #_(assoc this :user-lookup-fn (partial credentials this))
-    (assoc this :user-lookup-fn user-map)
-    )
+    (assoc this :credential-fn (partial credentials this)))
   (stop [this]
-    (assoc this :user-lookup-fn nil)))
+    (assoc this :credential-fn nil)))
 
 (defn new-authentication-service
   ([]
