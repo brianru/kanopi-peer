@@ -32,6 +32,7 @@
                  [com.cemerick/friend "0.2.1"]
                  [ring/ring-defaults "0.1.4"]
                  [hiccup "1.0.5"]
+                 [crypto-password "0.1.3"]
 
                  ;; Test
                  [org.clojure/test.check "0.7.0"]

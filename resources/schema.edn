@@ -1,11 +1,15 @@
 [
  ;; Partitions
  {:db/id #db/id [:db.part/db]
-  :db/ident :users
+  :db/ident :db.part/users
   :db.install/_partition :db.part/db}
 
  {:db/id #db/id [:db.part/db]
-  :db/ident :data
+  :db/ident :db.part/structure
+  :db.install/_partition :db.part/db}
+
+ {:db/id #db/id [:db.part/db]
+  :db/ident :db.part/value
   :db.install/_partition :db.part/db}
 
  ;; Users
@@ -71,7 +75,7 @@
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
- {:db/ident :entity/role
+ {:db/ident :thunk/role
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
   :db/index true

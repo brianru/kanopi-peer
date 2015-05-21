@@ -104,7 +104,15 @@
   (let [{:keys [username password]} (get-in ctx [:request :params])
         authenticator (get-in ctx [:request :authenticator])
         res @(auth/register! authenticator username password)]
-    (str res)))
+    {::result res}))
+
+(defn success?
+  ""
+  [ctx]
+  (let [loc (if (not-empty (get-in ctx [::result :tx-data]))
+              "/?welcome=true"
+              "/register?fail=true")]
+    {:location loc}))
 
 (defresource logout-resource
   :allowed-methods [:get]
@@ -119,5 +127,6 @@
 (defresource registration-resource
   :allowed-methods [:get :post]
   :available-media-types ["text/html"]
+  :handle-ok registration-page
   :post! register!
-  :handle-ok registration-page)
+  :post-redirect? success?)
