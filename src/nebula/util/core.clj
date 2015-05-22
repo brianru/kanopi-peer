@@ -18,3 +18,11 @@
 
 (defn random-uuid []
   (java.util.UUID/randomUUID))
+
+;; ### HTTP context map helper fns
+
+(defn get-authenticator [ctx]
+  (get-in ctx [:request :authenticator]))
+
+(defn get-datomic [ctx]
+  (get-in ctx [:request :datomic]))

@@ -1,6 +1,7 @@
 (ns nebula.system
   (:require [com.stuartsierra.component :as component]
-            [nebula.storage.datomic :refer [database]]
+            [nebula.storage.datomic :refer (datomic-peer)]
+            [nebula.data :refer (database)]
             [nebula.web.auth :as auth]
             [nebula.web.server :as server]
             [nebula.web.app :as app]
@@ -14,13 +15,19 @@
    (let [{:keys [port env]} config
          with-dev #(util/select-with-merge config % [:dev])]
     (component/system-map
+     :datomic
+     (datomic-peer "localhost" 4334 (with-dev :datomic))
+
      :database
-     (database "localhost" 4334 (with-dev :datomic))
+     (component/using
+      (database)
+      {:database :datomic})
+
 
      :authenticator
      (component/using
       (auth/new-authentication-service)
-      {:database :database})
+      {:database :datomic})
 
      :web-app
      (component/using

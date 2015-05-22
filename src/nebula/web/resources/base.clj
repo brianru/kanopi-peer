@@ -114,6 +114,7 @@
   (let [not-found (comp rep/ring-response (route/not-found "Route not found!"))
         base      {"text/html" not-found}]
     {:authorized?
+     ;; FIXME: perform real authorization.
      (fn [ctx] (-> ctx :request friend/current-authentication))
 
      :handle-unauthorized

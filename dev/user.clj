@@ -7,7 +7,11 @@
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [environ.core :refer [env]]
             [nebula.system :refer [new-system]]
-            [nebula.main :refer [default-config]]))
+            [nebula.main :refer [default-config]]
+
+            [nebula.generators :as ngen]
+            [clojure.test.check.generators :as gen]
+            [clojure.test.check.properties :as prop]))
 
 (defonce system nil)
 

@@ -2,6 +2,7 @@
   (:require [cemerick.friend :as friend]
             [cemerick.friend.workflows :as workflows]
             [cemerick.friend.credentials :as creds]
+            [clojure.set :as set]
             [datomic.api :as d]
             [com.stuartsierra.component :as component]))
 
@@ -9,6 +10,8 @@
   [handler credential-fn]
   (let [friend-m
         {:credential-fn (partial creds/bcrypt-credential-fn credential-fn)
+         ;; TODO: define unauthorized handler.
+         ;; :unauthorized-handler {:status 403 :body ___}
          :login-uri "/login"
          :default-landing-uri "/"
          :workflows [(workflows/http-basic :realm "/")
@@ -21,6 +24,7 @@
   (verify-creds [this input-creds])
   (register!    [this username password]))
 
+;; FIXME: refactor to use real database component with its own query api
 (defrecord AuthenticationService
     [config database user-lookup-fn]
   IAuthenticate
@@ -57,7 +61,30 @@
     (assoc this :credential-fn nil)))
 
 (defn new-authentication-service
+  "Helper fn."
   ([]
    (new-authentication-service {}))
   ([config]
    (map->AuthenticationService {:config config})))
+
+(defprotocol IAuthorize
+  (authorized-methods [this cur-auth ent-id])
+  (authorized? [this cur-auth request]))
+
+(defrecord AuthorizationService
+    [config database authorized?]
+  IAuthorize
+  (authorized-methods [this cur-auth ent-id]
+    #{:get :put :post :delete})
+  (authorized? [this cur-auth request]
+    (let [ent-id nil]
+      (contains?
+       (authorized-methods this cur-auth ent-id)
+       (:request-method request)))))
+
+(defn new-authorization-service
+  "Helper fn."
+  ([]
+   (new-authorization-service {}))
+  ([config]
+   (map->AuthorizationService {:config config})))

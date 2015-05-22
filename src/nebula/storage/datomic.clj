@@ -21,7 +21,7 @@
 
       conn)))
 
-(defrecord Database [config host port connection]
+(defrecord DatomicPeer [config host port connection]
   component/Lifecycle
   (start [this]
     (println "starting database")
@@ -38,5 +38,5 @@
         (d/release connection)
         (assoc this :connection nil)))))
 
-(defn database [host port config]
-  (map->Database {:host host, :port port, :config config}))
+(defn datomic-peer [host port config]
+  (map->DatomicPeer {:host host, :port port, :config config}))

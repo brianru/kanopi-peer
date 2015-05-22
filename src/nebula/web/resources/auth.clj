@@ -3,6 +3,7 @@
             [cemerick.friend :as friend]
             [nebula.web.resources.templates :as html]
             [nebula.web.auth :as auth]
+            [nebula.util.core :as util]
             [ring.util.response :as r]
             [hiccup.page :refer (html5 include-js include-css)]))
 
@@ -102,7 +103,7 @@
   TODO: if failure, redirect to same page with fail msg in route params"
   [ctx]
   (let [{:keys [username password]} (get-in ctx [:request :params])
-        authenticator (get-in ctx [:request :authenticator])
+        authenticator (util/get-authenticator ctx)
         res @(auth/register! authenticator username password)]
     {::result res}))
 
