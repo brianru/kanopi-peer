@@ -12,6 +12,26 @@
   :db/ident :db.part/value
   :db.install/_partition :db.part/db}
 
+ ;; Comms
+ {:db/ident :comm/method
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db
+  }
+ {:db/ident :comm/value
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute
+  }
+ {:db/ident :comm/is-primary
+  :db/valueType :db.type/boolean
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db
+  }
+
  ;; Users
  {:db/ident :user/id
   :db/valueType :db.type/string
@@ -33,6 +53,12 @@
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
+ {:db/ident :user/communication-method
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/many
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+
  ;; Roles
  {:db/ident :role/id
   :db/valueType :db.type/string
@@ -49,6 +75,7 @@
   :db.install/_attribute :db.part/db}
 
 
+ ;; Thunks
  {:db/ident :thunk/label
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
@@ -88,18 +115,22 @@
   :db.install/_attribute :db.part/db}
 
  {:db/ident :fact/representation
+  :db/description "An artification generated from the fact value."
+  :db/comment "Representations are regenerated whenever the value changes."
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
  {:db/ident :fact/hook
+  :db/description "Function that gets called whenever the value changes."
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
  ;; Values
+ ;; TODO: fulltext search should be enabled on a number of these.
  {:db/ident :value/uri
   :db/valueType :db.type/uri
   :db/cardinality :db.cardinality/one
@@ -110,6 +141,18 @@
   :db/valueType :db.type/uri
   :db/cardinality :db.cardinality/one
   :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :value/email-address
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :value/sms-number
+  :db/valueType :db.type/integer
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id [:db.part/db]
   :db.install/_attribute :db.part/db}
 
  {:db/ident :value/string

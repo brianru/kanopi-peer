@@ -5,7 +5,7 @@
             [nebula.data :as data]
             ))
 
-(defn pass-to-db [data-fn path]
+(defn query-db [data-fn path]
   (fn [ctx]
     (data-fn (util/get-database ctx)
              (get-in ctx path))))
@@ -16,11 +16,11 @@
                           "application/edn"
                           "application/json"]
 
-  :exists? (pass-to-db data/get-entity        [:request :params :id])
-  :put!    (pass-to-db data/swap-entity       [:request :params :entity])
-  :delete! (pass-to-db data/retract-entity    [:request :params :id])
-  :patch!  (pass-to-db data/assert-statements [:request :params :statements])
-  :post!   (pass-to-db data/add-entity        [:request :params :entity])
+  :exists? (query-db data/get-entity        [:request :params :id])
+  :put!    (query-db data/swap-entity       [:request :params :entity])
+  :delete! (query-db data/retract-entity    [:request :params :id])
+  :patch!  (query-db data/assert-statements [:request :params :statements])
+  :post!   (query-db data/add-entity        [:request :params :entity])
 
   :new? ::new
   :respond-with-entity? true
