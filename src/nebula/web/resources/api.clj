@@ -3,11 +3,12 @@
   (:require [liberator.core :refer (defresource)]
             [nebula.web.resources.base :as base]
             [nebula.data :as data]
+            [nebula.util.core :as util]
             ))
 
 (defn query-db [data-fn path]
   (fn [ctx]
-    (data-fn (util/get-database ctx)
+    (data-fn (util/get-datomic ctx)
              (get-in ctx path))))
 
 (defresource api-resource base/requires-authentication
