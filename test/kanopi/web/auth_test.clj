@@ -1,10 +1,10 @@
-(ns nebula.web.auth-test
+(ns kanopi.web.auth-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
             [com.stuartsierra.component :as component]
             [cemerick.friend.credentials :as creds]
-            [nebula.test-util :as test-util]
-            [nebula.web.auth :refer :all]))
+            [kanopi.test-util :as test-util]
+            [kanopi.web.auth :refer :all]))
 
 (deftest register
   (testing "first"

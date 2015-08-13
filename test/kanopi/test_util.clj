@@ -1,7 +1,7 @@
-(ns nebula.test-util
+(ns kanopi.test-util
   (:require [com.stuartsierra.component :as component]
-            [nebula.main :refer (default-config)]
-            [nebula.system :refer (new-system)]))
+            [kanopi.main :refer (default-config)]
+            [kanopi.system :refer (new-system)]))
 
 (defn system-excl-web []
   (-> (new-system default-config)

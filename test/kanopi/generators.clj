@@ -1,4 +1,4 @@
-(ns nebula.generators
+(ns kanopi.generators
   "I don't want to generate sample data.
 
   I want to generate simulation data. I want to input all possible
