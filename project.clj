@@ -1,4 +1,4 @@
-(defproject nebula "0.1.0-SNAPSHOT"
+(defproject kanopi "0.1.0-SNAPSHOT"
   :description "A tool for exploring, expressing and documenting your mind."
   :url "http://example.com/FIXME"
   :license {:name "Eclipse Public License"
@@ -37,7 +37,7 @@
                  ;; Test
                  [org.clojure/test.check "0.7.0"]
                  ]
-  :main nebula.main
+  :main kanopi.main
   :plugins [[lein-marginalia "0.8.0"]
             [lein-cljsbuild "1.0.6"]]
   :profiles {:dev {:plugins [[lein-environ "1.0.0"]
@@ -49,7 +49,7 @@
                    :repl-options {:init-ns user}}}
 
   :cljsbuild {:builds
-              {:dev {:source-paths ["src-cljs/nebula/"]
+              {:dev {:source-paths ["src-cljs/kanopi/"]
                      :compiler {:output-to "target/public/js/main.js"
                                 :output-dir "target/public/js/out"
                                 :optimizations :simple

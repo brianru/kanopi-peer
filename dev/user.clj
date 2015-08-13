@@ -6,10 +6,10 @@
             [com.stuartsierra.component :as component]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [environ.core :refer [env]]
-            [nebula.system :refer [new-system]]
-            [nebula.main :refer [default-config]]
+            [kanopi.system :refer [new-system]]
+            [kanopi.main :refer [default-config]]
 
-            [nebula.generators :as ngen]
+            [kanopi.generators :as ngen]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]))
 
@@ -31,7 +31,7 @@
   (refresh :after 'user/go))
 
 (comment
-  (require '[nebula.web.auth :as auth])
+  (require '[kanopi.web.auth :as auth])
 
   (auth/register! (get system :authenticator) "brian" "rubinton")
 
