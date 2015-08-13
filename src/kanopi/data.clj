@@ -13,7 +13,6 @@
        (d/entity db)
        (into {})))
 
-
 (defprotocol IDatabase
   (add-entity [this entity])
   (get-entity [this ent-id] [this as-of ent-id])

@@ -23,7 +23,7 @@
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
   :db/id #db/id[:db.part/db]
-  :db.install/_attribute
+  :db.install/_attribute :db.part/db
   }
  {:db/ident :comm/is-primary
   :db/valueType :db.type/boolean
@@ -115,7 +115,7 @@
   :db.install/_attribute :db.part/db}
 
  {:db/ident :fact/representation
-  :db/description "An artification generated from the fact value."
+  ;; :db/description "An artification generated from the fact value."
   :db/comment "Representations are regenerated whenever the value changes."
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
@@ -123,7 +123,7 @@
   :db.install/_attribute :db.part/db}
 
  {:db/ident :fact/hook
-  :db/description "Function that gets called whenever the value changes."
+  ;; :db/description "Function that gets called whenever the value changes."
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
   :db/id #db/id[:db.part/db]
