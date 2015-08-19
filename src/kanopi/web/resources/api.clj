@@ -17,11 +17,11 @@
                           "application/edn"
                           "application/json"]
 
-  :exists? (query-db data/get-entity        [:request :params :id])
+  :exists? (query-db data/get-thunk        [:request :params :id])
   :put!    (query-db data/swap-entity       [:request :params :entity])
   :delete! (query-db data/retract-entity    [:request :params :id])
-  :patch!  (query-db data/assert-statements [:request :params :statements])
-  :post!   (query-db data/add-entity        [:request :params :entity])
+  ;;:patch!  (query-db data/assert-statements [:request :params :statements])
+  ;;:post!   (query-db data/add-entity        [:request :params :entity])
 
   :new? ::new
   :respond-with-entity? true

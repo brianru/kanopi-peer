@@ -21,6 +21,14 @@
 
       conn)))
 
+;; TODO: study https://www.youtube.com/watch?v=7lm3K8zVOdY
+(defprotocol ISecureDatomic
+  "Provide secured Datomic api fns based on provided credentials."
+  (db [this creds] [this creds as-of])
+  ;;(q [creds q args])
+  ;;(entity [creds eid])
+  )
+
 (defrecord DatomicPeer [config host port connection]
   component/Lifecycle
   (start [this]
@@ -36,7 +44,13 @@
       this
       (do
         (d/release connection)
-        (assoc this :connection nil)))))
+        (assoc this :connection nil))))
+  
+  ISecureDatomic
+  (db [this creds]
+    (d/db connection))
+  (db [this creds as-of]
+    (d/db connection as-of)))
 
 (defn datomic-peer [host port config]
   (map->DatomicPeer {:host host, :port port, :config config}))

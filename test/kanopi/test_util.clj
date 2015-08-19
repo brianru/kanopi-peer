@@ -6,3 +6,8 @@
 (defn system-excl-web []
   (-> (new-system default-config)
       (dissoc :web-app :web-server)))
+
+(defn system-excl-web-fixture [f]
+  (with-binding [*system* (component/start (system-excl-web))]
+    (f)
+    (component/stop *system*)))

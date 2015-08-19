@@ -4,7 +4,8 @@
   TODO: consistent naming convention for sync vs async requests. check
   datomic api for inspiration.
   "
-  (:require [datomic.api :as d]))
+  (:require [datomic.api :as d]
+            [kanopi.storage.datomic :as datomic]))
 
 (defn get-entity*
   "TODO: may want to use pull api to grab facts as well."
@@ -14,20 +15,31 @@
        (into {})))
 
 (defprotocol IDatabase
-  (add-entity [this entity])
-  (get-entity [this ent-id] [this as-of ent-id])
-  (swap-entity [this entity'])
-  (retract-entity [this ent-id])
-  (assert-statements [this stmts]))
+  (init-thunk [this creds])
+  (get-thunk [this creds thunk-id] [this creds as-of thunk-id])
+  (add-fact [this creds thunk-id attribute value])
+  (swap-entity [this creds entity'])
+  (retract-entity [this creds ent-id])
+  )
 
 (defrecord DatomicDatabase [database]
   IDatabase
-  (get-entity [database ent-id]
+  (init-thunk [this creds]
+    (let [db (datomic/db database creds)]
+      [nil nil]))
+
+  (get-thunk [this creds ent-id]
     (let [db (-> database :connection (d/db))]
       (get-entity* db ent-id)))
-  (get-entity [database as-of ent-id]
+  (get-thunk [this creds as-of ent-id]
     (let [db (-> database :connection (d/db as-of))]
       (get-entity* db ent-id)))
+  (add-fact [this creds ent-id attribute value]
+    nil)
+  (swap-entity [this creds ent']
+    nil)
+  (retract-entity [this creds ent-id]
+    nil)
   )
 
 (defn database []
