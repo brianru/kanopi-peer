@@ -7,6 +7,8 @@
             [datomic.api :as d]
             [kanopi.system :as sys]
             [kanopi.data :as data]
+            [kanopi.storage.datomic :as datomic]
+            [kanopi.web.auth :as auth]
             [kanopi.generators :refer :all]
             [kanopi.test-util :as test-util]
             [com.stuartsierra.component :as component]))
@@ -17,42 +19,40 @@
 
 
 (deftest init-thunk
-  (let [creds nil
-        database (:database *system*)
-        [ent _ :as res] (data/init-thunk database creds)]
-
-    (println res)
-
-    (testing "init thunk return vals"
-      (is (not-empty ent)))
+  (let [creds (do @(auth/register! (:authenticator *system*)
+                                   "brian" "rubinton")
+                  (auth/credentials (:authenticator *system*) "brian"))
+        ent-id   (data/init-thunk (:data-service *system*) creds)]
+    (testing "init thunk returns the thunk's entity id"
+      (is (d/entity (datomic/db (:datomic-peer *system*) creds) ent-id)))
     
     (testing "retrieve new thunk"
-      (is (not-empty (data/get-thunk database creds (:db/id ent)))))
+      (is (not-empty (data/get-thunk (:data-service *system*) creds ent-id))))
 
-    (testing "retract new thunk"
-      )
+    ;;(testing "retract new thunk"
+    ;;  )
     ))
 
-(deftest construct-thunk
-  (let [ creds nil
-        [ent _] (data/init-thunk (:database *system*) creds)]
+;;(deftest construct-thunk
+;;  (let [ creds nil
+;;        [ent _] (data/init-thunk (:database *system*) creds)]
+;;
+;;    (testing "assert fact")
+;;    (testing "assert facts (single transaction)")
+;;    (testing "retract fact(s)")
+;;    (testing "retract thunk")
+;;    (testing "retrieve at points in time")
+;;    ))
 
-    (testing "assert fact")
-    (testing "assert facts (single transaction)")
-    (testing "retract fact(s)")
-    (testing "retract thunk")
-    (testing "retrieve at points in time")
-    ))
-
-(deftest authorization-controls
-  (let [creds-a nil
-        creds-b nil
-        creds-c nil]
-    ))
+;;(deftest authorization-controls
+;;  (let [creds-a nil
+;;        creds-b nil
+;;        creds-c nil]
+;;    ))
 
 ;; create all sorts of properties
-(defspec hammer-thunk
-  (let []
-    (testing "assertions")
-    (testing "retractions")
-    ))
+;;(defspec hammer-thunk
+;;  (let []
+;;    (testing "assertions")
+;;    (testing "retractions")
+;;    ))

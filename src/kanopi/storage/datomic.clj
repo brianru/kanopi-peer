@@ -10,8 +10,8 @@
       @(d/transact conn txdata))))
 
 (defn- connect-to-database
-  [host port config]
-  (let [uri (str "datomic:mem://kanopi")]
+  [config]
+  (let [uri (:uri config)]
     (d/create-database uri)
     (let [conn (d/connect uri)]
       (println "load schema")
@@ -34,23 +34,24 @@
 
 ;; NOTE: in future, give DP zookeeper conn info so it can then find
 ;; the uri for the correct Datomic DB
-(defrecord DatomicPeer [config host port connection]
+(defrecord DatomicPeer [config connection]
   component/Lifecycle
   (start [this]
     (println "starting datomic peer")
     (if connection
       this
       (assoc this :connection
-             (connect-to-database host port config))))
+             (connect-to-database config))))
 
   (stop [this]
     (println "stopping datomic peer")
     (if-not connection
       this
       (do
-        (d/release connection)
-        (assoc this :connection nil))))
-  
+       (d/release connection)
+       (d/delete-database (:uri config))
+       (assoc this :connection nil))))
+
   ISecureDatomic
   (db [this creds]
     (d/db connection))
@@ -61,6 +62,6 @@
   (transact [this creds txdata]
     (d/transact connection txdata)))
 
-(defn datomic-peer [host port config]
-  (map->DatomicPeer {:host host, :port port, :config config}))
+(defn datomic-peer [config]
+  (map->DatomicPeer {:config config}))
 

@@ -126,12 +126,12 @@
   IDataService
   (init-thunk [this creds]
     (let [txdata [{:db/id #db/id [:db.part/structure]
-                   :thunk/role (:ent-id creds) ;; role from creds
-                   :thunk/label "banana boat" ;; default-label
+                   :thunk/role (:ent-id creds)
+                   :thunk/label "banana boat"
                    }
                   ]
-          res (datomic/transact datomic-peer creds txdata)]
-      res))
+          report @(datomic/transact datomic-peer creds txdata)]
+      (-> report :tempids vals first)))
 
   (get-thunk [this creds ent-id]
     (let [db (datomic/db datomic-peer creds)]
@@ -145,7 +145,9 @@
     (let [fact-txdata (fact->txdata datomic-peer creds ent-id attribute value)
           txdata (conj (:txdata fact-txdata)
                        [ent-id :thunk/fact (:fact-id fact-txdata)])
-          res (datomic/transact datomic-peer creds txdata)]))
+          report @(datomic/transact datomic-peer creds txdata)]
+      ;; FIXME: return something more directly useful
+      report))
 
   (swap-entity [this creds ent']
     nil)

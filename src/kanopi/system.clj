@@ -16,7 +16,7 @@
          with-dev #(util/select-with-merge config % [:dev])]
     (component/system-map
      :datomic-peer
-     (datomic-peer "localhost" 4334 (with-dev :datomic))
+     (datomic-peer (with-dev :datomic))
 
      :data-service
      (component/using
