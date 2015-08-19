@@ -12,10 +12,8 @@
                   (component/start))
           username "brian"
           password "rubinton"
-          res @(register! (:authenticator sys)
-                          username password)
-          creds (credentials (:authenticator sys)
-                             username)]
+          res @(register! (:authenticator sys) username password)
+          creds (credentials (:authenticator sys) username)]
       (is (not-empty (:tx-data res)))
       (is (= username (:username creds)))
       (is (creds/bcrypt-verify password (:password creds)))

@@ -1,7 +1,7 @@
 (ns kanopi.system
   (:require [com.stuartsierra.component :as component]
             [kanopi.storage.datomic :refer (datomic-peer)]
-            [kanopi.data :refer (database)]
+            [kanopi.data :refer (data-service)]
             [kanopi.web.auth :as auth]
             [kanopi.web.server :as server]
             [kanopi.web.app :as app]
@@ -15,24 +15,23 @@
    (let [{:keys [port env]} config
          with-dev #(util/select-with-merge config % [:dev])]
     (component/system-map
-     :datomic
+     :datomic-peer
      (datomic-peer "localhost" 4334 (with-dev :datomic))
 
-     :database
+     :data-service
      (component/using
-      (database)
-      {:database :datomic})
-
+      (data-service)
+      {:datomic-peer :datomic-peer})
 
      :authenticator
      (component/using
       (auth/new-authentication-service)
-      {:database :datomic})
+      {:database :datomic-peer})
 
      :web-app
      (component/using
       (app/new-web-app (with-dev :web-app))
-      {:database :database
+      {:database :data-service
        :authenticator :authenticator})
 
      :web-server

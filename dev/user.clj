@@ -31,9 +31,16 @@
   (refresh :after 'user/go))
 
 (comment
-  (require '[kanopi.web.auth :as auth])
+ (require '[kanopi.storage.datomic :as dp])
 
-  (auth/register! (get system :authenticator) "brian" "rubinton")
+ (def datomic-peer (component/start
+                    (dp/datomic-peer "localhost" 4334
+                                     {:schema ["resources/schema.edn"]
+                                      :data ["resources/test-data.edn"
+                                             "resources/init-data.edn"]})))
 
-  (get system :authenticator)
-  )
+ (def db (dp/db datomic-peer nil))
+ (d/q '[:find [?ident ...] :where [_ :db/ident ?ident]] db)
+ (component/stop datomic-peer)
+
+ )

@@ -36,7 +36,7 @@
     (h (assoc req k payload))))
 
 (defrecord WebApp
-    [config database app-handler authenticator]
+    [config data-service app-handler authenticator]
   component/Lifecycle
   (start [this]
     (if app-handler
@@ -50,7 +50,7 @@
             (cond-> (:dev config)
               (wrap-trace :header :ui))
             (wrap-ensure-session)
-            (wrap-add-to-req :database database)
+            (wrap-add-to-req :database data-service)
             (wrap-add-to-req :authenticator authenticator)
             (wrap-session {:timeout 0})
             (->> (assoc this :app-handler))))))

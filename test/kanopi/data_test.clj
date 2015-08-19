@@ -17,8 +17,11 @@
 
 
 (deftest init-thunk
-  (let [ creds nil
-        [ent _] (data/init-thunk! (:database *system*) creds)]
+  (let [creds nil
+        database (:database *system*)
+        [ent _ :as res] (data/init-thunk database creds)]
+
+    (println res)
 
     (testing "init thunk return vals"
       (is (not-empty ent)))
@@ -32,7 +35,7 @@
 
 (deftest construct-thunk
   (let [ creds nil
-        [ent _] (data/init-thunk! (:database *system*) creds)]
+        [ent _] (data/init-thunk (:database *system*) creds)]
 
     (testing "assert fact")
     (testing "assert facts (single transaction)")
