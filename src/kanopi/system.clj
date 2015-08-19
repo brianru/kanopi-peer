@@ -28,13 +28,15 @@
       (auth/new-authentication-service)
       {:database :datomic-peer})
 
-     :web-app
-     (component/using
-      (app/new-web-app (with-dev :web-app))
-      {:database :data-service
-       :authenticator :authenticator})
-
-     :web-server
-     (component/using
-      (server/new-web-server (with-dev :web-server))
-      {:web-app :web-app})))))
+;;     :web-app
+;;     (component/using
+;;      (app/new-web-app (with-dev :web-app))
+;;      {:database :data-service
+;;       :authenticator :authenticator})
+;;
+;;     :web-server
+;;     (component/using
+;;      (server/new-web-server (with-dev :web-server))
+;;      {:web-app :web-app})
+     
+     ))))

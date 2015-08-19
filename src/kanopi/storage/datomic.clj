@@ -26,9 +26,11 @@
 (defprotocol ISecureDatomic
   "Provide secured Datomic api fns based on provided credentials."
   (db [this creds] [this creds as-of]
-      "API Consumers must think in terms of Peer processes instead of connection objects.")
+      "API Consumers must think in terms of Peer processes instead of connection objects.
+      NOTE: remember user registration case (creds are nil)")
   (transact [this creds txdata]
-            "Abstract from transact and transact-async. Pick one."))
+            "Abstract from transact and transact-async. Pick one.
+            NOTE: remember user registration case (creds are nil)"))
 
 ;; NOTE: in future, give DP zookeeper conn info so it can then find
 ;; the uri for the correct Datomic DB
@@ -55,7 +57,7 @@
 
   (db [this creds as-of]
     (d/db connection as-of))
-  
+
   (transact [this creds txdata]
     (d/transact connection txdata)))
 

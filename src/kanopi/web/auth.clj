@@ -4,6 +4,8 @@
             [cemerick.friend.credentials :as creds]
             [clojure.set :as set]
             [datomic.api :as d]
+            [kanopi.data :as data]
+            [kanopi.storage.datomic :as datomic]
             [com.stuartsierra.component :as component]))
 
 (defn authentication-middleware
@@ -29,13 +31,12 @@
     [config database user-lookup-fn]
   IAuthenticate
   (credentials [this username]
-    (let [creds (->> [:user/id username]
-                     (d/entity (d/db (:connection database)))
-                     (into {}))
-          ]
-      {:username (:user/id creds)
-       :password (:user/password creds)})
-    )
+    (let [db     (datomic/db database nil)
+          ent-id (d/entid db [:user/id username])
+          creds  (->> ent-id (d/entity db) (into {})) ]
+      {:ent-id   ent-id
+       :username (:user/id creds)
+       :password (:user/password creds)}))
 
   (verify-creds [this {:keys [username password]}]
     (->> (credentials this username)
@@ -52,7 +53,7 @@
                    :user/role #db/id [:db.part/user -1000]}
                   ]
           ]
-      (d/transact (:connection database) txdata)))
+      (datomic/transact database nil txdata)))
 
   component/Lifecycle
   (start [this]

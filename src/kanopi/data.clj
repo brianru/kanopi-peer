@@ -122,12 +122,12 @@
               [value-id :value/string  value]
               ])))
 
-(defrecord DatomicDataService [datomic-peer]
+(defrecord DatomicDataService [config datomic-peer]
   IDataService
   (init-thunk [this creds]
     (let [txdata [{:db/id #db/id [:db.part/structure]
-                   :thunk/role (:username creds) ;; role from creds
-                   :thunk/label nil ;; default-label
+                   :thunk/role (:ent-id creds) ;; role from creds
+                   :thunk/label "banana boat" ;; default-label
                    }
                   ]
           res (datomic/transact datomic-peer creds txdata)]
@@ -154,4 +154,4 @@
     nil))
 
 (defn data-service []
-  (map->DatomicDataService {}))
+  (map->DatomicDataService {:config nil}))

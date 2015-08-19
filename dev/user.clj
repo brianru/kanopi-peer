@@ -32,15 +32,19 @@
 
 (comment
  (require '[kanopi.storage.datomic :as dp])
+ (require '[kanopi.web.auth :as auth])
+ (require '[kanopi.data :as data])
 
- (def datomic-peer (component/start
-                    (dp/datomic-peer "localhost" 4334
-                                     {:schema ["resources/schema.edn"]
-                                      :data ["resources/test-data.edn"
-                                             "resources/init-data.edn"]})))
+ (go)
+ (reset)
+ (let [creds (do @(auth/register! (:authenticator system) "brian" "rubinton")
+                 (auth/credentials (:authenticator system) "brian"))
+       res (data/init-thunk (:data-service system) creds)]
+   res)
 
- (def db (dp/db datomic-peer nil))
+ (def dp (dp/db datomic-peer nil))
  (d/q '[:find [?ident ...] :where [_ :db/ident ?ident]] db)
- (component/stop datomic-peer)
+ (data/init-thunk datomic-peer nil)
+ (component/stop system)
 
  )
