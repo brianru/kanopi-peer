@@ -27,14 +27,16 @@
   (register!    [this username password]))
 
 ;; FIXME: refactor to use real database component with its own query api
-(defrecord AuthenticationService
-    [config database user-lookup-fn]
+(defrecord AuthenticationService [config database user-lookup-fn]
+
   IAuthenticate
+
   (credentials [this username]
     (let [db     (datomic/db database nil)
           ent-id (d/entid db [:user/id username])
-          creds  (->> ent-id (d/entity db) (into {})) ]
+          creds  (->> ent-id (d/entity db) (into {}))]
       {:ent-id   ent-id
+       :role     (-> creds :user/role first :db/id)
        :username (:user/id creds)
        :password (:user/password creds)}))
 
@@ -44,20 +46,27 @@
          (creds/bcrypt-verify password)))
 
   (register! [this username password]
-    (let [txdata [
+    ;; TODO: should this return nil when user already exists or throw
+    ;; an exception?
+    (assert (nil? (d/entid (datomic/db database nil) [:user/id username]))
+            "This username is already taken. Please choose another.")
+    (let [user-ent-id (d/tempid :db.part/user -1)
+          txdata [
                   {:db/id #db/id [:db.part/user -1000]
                    :role/id username}
-                  {:db/id #db/id [:db.part/user]
+                  {:db/id user-ent-id
                    :user/id username
                    :user/password (creds/hash-bcrypt password)
                    :user/role #db/id [:db.part/user -1000]}
                   ]
-          ]
-      (datomic/transact database nil txdata)))
+          report @(datomic/transact database nil txdata)]
+      (d/resolve-tempid (:db-after report) (:tempids report) user-ent-id)))
 
   component/Lifecycle
+
   (start [this]
     (assoc this :credential-fn (partial credentials this)))
+
   (stop [this]
     (assoc this :credential-fn nil)))
 

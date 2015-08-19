@@ -3,7 +3,7 @@
             [clojure.pprint :refer (pprint)]
             [com.stuartsierra.component :as component]
             [cemerick.friend.credentials :as creds]
-            [datomic.api :as d]
+            [kanopi.data :as data]
             [kanopi.test-util :as test-util]
             [kanopi.web.auth :refer :all]))
 
@@ -12,13 +12,40 @@
                 (component/start))
         username "brian"
         password "rubinton"
-        res @(register! (:authenticator sys) username password)
+        res   (register! (:authenticator sys) username password)
         creds (credentials (:authenticator sys) username)]
-    (is (not-empty (:tx-data res)))
-    (is (= username (:username creds)))
-    (is (d/entity (d/db (get-in sys [:datomic-peer :connection]))
-                  (:ent-id creds)))
-    (is (creds/bcrypt-verify password (:password creds)))
+
+    (testing "transaction succeeded"
+      (is (not (nil? res)))
+      (is (= username (:username creds))))
+
+    (testing "user stored as thunk"
+      (is (data/get-thunk (:data-service sys) creds (:ent-id creds))))
+
+    (testing "user role created"
+      (is (data/get-thunk (:data-service sys) creds (:role creds))))
+
+    (testing "password crypto works"
+      (is (not= password (:password creds)))
+      (is (creds/bcrypt-verify password (:password creds))))
+
+    (component/stop sys)))
+
+(deftest register-existing-username
+  (let [sys (-> (test-util/system-excl-web)
+                (component/start))
+        username "brian"
+        password "rubinton"
+        report (register! (:authenticator sys) username password)]
+
+    (testing "throw exception when registering an existing username"
+      (is (thrown? java.lang.AssertionError
+                   (register! (:authenticator sys) username password))))
+
+    (testing "return something when registering a slightly different username"
+      (is (not-empty
+           (do (register! (:authenticator sys) (str username "blah") password)
+               (credentials (:authenticator sys) (str username "blah"))))))
 
     (component/stop sys)))
 

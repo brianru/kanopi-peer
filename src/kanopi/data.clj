@@ -14,7 +14,7 @@
   (entity?        [this creds ent-id])
   (add-fact       [this creds thunk-id attribute value])
   (swap-entity    [this creds entity'])
-  (retract-entity [this creds ent-id])
+  (retract-thunk [this creds ent-id])
   )
 
 (defn- describe-input [datomic-peer creds input]
@@ -47,9 +47,9 @@
 (defn get-entity*
   "TODO: may want to use pull api to grab facts as well."
   [db ent-id]
-  (->> ent-id
-       (d/entity db)
-       (into {})))
+  (some->> ent-id
+           (d/entity db)
+           (into {})))
 
 
 (defn- mk-thunk
@@ -93,7 +93,7 @@
      :fact-id fact-id
      :txdata [[fact-id      :fact/attribute attribute-id]
               [fact-id      :fact/value     value]
-              [attribute-id :thunk/role     (:username creds)]
+              [attribute-id :thunk/role     (:role creds)]
               [attribute-id :thunk/label    attribute]
               ])))
 
@@ -117,7 +117,7 @@
      :fact-id fact-id
      :txdata [[fact-id :fact/attribute attribute-id]
               [fact-id :fact/value     value-id]
-              [attribute-id :thunk/role (:username creds)]
+              [attribute-id :thunk/role (:role creds)]
               [attribute-id :thunk/label attribute]
               [value-id :value/string  value]
               ])))
@@ -125,20 +125,21 @@
 (defrecord DatomicDataService [config datomic-peer]
   IDataService
   (init-thunk [this creds]
-    (let [txdata [{:db/id #db/id [:db.part/structure]
-                   :thunk/role (:ent-id creds)
+    (let [thunk-ent-id (d/tempid :db.part/structure)
+          txdata [{:db/id thunk-ent-id
+                   :thunk/role  (get creds :role)
                    :thunk/label "banana boat"
                    }
                   ]
           report @(datomic/transact datomic-peer creds txdata)]
-      (-> report :tempids vals first)))
+      (d/resolve-tempid (:db-after report) (:tempids report) thunk-ent-id)))
 
   (get-thunk [this creds ent-id]
     (let [db (datomic/db datomic-peer creds)]
       (get-entity* db ent-id)))
 
   (get-thunk [this creds as-of ent-id]
-    (let [db (datomic/db datomic-peer as-of)]
+    (let [db (datomic/db datomic-peer creds as-of)]
       (get-entity* db ent-id)))
 
   (add-fact [this creds ent-id attribute value]
@@ -152,8 +153,9 @@
   (swap-entity [this creds ent']
     nil)
 
-  (retract-entity [this creds ent-id]
-    nil))
+  (retract-thunk [this creds ent-id]
+    (let []
+      )))
 
 (defn data-service []
   (map->DatomicDataService {:config nil}))

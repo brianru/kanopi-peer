@@ -9,9 +9,10 @@
     (when-let [txdata (not-empty (read-string (slurp file-path)))]
       @(d/transact conn txdata))))
 
-(defn- connect-to-database
-  [config]
+(defn- connect-to-database [config]
   (let [uri (:uri config)]
+    (println uri)
+    (d/delete-database (:uri config))
     (d/create-database uri)
     (let [conn (d/connect uri)]
       (println "load schema")
@@ -40,8 +41,7 @@
     (println "starting datomic peer")
     (if connection
       this
-      (assoc this :connection
-             (connect-to-database config))))
+      (assoc this :connection (connect-to-database config))))
 
   (stop [this]
     (println "stopping datomic peer")
@@ -49,7 +49,6 @@
       this
       (do
        (d/release connection)
-       (d/delete-database (:uri config))
        (assoc this :connection nil))))
 
   ISecureDatomic

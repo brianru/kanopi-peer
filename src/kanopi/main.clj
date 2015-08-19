@@ -9,7 +9,7 @@
   {:web-server {:port    8080
                 :host    "0.0.0.0"}
    :web-app    {:handler #'routes/app-routes}
-   :datomic    {:uri     "datomic:mem://kanopi"
+   :datomic    {:uri     "datomic:mem://kanopi42"
                 :schema  ["resources/schema.edn"]
                 :data    ["resources/test-data.edn"
                           "resources/init-data.edn"]}

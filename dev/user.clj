@@ -11,7 +11,11 @@
 
             [kanopi.generators :as ngen]
             [clojure.test.check.generators :as gen]
-            [clojure.test.check.properties :as prop]))
+            [clojure.test.check.properties :as prop]
+            
+            [kanopi.web.auth :as auth]
+            [kanopi.data :as data]
+            [kanopi.storage.datomic :as datomic]))
 
 (defonce system nil)
 
@@ -31,20 +35,17 @@
   (refresh :after 'user/go))
 
 (comment
- (require '[kanopi.storage.datomic :as dp])
- (require '[kanopi.web.auth :as auth])
- (require '[kanopi.data :as data])
 
  (go)
- (reset)
- (let [creds (do @(auth/register! (:authenticator system) "brian" "rubinton")
-                 (auth/credentials (:authenticator system) "brian"))
-       res (data/init-thunk (:data-service system) creds)]
-   res)
 
- (def dp (dp/db datomic-peer nil))
- (d/q '[:find [?ident ...] :where [_ :db/ident ?ident]] db)
+ (reset)
+
+ (let [creds (auth/register! (:authenticator system) "rian" "banan")
+       ent-id (data/init-thunk (:data-service system) creds)]
+   (data/get-thunk (:data-service system) creds ent-id))
+
  (data/init-thunk datomic-peer nil)
+
  (component/stop system)
 
  )

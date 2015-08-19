@@ -13,29 +13,31 @@
             [kanopi.test-util :as test-util]
             [com.stuartsierra.component :as component]))
 
-(defonce ^:dynamic *system* nil)
-
-(use-fixtures :each test-util/system-excl-web-fixture)
-
 
 (deftest init-thunk
-  (let [creds (do @(auth/register! (:authenticator *system*)
-                                   "brian" "rubinton")
-                  (auth/credentials (:authenticator *system*) "brian"))
-        ent-id   (data/init-thunk (:data-service *system*) creds)]
-    (testing "init thunk returns the thunk's entity id"
-      (is (d/entity (datomic/db (:datomic-peer *system*) creds) ent-id)))
-    
-    (testing "retrieve new thunk"
-      (is (not-empty (data/get-thunk (:data-service *system*) creds ent-id))))
+  (let [system (component/start (test-util/system-excl-web))
 
-    ;;(testing "retract new thunk"
-    ;;  )
-    ))
+        creds  (do (auth/register! (:authenticator system) "brian" "rubinton")
+                   (auth/credentials (:authenticator system) "brian"))
+        ent-id (data/init-thunk (:data-service system) creds)
+        ent    (data/get-thunk (:data-service system) creds ent-id)]
+
+    (testing "init thunk returns the thunk's entity id"
+      (println "HERE" ent-id)
+      (is (not (nil? ent-id))))
+    
+    (testing "thunk has user's default role"
+      (is (= (:role creds) (-> ent :thunk/role first :db/id))))
+
+    (testing "retract new thunk"
+      (let [report (data/retract-thunk (:data-service system) creds ent-id) ]
+        (is (nil? (data/get-thunk (:data-service system) creds ent-id)))))
+    
+    (component/stop system)))
 
 ;;(deftest construct-thunk
 ;;  (let [ creds nil
-;;        [ent _] (data/init-thunk (:database *system*) creds)]
+;;        [ent _] (data/init-thunk (:database system*) creds)]
 ;;
 ;;    (testing "assert fact")
 ;;    (testing "assert facts (single transaction)")
