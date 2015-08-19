@@ -47,9 +47,8 @@
 (defn get-entity*
   "TODO: may want to use pull api to grab facts as well."
   [db ent-id]
-  (some->> ent-id
-           (d/entity db)
-           (into {})))
+  (when-let [ent (not-empty (d/entity db ent-id))]
+    (into {} ent)))
 
 
 (defn- mk-thunk
@@ -154,8 +153,9 @@
     nil)
 
   (retract-thunk [this creds ent-id]
-    (let []
-      )))
+    (let [txdata [[:db.fn/retractEntity ent-id]]
+          report @(datomic/transact datomic-peer creds txdata)]
+      report)))
 
 (defn data-service []
   (map->DatomicDataService {:config nil}))

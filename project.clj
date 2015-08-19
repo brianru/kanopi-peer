@@ -1,6 +1,6 @@
 (defproject kanopi "0.1.0-SNAPSHOT"
   :description "A tool for exploring, expressing and documenting your mind."
-  :url "http://example.com/FIXME"
+  :url "http://kanopi.io"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :min-lein-version "2.5.0"
