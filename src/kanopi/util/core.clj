@@ -28,6 +28,7 @@
   (get-in ctx [:request :data-service]))
 
 ;; ### Datomic EntityMap helper fns for navigating the schema
+;; TODO: refactor to support values of any type
 (defn fact-entity->tuple [ent]
   (let [attr (-> ent :fact/attribute :thunk/label)
         valu (-> ent :fact/value     :value/string)]

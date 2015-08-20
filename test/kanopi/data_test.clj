@@ -68,14 +68,33 @@
         ]
 
     (testing "assert fact"
-      (let [foo (->> (clojure.set/difference (get ent-1 :thunk/fact) (get ent-0 :thunk/fact))
-                     (first)
-                     (util/fact-entity->tuple))]
-        (is (= foo fact-1))))
-    ;;(testing "assert facts (single transaction)")
-    ;;(testing "retract fact")
-    ;;(testing "retrieve at points in time")
-    ))
+      (let [new-fact (->> (clojure.set/difference (get ent-1 :thunk/fact)
+                                                  (get ent-0 :thunk/fact))
+                          (first)
+                          (util/fact-entity->tuple))]
+        (is (= new-fact fact-1))))
+
+    (testing "update-fact: change value literal"
+      (let []
+        ))
+
+    (testing "update-fact: change value from literal to ref"
+      )
+
+    (testing "update-fact: change value from ref to literal"
+      )
+
+    (testing "update-fact: change attribute literal"
+      )
+
+    (testing "update-fact: change attribute from literal to ref"
+      )
+
+    (testing "update-fact: change attribute from ref to literal"
+      )
+
+    (testing "retract fact"
+      )))
 
 ;;(deftest authorization-controls
 ;;  (let [creds-a nil
