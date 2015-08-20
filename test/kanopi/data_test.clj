@@ -23,16 +23,36 @@
         ent    (data/get-thunk (:data-service system) creds ent-id)]
 
     (testing "init thunk returns the thunk's entity id"
-      (println "HERE" ent-id)
       (is (not (nil? ent-id))))
     
     (testing "thunk has user's default role"
       (is (= (:role creds) (-> ent :thunk/role first :db/id))))
 
+    (testing "thunk shape as given by data service"
+      (is (every? keyword? (keys ent)))
+      (is (->> (get ent :thunk/role)
+               (set?)))
+      (is (->> (get ent :thunk/role)
+               (every? (partial instance? datomic.query.EntityMap))))
+      (is (->> (get ent :thunk/role)
+               (map :db/id)
+               (every? integer?)))
+      (is (->> (get ent :thunk/label)
+               (every? string?)))
+      (when (get ent :thunk/fact)
+        (is (->> (get ent :thunk/fact)
+                 (set?)))
+        (is (->> (get ent :thunk/fact)
+                 (every? (partial instance? datomic.query.EntityMap))))
+        (is (->> (get ent :thunk/fact)
+                 (map :db/id)
+                 (every? integer?)))
+        ))
+
     (testing "retract new thunk"
       (let [report (data/retract-thunk (:data-service system) creds ent-id) ]
         (is (nil? (data/get-thunk (:data-service system) creds ent-id)))))
-    
+
     (component/stop system)))
 
 ;;(deftest construct-thunk

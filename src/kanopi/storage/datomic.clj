@@ -23,7 +23,8 @@
       NOTE: remember user registration case (creds are nil)")
   (transact [this creds txdata]
             "Abstract from transact and transact-async. Pick one.
-            NOTE: remember user registration case (creds are nil)"))
+            NOTE: remember user registration case (creds are nil)")
+  (entity [this creds ent-id]))
 
 ;; NOTE: in future, give DP zookeeper conn info so it can then find
 ;; the uri for the correct Datomic DB
@@ -60,7 +61,10 @@
     (d/db connection as-of))
 
   (transact [this creds txdata]
-    (d/transact connection txdata)))
+    (d/transact connection txdata))
+  
+  (entity [this creds ent-id]
+    (d/entity (db this creds) ent-id)))
 
 (defn datomic-peer [config]
   (map->DatomicPeer {:config config}))

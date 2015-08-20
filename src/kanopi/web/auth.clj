@@ -79,20 +79,24 @@
    (map->AuthenticationService {:config config})))
 
 (defprotocol IAuthorize
-  (authorized-methods [this cur-auth ent-id])
-  (authorized? [this cur-auth request])
+  (authorized-methods [this creds ent-id])
+  (authorized? [this creds request])
   (enforce-entitlements [this ]))
 
-(defrecord AuthorizationService
-    [config database authorized?]
+(defrecord AuthorizationService [config database]
+
   IAuthorize
-  (authorized-methods [this cur-auth ent-id]
+  (authorized-methods [this creds ent-id]
     #{:get :put :post :delete})
-  (authorized? [this cur-auth request]
+
+  (authorized? [this creds request]
     (let [ent-id nil]
       (contains?
-       (authorized-methods this cur-auth ent-id)
-       (:request-method request)))))
+       (authorized-methods this creds ent-id)
+       (:request-method request))))
+  
+  ;;(enforce-entitlements [this creds ])
+  )
 
 (defn new-authorization-service
   "Helper fn."

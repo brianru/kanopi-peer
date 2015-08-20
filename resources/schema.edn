@@ -13,24 +13,24 @@
   :db.install/_partition :db.part/db}
 
  ;; Comms
- {:db/ident :comm/method
-  :db/valueType :db.type/ref
-  :db/cardinality :db.cardinality/one
-  :db/id #db/id[:db.part/db]
-  :db.install/_attribute :db.part/db
-  }
- {:db/ident :comm/value
-  :db/valueType :db.type/ref
-  :db/cardinality :db.cardinality/one
-  :db/id #db/id[:db.part/db]
-  :db.install/_attribute :db.part/db
-  }
- {:db/ident :comm/is-primary
-  :db/valueType :db.type/boolean
-  :db/cardinality :db.cardinality/one
-  :db/id #db/id[:db.part/db]
-  :db.install/_attribute :db.part/db
-  }
+ ;; {:db/ident :comm/method
+ ;;  :db/valueType :db.type/ref
+ ;;  :db/cardinality :db.cardinality/one
+ ;;  :db/id #db/id[:db.part/db]
+ ;;  :db.install/_attribute :db.part/db
+ ;;  }
+ ;; {:db/ident :comm/value
+ ;;  :db/valueType :db.type/ref
+ ;;  :db/cardinality :db.cardinality/one
+ ;;  :db/id #db/id[:db.part/db]
+ ;;  :db.install/_attribute :db.part/db
+ ;;  }
+ ;; {:db/ident :comm/is-primary
+ ;;  :db/valueType :db.type/boolean
+ ;;  :db/cardinality :db.cardinality/one
+ ;;  :db/id #db/id[:db.part/db]
+ ;;  :db.install/_attribute :db.part/db
+ ;;  }
 
  ;; Users
  {:db/ident :user/id
@@ -86,6 +86,7 @@
  {:db/ident :thunk/fact
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
+  :db/isComponent true
   :db/index true
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
@@ -101,15 +102,15 @@
  {:db/ident :fact/attribute
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
+  :db/isComponent true
   :db/index true
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
  {:db/ident :fact/value
   :db/valueType :db.type/ref
-  ;; sets of items should be across datoms and the UI should group
-  ;; them by :fact/attribute
   :db/cardinality :db.cardinality/one
+  :db/isComponent true
   :db/index true
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
