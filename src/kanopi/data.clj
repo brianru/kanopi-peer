@@ -8,13 +8,17 @@
             [kanopi.storage.datomic :as datomic]))
 
 (defprotocol IDataService
-  (init-thunk     [this creds])
-  (get-thunk      [this creds thunk-id]
-                  [this creds as-of thunk-id])
-  (entity?        [this creds ent-id])
-  (add-fact       [this creds thunk-id attribute value])
-  (swap-entity    [this creds entity'])
-  (retract-thunk [this creds ent-id])
+  (init-thunk    [this creds])
+  (get-thunk     [this creds thunk-id]
+                 [this creds as-of thunk-id])
+  (user-thunk    [this creds] [this creds as-of])
+  (entity?       [this creds ent-id])
+  (add-fact      [this creds thunk-id attribute value])
+  (swap-entity   [this creds entity'])
+  (retract-thunk [this creds ent-id]
+                 "Assumes only 1 user has access, and thus retracting totally retracts it.
+                 If more than 1 user has that access this must only retract the appropriate
+                 role(s) from the entity.")
   )
 
 (defn- describe-input [datomic-peer creds input]
@@ -76,7 +80,7 @@
 
 (defmethod fact->txdata [::entity-id ::entity-id]
   [datomic-peer creds ent-id attribute value]
-  (let [fact-id #db/id [:db.part/structure]]
+  (let [fact-id (d/tempid :db.part/structure)]
     (hash-map
      :fact-id fact-id
      :txdata  [[fact-id :fact/attribute attribute]
@@ -86,8 +90,9 @@
 
 (defmethod fact->txdata [::string ::entity-id]
   [datomic-peer creds ent-id attribute value]
-  (let [fact-id      #db/id [:db.part/structure]
-        attribute-id #db/id [:db.part/structure]]
+  (let [fact-id      (d/tempid :db.part/structure)
+        attribute-id (d/tempid :db.part/structure)
+        ]
     (hash-map
      :fact-id fact-id
      :txdata [[fact-id      :fact/attribute attribute-id]
@@ -98,8 +103,9 @@
 
 (defmethod fact->txdata [::entity-id ::string]
   [datomic-peer creds ent-id attribute value]
-  (let [fact-id  #db/id [:db.part/structure]
-        value-id #db/id [:db.part/structure]]
+  (let [fact-id  (d/tempid :db.part/structure)
+        value-id (d/tempid :db.part/structure)
+        ]
     (hash-map
      :fact-id fact-id
      :txdata [[fact-id  :fact/attribute attribute]
@@ -109,9 +115,10 @@
 
 (defmethod fact->txdata [::string ::string]
   [datomic-peer creds ent-id attribute value]
-  (let [fact-id #db/id [:db.part/structure]
-        attribute-id #db/id [:db.part/structure]
-        value-id #db/id [:db.part/structure]]
+  (let [fact-id      (d/tempid :db.part/structure)
+        attribute-id (d/tempid :db.part/structure)
+        value-id     (d/tempid :db.part/structure)
+        ]
     (hash-map
      :fact-id fact-id
      :txdata [[fact-id :fact/attribute attribute-id]
@@ -159,3 +166,4 @@
 
 (defn data-service []
   (map->DatomicDataService {:config nil}))
+

@@ -50,7 +50,7 @@
             (cond-> (:dev config)
               (wrap-trace :header :ui))
             (wrap-ensure-session)
-            (wrap-add-to-req :database data-service)
+            (wrap-add-to-req :data-service data-service)
             (wrap-add-to-req :authenticator authenticator)
             (wrap-session {:timeout 0})
             (->> (assoc this :app-handler))))))

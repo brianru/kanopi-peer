@@ -15,7 +15,9 @@
             
             [kanopi.web.auth :as auth]
             [kanopi.data :as data]
-            [kanopi.storage.datomic :as datomic]))
+            [kanopi.storage.datomic :as datomic]
+            
+            [kanopi.csv-import :as csv-import]))
 
 (defonce system nil)
 
@@ -40,12 +42,20 @@
 
  (reset)
 
- (let [creds (auth/register! (:authenticator system) "rian" "banan")
-       ent-id (data/init-thunk (:data-service system) creds)]
-   (data/get-thunk (:data-service system) creds ent-id))
+ (let [conn (get-in system [:datomic-peer :connection])
+       db   (d/db conn)
+       ;_    (auth/register! (get system :authenticator) "brian" "rubinton")
+       role-id (d/entity db [:role/id "brian"]) 
+       txdata (->> (csv-import/csv->kanopi "shelfari-data.tsv" role-id)
+                   ) 
+       report @(d/transact conn txdata)
+       ]
+   report)
 
- (data/init-thunk datomic-peer nil)
+ (d/q '[:find [?val ...] :where [_ :value/string ?val]]
+      (d/db (get-in system [:datomic-peer :connection])))
+  
+ 
 
- (component/stop system)
 
  )

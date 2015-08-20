@@ -11,17 +11,9 @@
 
 (defn- connect-to-database [config]
   (let [uri (:uri config)]
-    (println uri)
-    (d/delete-database (:uri config))
+    (d/delete-database uri)
     (d/create-database uri)
-    (let [conn (d/connect uri)]
-      (println "load schema")
-      (load-files! conn (:schema config))
-
-      (println "load data")
-      (load-files! conn (:data config))
-
-      conn)))
+    (d/connect uri)))
 
 ;; TODO: study https://www.youtube.com/watch?v=7lm3K8zVOdY
 (defprotocol ISecureDatomic
@@ -41,7 +33,16 @@
     (println "starting datomic peer")
     (if connection
       this
-      (assoc this :connection (connect-to-database config))))
+      (let [conn (connect-to-database config)]
+
+        (println "load schema")
+        (load-files! conn (:schema config))
+
+        (when (:dev config)
+          (println "load data")
+          (load-files! conn (:data config)))
+        
+        (assoc this :connection conn))))
 
   (stop [this]
     (println "stopping datomic peer")

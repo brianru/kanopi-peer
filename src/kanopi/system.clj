@@ -28,6 +28,11 @@
       (auth/new-authentication-service)
       {:database :datomic-peer})
 
+     :authorizer
+     (component/using
+      (auth/new-authorization-service)
+      {:database :datomic-peer})
+
 ;;     :web-app
 ;;     (component/using
 ;;      (app/new-web-app (with-dev :web-app))

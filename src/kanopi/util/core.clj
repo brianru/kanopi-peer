@@ -24,5 +24,5 @@
 (defn get-authenticator [ctx]
   (get-in ctx [:request :authenticator]))
 
-(defn get-datomic [ctx]
-  (get-in ctx [:request :datomic]))
+(defn get-data-service [ctx]
+  (get-in ctx [:request :data-service]))

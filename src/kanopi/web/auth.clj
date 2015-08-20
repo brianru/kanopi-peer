@@ -52,12 +52,13 @@
             "This username is already taken. Please choose another.")
     (let [user-ent-id (d/tempid :db.part/user -1)
           txdata [
-                  {:db/id #db/id [:db.part/user -1000]
-                   :role/id username}
+                  {:db/id (d/tempid :db.part/users -1000)
+                   :role/id username
+                   :role/label username}
                   {:db/id user-ent-id
                    :user/id username
                    :user/password (creds/hash-bcrypt password)
-                   :user/role #db/id [:db.part/user -1000]}
+                   :user/role (d/tempid :db.part/users -1000)}
                   ]
           report @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-ent-id)))
@@ -79,7 +80,8 @@
 
 (defprotocol IAuthorize
   (authorized-methods [this cur-auth ent-id])
-  (authorized? [this cur-auth request]))
+  (authorized? [this cur-auth request])
+  (enforce-entitlements [this ]))
 
 (defrecord AuthorizationService
     [config database authorized?]
