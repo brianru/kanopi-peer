@@ -1,8 +1,8 @@
 (ns kanopi.csv-import
+  "TODO: move to main project util dir."
   (:require [clojure.java.io :as io]
             [clojure.data.csv :as csv]
-            [datomic.api :as d]
-             ))
+            [datomic.api :as d]))
 
 (defn load-tsv [path]
   (let [[header-row & value-rows]
@@ -47,6 +47,12 @@
                  :datoms  []}
                 (:header-row raw-data))
         ]
+    ;; TODO: add audit datoms to the tx entity
     (->> (:value-rows raw-data)
          (mapcat (partial value-row->facts role-id (:tempids attributes)))
          (concat))))
+
+(defn kanopi->csv
+  "TODO: this may be useful."
+  [datoms]
+  nil)

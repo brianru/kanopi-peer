@@ -6,6 +6,7 @@
   "
   (:require [datomic.api :as d]
             [clojure.pprint :refer (pprint)]
+            [kanopi.util.core :as util]
             [kanopi.storage.datomic :as datomic]))
 
 (defprotocol IDataService
@@ -14,22 +15,34 @@
                  [this creds as-of thunk-id])
   (user-thunk    [this creds] [this creds as-of])
   (add-fact      [this creds thunk-id attribute value])
+  (update-fact   [this creds fact-id attribute value])
   (swap-entity   [this creds entity'])
   (retract-thunk [this creds ent-id]
                  "Assumes only 1 user has access, and thus retracting totally retracts it.
                  If more than 1 user has that access this must only retract the appropriate
-                 role(s) from the entity.")
-  )
+                 role(s) from the entity."))
+
+(defn- entity-id-tuple? [input]
+  (and (vector? input) (= :db/id (first input)) (integer? (second input))))
+
+(defn- describe-value-literal [value]
+  (cond
+   (string? value)
+   :value/string
+   
+   :default
+   nil))
+
+(defn- value-literal? [input]
+  (describe-value-literal input))
 
 (defn- describe-input [datomic-peer creds input]
   (cond
-   (and integer? (datomic/entity datomic-peer creds input))
+   (entity-id-tuple? input)
    ::entity-id
 
-   (string? input)
-   ::string
-
-   ))
+   (value-literal? input)
+   ::literal))
 
 (defmulti fact->txdata
   "Generate transaction data for asserting the given [eid attr value].
@@ -79,11 +92,6 @@
      :txdata [[:db/add attribute-id :thunk/role (get creds :role)]
               [:db/add attribute-id :thunk/label attribute]])))
 
-(defn- describe-value-literal [value]
-  (cond
-   (string? value)
-   :value/string))
-
 (defn- mk-value 
   "FIXME: if value entity with same literal already exists, use it."
   [datomic-peer creds value]
@@ -94,15 +102,16 @@
      :txdata [[:db/add value-id value-attribute value]])))
 
 (defn- mk-fact
-  [datomic-peer creds attribute value]
+  [datomic-peer creds attribute-id value-id]
   (let [fact-id (d/tempid :db.part/structure)]
     (hash-map
      :ent-id fact-id
-     :txdata  [[:db/add fact-id :fact/attribute attribute]
-               [:db/add fact-id :fact/value     value] ])))
+     :txdata  [[:db/add fact-id :fact/attribute attribute-id]
+               [:db/add fact-id :fact/value     value-id]])))
 
 (defn- mk-thunk
-  "ex: (mk-thunk dp creds label [attr-id val-id] [attr-literal val-id] ... etc)"
+  "ex: (mk-thunk dp creds label [attr-id-tuple val-id-tuple]
+                                [attr-literal  val-id-tuple] ... etc)"
   ([datomic-peer creds]
    (mk-thunk datomic-peer creds ""))
 
@@ -132,34 +141,34 @@
                       (get fact-coll :txdata))))))
 
 (defmethod fact->txdata [::entity-id ::entity-id]
-  [datomic-peer creds ent-id attribute value]
-  (let [fact (mk-fact datomic-peer creds attribute value) ]
+  [datomic-peer creds ent-id attribute-id value-id]
+  (let [fact (mk-fact datomic-peer creds attribute-id value-id)]
     (hash-map
      :ent-id  (get fact :ent-id)
      :txdata  (conj (get fact :txdata)
                     [:db/add ent-id :thunk/fact (get fact :ent-id)]))))
 
-(defmethod fact->txdata [::string ::entity-id]
-  [datomic-peer creds ent-id attribute value]
+(defmethod fact->txdata [::literal ::entity-id]
+  [datomic-peer creds ent-id attribute value-id]
   (let [attr (mk-attribute datomic-peer creds attribute)
-        fact (mk-fact datomic-peer creds (get :ent-id attr) value)]
+        fact (mk-fact datomic-peer creds (get :ent-id attr) value-id)]
     (hash-map
      :ent-id (get fact :ent-id)
      :txdata (concat (get attr :txdata)
                      (get fact :txdata)
                      [[:db/add ent-id :thunk/fact (get fact :ent-id)]]))))
 
-(defmethod fact->txdata [::entity-id ::string]
-  [datomic-peer creds ent-id attribute value]
+(defmethod fact->txdata [::entity-id ::literal]
+  [datomic-peer creds ent-id attribute-id value]
   (let [value (mk-value datomic-peer creds value)
-        fact  (mk-fact datomic-peer creds attribute (get value :ent-id)) ]
+        fact  (mk-fact datomic-peer creds attribute-id (get value :ent-id))]
     (hash-map
      :ent-id (get fact :ent-id)
      :txdata (concat (get value :txdata)
                      (get fact :txdata)
                      [[:db/add ent-id :thunk/fact (get fact :ent-id)]]))))
 
-(defmethod fact->txdata [::string ::string]
+(defmethod fact->txdata [::literal ::literal]
   [datomic-peer creds ent-id attribute value]
   (let [attr (mk-attribute datomic-peer creds attribute)
         value (mk-value datomic-peer creds value)
@@ -189,10 +198,16 @@
   (add-fact [this creds ent-id attribute value]
     (let [fact-txdata (fact->txdata datomic-peer creds ent-id attribute value)
           txdata (conj (:txdata fact-txdata)
-                       [ent-id :thunk/fact (:fact-id fact-txdata)])
+                       [:db/add ent-id :thunk/fact (:ent-id fact-txdata)])
           report @(datomic/transact datomic-peer creds txdata)]
-      ;; FIXME: return something more directly useful
-      report))
+      (get-entity* (:db-after report) ent-id)))
+
+  ;; TODO: implement.
+  (update-fact [this creds fact-id attribute value]
+    (let [[attr-0 val-0] (-> (get-entity* (datomic/db datomic-peer creds) fact-id)
+                             (util/fact-entity->tuple))
+          ]
+      ))
 
   (swap-entity [this creds ent']
     nil)

@@ -4,7 +4,9 @@
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             [clojure.test.check.clojure-test :refer [defspec]]
+            [clojure.set]
             [datomic.api :as d]
+            [kanopi.util.core :as util]
             [kanopi.system :as sys]
             [kanopi.data :as data]
             [kanopi.storage.datomic :as datomic]
@@ -12,7 +14,6 @@
             [kanopi.generators :refer :all]
             [kanopi.test-util :as test-util]
             [com.stuartsierra.component :as component]))
-
 
 (deftest init-thunk
   (let [system (component/start (test-util/system-excl-web))
@@ -55,26 +56,29 @@
 
     (component/stop system)))
 
-;;(deftest construct-thunk
-;;  (let [ creds nil
-;;        [ent _] (data/init-thunk (:database system*) creds)]
-;;
-;;    (testing "assert fact")
-;;    (testing "assert facts (single transaction)")
-;;    (testing "retract fact(s)")
-;;    (testing "retract thunk")
-;;    (testing "retrieve at points in time")
-;;    ))
+(deftest construct-thunk
+  (let [system (component/start (test-util/system-excl-web))
+        creds  (do (auth/register! (:authenticator system) "brian" "rubinton")
+                   (auth/credentials (:authenticator system) "brian"))
+
+        ent-id (data/init-thunk (:data-service system) creds)
+        ent-0  (data/get-thunk (:data-service system) creds ent-id)
+        fact-1 ["age" "42"]
+        ent-1  (apply data/add-fact (:data-service system) creds ent-id fact-1)
+        ]
+
+    (testing "assert fact"
+      (let [foo (->> (clojure.set/difference (get ent-1 :thunk/fact) (get ent-0 :thunk/fact))
+                     (first)
+                     (util/fact-entity->tuple))]
+        (is (= foo fact-1))))
+    ;;(testing "assert facts (single transaction)")
+    ;;(testing "retract fact")
+    ;;(testing "retrieve at points in time")
+    ))
 
 ;;(deftest authorization-controls
 ;;  (let [creds-a nil
 ;;        creds-b nil
 ;;        creds-c nil]
-;;    ))
-
-;; create all sorts of properties
-;;(defspec hammer-thunk
-;;  (let []
-;;    (testing "assertions")
-;;    (testing "retractions")
 ;;    ))

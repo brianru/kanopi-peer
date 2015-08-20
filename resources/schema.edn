@@ -8,9 +8,31 @@
   :db/ident :db.part/structure
   :db.install/_partition :db.part/db}
 
- {:db/id #db/id [:db.part/db]
-  :db/ident :db.part/value
-  :db.install/_partition :db.part/db}
+ ;; Audit
+;; {:db/id #db/id [:db.part/db]
+;;  :db/ident :audit/source
+;;  :db.valueType :db.type/string
+;;  :db/cardinality :db.cardinality/one
+;;  :db.install/_attribute :db.part/db
+;;  }
+;; {:db/id #db/id [:db.part/db]
+;;  :db/ident :audit/user
+;;  :db.valueType :db.type/string
+;;  :db/cardinality :db.cardinality/one
+;;  :db.install/_attribute :db.part/db
+;;  }
+;; {:db/id #db/id [:db.part/db]
+;;  :db/ident :audit/role
+;;  :db.valueType :db.type/string
+;;  :db/cardinality :db.cardinality/one
+;;  :db.install/_attribute :db.part/db
+;;  }
+;; {:db/id #db/id [:db.part/db]
+;;  :db/ident :audit/event-id
+;;  :db.valueType :db.type/string
+;;  :db/cardinality :db.cardinality/one
+;;  :db.install/_attribute :db.part/db
+;;  }
 
  ;; Comms
  ;; {:db/ident :comm/method

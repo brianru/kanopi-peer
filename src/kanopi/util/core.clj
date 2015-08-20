@@ -26,3 +26,9 @@
 
 (defn get-data-service [ctx]
   (get-in ctx [:request :data-service]))
+
+;; ### Datomic EntityMap helper fns for navigating the schema
+(defn fact-entity->tuple [ent]
+  (let [attr (-> ent :fact/attribute :thunk/label)
+        valu (-> ent :fact/value     :value/string)]
+    (vector attr valu)))

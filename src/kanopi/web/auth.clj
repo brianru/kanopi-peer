@@ -26,7 +26,7 @@
   (verify-creds [this input-creds])
   (register!    [this username password]))
 
-;; FIXME: refactor to use real database component with its own query api
+;; FIXME: refactor to use the data-service
 (defrecord AuthenticationService [config database user-lookup-fn]
 
   IAuthenticate
@@ -50,15 +50,16 @@
     ;; an exception?
     (assert (nil? (d/entid (datomic/db database nil) [:user/id username]))
             "This username is already taken. Please choose another.")
+    ;; TODO: add audit datoms to the tx entity
     (let [user-ent-id (d/tempid :db.part/user -1)
           txdata [
-                  {:db/id (d/tempid :db.part/users -1000)
-                   :role/id username
+                  {:db/id      (d/tempid :db.part/users -1000)
+                   :role/id    username
                    :role/label username}
-                  {:db/id user-ent-id
-                   :user/id username
+                  {:db/id         user-ent-id
+                   :user/id       username
                    :user/password (creds/hash-bcrypt password)
-                   :user/role (d/tempid :db.part/users -1000)}
+                   :user/role     (d/tempid :db.part/users -1000)}
                   ]
           report @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-ent-id)))
