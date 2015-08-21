@@ -67,24 +67,15 @@
                      [k v''])))
          (apply hash-map))))
 
-(defn mk-attribute
-  "FIXME: if attribute entity with same label? already exists, use it.
-  TODO: Attributes are thunks. Should this call `mk-thunk`?"
-  [datomic-peer creds attribute]
-  (let [attribute-id (d/tempid :db.part/structure)]
-    (hash-map
-     :ent-id attribute-id
-     :txdata [[:db/add attribute-id :thunk/role (get creds :role)]
-              [:db/add attribute-id :thunk/label attribute]])))
-
-(defn mk-value 
-  "FIXME: if value entity with same literal already exists, use it."
-  [datomic-peer creds value]
-  (let [value-id (d/tempid :db.part/structure)
-        value-attribute (describe-value-literal value)]
-    (hash-map
-     :ent-id value-id
-     :txdata [[:db/add value-id value-attribute value]])))
+(defn mk-literal
+  ""
+  ([datomic-peer creds value]
+   (let [value-id (d/tempid :db.part/structure)
+         value-attribute (describe-value-literal value)
+         ]
+     (hash-map
+      :ent-id value-id
+      :txdata [[:db/add value-id value-attribute value]]))))
 
 (defn mk-fact
   [datomic-peer creds attribute-id value-id]
@@ -135,7 +126,8 @@
 
 (defmethod add-fact->txdata [::literal ::entity-id]
   [datomic-peer creds ent-id attribute [_ value-id]]
-  (let [attr (mk-attribute datomic-peer creds attribute)
+  (let [;;attr (mk-attribute datomic-peer creds attribute)
+        attr (mk-literal datomic-peer creds attribute)
         fact (mk-fact datomic-peer creds (get :ent-id attr) value-id)]
     (hash-map
      :ent-id (get fact :ent-id)
@@ -145,7 +137,8 @@
 
 (defmethod add-fact->txdata [::entity-id ::literal]
   [datomic-peer creds ent-id [_ attribute-id] value]
-  (let [value (mk-value datomic-peer creds value)
+  (let [;;value (mk-value datomic-peer creds value)
+        value (mk-literal datomic-peer creds value)
         fact  (mk-fact datomic-peer creds attribute-id (get value :ent-id))]
     (hash-map
      :ent-id (get fact :ent-id)
@@ -155,8 +148,10 @@
 
 (defmethod add-fact->txdata [::literal ::literal]
   [datomic-peer creds ent-id attribute value]
-  (let [attr  (mk-attribute datomic-peer creds attribute)
-        value (mk-value datomic-peer creds value)
+  (let [;;attr  (mk-attribute datomic-peer creds attribute)
+        ;;value (mk-value datomic-peer creds value)
+        attr  (mk-literal datomic-peer creds attribute)
+        value (mk-literal datomic-peer creds attribute)
         fact  (mk-fact datomic-peer creds (get attr :ent-id) (get value :ent-id))]
     (hash-map
      :ent-id (get fact :ent-id)
@@ -167,7 +162,7 @@
 
 (defn update-fact-attribute->txdata
   [datomic-peer creds fact attribute]
-  (case (describe-input attribute)
+  (case (describe-input datomic-peer creds attribute)
     ::entity-id
     (let [attr-0 (-> fact :fact/attribute :db/id)]
       (when (not= attr-0 (second attribute))
@@ -176,11 +171,11 @@
     (let [attr-0 (-> fact :fact/attribute :thunk/label)]
       (when (not= attr-0 attribute)
         ))
-   ))
+    ))
 
 (defn update-fact-value->txdata
   [datomic-peer creds fact value]
-  (case (describe-input value)
+  (case (describe-input datomic-peer creds value)
     ::entity-id
     (let [val-0 (-> fact :fact/value :db/id)]
       (when (not= val-0 (second value))
