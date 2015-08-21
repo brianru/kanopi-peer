@@ -18,7 +18,7 @@
                           "application/json"]
 
   :exists? (query-db data/get-thunk     [:request :params :id])
-  :put!    (query-db data/swap-entity   [:request :params :entity])
+  ;;:put!    (query-db data/swap-entity   [:request :params :entity])
   :delete! (query-db data/retract-thunk [:request :params :id])
   ;;:patch!  (query-db data/assert-statements [:request :params :statements])
   ;;:post!   (query-db data/add-entity        [:request :params :entity])
