@@ -39,7 +39,8 @@
                           "application/edn"
                           "application/json"]
 
-  :exists? generate-full-message
+  :processable? generate-full-message
+
   ;;:exists? (query-db data/get-thunk     [:request :params :id])
   ;;:put!    (query-db data/swap-entity   [:request :params :entity])
   ;;:delete! (query-db data/retract-thunk [:request :params :id])
