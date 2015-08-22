@@ -33,6 +33,7 @@
                  [hiccup "1.0.5"]
                  [crypto-password "0.1.3"]
                  [cheshire "5.5.0"]
+                 [clj-time "0.11.0"]
 
                  ;; Test
                  [org.clojure/test.check "0.7.0"]

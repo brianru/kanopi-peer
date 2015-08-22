@@ -19,3 +19,6 @@
        (map char)
        (apply str)
        (str "Basic ")))
+
+(defn assoc-basic-auth [m creds]
+  (assoc-in m [:headers "authorization"] (mk-basic-auth-header creds)))

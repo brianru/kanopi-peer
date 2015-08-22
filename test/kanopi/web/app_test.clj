@@ -3,16 +3,22 @@
             [kanopi.test-util :as test-util]
             [com.stuartsierra.component :as component]
             [liberator.dev]
+            [datomic.api :as d]
             [ring.mock.request :as mock]
             [cheshire.core :as json]
             [clojure.data.codec.base64 :as base64]
+            [clj-time.core :as time]
             [kanopi.web.app :as web-app]
             [kanopi.web.auth :as auth]))
 
 (deftest authentication
   (let [system (component/start (test-util/system-excl-web-server))
         handler (get-in system [:web-app :app-handler])
-        creds   {:username "mickey" :password "mouse"}]
+        creds   {:username "mickey" :password "mouse"}
+        test-ent-ids
+        (d/q '[:find [?eid ...] :in $ :where [?eid :thunk/label _]]
+             (d/db (get-in system [:datomic-peer :connection])))
+        ]
 
     (testing "unauthorized-access"
       (let [req  (mock/request :get "/")
@@ -39,15 +45,22 @@
         (is (= "http://localhost/" (get-in resp [:headers "Location"])))))
 
     (testing "access-spa-creds"
-      (let [req  (-> (mock/request :get "/"; {:basic-auth ["mickey" "mouse"]}
-                                   )
-                     (assoc-in [:headers "authorization"]
-                               (test-util/mk-basic-auth-header creds))) 
-            resp (handler req)
-            ]
+      (let [req  (-> (mock/request :get "/")
+                     (test-util/assoc-basic-auth creds)) 
+            resp (handler req)]
         (is (= 200 (:status resp)))
-        (is (re-find #"<title>kanopi</title>" (:body resp)))
-        
+        (is (re-find #"<title>kanopi</title>" (:body resp)))))
+
+    (testing "access-api"
+      (let [req (-> (mock/request :get "/api/" {:ent-id (first test-ent-ids)
+                                                :verb :get
+                                                :place :unit-test
+                                                :time (time/now)
+                                                })
+                    (test-util/assoc-basic-auth creds))
+            resp (handler req)]
+        (is (nil? (:body resp)))
+        (is (empty? test-ent-ids))
         ))
 
     (component/stop system)))
