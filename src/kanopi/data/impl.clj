@@ -176,7 +176,6 @@
            (if (d/entity (datomic/db datomic-peer creds) input-ent-arg)
              (hash-map :ent-id input-ent-arg, :txdata [])
              (mk-thunk datomic-peer creds input-ent-arg))]
-       (println "update-fact-part->txdata" input-ent)
        (hash-map
         :ent-id fact-id
         :txdata (conj (get input-ent :txdata)

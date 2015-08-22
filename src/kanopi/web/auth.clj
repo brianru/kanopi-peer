@@ -41,7 +41,7 @@
       ;; NOTE: friend expects this to return nil when the given
       ;; username is unidentified.
       (when (not-empty creds)
-        {:ent-id   (:db/id creds)
+        {:ent-id   ent-id
          :role     (-> creds :user/role first :db/id)
          :username (-> creds :user/id first)
          :password (-> creds :user/password first)})))

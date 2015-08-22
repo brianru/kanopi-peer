@@ -3,9 +3,10 @@
             [immutant.web.middleware :refer [wrap-session]]
             [liberator.dev :refer [wrap-trace]]
             [liberator.representation :as rep]
-            [ring.middleware.defaults :as defaults]
-            [ring.middleware.params :as params]
-            [ring.middleware.keyword-params :as keyword-params]
+            [ring.middleware.defaults]
+            [ring.middleware.params]
+            [ring.middleware.keyword-params]
+            [ring.middleware.cookies]
             [kanopi.web.auth :refer (authentication-middleware)]
             [kanopi.util.core :as util]))
 
@@ -46,11 +47,13 @@
       (let [http-handler ((:handler config))]
         (-> http-handler
             (authentication-middleware (:user-lookup-fn authenticator))
-            (defaults/wrap-defaults (-> defaults/site-defaults
-                                        (dissoc :session)
-                                        (assoc :security false)))
-            (params/wrap-params)
-            (keyword-params/wrap-keyword-params)
+            (ring.middleware.defaults/wrap-defaults
+             (-> ring.middleware.defaults/site-defaults
+                 (dissoc :session)
+                 (assoc :security false)))
+            (ring.middleware.params/wrap-params)
+            (ring.middleware.keyword-params/wrap-keyword-params)
+            (ring.middleware.cookies/wrap-cookies)
             (cond-> (:dev config)
               (wrap-trace :header :ui))
             (wrap-ensure-session)
