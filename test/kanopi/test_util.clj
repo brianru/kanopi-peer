@@ -6,3 +6,7 @@
 (defn system-excl-web []
   (-> (new-system default-config)
       (dissoc :web-app :web-server)))
+
+(defn system-excl-web-server []
+  (-> (new-system default-config)
+      (dissoc :web-server)))

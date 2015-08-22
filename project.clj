@@ -43,6 +43,7 @@
                              [lein-ancient "0.6.6"]]
                    :dependencies [[org.clojure/tools.namespace "0.2.10"]
                                   [ring/ring-devel "1.4.0"]
+                                  [ring/ring-mock "0.2.0"]
                                   [org.clojure/data.csv "0.1.3"]]
                    :env {:dev true}
                    :source-paths ["dev"]

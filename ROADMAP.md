@@ -24,6 +24,6 @@
 
 ### 0.3 - The Alpha 
 - RDS-backed Datomic
-- EC2 Transactor
+- ECS (AWS Docker) Transactor
 - kanopi.io landing page
 - uri literals
