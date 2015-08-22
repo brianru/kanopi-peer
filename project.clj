@@ -32,6 +32,7 @@
                  [ring/ring-defaults "0.1.5"]
                  [hiccup "1.0.5"]
                  [crypto-password "0.1.3"]
+                 [cheshire "5.5.0"]
 
                  ;; Test
                  [org.clojure/test.check "0.7.0"]

@@ -104,14 +104,15 @@
   [ctx]
   (let [{:keys [username password]} (get-in ctx [:request :params])
         authenticator (util/get-authenticator ctx)
-        res @(auth/register! authenticator username password)]
-    {::result res}))
+        user-ent-id (auth/register! authenticator username password)
+        ]
+    {::result {:db/id user-ent-id}}))
 
 (defn success?
   ""
   [ctx]
-  (let [loc (if (not-empty (get-in ctx [::result :tx-data]))
-              "/?welcome=true"
+  (let [loc (if-let [id (get-in ctx [::result :db/id])]
+              (str "/?welcome=true" "&id=" id)
               "/register?fail=true")]
     {:location loc}))
 

@@ -57,9 +57,10 @@
    :txdata [[:db.fn/retractEntity ent-id]]))
 
 (defn get-entity*
-  "TODO: may want to use pull api to grab facts as well."
+  "TODO: may want to use pull api to grab facts as well.
+  NOTE: ent-id can also be an ident or datomic lookup-ref."
   [db ent-id]
-  (when-let [ent (not-empty (d/touch (d/entity db ent-id)))]
+  (when-let [ent (d/touch (not-empty (d/entity db ent-id)))]
     (->> ent
          (mapcat (fn [[k v]]
                    (let [v' (cond

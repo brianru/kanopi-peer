@@ -115,7 +115,8 @@
         base      {"text/html" not-found}]
     {:authorized?
      ;; FIXME: perform real authorization.
-     (fn [ctx] (-> ctx :request friend/current-authentication))
+     (fn [ctx]
+       (-> ctx :request friend/current-authentication))
 
      :handle-unauthorized
      (fn [ctx]

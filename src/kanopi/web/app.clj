@@ -4,6 +4,8 @@
             [liberator.dev :refer [wrap-trace]]
             [liberator.representation :as rep]
             [ring.middleware.defaults :as defaults]
+            [ring.middleware.params :as params]
+            [ring.middleware.keyword-params :as keyword-params]
             [kanopi.web.auth :refer (authentication-middleware)]
             [kanopi.util.core :as util]))
 
@@ -43,10 +45,12 @@
       this
       (let [http-handler ((:handler config))]
         (-> http-handler
-            (authentication-middleware (:credential-fn authenticator))
+            (authentication-middleware (:user-lookup-fn authenticator))
             (defaults/wrap-defaults (-> defaults/site-defaults
                                         (dissoc :session)
                                         (assoc :security false)))
+            (params/wrap-params)
+            (keyword-params/wrap-keyword-params)
             (cond-> (:dev config)
               (wrap-trace :header :ui))
             (wrap-ensure-session)

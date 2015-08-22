@@ -33,11 +33,11 @@
       (auth/new-authorization-service)
       {:database :datomic-peer})
 
-;;     :web-app
-;;     (component/using
-;;      (app/new-web-app (with-dev :web-app))
-;;      {:database :data-service
-;;       :authenticator :authenticator})
+     :web-app
+     (component/using
+      (app/new-web-app (with-dev :web-app))
+      {:database :data-service
+       :authenticator :authenticator})
 ;;
 ;;     :web-server
 ;;     (component/using
