@@ -29,7 +29,11 @@
 
 ;; ### Datomic EntityMap helper fns for navigating the schema
 ;; TODO: refactor to support values of any type
+(defn get-literal-or-label [ent k]
+  (or (-> ent (get k) (first) (get :thunk/label))
+      (-> ent (get k) (first) (get :value/string))))
+
 (defn fact-entity->tuple [ent]
-  (let [attr (-> ent :fact/attribute :thunk/label)
-        valu (-> ent :fact/value     :value/string)]
+  (let [attr (get-literal-or-label ent :fact/attribute)
+        valu (get-literal-or-label ent :fact/value)]
     (vector attr valu)))

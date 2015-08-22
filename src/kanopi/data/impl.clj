@@ -3,8 +3,15 @@
             [kanopi.util.core :as util]
             [kanopi.storage.datomic :as datomic]))
 
-(defn entity-id-tuple? [input]
-  (and (vector? input) (= :db/id (first input)) (integer? (second input))))
+(declare describe-value-literal)
+
+(defn entity-id-tuple?
+  "(second input) => either an integer (id) or a string (label of new thunk)"
+  [input]
+  (and (vector? input)
+       (= :db/id (first input))
+       (or (integer? (second input))
+           (describe-value-literal (second input)))))
 
 (defn describe-value-literal [value]
   (cond
@@ -23,7 +30,10 @@
    ::entity-id
 
    (value-literal? input)
-   ::literal))
+   ::literal
+   
+   :default
+   ::retract))
 
 ;; TODO: Is it simpler to separate this into add-fact-attribute and
 ;; add-fact-value helper fns? This way there'd be 2 functions with 2
@@ -147,7 +157,7 @@
 (defmethod add-fact->txdata [::literal ::literal]
   [datomic-peer creds ent-id attribute value]
   (let [attr  (mk-literal datomic-peer creds attribute)
-        value (mk-literal datomic-peer creds attribute)
+        value (mk-literal datomic-peer creds value)
         fact  (mk-fact datomic-peer creds (get attr :ent-id) (get value :ent-id))]
     (hash-map
      :ent-id (get fact :ent-id)
@@ -156,30 +166,43 @@
                      (get fact :txdata)
                      [[:db/add ent-id :thunk/fact (get fact :ent-id)]]))))
 
-(defn update-fact-attribute->txdata
-  [datomic-peer creds fact attribute]
-  (case (describe-input datomic-peer creds attribute)
-    ::entity-id
-    (let [[_ attribute-id] attribute]
-      (vector [:db/add (get fact :db/id) :fact/attribute attribute-id]))
-    ::literal
-    (let []
-      (vector [:db/add (get fact :db/id) :fact/attribtue attribute]))))
+(defn update-fact-part->txdata
+  [datomic-peer creds fact-id part input]
+  (case (describe-input datomic-peer creds input)
+     ::entity-id
+     (let [[_ input-ent-arg] input
+           input-ent
+           (if (d/entity (datomic/db datomic-peer creds) input-ent-arg)
+             (hash-map :ent-id input-ent-arg, :txdata [])
+             (mk-thunk datomic-peer creds input-ent-arg))]
+       (println "update-fact-part->txdata" input-ent)
+       (hash-map
+        :ent-id fact-id
+        :txdata (conj (get input-ent :txdata)
+                      [:db/add fact-id part (get input-ent :ent-id)])))
 
-(defn update-fact-value->txdata
-  [datomic-peer creds fact value]
-  (case (describe-input datomic-peer creds value)
-    ::entity-id
-    (let [[_ value-id] value]
-      (vector [:db/add (get fact :db/id) :fact/value value-id]))
-    ::literal
-    (let []
-      (vector [:db/add (get fact :db/id) :fact/value value]))))
+     ::literal
+     (let [literal (mk-literal datomic-peer creds input)]
+       (hash-map
+        :ent-id fact-id
+        :txdata (conj (get literal :txdata)
+                      [:db/add fact-id part (get literal :ent-id)])))
+
+     ::retract
+     (let [fact (get-entity* (datomic/db datomic-peer creds) fact-id)
+           part-ent-id (-> fact part first :db/id)]
+       (hash-map
+        :ent-id fact-id
+        :txdata (vector [:db/retract fact-id part part-ent-id])))))
 
 (defn update-fact->txdata
   [datomic-peer creds fact-id attribute value]
   (let [fact (get-entity* (datomic/db datomic-peer creds) fact-id)]
-    (concat
-     (update-fact-attribute->txdata datomic-peer creds fact attribute)
-     (update-fact-value->txdata     datomic-peer creds fact value))))
+    (hash-map
+     :ent-id fact-id
+     :txdata (->> [[:fact/attribute attribute]
+                   [:fact/value value]]
+                  (map (partial apply update-fact-part->txdata datomic-peer creds fact-id))
+                  (mapcat :txdata)
+                  (vec)))))
 

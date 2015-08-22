@@ -72,44 +72,29 @@
       (let [new-fact (->> (clojure.set/difference (get ent-1 :thunk/fact)
                                                   (get ent-0 :thunk/fact))
                           (first)
-                          (util/fact-entity->tuple))]
-        (is (= new-fact fact-1))))
+                          (:db/id)
+                          (data/get-thunk (:data-service system) creds))]
+        (is (= (util/fact-entity->tuple new-fact) fact-1))))
 
     (testing "update-fact: change value literal. attr label same."
       (let [fact' ["age" "new-value!"]
-            ent' (apply data/update-fact (:data-service system) creds fact-id fact')
-            fact-ent (-> ent' :thunk/fact first)]
-        (is (= "age" (-> fact-ent :fact/attribute :thunk/label)))
-        (is (nil? (-> fact-ent :fact/value :value/ref)))
-        (is (not (nil? (-> fact-ent :fact/value :value/string))))
-        (is (= "new-value!" (-> fact-ent :fact/value :value/ref :thunk/label)))))
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact') ]
+        (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change value literal. attr label nil."
       (let [fact' [nil "new-value2!"]
-            ent' (apply data/update-fact (:data-service system) creds fact-id fact')
-            fact-ent (-> ent' :thunk/fact first)]
-        (is (= "age" (-> fact-ent :fact/attribute :thunk/label)))
-        (is (nil? (-> fact-ent :fact/value :value/ref)))
-        (is (not (nil? (-> fact-ent :fact/value :value/string))))
-        (is (= "new-value2!" (-> fact-ent :fact/value :value/ref :thunk/label)))))
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact') ]
+        (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change value from literal to ref"
       (let [fact' ["age2" [:db/id "42"]]
-            ent'  (apply data/update-fact (:data-service system) creds fact-id fact')
-            fact-ent (-> ent' :thunk/fact first)]
-        (is (= "age2" (-> fact-ent :fact/attribute :thunk/label)))
-        (is (nil? (-> fact-ent :fact/value :value/string)))
-        (is (not (nil? (-> fact-ent :fact/value :value/ref))))
-        (is (= "42" (-> fact-ent :fact/value :value/ref :thunk/label)))))
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact') ]
+        (is (= ["age2" "42"] (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change value from ref to literal"
       (let [fact' ["age2" "43"]
-            ent'  (apply data/update-fact (:data-service system) creds fact-id fact')
-            fact-ent (-> ent' :thunk/fact first)]
-        (is (= "age2" (-> fact-ent :fact/attribute :thunk/label)))
-        (is (nil? (-> fact-ent :fact/value :value/ref)))
-        (is (not (nil? (-> fact-ent :fact/value :value/string))))
-        (is (= "43" (-> fact-ent :fact/value :value/string)))))
+            fact-ent  (apply data/update-fact (:data-service system) creds fact-id fact') ]
+        (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change attribute literal"
       )
