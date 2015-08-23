@@ -11,9 +11,12 @@
 
                  [com.cognitect/transit-clj "0.8.281"]
                  [com.cognitect/transit-cljs "0.8.220"]
+                 ;; resolves a dependency issue with figwheel and
+                 ;; core.async
+                 [org.clojure/core.memoize "0.5.6"]
 
                  ;; Client
-                 [org.clojure/clojurescript "1.7.107"]
+                 [org.clojure/clojurescript "1.7.48"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [org.omcljs/om "0.9.0"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
@@ -45,9 +48,10 @@
 
   :plugins [[lein-marginalia "0.8.0"]
             [lein-cljsbuild "1.0.6"]
-            [lein-figwheel "0.3.7"]]
+            [lein-figwheel "0.3.7"
+             :exclusions [org.clojure/core.async]]]
 
-  :clean-targets [:target-path "public/js/out"]
+  :clean-targets [:target-path "resources/public/js/out"]
 
   :profiles {:dev {:plugins [[lein-environ "1.0.0"]
                              [lein-ancient "0.6.6"]]
@@ -60,13 +64,17 @@
                    :source-paths ["dev"]
                    :repl-options {:init-ns user}}}
 
+  :figwheel {:server-logfile "target/logs/figwheel.log" }
+
   :cljsbuild {:builds
               [{:id "dev"
-                :source-paths ["src-cljs/kanopi/"]
-                :compiler {:output-to "target/public/js/main.js"
-                           :output-dir "target/public/js/out"
+                :figwheel {:on-jsload "kanopi.core/render!"}
+                :source-paths ["src-cljs"]
+                :compiler {:output-to "resources/public/js/main.js"
+                           :output-dir "resources/public/js/out"
+                           :asset-path "js/out"
                            :main kanopi.core
                            :optimizations :none
                            :pretty-print true
-                           :source-map "target/public/js/source_map.js"}}]
+                           :source-map "resources/public/js/source_map.js"}}]
               })

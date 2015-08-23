@@ -11,7 +11,7 @@
       (:label node)]]
     ))
 
-(defn parents
+(defn foo-parents
   [props owner opts]
   (reify
     om/IDisplayName
@@ -76,7 +76,7 @@
       (let []
         (html
          [:div.thunk-container
-          (om/build parents  props)
+          (om/build foo-parents  props)
           (om/build body     props)
           (om/build children props)])))
     ))

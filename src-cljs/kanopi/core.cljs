@@ -2,6 +2,7 @@
   (:require [om.core :as om :include-macros true]
             [secretary.core :as secretary :include-macros true]
             [sablono.core :refer-macros [html] :include-macros true]
+            [kanopi.view.fact :as fact]
             ))
 
 (def app-container (. js/document (getElementById "app-container")))
@@ -26,6 +27,9 @@
         [:h1 "Hi!"]]
        ))))
 
-(om/root root app-state
-         {:target app-container
-          :shared {}})
+(defn mount-root! []
+  (om/root root app-state
+           {:target app-container
+            :shared {}}))
+
+(mount-root!)
