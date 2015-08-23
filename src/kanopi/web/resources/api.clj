@@ -6,6 +6,7 @@
             [cemerick.friend :as friend]
             [kanopi.data :as data]
             [kanopi.util.core :as util]
+            [kanopi.web.message :as msg]
             ))
 
 (defn query-db [data-fn path]
@@ -13,33 +14,13 @@
     (data-fn (util/get-data-service ctx)
              (get-in ctx path))))
 
-(defn build-noun [ctx]
-  (-> ctx
-      (get-in [:request :params])
-      (select-keys [:ent-id :attribute :value])))
-
-(defn build-verb [ctx]
-  (or (get-in ctx [:request :params :verb])
-      (get-in ctx [:request :request-method])))
-
-(defn build-context [{:keys [request] :as ctx}]
-  (let []
-    (merge (-> (get-in ctx [:request :params])
-               (select-keys [:time :place]))
-           {:creds (friend/current-authentication request)})))
-
-(defn generate-full-message [ctx]
-  (hash-map ::message {:noun    (build-noun ctx)
-                       :verb    (build-verb ctx)
-                       :context (build-context ctx)}))
-
 (defresource api-resource base/requires-authentication
   :allowed-methods [:get :put :patch :post :delete]
   :available-media-types ["application/transit+json"
                           "application/edn"
                           "application/json"]
 
-  :processable? generate-full-message
+  :processable? msg/request-context->message
 
   ;;:exists? (query-db data/get-thunk     [:request :params :id])
   ;;:put!    (query-db data/swap-entity   [:request :params :entity])
@@ -50,4 +31,5 @@
   :new? ::new
   :respond-with-entity? true
   :handle-ok (fn [ctx] (str (get ctx ::message)))
+  :handle-unprocessable-entity "The request is in some way incomplete or illogical."
   )
