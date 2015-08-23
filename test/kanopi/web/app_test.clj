@@ -59,9 +59,8 @@
                                    :time (time/now)
                                    })
                     (test-util/assoc-basic-auth creds))
-            resp (handler req)]
-        (is (nil? (:body resp)))
-        (is (empty? test-ent-ids))
-        ))
+            resp (handler req)
+            resp-body (read-string (:body resp))]
+        (is (not-empty (get resp-body :focus-entity)))))
 
     (component/stop system)))

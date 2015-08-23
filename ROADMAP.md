@@ -7,6 +7,7 @@
 - string literals
 - http api expressing the data-service api (with auth)
 - lots of unit tests
+- message-oriented architecture
 
 
 ## The Future:

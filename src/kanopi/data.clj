@@ -42,12 +42,11 @@
 
   (user-thunk [this {:keys [noun verb context] :as msg}]
     (let [{:keys [creds as-of]} context
-          {:keys [ent-id]}      noun
-          db (if as-of
-               (datomic/db datomic-peer creds as-of)
-               (datomic/db datomic-peer creds)) ]
+          {:keys [ent-id]}      noun ]
       (hash-map :context-entities #{}
-                :focus-entity (get-entity* db ent-id)
+                :focus-entity (if as-of
+                                (get-thunk this creds as-of ent-id)
+                                (get-thunk this creds ent-id))
                 :similar-entities #{}
                 )))
 
@@ -58,7 +57,6 @@
           report @(datomic/transact datomic-peer creds txdata)]
       (get-entity* (:db-after report) ent-id)))
 
-  ;; TODO: implement.
   (update-fact [this creds fact-id attribute value]
     (let [fact-diff (update-fact->txdata datomic-peer creds fact-id attribute value)
           report    @(datomic/transact datomic-peer creds (:txdata fact-diff))]

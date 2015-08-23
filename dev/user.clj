@@ -9,7 +9,7 @@
             [kanopi.system :refer [new-system]]
             [kanopi.main :refer [default-config]]
 
-            [kanopi.generators :as ngen]
+            ;[kanopi.generators :as ngen]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]
             
@@ -36,26 +36,3 @@
   (stop)
   (refresh :after 'user/go))
 
-(comment
-
- (go)
-
- (reset)
-
- (let [conn (get-in system [:datomic-peer :connection])
-       db   (d/db conn)
-       ;_    (auth/register! (get system :authenticator) "brian" "rubinton")
-       role-id (d/entity db [:role/id "brian"]) 
-       txdata (->> (csv-import/csv->kanopi "shelfari-data.tsv" role-id)
-                   ) 
-       report @(d/transact conn txdata)
-       ]
-   report)
-
- (d/q '[:find [?val ...] :where [_ :value/string ?val]]
-      (d/db (get-in system [:datomic-peer :connection])))
-  
- 
-
-
- )

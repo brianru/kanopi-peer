@@ -2,14 +2,16 @@
   (:require [om.core :as om :include-macros true]
             [secretary.core :as secretary :include-macros true]
             [sablono.core :refer-macros [html] :include-macros true]
-            [shodan.console :refer-macros [log] :include-macros true]
             ))
 
 (def app-container (. js/document (getElementById "app-container")))
+
 (def app-state
   (atom {:tempo {:pulse nil}
-         :user  {:actions {}}
-         :data  {}}))
+         :user  {:actions []}
+         :thunk {}
+        }))
+
 (defn root
   [props owner opts]
   (reify

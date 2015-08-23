@@ -1,7 +1,6 @@
 (ns kanopi.view.thunk
   (:require [om.core :as om :include-macros true]
             [sablono.core :refer-macros [html] :include-macros true]
-            [shodan.console :refer-macros [log] :include-macros true]
             [kanopi.view.fact :as fact]
             ))
 

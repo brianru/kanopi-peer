@@ -9,6 +9,9 @@
                  [com.taoensso/timbre "4.1.0"]
                  [environ "1.0.0"]
 
+                 [com.cognitect/transit-clj "0.8.281"]
+                 [com.cognitect/transit-cljs "0.8.220"]
+
                  ;; Client
                  [org.clojure/clojurescript "1.7.107"]
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
@@ -39,8 +42,13 @@
                  [org.clojure/test.check "0.7.0"]
                  ]
   :main kanopi.main
+
   :plugins [[lein-marginalia "0.8.0"]
-            [lein-cljsbuild "1.0.6"]]
+            [lein-cljsbuild "1.0.6"]
+            [lein-figwheel "0.3.7"]]
+
+  :clean-targets [:target-path "public/js/out"]
+
   :profiles {:dev {:plugins [[lein-environ "1.0.0"]
                              [lein-ancient "0.6.6"]]
                    :dependencies [[org.clojure/tools.namespace "0.2.10"]
@@ -53,10 +61,12 @@
                    :repl-options {:init-ns user}}}
 
   :cljsbuild {:builds
-              {:dev {:source-paths ["src-cljs/kanopi/"]
-                     :compiler {:output-to "target/public/js/main.js"
-                                :output-dir "target/public/js/out"
-                                :optimizations :simple
-                                :pretty-print true
-                                :source-map "target/public/js/source_map.js"}}
-               }})
+              [{:id "dev"
+                :source-paths ["src-cljs/kanopi/"]
+                :compiler {:output-to "target/public/js/main.js"
+                           :output-dir "target/public/js/out"
+                           :main kanopi.core
+                           :optimizations :none
+                           :pretty-print true
+                           :source-map "target/public/js/source_map.js"}}]
+              })

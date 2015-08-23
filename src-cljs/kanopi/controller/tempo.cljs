@@ -2,7 +2,6 @@
   "TODO: zelkova."
   (:require [om.core :as om]
             [sablono.core :refer-macros [html] :include-macros true]
-            [shodan.console :refer-macros [log] :include-macros true]
             ))
 
 (defn heart-rate-monitor
