@@ -56,27 +56,31 @@
    :ent-id nil
    :txdata [[:db.fn/retractEntity ent-id]]))
 
+(defn- make-datomic-kv-consistent [[k v]]
+  (let [v' (cond
+            (instance? datomic.query.EntityMap v)
+            (list v)
+
+            (every? (partial instance? datomic.query.EntityMap) v)
+            v
+
+            (not (set? v))
+            (list v)
+            )
+        ;; ensure it's a set
+        v'' (if (set? v') v' (set v'))]
+    [k v'']))
+
 (defn get-entity*
   "TODO: may want to use pull api to grab facts as well.
   NOTE: ent-id can also be an ident or datomic lookup-ref."
   [db ent-id]
+  {:post [(->> (vals %) (every? set?))]}
   (when-let [ent (d/touch (not-empty (d/entity db ent-id)))]
-    (->> ent
-         (mapcat (fn [[k v]]
-                   (let [v' (cond
-                             (instance? datomic.query.EntityMap v)
-                             (list v)
-
-                             (every? (partial instance? datomic.query.EntityMap) v)
-                             v
-
-                             (not (set? v))
-                             (list v)
-                             )
-                         ;; ensure it's a set
-                         v'' (if (set? v') v' (set v'))]
-                     [k v''])))
-         (apply hash-map))))
+    (let [pretty-ent (->> ent
+                          (mapcat make-datomic-kv-consistent)
+                          (apply hash-map))]
+      (assoc pretty-ent :db/id #{ent-id}))))
 
 (defn mk-literal
   ""
@@ -170,30 +174,30 @@
 (defn update-fact-part->txdata
   [datomic-peer creds fact-id part input]
   (case (describe-input datomic-peer creds input)
-     ::entity-id
-     (let [[_ input-ent-arg] input
-           input-ent
-           (if (d/entity (datomic/db datomic-peer creds) input-ent-arg)
-             (hash-map :ent-id input-ent-arg, :txdata [])
-             (mk-thunk datomic-peer creds input-ent-arg))]
-       (hash-map
-        :ent-id fact-id
-        :txdata (conj (get input-ent :txdata)
-                      [:db/add fact-id part (get input-ent :ent-id)])))
+    ::entity-id
+    (let [[_ input-ent-arg] input
+          input-ent
+          (if (d/entity (datomic/db datomic-peer creds) input-ent-arg)
+            (hash-map :ent-id input-ent-arg, :txdata [])
+            (mk-thunk datomic-peer creds input-ent-arg))]
+      (hash-map
+       :ent-id fact-id
+       :txdata (conj (get input-ent :txdata)
+                     [:db/add fact-id part (get input-ent :ent-id)])))
 
-     ::literal
-     (let [literal (mk-literal datomic-peer creds input)]
-       (hash-map
-        :ent-id fact-id
-        :txdata (conj (get literal :txdata)
-                      [:db/add fact-id part (get literal :ent-id)])))
+    ::literal
+    (let [literal (mk-literal datomic-peer creds input)]
+      (hash-map
+       :ent-id fact-id
+       :txdata (conj (get literal :txdata)
+                     [:db/add fact-id part (get literal :ent-id)])))
 
-     ::retract
-     (let [fact (get-entity* (datomic/db datomic-peer creds) fact-id)
-           part-ent-id (-> fact part first :db/id)]
-       (hash-map
-        :ent-id fact-id
-        :txdata (vector [:db/retract fact-id part part-ent-id])))))
+    ::retract
+    (let [fact (get-entity* (datomic/db datomic-peer creds) fact-id)
+          part-ent-id (-> fact part first :db/id)]
+      (hash-map
+       :ent-id fact-id
+       :txdata (vector [:db/retract fact-id part part-ent-id])))))
 
 (defn update-fact->txdata
   [datomic-peer creds fact-id attribute value]

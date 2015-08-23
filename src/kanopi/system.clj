@@ -36,7 +36,7 @@
      :web-app
      (component/using
       (app/new-web-app (with-dev :web-app))
-      {:database :data-service
+      {:data-service :data-service
        :authenticator :authenticator})
 ;;
 ;;     :web-server

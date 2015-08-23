@@ -52,11 +52,12 @@
         (is (re-find #"<title>kanopi</title>" (:body resp)))))
 
     (testing "access-api"
-      (let [req (-> (mock/request :get "/api/" {:ent-id (first test-ent-ids)
-                                                :verb :get
-                                                :place :unit-test
-                                                :time (time/now)
-                                                })
+      (let [req (-> (mock/request :get "/api/"
+                                  {:ent-id (first test-ent-ids)
+                                   :verb :get
+                                   :place :unit-test
+                                   :time (time/now)
+                                   })
                     (test-util/assoc-basic-auth creds))
             resp (handler req)]
         (is (nil? (:body resp)))

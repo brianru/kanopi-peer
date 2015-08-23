@@ -8,16 +8,13 @@
 - http api expressing the data-service api (with auth)
 - lots of unit tests
 
-#### Notably Missing:
-- no authorization
-- generative tests
-
 
 ## The Future:
 
 ### 0.2 - The GUI (ETA: 4 September 2015)
 - prototype UI
 - generative tests
+- simulation tests?
 - authorization
 - math (latex) literals
 - continuous integration

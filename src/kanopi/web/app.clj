@@ -34,12 +34,12 @@
         :else
         (assoc response :session (assoc session :key key))))))
 
-(defn wrap-add-to-req [h k payload]
+(defn wrap-add-to-req [handler k payload]
   (fn [req]
-    (h (assoc req k payload))))
+    (handler (assoc req k payload))))
 
-(defrecord WebApp
-    [config data-service app-handler authenticator]
+(defrecord WebApp [config data-service app-handler authenticator]
+
   component/Lifecycle
   (start [this]
     (if app-handler
@@ -61,6 +61,7 @@
             (wrap-add-to-req :authenticator authenticator)
             (wrap-session {:timeout 0})
             (->> (assoc this :app-handler))))))
+
   (stop [this]
     (if-not app-handler this
             (assoc this :app-handler nil))))

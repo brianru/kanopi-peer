@@ -1,3 +1,10 @@
+## Data Flow
+### Message-oriented
+### Messages are self-contained
+No information can only be present in transit as part of a protocol
+(http request methods for example).
+
+
 ## Schema
 
 ### Goals

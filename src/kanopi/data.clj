@@ -16,7 +16,7 @@
   (init-thunk    [this creds])
   (get-thunk     [this creds thunk-id]
                  [this creds as-of thunk-id])
-  (user-thunk    [this creds] [this creds as-of])
+  (user-thunk    [this msg])
   (add-fact      [this creds thunk-id attribute value])
   (update-fact   [this creds fact-id attribute value]
                  "attribute and value can be nil.")
@@ -39,6 +39,17 @@
   (get-thunk [this creds as-of ent-id]
     (let [db (datomic/db datomic-peer creds as-of)]
       (get-entity* db ent-id)))
+
+  (user-thunk [this {:keys [noun verb context] :as msg}]
+    (let [{:keys [creds as-of]} context
+          {:keys [ent-id]}      noun
+          db (if as-of
+               (datomic/db datomic-peer creds as-of)
+               (datomic/db datomic-peer creds)) ]
+      (hash-map :context-entities #{}
+                :focus-entity (get-entity* db ent-id)
+                :similar-entities #{}
+                )))
 
   (add-fact [this creds ent-id attribute value]
     (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)
