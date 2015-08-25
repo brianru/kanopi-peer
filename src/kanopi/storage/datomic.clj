@@ -36,9 +36,11 @@
       this
       (let [conn (connect-to-database config)]
 
-        (println "load schema")
-        (load-files! conn (:schema config))
-
+        ;; init DB from peer, but only once
+        (when-not (d/entid (d/db conn) :user/id)
+          (println "load schema")
+          (load-files! conn (:schema config)))
+        
         (when (:dev config)
           (println "load data")
           (load-files! conn (:data config)))
