@@ -7,8 +7,8 @@
 (defn header
   "
   Logout.
-  Profile modal.
-  Link to home.
+  Settings.
+  Home.
   "
   [props owner opts]
   (reify

@@ -26,6 +26,7 @@
                  [cljs-ajax "0.3.14"]
                  [com.andrewmcveigh/cljs-time "0.3.11"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
+                 [com.cemerick/url "0.1.1"]
                  [sablono "0.3.6"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
 

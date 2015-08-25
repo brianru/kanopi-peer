@@ -19,6 +19,7 @@
   (context-thunks [this creds thunk-id])
   (similar-thunks [this creds thunk-id])
   (user-thunk    [this msg])
+  (recent-thunks [this creds])
   (add-fact      [this creds thunk-id attribute value])
   (update-fact   [this creds fact-id attribute value]
                  "attribute and value can be nil.")
@@ -77,6 +78,18 @@
                 :similar-entities
                 (similar-thunks this creds ent-id)
                 )))
+
+  ;; TODO: test this.
+  (recent-thunks [this creds]
+    (let []
+      (d/q '[:find [?e ?dt]
+             :in $ ?user-id
+             :where
+             [?s _ _ ?tx]
+             [?tx :audit/user ?user-id]
+             ]
+           (datomic/db datomic-peer creds)
+           (:user/id creds))))
 
   (add-fact [this creds ent-id attribute value]
     (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)

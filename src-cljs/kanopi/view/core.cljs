@@ -3,10 +3,12 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
+            [kanopi.model.message :as msg]
             [kanopi.view.header :as header]
             [kanopi.view.thunk :as thunk]
             [kanopi.view.pages.settings :as settings]
             [ajax.core :as http]
+            [cljs.core.async :as async]
             [om.core :as om]))
 
 (defn root-component
@@ -18,8 +20,7 @@
 
     om/IWillMount
     (will-mount [_]
-      
-      )
+      (msg/request-recent-thunks! owner))
 
     om/IRender
     (render [_]
@@ -44,7 +45,7 @@
        ))))
 
 (defn mount-root! [app-state container ether]
-  (om/root root-component app-state {:target container, :shared {:ether ether}}))
+  (om/root root-component app-state {:target container, :shared {:ether (:ether ether)}}))
 
 (defrecord Om [config app-state ether history app-container]
   component/Lifecycle

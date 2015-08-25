@@ -163,7 +163,7 @@
     (if ether
       this
       (let [ethr (apply mk-ether (:dimensions config))]
-        (info "start ether")
+        (info "start ether" (:dimensions config))
         (assoc this :ether ethr))))
 
   (stop [this]
@@ -171,8 +171,8 @@
       this
       (do
        (info "stop ether")
-        ;; TODO: kill ether
-        (assoc this :ether nil)))))
+       ;; TODO: kill ether
+       (assoc this :ether nil)))))
 
 (defn new-ether [config]
   (map->Ether {:config config}))

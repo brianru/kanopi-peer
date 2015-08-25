@@ -1,6 +1,8 @@
 (ns kanopi.web.resources.templates
   (:require [hiccup.page :refer (html5 include-js include-css)]
-            [cemerick.friend :as friend]))
+            [liberator.representation :as rep]
+            [cheshire.core :as json]
+            [kanopi.util.core :as util]))
 
 (defn include-bootstrap []
   (include-css "//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"))
@@ -17,14 +19,20 @@
           (include-css "css/main.css")
           (include-bootstrap)))
 
-(defn body [& content]
-  (into [:body] content))
+(defn om-page
+  "TODO: set cookie with no expiration (expire at end of session)
+  which contains user identity and recently modified thunks and config information"
+  [ctx {:keys [title cookie] :as opts}]
+  (let []
+    (rep/ring-response
+     {:cookies
+      {"kanopi-init"
+       {:value {:init (json/generate-string cookie)}}}
 
-(defn om-page [ctx {:keys [title] :as opts}]
-  (html5
-   (header title)
-   [:body
-    [:p
-     (-> ctx :request friend/current-authentication str)]
-    [:div#app-container]
-    (include-om)]))
+      :body
+      (html5
+       (header title)
+       [:body
+        [:div#app-container]
+        (include-om)])
+      })))

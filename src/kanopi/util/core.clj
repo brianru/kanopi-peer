@@ -1,5 +1,7 @@
 (ns kanopi.util.core
-  (:import java.util.UUID))
+  (:require [cognitect.transit :as transit])
+  (:import java.util.UUID
+           [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 (defn select-with-merge
   "Selects subset of a larger configuration map, merging in the selected keys.
@@ -37,3 +39,9 @@
   (let [attr (get-literal-or-label ent :fact/attribute)
         valu (get-literal-or-label ent :fact/value)]
     (vector attr valu)))
+
+(defn transit-write [data]
+  (let [out (ByteArrayOutputStream. 4096)
+        writer (transit/writer out :json)]
+    (transit/write writer data)
+    (.toString out)))
