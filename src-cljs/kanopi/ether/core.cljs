@@ -75,6 +75,8 @@
 (ns kanopi.ether.core
   (:require-macros [cljs.core.async.macros :as asyncm :refer [go]])
   (:require [cljs.core.async :as async]
+            [taoensso.timbre :as timbre
+             :refer-macros (log trace debug info warn error fatal report)]
             [om.core :as om]
             [quile.component :as component]))
 
@@ -160,13 +162,16 @@
   (start [this]
     (if ether
       this
-      (apply mk-ether (:dimensions config))))
+      (let [ethr (apply mk-ether (:dimensions config))]
+        (info "start ether")
+        (assoc this :ether ethr))))
 
   (stop [this]
     (if-not ether
       this
       (do
-        ;; kill ether
+       (info "stop ether")
+        ;; TODO: kill ether
         (assoc this :ether nil)))))
 
 (defn new-ether [config]

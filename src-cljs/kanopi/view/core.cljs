@@ -1,5 +1,7 @@
 (ns kanopi.view.core
   (:require [quile.component :as component]
+            [taoensso.timbre :as timbre
+             :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
             [om.core :as om]))
 
@@ -28,10 +30,12 @@
 
     ;; TODO: do something with history component
     (let [container (. js/document (getElementById (:container-id config))) ]
+      (info "mount om root" (:container-id config))
       (mount-root! (:atom app-state) container ether)
       (assoc this :app-container container)))
 
   (stop [this]
+    (info "un-mount om root?")
     (assoc this :app-container nil)))
 
 (defn new-om-root [config]
