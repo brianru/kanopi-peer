@@ -9,7 +9,9 @@
 
 (def app-state
   (atom {:tempo {:pulse nil}
-         :user  {:actions []}
+         :user  {
+                 :actions []
+                 }
          :thunk {}
         }))
 

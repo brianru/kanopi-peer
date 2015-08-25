@@ -9,6 +9,7 @@
                  [com.taoensso/timbre "4.1.0"]
                  [environ "1.0.0"]
 
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [com.cognitect/transit-clj "0.8.281"]
                  [com.cognitect/transit-cljs "0.8.220"]
                  ;; resolves a dependency issue with figwheel and
@@ -17,7 +18,7 @@
 
                  ;; Client
                  [org.clojure/clojurescript "1.7.48"]
-                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [quile/component-cljs "0.2.4"]
                  [org.omcljs/om "0.9.0"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [cljsjs/react-with-addons "0.13.3-0"]

@@ -21,6 +21,7 @@
 - continuous integration
 
 ### 0.3 - The Alpha 
+- zookeeper, kafka and onyx -> s3 for log persistence
 - RDS-backed Datomic
 - ECS (AWS Docker) Transactor
 - kanopi.io landing page
