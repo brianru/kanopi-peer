@@ -11,7 +11,15 @@
   (start [this]
     (let [atm (atom {:tempo {:pulse nil}
                      :user  {:actions {}}
-                     :data  {}})]
+                     ;; I don't want to use the URI as a place to
+                     ;; store state. All state is here.
+                     :page  {}
+                     :thunk {}
+
+                     ;; local cache
+                     ;; {<ent-id> <entity>}
+                     :cache {}
+                     })]
       (info "create ephemeral app state")
       (assoc this :app-state atm)))
 

@@ -3,6 +3,10 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
+            [kanopi.view.header :as header]
+            [kanopi.view.thunk :as thunk]
+            [kanopi.view.pages.settings :as settings]
+            [ajax.core :as http]
             [om.core :as om]))
 
 (defn root-component
@@ -12,11 +16,31 @@
     (display-name [_]
       "app-root")
 
+    om/IWillMount
+    (will-mount [_]
+      
+      )
+
     om/IRender
     (render [_]
       (html
        [:div
-        [:h1 "Hi!"]]
+        [:div.header-container
+         (om/build header/header props)]
+        [:div.page-container
+         (cond
+          (= (:page props) "thunk")
+          (om/build thunk/container (get props :thunk))
+
+          (= (:page props) "settings")
+          (om/build settings/settings props)
+
+          ;; TODO: welcome thunk
+          :default
+          [:h1 "Hi!"]
+          )
+         ]
+        ]
        ))))
 
 (defn mount-root! [app-state container ether]

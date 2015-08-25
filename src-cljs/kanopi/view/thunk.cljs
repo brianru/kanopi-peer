@@ -1,7 +1,11 @@
 (ns kanopi.view.thunk
   (:require [om.core :as om :include-macros true]
+            [taoensso.timbre :as timbre
+             :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
             [kanopi.view.fact :as fact]
+            [cljs.core.async :as async]
+            [ajax.core :as http]
             ))
 
 (defn node-link [node]
@@ -11,7 +15,7 @@
       (:label node)]]
     ))
 
-(defn foo-parents
+(defn context-entities
   [props owner opts]
   (reify
     om/IDisplayName
@@ -47,19 +51,19 @@
           ])))
     ))
 
-(defn children
+(defn similar-entities
   [props owner opts]
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "thunk-children" (:id props)))
+      (str "thunk-similar-entities" (:id props)))
 
     om/IRender
     (render [_]
       (let []
         (html
-         [:div.thunk-children
-          (for [node (:children props)]
+         [:div.thunk-similar-entities
+          (for [node (:similar-entities props)]
             (node-link node))])))
     ))
 
@@ -71,12 +75,29 @@
     (display-name [_]
       (str "thunk" (:id props)))
 
+    om/IWillMount
+    (will-mount [_]
+      ;; TODO: make sure I have the current thunk in app-state
+      ;; get current thunk id from uri
+      )
+
     om/IRender
     (render [_]
-      (let []
+      (let [
+           ;; _ (async/put! (om/get-shared owner [:ether :publisher])
+           ;;               {:noun nil
+           ;;                :verb :request
+           ;;                :context nil})
+            resp (http/GET "/api/" {:params {:ent-id 17592186045429
+                                             :noun 17592186045429
+                                             :verb :request
+                                             :context {:source :web}}} )
+            _ (info resp)]
         (html
          [:div.thunk-container
-          (om/build foo-parents  props)
-          (om/build body     props)
-          (om/build children props)])))
+          [:h1 "Thunk"]
+          ;(om/build context-entities  (get props :context-entities)
+          ;(om/build body     (get props :thunk)
+          ;(om/build similar-entities (get props :similar-entities)
+          ])))
     ))
