@@ -1,8 +1,9 @@
 (ns kanopi.view.core
   (:require [quile.component :as component]
+            [sablono.core :refer-macros [html] :include-macros true]
             [om.core :as om]))
 
-(defn root
+(defn root-component
   [props owner opts]
   (reify
     om/IDisplayName

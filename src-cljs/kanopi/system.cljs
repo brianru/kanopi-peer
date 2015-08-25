@@ -3,6 +3,7 @@
             [kanopi.view.core :as view]
             [kanopi.model.state :as state]
             [kanopi.controller.ajax :as ajax]
+            [kanopi.controller.history :as history]
             [kanopi.ether.core :as ether]
             ))
 
@@ -14,9 +15,10 @@
     :om
     (component/using
      (view/new-om-root config)
-     :app-state :app-state
-     :ether     :ether
-     :history   :history)
+     {:app-state :app-state
+      :ether     :ether
+      :history   :history}
+     )
 
     :app-state
     (state/new-app-state config)
@@ -27,12 +29,13 @@
     :history
     (component/using
      (history/new-html5-history config)
-     :ether :ether)
+     {:ether :ether})
 
     :transporter
     (component/using
      (ajax/new-ajax-spout config)
-     :ether :ether)
+     {:ether :ether}
+     )
     
     
     )))

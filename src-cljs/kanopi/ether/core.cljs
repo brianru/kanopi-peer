@@ -160,7 +160,7 @@
   (start [this]
     (if ether
       this
-      (apply ether/mk-ether (:dimensions config))))
+      (apply mk-ether (:dimensions config))))
 
   (stop [this]
     (if-not ether

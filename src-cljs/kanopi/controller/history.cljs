@@ -15,5 +15,5 @@
   (stop [this]
     this))
 
-(defn new-html5-hsitory [config]
+(defn new-html5-history [config]
   (map->Html5History {:config config}))

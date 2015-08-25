@@ -54,7 +54,7 @@
             [lein-figwheel "0.3.7"
              :exclusions [org.clojure/core.async]]]
 
-  :clean-targets [:target-path "resources/public/js/out"]
+  :clean-targets ^{:protect false} [:target-path "resources/public/js/out"]
 
   :profiles {:dev {:plugins [[lein-environ "1.0.0"]
                              [lein-ancient "0.6.6"]]
@@ -71,7 +71,7 @@
 
   :cljsbuild {:builds
               [{:id "dev"
-                :figwheel {:on-jsload "kanopi.core/start"}
+                :figwheel {:on-jsload "kanopi.core/reload-om"}
                 :source-paths ["src-cljs"]
                 :compiler {:output-to "resources/public/js/main.js"
                            :output-dir "resources/public/js/out"
