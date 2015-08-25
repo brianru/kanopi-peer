@@ -16,6 +16,8 @@
   (init-thunk    [this creds])
   (get-thunk     [this creds thunk-id]
                  [this creds as-of thunk-id])
+  (context-thunks [this creds thunk-id])
+  (similar-thunks [this creds thunk-id])
   (user-thunk    [this msg])
   (add-fact      [this creds thunk-id attribute value])
   (update-fact   [this creds fact-id attribute value]
@@ -40,14 +42,40 @@
     (let [db (datomic/db datomic-peer creds as-of)]
       (get-entity* db ent-id)))
 
+  (context-thunks [this creds ent-id]
+    (let []
+      (->> (d/q
+            '[:find ?s ?a ?ent-id
+              :in $ ?ent-id
+              :where [?s ?a ?ent-id]]
+            (datomic/db datomic-peer creds)
+            (sort-by first)
+            (partition-by first)))
+      ))
+
+  (similar-thunks [this creds ent-id]
+    (let []
+      (->> (d/q
+            '[:find ?s ?a ?v
+              :in $ ?ent-id
+              :where [?ent-id ?a ?v] [?s ?a ?v]]
+            (datomic/db datomic-peer creds)
+            ent-id)
+           (sort-by first)
+           (partition-by first)) 
+      ))
+
   (user-thunk [this {:keys [noun verb context] :as msg}]
     (let [{:keys [creds as-of]} context
-          {:keys [ent-id]}      noun ]
-      (hash-map :context-entities #{}
-                :focus-entity (if as-of
-                                (get-thunk this creds as-of ent-id)
-                                (get-thunk this creds ent-id))
-                :similar-entities #{}
+          {:keys [ent-id]}      noun]
+      (hash-map :context-entities
+                (context-thunks this creds ent-id)
+                :focus-entity
+                (if as-of
+                  (get-thunk this creds as-of ent-id)
+                  (get-thunk this creds ent-id))
+                :similar-entities
+                (similar-thunks this creds ent-id)
                 )))
 
   (add-fact [this creds ent-id attribute value]

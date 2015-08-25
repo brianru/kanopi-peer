@@ -51,7 +51,7 @@
         (is (= 200 (:status resp)))
         (is (re-find #"<title>kanopi</title>" (:body resp)))))
 
-    (testing "access-api"
+    (testing "access-api-GET"
       (let [req (-> (mock/request :get "/api/"
                                   {:ent-id (first test-ent-ids)
                                    :verb :get
@@ -62,5 +62,21 @@
             resp (handler req)
             resp-body (read-string (:body resp))]
         (is (not-empty (get resp-body :focus-entity)))))
+
+    (testing "access-api-POST"
+      (let []
+        ))
+
+    (testing "access-api-PUT"
+      (let []
+        ))
+
+    (testing "access-api-PATCH"
+      (let []
+        ))
+
+    (testing "access-api-DELETE"
+      (let []
+        ))
 
     (component/stop system)))

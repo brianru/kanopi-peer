@@ -108,6 +108,16 @@
     (testing "retract fact"
       )))
 
+;; TODO: test user-thunk input fns
+(deftest context-thunks
+  (let []
+    
+    ))
+
+(deftest similar-thunks
+  (let []
+    ))
+
 ;;(deftest authorization-controls
 ;;  (let [creds-a nil
 ;;        creds-b nil
