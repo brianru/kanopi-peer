@@ -3,7 +3,7 @@
             [cemerick.friend :as friend]))
 
 (defn include-bootstrap []
-  (include-css "//maxcdn.bootstrapcdn.com/bootstrap/3.3.2/css/bootstrap.min.css"))
+  (include-css "//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"))
 
 (defn include-om []
   (include-js "js/main.js"))

@@ -1,5 +1,7 @@
 (ns kanopi.core
-  (:require [om.core :as om :include-macros true]
+  (:require [quile.component :as component]
+            [kanopi.system :as sys]
+            [om.core :as om :include-macros true]
             [secretary.core :as secretary :include-macros true]
             [sablono.core :refer-macros [html] :include-macros true]
             [kanopi.view.fact :as fact]
@@ -35,3 +37,24 @@
             :shared {}}))
 
 (mount-root!)
+
+(def dev-config
+  {})
+
+(defonce system
+  (component/start (sys/new-system dev-config)))
+
+(defn init []
+  (alter-var-root #'system (constantly (sys/new-system dev-config))))
+
+(defn start []
+  (alter-var-root #'system component/start))
+
+(defn stop []
+  (alter-var-root #'system (fn [s] (when s (component/stop s)))))
+
+(defn go [] (init) (start))
+
+(defn reset []
+  (stop)
+  (refresh :after 'user/go))

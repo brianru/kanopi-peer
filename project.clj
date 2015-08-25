@@ -24,6 +24,8 @@
                  [cljsjs/react-with-addons "0.13.3-0"]
                  [secretary "1.2.3"]
                  [cljs-ajax "0.3.14"]
+                 [com.andrewmcveigh/cljs-time "0.3.11"]
+                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [sablono "0.3.6"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
 
@@ -69,7 +71,7 @@
 
   :cljsbuild {:builds
               [{:id "dev"
-                :figwheel {:on-jsload "kanopi.core/render!"}
+                :figwheel {:on-jsload "kanopi.core/start"}
                 :source-paths ["src-cljs"]
                 :compiler {:output-to "resources/public/js/main.js"
                            :output-dir "resources/public/js/out"

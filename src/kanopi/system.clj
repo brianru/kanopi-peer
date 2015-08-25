@@ -38,10 +38,10 @@
       (app/new-web-app (with-dev :web-app))
       {:data-service :data-service
        :authenticator :authenticator})
-;;
-;;     :web-server
-;;     (component/using
-;;      (server/new-web-server (with-dev :web-server))
-;;      {:web-app :web-app})
+
+     :web-server
+     (component/using
+      (server/new-web-server (with-dev :web-server))
+      {:web-app :web-app})
      
      ))))
