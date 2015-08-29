@@ -79,17 +79,17 @@
                 (similar-thunks this creds ent-id)
                 )))
 
-  ;; TODO: test this.
   (recent-thunks [this creds]
-    (let []
-      (d/q '[:find [?e ?dt]
-             :in $ ?user-id
+    (let [user-id (-> creds :role)]
+      (d/q '[:find [?e ?time]
+             :in $ ?user-role
              :where
-             [?s _ _ ?tx]
-             [?tx :audit/user ?user-id]
+             [?e :thunk/role ?user-role]
+             [?e _ _ ?tx]
+             [?tx :db/txinstant ?time]
              ]
            (datomic/db datomic-peer creds)
-           (:user/id creds))))
+           user-id)))
 
   (add-fact [this creds ent-id attribute value]
     (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)

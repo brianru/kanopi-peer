@@ -2,13 +2,15 @@
   (:require [compojure.core  :refer (routes GET POST PUT ANY)]
             [compojure.route :as route]
             [kanopi.web.resources.auth :as auth]
-            [kanopi.web.resources.api  :refer (api-resource)]
-            [kanopi.web.resources.spa  :refer (spa-resource)]
+            [kanopi.web.resources.api  :as api :refer (api-resource)]
+            [kanopi.web.resources.spa  :as spa :refer (spa-resource)]
             ))
 
 (defn app-routes []
   (->
    (routes
+    (GET "/welcome" [] spa/welcome)
+
     ;; authentication
     (ANY "/register" [] auth/registration-resource)
     (GET "/login"    [] auth/login-resource)
