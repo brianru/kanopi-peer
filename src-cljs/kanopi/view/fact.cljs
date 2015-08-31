@@ -15,6 +15,13 @@
       (let []
         (html
          [:div.fact-handle
+          [:div.fact-handle-top
+           [:div.fact-handle-top-left]
+           [:div.fact-handle-top-right]]
+          [:div.fact-handle-bottom
+           [:div.fact-handle-bottom-left]
+           [:div.fact-handle-bottom-right]]
+          [:div.fact-handle-icon]
           ])))
     ))
 
@@ -23,11 +30,11 @@
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "fact-attribute-" (:id props)))
+      (str "fact-attribute-" (:db/id props)))
 
     om/IRenderState
     (render-state [_ {:keys [mode] :as state}]
-      (let []
+      (let [_ (println props)]
         (html
          [:div.fact-attribute
           ])))
@@ -78,10 +85,11 @@
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "fact-" (:id props)))
+      (str "fact" (:db/id props)))
     om/IRender
     (render [_]
       (let []
         (html
-         [:div.fact-container])))
+         [:div.fact-container
+          (om/build body props)])))
     ))

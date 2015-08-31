@@ -23,3 +23,50 @@ body {
 }
 .context-thunks {
 }
+
+/* Facts */
+.fact-body {
+    margin-bottom: 20px;
+}
+.fact-handle {
+    width: 12px;
+    height: 12px;
+}
+.fact-handle-top, .fact-handle-bottom {
+    width: 12px;
+    height: 6px;
+}
+.fact-handle-top-left {
+    border-top: 1px solid black;
+    border-left: 1px solid black;
+}
+.fact-handle-top-right {
+    border-top: 1px solid white;
+    border-left: 1px solid white;
+}
+.fact-handle-bottom-left {
+    border-bottom: 1px solid white;
+    border-right: 1px solid white;
+}
+.fact-handle-bottom-right {
+    border-bottom: 1px solid black;
+    border-right: 1px solid black;
+}
+.fact-handle-top-left,
+.fact-handle-top-right,
+.fact-handle-bottom-left,
+.fact-handle-bottom-right {
+    height: 6px;
+    width: 6px;
+    display: inline-block;
+}
+.fact-handle-icon {
+    position: absolute;
+    height: 9px;
+    width: 9px;
+    background-color: red;
+    display: none;
+}
+.fact-handle:hover .fact-handle-icon {
+    display: inherit;
+}
