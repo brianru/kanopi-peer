@@ -17,8 +17,7 @@
      (view/new-om-root config)
      {:app-state :app-state
       :ether     :ether
-      :history   :history}
-     )
+      :history   :history})
 
     :app-state
     (state/new-app-state config)
@@ -34,8 +33,7 @@
     :transporter
     (component/using
      (ajax/new-ajax-spout config)
-     {:ether :ether}
-     )
+     {:ether :ether})
     
     
     )))

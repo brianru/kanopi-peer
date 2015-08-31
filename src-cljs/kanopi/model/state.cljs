@@ -5,6 +5,7 @@
             [goog.net.cookies :as cookies]
             [cemerick.url :as url]
             [cognitect.transit :as transit]
+            [kanopi.model.intro-data :refer (intro-data)]
             ))
 
 #_(defrecord PersistentAppState [config app-state])
@@ -25,11 +26,13 @@
                      ;; I don't want to use the URI as a place to
                      ;; store state. All state is here.
                      :page  {}
-                     :thunk {}
+                     :thunk {:context-thunks (select-keys intro-data [-1006 -1008 -1016]) 
+                             :thunk (get intro-data -1000)
+                             :similar-thunks (select-keys intro-data [-1009 -1012 -1016])}
 
                      ;; local cache
                      ;; {<ent-id> <entity>}
-                     :cache {}
+                     :cache (merge {} intro-data)
                      })]
       (info "create ephemeral app state" @atm)
       (assoc this :app-state atm)))

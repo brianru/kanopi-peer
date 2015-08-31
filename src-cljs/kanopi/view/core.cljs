@@ -38,7 +38,14 @@
 
           ;; TODO: welcome thunk
           :default
-          [:h1 "Hi!"]
+          [:div.home-page
+           (let [thunks (->> (get props :cache)
+                             (vals))]
+             (for [thunk thunks]
+               [:div [:a {:href ""} [:span (:thunk/label thunk)]]])
+             (om/build thunk/container (get props :thunk))
+             )
+           ]
           )
          ]
         ]
@@ -56,7 +63,7 @@
     ;; TODO: do something with history component
     (let [container (. js/document (getElementById (:container-id config))) ]
       (info "mount om root" (:container-id config))
-      (mount-root! (:atom app-state) container ether)
+      (mount-root! (:app-state app-state) container ether)
       (assoc this :app-container container)))
 
   (stop [this]
