@@ -40,10 +40,11 @@
                :aria-haspopup "true"
                :aria-expanded (if (get state :account-dropdown)
                                 "true" "false")}
-              "Dropdown" [:span.caret]]
+              "Account" [:span.caret]]
              [:ul.dropdown-menu
               {:style {:display (if (get state :account-dropdown)
                                   "inherit")}
+               :on-mouse-leave #(om/set-state! owner :account-dropdown false)
                }
               [:li [:a {:href (browser/route-for owner :settings)} "Settings"]]
               [:li.divider {:role "separator"}]

@@ -17,7 +17,9 @@
     (GET "/logout"   [] auth/logout-resource)
 
     (ANY "/api/" [] api-resource)
-    (GET "/*" [] spa-resource)
+    (GET "/thunk/:id" [] spa-resource)
+    (GET "/settings" [] spa-resource)
+    (GET "/" [] spa-resource)
 
     (route/files "" {:root "target/public"})
     (route/not-found "<h1>Page not found</h1>")

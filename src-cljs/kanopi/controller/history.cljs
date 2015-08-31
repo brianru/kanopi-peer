@@ -19,12 +19,12 @@
             [pushy.core :as pushy]))
 
 (def default-routes ["/" {""         :home
-                          "thunk"    :thunk
+                          "thunk/"   {[:id ""] :thunk}
                           "settings" :settings}])
 
 (defn- set-page! [ether match]
   (async/put! (get-in ether [:ether :publisher])
-              {:noun (get match :handler)
+              {:noun match
                :verb :navigate
                :context nil}))
 

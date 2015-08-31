@@ -8,6 +8,7 @@
             [kanopi.view.thunk :as thunk]
             [kanopi.view.pages.settings :as settings]
             [kanopi.ether.core :as ether]
+            [kanopi.controller.handlers :as handlers]
             [kanopi.util.browser :as browser]
             [ajax.core :as http]
             [cljs.core.async :as async]
@@ -23,15 +24,11 @@
     om/IWillMount
     (will-mount [_]
       ;(msg/request-recent-thunks! owner)
-      (ether/listen! owner :verb :navigate
-                     (fn [{:keys [noun verb context]} ]
-                       (let []
-                         (info "navigate to:" noun)
-                         (om/update! props :page noun)))))
+      (ether/listen! owner :verb :navigate (handlers/navigate! props)))
 
     om/IWillUnmount
     (will-unmount [_]
-      (ether/stop-listening!))
+      (ether/stop-listening! owner))
 
     om/IRender
     (render [_]
@@ -41,10 +38,10 @@
          (om/build header/header props)]
         [:div.page-container
          (cond
-          (= (:page props) :thunk)
+          (= (get-in props [:page :handler]) :thunk)
           (om/build thunk/container (get props :thunk))
 
-          (= (:page props) :settings)
+          (= (get-in props [:page :handler]) :settings)
           (om/build settings/settings props)
 
           ;; TODO: welcome thunk

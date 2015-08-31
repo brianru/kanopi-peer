@@ -6,14 +6,8 @@
             [kanopi.view.fact :as fact]
             [cljs.core.async :as async]
             [ajax.core :as http]
+            [kanopi.util.browser :as browser]
             ))
-
-(defn node-link [node]
-  (let []
-    [:div.node-link
-     [:a {:href (:url node)}
-      (:label node)]]
-    ))
 
 (defn- corner?
   ([w h n]
@@ -77,7 +71,8 @@
                         (merge (corner-styling size (inc idx)))
                         (= 0 idx)
                         (merge {:margin-left "11%"}))}
-              [:a {:href ""} [:span (:thunk/label thunk)]]])
+              [:a {:href (browser/route-for owner :thunk :id (:db/id thunk))}
+               [:span (:thunk/label thunk)]]])
           ])))))
 
 (defn body
@@ -128,7 +123,8 @@
                        (merge (corner-styling size (inc idx)))
                        (= 0 idx)
                        (merge {:margin-left "11%"}))}
-             [:a {:href ""} [:span (:thunk/label thunk)]]]
+             [:a {:href (browser/route-for owner :thunk :id (:db/id thunk))}
+              [:span (:thunk/label thunk)]]]
             )
           ])))))
 
@@ -160,7 +156,7 @@
             ;;_ (info resp)
             ]
         (html
-         [:div.thunk-container.fluid-container
+         [:div.thunk-container.container-fluid
           (om/build context-thunks (get props :context-thunks))
           (om/build body (get props :thunk))
           (om/build similar-thunks (get props :similar-thunks))

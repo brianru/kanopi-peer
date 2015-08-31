@@ -28,6 +28,12 @@ body {
 .fact-body {
     margin-bottom: 20px;
 }
+.fact-container {
+    width: 100% !important;
+}
+.fact-body {
+    width: 100%;
+}
 .fact-handle {
     width: 12px;
     height: 12px;

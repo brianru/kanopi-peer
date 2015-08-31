@@ -8,7 +8,7 @@
   (include-css "//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"))
 
 (defn include-om []
-  (include-js "js/main.js"))
+  (include-js "/js/main.js"))
 
 (defn header [title]
   (vector :head
@@ -16,7 +16,7 @@
           [:link {:rel "icon"
                   :type "image/png"
                   :href "/favicon.png"}]
-          (include-css "css/main.css")
+          (include-css "/css/main.css")
           (include-bootstrap)))
 
 (defn om-page

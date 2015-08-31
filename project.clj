@@ -77,7 +77,7 @@
                 :source-paths ["src-cljs"]
                 :compiler {:output-to "resources/public/js/main.js"
                            :output-dir "resources/public/js/out"
-                           :asset-path "js/out"
+                           :asset-path "/js/out"
                            :main kanopi.core
                            :optimizations :none
                            :pretty-print true

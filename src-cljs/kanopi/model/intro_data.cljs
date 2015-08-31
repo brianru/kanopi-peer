@@ -3,7 +3,7 @@
 (def intro-data
   {-1000 {:db/id -1000
           :thunk/label "Welcome to Kanopi!"
-          :thunk/fact #{-1001 -1002 -1007}}
+          :thunk/fact #{-1001 -1002 -1007 -1015}}
    -1001 {:db/id -1001
           :fact/attribute #{-1003}
           :fact/value     #{-1004}}
@@ -49,6 +49,20 @@
           :fact/attribute #{-1011}
           :fact/value     #{-1016}}
    -1016 {:db/id -1016
-          :thunk/label "Kanopi Pattern Language"}
+          :thunk/label "Kanopi Pattern Language"
+          :thunk/fact #{-1017 -1018}}
+
+   -1019 {:db/id -1019
+          :thunk/label "Pattern"}
+   -1017 {:db/id -1017
+          :fact/attribute #{-1019}
+          :fact/value     #{-1020}}
+   -1020 {:db/id -1020
+          :thunk/label "Lantern in the fog"}
+   -1018 {:db/id -1018
+          :fact/attribute #{-1019}
+          :fact/value     #{-1021}}
+   -1021 {:db/id -1021
+          :thunk/label "Frictionless expansion and exploration of thoughts."}
 
    })
