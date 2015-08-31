@@ -4,7 +4,6 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.system :as sys]
             [om.core :as om :include-macros true]
-            [secretary.core :as secretary :include-macros true]
             [sablono.core :refer-macros [html] :include-macros true]
             ))
 

@@ -7,6 +7,8 @@
             [kanopi.view.header :as header]
             [kanopi.view.thunk :as thunk]
             [kanopi.view.pages.settings :as settings]
+            [kanopi.ether.core :as ether]
+            [kanopi.util.browser :as browser]
             [ajax.core :as http]
             [cljs.core.async :as async]
             [om.core :as om]))
@@ -20,7 +22,16 @@
 
     om/IWillMount
     (will-mount [_]
-      (msg/request-recent-thunks! owner))
+      ;(msg/request-recent-thunks! owner)
+      (ether/listen! owner :verb :navigate
+                     (fn [{:keys [noun verb context]} ]
+                       (let []
+                         (info "navigate to:" noun)
+                         (om/update! props :page noun)))))
+
+    om/IWillUnmount
+    (will-unmount [_]
+      (ether/stop-listening!))
 
     om/IRender
     (render [_]
@@ -30,10 +41,10 @@
          (om/build header/header props)]
         [:div.page-container
          (cond
-          (= (:page props) "thunk")
+          (= (:page props) :thunk)
           (om/build thunk/container (get props :thunk))
 
-          (= (:page props) "settings")
+          (= (:page props) :settings)
           (om/build settings/settings props)
 
           ;; TODO: welcome thunk
@@ -41,18 +52,16 @@
           [:div.home-page
            (let [thunks (->> (get props :cache)
                              (vals))]
-             (for [thunk thunks]
-               [:div [:a {:href ""} [:span (:thunk/label thunk)]]])
-             (om/build thunk/container (get props :thunk))
-             )
+             (om/build thunk/container (get props :thunk)))
            ]
           )
          ]
         ]
        ))))
 
-(defn mount-root! [app-state container ether]
-  (om/root root-component app-state {:target container, :shared {:ether (:ether ether)}}))
+(defn mount-root! [app-state container ether history]
+  (om/root root-component app-state {:target container, :shared {:ether (:ether ether)
+                                                                 :history history}}))
 
 (defrecord Om [config app-state ether history app-container]
   component/Lifecycle
@@ -63,7 +72,7 @@
     ;; TODO: do something with history component
     (let [container (. js/document (getElementById (:container-id config))) ]
       (info "mount om root" (:container-id config))
-      (mount-root! (:app-state app-state) container ether)
+      (mount-root! (:app-state app-state) container ether history)
       (assoc this :app-container container)))
 
   (stop [this]

@@ -16,8 +16,8 @@
     (GET "/login"    [] auth/login-resource)
     (GET "/logout"   [] auth/logout-resource)
 
-    (GET "/" [] spa-resource)
     (ANY "/api/" [] api-resource)
+    (GET "/*" [] spa-resource)
 
     (route/files "" {:root "target/public"})
     (route/not-found "<h1>Page not found</h1>")

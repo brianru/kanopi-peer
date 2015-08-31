@@ -2,6 +2,7 @@
   (:require [om.core :as om]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
+            [kanopi.util.browser :as browser]
             [sablono.core :refer-macros [html] :include-macros true]))
 
 (defn header
@@ -28,8 +29,7 @@
           [:div.container-fluid
            [:div.navbar-header
             [:a.navbar-brand
-             {:on-click (fn [_]
-                          (info "click header"))}
+             {:href (browser/route-for owner :home)}
              "Kanopi"]]
            [:ul.nav.navbar-nav.navbar-right
             [:li.dropdown
@@ -45,8 +45,8 @@
               {:style {:display (if (get state :account-dropdown)
                                   "inherit")}
                }
-              [:li [:a {} "Settings"]]
+              [:li [:a {:href (browser/route-for owner :settings)} "Settings"]]
               [:li.divider {:role "separator"}]
-              [:li [:a {} "Logout"]]]]]]
+              [:li [:a {:href "/logout"} "Logout"]]]]]]
           ])))
     ))

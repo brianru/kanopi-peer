@@ -118,7 +118,7 @@
   ([owner dimension value handlerfn]
    (listen! owner dimension value handlerfn (constantly nil)))
   ([owner dimension value handlerfn logfn]
-   (let [ether       (om/get-shared owner)
+   (let [ether       (om/get-shared owner :ether)
          listener    (async/chan 100 (map deref-cursor))
          kill-ch     (async/chan)
          publication (->> dimension (publication-keyword) (get ether))]

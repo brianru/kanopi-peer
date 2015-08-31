@@ -11,20 +11,37 @@
   
   "
   (:require [quile.component :as component]
-            [kanopi.ether.core :as ether]))
+            [taoensso.timbre :as timbre
+             :refer-macros (log trace debug info warn error fatal report)]
+            [kanopi.ether.core :as ether]
+            [cljs.core.async :as async]
+            [bidi.bidi :as bidi]
+            [pushy.core :as pushy]))
 
-(defprotocol IBrowserRouter
-  (do-something [this foo]))
+(def default-routes ["/" {""         :home
+                          "thunk"    :thunk
+                          "settings" :settings}])
 
-#_(defrecord HtmlHistory [config ether])
+(defn- set-page! [ether match]
+  (async/put! (get-in ether [:ether :publisher])
+              {:noun (get match :handler)
+               :verb :navigate
+               :context nil}))
 
-(defrecord Html5History [config ether]
+(defrecord Html5History [config routes route-for history ether]
   component/Lifecycle
   (start [this]
-    this)
+    (let [hist (pushy/pushy (partial set-page! ether)
+                            (partial bidi/match-route default-routes))]
+      (info "start html5 history")
+      (pushy/start! hist)
+      (assoc this :history hist
+             :routes default-routes
+             :route-for (partial bidi/path-for default-routes))))
 
   (stop [this]
-    this))
+    (pushy/stop! history)
+    (assoc this :history nil, :routes nil, :route-for (constantly nil))))
 
 (defn new-html5-history [config]
   (map->Html5History {:config config}))

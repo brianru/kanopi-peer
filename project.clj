@@ -22,7 +22,8 @@
                  [org.omcljs/om "0.9.0"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [cljsjs/react-with-addons "0.13.3-0"]
-                 [secretary "1.2.3"]
+                 [bidi "1.20.3"]
+                 [kibu/pushy "0.3.3"]
                  [cljs-ajax "0.3.14"]
                  [com.andrewmcveigh/cljs-time "0.3.11"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
