@@ -65,7 +65,7 @@
                                           size
                                           (js/Math.sqrt size))))
                  :let []]
-             [:div.context-thunk-cell.col-md-3.vcenter
+             [:div.context-thunk-cell.col-xs-3.vcenter
               {:style (cond-> {}
                         true
                         (merge (corner-styling size (inc idx)))
@@ -91,7 +91,7 @@
       (let []
         (html
          [:div.row
-          [:div.thunk-body.col-md-offset-3.col-md-6
+          [:div.thunk-body.col-xs-offset-3.col-xs-6
            [:div.thunk-title
             [:h1 (get props :thunk/label)]]
            [:div.thunk-facts
@@ -122,7 +122,7 @@
                                  (take (if (get state :expand)
                                          size
                                          (js/Math.sqrt size))))]
-            [:div.similar-thunk-cell.vcenter.col-md-3
+            [:div.similar-thunk-cell.vcenter.col-xs-3
              {:style (cond-> {}
                        true
                        (merge (corner-styling size (inc idx)))

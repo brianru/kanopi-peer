@@ -8,6 +8,47 @@ body {
     justify-content: center;
 }
 
+input {
+    border: none;
+    -webkit-appearance: none;
+    background-color: inherit;
+    border-bottom: 1px solid #777;
+    display: inline-block;
+    line-height: 2rem !important;
+    margin: 0 0.5rem !important;
+}
+input:focus {
+    outline: none;
+}
+.glyphicon-search {
+    transform: scaleX(-1);
+}
+
+/*
+span {
+    font-size: 16px;
+}
+*/
+.bold-text {
+    font-weight: 500;
+}
+
+.dropdown {
+    list-style: none;
+}
+
+.navbar-center {
+    color: #777;
+    position: absolute;
+    min-width: 100px;
+    width: 100%;
+    margin: 0 auto;
+    text-align: center;
+    height: 50px;
+    line-height: 50px;
+    font-size: 18px;
+}
+
 /* Thunks */
 .thunk-container {
     padding-top: 60px;
@@ -34,46 +75,60 @@ body {
 .fact-body {
     width: 100%;
 }
-.fact-handle {
-    width: 12px;
-    height: 12px;
+
+/* Input Fields */
+.editable-text-container {
 }
-.fact-handle-top, .fact-handle-bottom {
-    width: 12px;
-    height: 6px;
+.view-editable-text {
+    font-size: 16px;
+    padding-right: 0.5rem;
+ /*   cursor: pointer; */
+    /*
+    max-width: 75%;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    */
 }
-.fact-handle-top-left {
-    border-top: 1px solid black;
-    border-left: 1px solid black;
+.edit-editable-text {
+    font-size: 16px;
 }
-.fact-handle-top-right {
-    border-top: 1px solid white;
-    border-left: 1px solid white;
+.input-textarea {
+    font-size: 12px;
 }
-.fact-handle-bottom-left {
-    border-bottom: 1px solid white;
-    border-right: 1px solid white;
+.editable-text-icon {
+    padding-right: 0.5rem;
+    cursor: pointer;
 }
-.fact-handle-bottom-right {
-    border-bottom: 1px solid black;
-    border-right: 1px solid black;
+.fact-part-representation {
+    font-size: 16px;
+    /*
+    max-width: 75%;
+    display: inline-block;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    */
 }
-.fact-handle-top-left,
-.fact-handle-top-right,
-.fact-handle-bottom-left,
-.fact-handle-bottom-right {
-    height: 6px;
-    width: 6px;
+.fact-part-metadata-container {
+    padding-top: 0.25rem;
+    padding-left: 2rem;
+}
+.type-input-label, .value-input-label {
+    display: inline-block;
+    font-size: 1rem;
+    text-transform: uppercase;
+    text-align: right;
+    width: 5rem;
+    padding-right: 1rem;
+}
+.type-input-value, .value-input-value {
     display: inline-block;
 }
-.fact-handle-icon {
-    position: absolute;
-    height: 9px;
-    width: 9px;
-    background-color: red;
-    display: none;
+.view-fact-part {
+    margin-bottom: inherit;
 }
-.fact-container:hover .fact-handle-icon {
-    display: inherit !important;
-    opacity: 0.4 !important;
+.edit-fact-part {
+    margin-bottom: 1rem;
 }

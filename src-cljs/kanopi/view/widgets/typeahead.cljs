@@ -1,4 +1,7 @@
 (ns kanopi.view.widgets.typeahead
+  "What do I want from typeahead search?
+  
+  "
   (:require [om.core :as om]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]

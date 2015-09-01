@@ -35,7 +35,8 @@
 
 (defmethod dropdown-menu-item :link
   [itm]
-  [:li [:a {:href (get itm :href)} (get itm :label)]])
+  [:li [:a (select-keys itm [:href :on-click])
+        (get itm :label)]])
 
 (defmethod dropdown-menu-item :divider
   [itm]
@@ -56,7 +57,7 @@
                      :label "Item 1"}
                     {:type :divider}
                     {:type :link
-                     :href ""
+                     :on-click (constantly nil)
                      :label "Item 2"}]
        :expanded nil
        ;; internal stuff

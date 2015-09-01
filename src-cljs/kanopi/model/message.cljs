@@ -25,3 +25,9 @@
                :verb :toggle-mode
                :context {}})
   nil)
+
+(defn submit-statement [owner stmt]
+  (async/put! (publisher owner)
+              {:noun stmt
+               :verb :submit-statement
+               :context {}}))

@@ -30,6 +30,12 @@
             [:a.navbar-brand
              {:href (browser/route-for owner :home)}
              "Kanopi"]]
+           [:div.navbar-center
+            (icons/search {})
+            ;; TODO: typeahead search.
+            [:span.search
+             [:input]]
+            ]
            [:ul.nav.navbar-nav.navbar-right
             (if (get-in props [:user :identity])
               (om/build dropdown/dropdown props

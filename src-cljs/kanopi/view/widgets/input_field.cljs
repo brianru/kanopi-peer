@@ -38,14 +38,13 @@
                       :as state}]
       (let []
         (html
-         [:span
-          ;;{:on-mouse-enter #(om/set-state! owner :hovering true)
-          ;; :on-mouse-leave #(om/set-state! owner :hovering false)}
-          [:span
+         [:span.editable-text-container
+          [:span.view-editable-text
              {:style {:display (when editing "none")}
+              :class [(when hovering "bold-text")]
               :on-click #(start-edit % owner :editing)}
              (get props edit-key)]
-          [:input
+          [:input.edit-editable-text
            {:style       {:display (when-not editing "none")}
             :ref         "text-field"
             :type        "text"
@@ -55,8 +54,51 @@
             :on-key-down #(when (= (.-key %) "Enter")
                             (end-edit % owner :editing submit-value))
             :on-blur     #(end-edit % owner :editing submit-value)}]
-          (when (get state :edit-icon-enabled)
-            (icons/edit-in-place {:style {:display (when-not hovering "none")}
-                                  :on-click #(start-edit % owner :editing)}))
+          #_(when (get state :edit-icon-enabled)
+              (icons/edit-in-place {:style {:display (when (or (not hovering)
+                                                               editing)
+                                                       "none")}
+                                    :class "editable-text-icon"
+                                    :on-click #(start-edit % owner :editing)}))
 
+          ])))))
+
+(defn input-field [props owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {})
+
+    om/IRenderState
+    (render-state [_ {:keys [submit-value] :as state}]
+      (let []
+        (html
+         [:input.edit-editable-text
+          {:ref         "text-field"
+           :type        "text"
+           :value       (get state :new-value)
+           :placeholder (get state :placeholder)
+           :on-change   #(handle-change % owner :new-value)
+           :on-key-down (constantly nil)
+           :on-blur     #(end-edit % owner :editing submit-value)
+           }])))))
+
+(defn textarea [props owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {})
+    om/IRenderState
+    (render-state [_ {:keys [submit-value] :as state}]
+      (let []
+        (html
+         [:textarea.input-textarea
+          {:value       (get state :new-value)
+           :rows 3
+           :cols 32
+           :placeholder (get state :placeholder)
+           :on-change   #(handle-change % owner :new-value)
+           :on-key-down (constantly nil)
+           :on-blur     #(end-edit % owner :editing submit-value)
+           }
           ])))))

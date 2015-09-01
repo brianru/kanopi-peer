@@ -9,6 +9,10 @@
   [:div.glyphicon.glyphicon-pencil
    (merge {} m)])
 
+(defn search [m]
+  [:div.glyphicon.glyphicon-search
+   (merge {} m)])
+
 (defn log-in [m]
   [:div.glyphicon.glyphicon-log-in
    (merge {} m)])
