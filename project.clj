@@ -58,21 +58,20 @@
 
   :clean-targets ^{:protect false} [:target-path "resources/public/js/out"]
 
-  :profiles [{:id "dev"
-              :plugins [[lein-environ "1.0.0"]
-                             [lein-ancient "0.6.6"]]
-                   :dependencies [[org.clojure/tools.namespace "0.2.10"]
-                                  [ring/ring-devel "1.4.0"]
-                                  [ring/ring-mock "0.2.0"]
-                                  [org.clojure/data.codec "0.1.0"]
-                                  [org.clojure/data.csv "0.1.3"]]
-                   :env {:dev true}
-                   :source-paths ["dev"]
-                   :repl-options {:init-ns user}}
-             ;; TODO: production build
-             ]
+  :profiles {"dev"
+             {:plugins [[lein-environ "1.0.0"]
+                        [lein-ancient "0.6.6"]]
+              :dependencies [[org.clojure/tools.namespace "0.2.10"]
+                             [ring/ring-devel "1.4.0"]
+                             [ring/ring-mock "0.2.0"]
+                             [org.clojure/data.codec "0.1.0"]
+                             [org.clojure/data.csv "0.1.3"]]
+              :env {:dev true}
+              :source-paths ["dev"]
+              :repl-options {:init-ns user}}}
 
-  :figwheel {:server-logfile "target/logs/figwheel.log" }
+  :figwheel {:server-logfile "target/logs/figwheel.log"
+             :css-dirs "resources/public/css"}
 
   :cljsbuild {:builds
               [{:id "dev"
