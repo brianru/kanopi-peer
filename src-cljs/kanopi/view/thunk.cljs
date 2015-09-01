@@ -82,6 +82,10 @@
     (display-name [_]
       (str "thunk-body"))
 
+    om/IWillMount
+    (will-mount [_]
+      (println "will-mount thunk" props))
+
     om/IRender
     (render [_]
       (let []
@@ -92,7 +96,8 @@
             [:h1 (get props :thunk/label)]]
            [:div.thunk-facts
             (for [f (:thunk/fact props)]
-              (om/build fact/container f))]
+              (om/build fact/container f))
+            (om/build fact/new-fact props)]
            ]
           ])))
     ))

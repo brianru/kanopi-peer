@@ -73,6 +73,7 @@ body {
     background-color: red;
     display: none;
 }
-.fact-handle:hover .fact-handle-icon {
-    display: inherit;
+.fact-container:hover .fact-handle-icon {
+    display: inherit !important;
+    opacity: 0.4 !important;
 }

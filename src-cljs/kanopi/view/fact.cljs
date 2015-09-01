@@ -1,8 +1,17 @@
 (ns kanopi.view.fact
+  "Facts feel like carefully assembled little devices. They are
+  precise yet frictionless. Confirmation is not required, though
+  everything can be undone. Hovering over a fact reveals all available
+  functionality. Nothing is hidden behind a click. The state of a fact
+  is visible with a single glance at a single indicator."
   (:require [om.core :as om :include-macros true]
             [sablono.core :refer-macros [html] :include-macros true]
+            [taoensso.timbre :as timbre
+             :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.model.schema :as schema]
             [kanopi.view.icons :as icons]
+            [kanopi.ether.core :as ether]
+            [kanopi.model.message :as msg]
             ))
 
 (defn handle
@@ -12,22 +21,26 @@
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "fact-handle-" (:id props)))
+      (str "fact-handle-" (:db/id props)))
 
     om/IRenderState
     (render-state [_ {:keys [mode] :as state}]
-      (let []
+      (let [_ (println mode)]
         (html
          [:div.fact-handle
+          {:on-click #(msg/toggle-fact-mode! owner (get props :db/id))}
           [:div.fact-handle-top
            [:div.fact-handle-top-left]
            [:div.fact-handle-top-right]]
           [:div.fact-handle-bottom
            [:div.fact-handle-bottom-left]
            [:div.fact-handle-bottom-right]]
-          [:div.fact-handle-icon]
-          ])))
-    ))
+          [:div.fact-handle-icon
+           {:style {:display (case mode
+                               :view "none"
+                               :edit "inherit")}
+            }]
+          ])))))
 
 ;;(defmulti fact-part
 ;;  (fn [attr part]
@@ -57,6 +70,7 @@
 
     om/IDidUpdate
     (did-update [_ prev-props prev-state]
+      ;; focus on text field when editing an input field
       (when (and (not (get prev-state :editing))
                  (om/get-state owner :editing))
        (. (om/get-node owner "text-field") (focus))))
@@ -76,11 +90,11 @@
             :ref "text-field"
             :type "text"
             :value (get state :new-value)
+            :placeholder (get state :placeholder)
             :on-change #(handle-change % owner :new-value)
             :on-key-down #(when (= (.-key %) "Enter")
                             (end-edit % owner :editing submit-value))
-            :on-blur #(end-edit % owner :editing submit-value)}
-           ]
+            :on-blur #(end-edit % owner :editing submit-value)}]
 
           ])))))
 
@@ -97,16 +111,28 @@
         (html
          [:div.fact-attribute
           (cond
+
            (schema/thunk? props)
            [:div
             (om/build editable-value props
                       {:init-state {:edit-key :thunk/label
                                     :submit-value #(println %)}})
             (->> (icons/open {})
-                 (icons/link-to owner [:thunk :id (:db/id props)]))
-            ]
+                 (icons/link-to owner [:thunk :id (:db/id props)])) ]
+
            (schema/literal? props)
-           [:span (get props :value/string)])
+           [:span (get props :value/string)]
+
+           (empty? props)
+           [:div
+            (om/build editable-value props
+                      {:init-state {:edit-key :none
+                                    :submit-value #(println %)
+                                    :editing true
+                                    :placeholder "Find or create an attribtue"}
+                       :state (select-keys state [:mode])}
+                      )]
+           )
           ])))
     ))
 
@@ -138,10 +164,6 @@
     (display-name [_]
       (str "fact-body-" (:id props)))
 
-    om/IInitState
-    (init-state [_]
-      {:mode :read})
-
     om/IRenderState
     (render-state [_ state]
       (let []
@@ -164,10 +186,50 @@
     om/IDisplayName
     (display-name [_]
       (str "fact" (:db/id props)))
-    om/IRender
-    (render [_]
+
+    om/IInitState
+    (init-state [_]
+      {:mode :view})
+
+    om/IWillMount
+    (will-mount [_]
+      (ether/listen! owner :noun [:fact (:db/id props)]
+                     (fn [{:keys [noun verb context]}]
+                       (case verb
+                         :toggle-mode
+                         (let [new-mode 
+                               (if (= :view (om/get-state owner :mode))
+                                 :edit
+                                 :view)]
+                           (om/set-state! owner :mode new-mode))
+                         ;;default
+                         (debug "what?" noun verb)
+                         ))
+                     #_(partial println "here")))
+    om/IWillUnmount
+    (will-unmount [_]
+      (ether/stop-listening! owner))
+
+    om/IRenderState
+    (render-state [_ state]
       (let []
         (html
          [:div.fact-container.container
-          (om/build body props)])))
+          (om/build body props {:state (select-keys state [:mode])})])))
     ))
+
+(defn new-fact
+  [props owner opts]
+  (reify
+    om/IDisplayName
+    (display-name [_]
+      (str "add-fact"))
+
+    om/IRenderState
+    (render-state [_ state]
+      (let []
+        (html
+         (om/build container {:db/id nil
+                              :fact/attribute #{}
+                              :fact/value     #{}})
+         )))))

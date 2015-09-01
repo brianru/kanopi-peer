@@ -9,10 +9,19 @@
   (async/put! (publisher owner)
               {:noun {}
                :verb :recent-thunks
-               :context {}}))
+               :context {}})
+  nil)
 
 (defn request-thunk! [owner ent-id]
   (async/put! (publisher owner)
               {:noun {:ent-id ent-id}
                :verb :get
-               :context {}}))
+               :context {}})
+  nil)
+
+(defn toggle-fact-mode! [owner fact-id]
+  (async/put! (publisher owner)
+              {:noun [:fact fact-id]
+               :verb :toggle-mode
+               :context {}})
+  nil)

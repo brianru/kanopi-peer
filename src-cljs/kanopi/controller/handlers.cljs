@@ -36,8 +36,9 @@
      :similar-thunks nil)))
 
 (defn- navigate-to-thunk [props msg]
-  (assoc props :thunk
-         (build-thunk-data props (cljs.reader/read-string (get-in msg [:noun :route-params :id])))))
+  (let [thunk-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))
+        thunk' (build-thunk-data props thunk-id)]
+    (assoc props :thunk thunk')))
 
 (defn navigate!
   "Transform app-state to support requested page."
@@ -53,7 +54,7 @@
                       (= :thunk (get-in msg [:noun :handler]))
                       (navigate-to-thunk msg)
 
-                      ;;(not= :thunk (get-in msg [:noun :handler]))
-                      ;;(assoc :thunk {})
+                      (not= :thunk (get-in msg [:noun :handler]))
+                      (assoc :thunk {})
 
                       )))))
