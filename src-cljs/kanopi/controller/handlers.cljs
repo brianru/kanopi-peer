@@ -31,9 +31,11 @@
   {:pre [(integer? thunk-id)]}
   (let [thunk (lookup-id props thunk-id)]
     (hash-map
-     :context-thunks nil
+     :context-thunks #{;(lookup-id props -1008)
+                       }
      :thunk thunk
-     :similar-thunks nil)))
+     :similar-thunks #{;(lookup-id props -1016)
+                       })))
 
 (defn- navigate-to-thunk [props msg]
   (let [thunk-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))
@@ -57,10 +59,10 @@
                         identity
 
                         (= :logout handler)
-                        identity
+                        (assoc :user nil)
 
                         (= :register handler)
-                        identity
+                        (assoc :user nil)
 
                         (= :thunk handler)
                         (navigate-to-thunk msg)

@@ -20,6 +20,12 @@ input {
 input:focus {
     outline: none;
 }
+a {
+    color: inherit !important;
+}
+a:hover {
+    text-decoration: none !important;
+}
 .glyphicon-search {
     transform: scaleX(-1);
 }
@@ -39,14 +45,15 @@ span {
 
 .navbar-center {
     color: #777;
-    position: absolute;
+    position: fixed;
     min-width: 100px;
-    width: 100%;
+    width: 40%;
     margin: 0 auto;
     text-align: center;
     height: 50px;
     line-height: 50px;
     font-size: 18px;
+    left: 30%;
 }
 
 /* Thunks */

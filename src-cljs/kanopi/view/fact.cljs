@@ -13,6 +13,7 @@
             [kanopi.ether.core :as ether]
             [kanopi.model.message :as msg]
             [kanopi.model.text :as text]
+            [kanopi.util.browser :as browser]
             [kanopi.view.widgets.input-field :as input-field]
             [kanopi.view.widgets.dropdown :as dropdown]
             ))
@@ -92,14 +93,10 @@
            (case mode
              :view
              [:div.view-fact-part
-              (om/build input-field/editable-value props
-                        {:init-state {:edit-key :thunk/label
-                                      :submit-value
-                                      #(do
-                                        (println %))}
-                         :state (select-keys state [:mode :hovering])})
-              (->> (icons/open {})
-                   (icons/link-to owner [:thunk :id (:db/id props)]))]
+              [:a {:href (browser/route-for owner :thunk :id (:db/id props))}
+               [:span.fact-part-representation
+                (get props :thunk/label)]
+               ]]
 
              :edit
              (let []
@@ -135,13 +132,14 @@
            ;; TODO: spend some time on this case.
            (empty? props)
            [:div
-            (om/build input-field/editable-value props
-                      {:init-state {:edit-key :none
-                                    :submit-value #(println %)
-                                    :editing true
-                                    :placeholder "Find or create an attribtue"}
-                       :state (select-keys state [:mode :hovering])}
-                      )]
+            "Add a fact!"
+            #_(om/build input-field/editable-value props
+                        {:init-state {:edit-key :none
+                                      :submit-value #(println %)
+                                      :editing true
+                                      :placeholder "Find or create an attribtue"}
+                         :state (select-keys state [:mode :hovering])}
+                        )]
            )
           ])))
     ))

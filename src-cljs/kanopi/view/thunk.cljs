@@ -60,11 +60,12 @@
       (let [size 9]
         (html
          [:div.row.context-thunks
-           (for [[idx thunk] (->> props (vals) (map-indexed vector)
+           (for [[idx thunk] (->> props (map-indexed vector)
                                   (take (if (get state :expand)
                                           size
                                           (js/Math.sqrt size))))
-                 :let []]
+                 :let []
+                 :when (:db/id thunk)]
              [:div.context-thunk-cell.col-xs-3.vcenter
               {:style (cond-> {}
                         true
@@ -118,10 +119,12 @@
       (let [size 9]
         (html
          [:div.similar-thunks.row
-          (for [[idx thunk] (->> props (vals) (map-indexed vector)
+          (for [[idx thunk] (->> props (map-indexed vector)
                                  (take (if (get state :expand)
                                          size
-                                         (js/Math.sqrt size))))]
+                                         (js/Math.sqrt size))))
+                :let [_ (println thunk)]
+                :when (:db/id thunk)]
             [:div.similar-thunk-cell.vcenter.col-xs-3
              {:style (cond-> {}
                        true

@@ -17,10 +17,21 @@
       (js/JSON.parse)
       (js->clj :keywordize-keys true)))
 
+(defn delete-cookie! [id]
+  (cookies/remove id))
+
+(defn get-and-remove-cookie
+  "Only for transferring initial state to client session, not for
+  persisting data between page refreshes."
+  [id]
+  (let [c (get-cookie id)]
+    (delete-cookie! id)
+    c))
+
 (defrecord EphemeralAppState [config app-state]
   component/Lifecycle
   (start [this]
-    (let [cookie (get-cookie "kanopi-init")
+    (let [cookie (get-and-remove-cookie "kanopi-init")
           atm (atom {:tempo {:pulse nil}
                      :user  (merge {:actions {}} (get cookie :user)) 
                      ;; I don't want to use the URI as a place to

@@ -7,6 +7,7 @@
             [kanopi.view.header :as header]
             [kanopi.view.thunk :as thunk]
             [kanopi.view.pages.settings :as settings]
+            [kanopi.view.pages.user :as user]
             [kanopi.ether.core :as ether]
             [kanopi.controller.handlers :as handlers]
             [kanopi.util.browser :as browser]
@@ -23,7 +24,6 @@
 
     om/IWillMount
     (will-mount [_]
-      ;(msg/request-recent-thunks! owner)
       (ether/listen! owner :verb :navigate (handlers/navigate! props)))
 
     om/IWillUnmount
@@ -37,21 +37,30 @@
         [:div.header-container
          (om/build header/header props)]
         [:div.page-container
-         (cond
-          (= (get-in props [:page :handler]) :thunk)
-          (om/build thunk/container (get props :thunk))
+         (println "here" (get-in props [:page]))
+         (case (get-in props [:page :handler])
+           :thunk
+           (om/build thunk/container (get props :thunk))
 
-          (= (get-in props [:page :handler]) :settings)
-          (om/build settings/settings props)
+           :settings
+           (om/build settings/settings props)
 
-          ;; TODO: welcome thunk
-          :default
-          [:div.home-page
-           (let [thunks (->> (get props :cache)
-                             (vals))]
-             (om/build thunk/container (get props :thunk)))
-           ]
-          )
+           :login
+           (om/build user/login props)
+
+           :register
+           (om/build user/register props)
+
+           :logout
+           (om/build user/logout props)
+
+           ;; TODO: welcome thunk
+           [:div.home-page
+            (let [thunks (->> (get props :cache)
+                              (vals))]
+              (om/build thunk/container (get props :thunk)))
+            ]
+           )
          ]
         ]
        ))))
