@@ -17,6 +17,7 @@
 (defn- close-dropdown! [owner]
   (om/set-state! owner :expanded false))
 
+;; TODO: refactor into a re-usable timer toy thing
 (defn- start-hover! [owner]
   (let [kill-hover-clock (async/chan 1)]
     (om/set-state! owner ::kill-hover-clock-ch kill-hover-clock)

@@ -12,6 +12,7 @@
             [kanopi.view.icons :as icons]
             [kanopi.ether.core :as ether]
             [kanopi.model.message :as msg]
+            [kanopi.view.widgets.input-field :as input-field]
             ))
 
 (defn handle
@@ -51,53 +52,6 @@
 ;;(defmethod fact-part [:fact/value :thunk])
 ;;(defmethod fact-part [:fact/value :literal])
 
-(defn- start-edit [e owner korks]
-  (om/set-state! owner korks true))
-
-(defn- handle-change [e owner korks]
-  (om/set-state! owner korks (.. e -target -value)))
-
-(defn- end-edit [e owner korks handler-fn]
-  (om/set-state! owner korks false)
-  (handler-fn (.. e -target -value))
-  (om/set-state! owner :new-value nil))
-
-(defn editable-value [props owner opts]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {:editing false})
-
-    om/IDidUpdate
-    (did-update [_ prev-props prev-state]
-      ;; focus on text field when editing an input field
-      (when (and (not (get prev-state :editing))
-                 (om/get-state owner :editing))
-       (. (om/get-node owner "text-field") (focus))))
-
-    om/IRenderState
-    (render-state [_ {:keys [editing edit-key submit-value]
-                      :as state}]
-      (let []
-        (html
-         [:span
-          [:span
-             {:style {:display (when editing "none")}
-              :on-click #(start-edit % owner :editing)}
-             (get props edit-key)]
-          [:input
-           {:style {:display (when-not editing "none")}
-            :ref "text-field"
-            :type "text"
-            :value (get state :new-value)
-            :placeholder (get state :placeholder)
-            :on-change #(handle-change % owner :new-value)
-            :on-key-down #(when (= (.-key %) "Enter")
-                            (end-edit % owner :editing submit-value))
-            :on-blur #(end-edit % owner :editing submit-value)}]
-
-          ])))))
-
 (defn attribute
   [props owner opts]
   (reify
@@ -105,18 +59,25 @@
     (display-name [_]
       (str "fact-attribute-" (:db/id props)))
 
+    om/IInitState
+    (init-state [_]
+      {:hovering false})
+
     om/IRenderState
     (render-state [_ {:keys [mode] :as state}]
       (let [_ (println props)]
         (html
          [:div.fact-attribute
+          {:on-mouse-enter #(om/set-state! owner :hovering true)
+           :on-mouse-leave #(om/set-state! owner :hovering false)}
           (cond
 
            (schema/thunk? props)
            [:div
-            (om/build editable-value props
+            (om/build input-field/editable-value props
                       {:init-state {:edit-key :thunk/label
-                                    :submit-value #(println %)}})
+                                    :submit-value #(println %)}
+                       :state (select-keys state [:mode :hovering])})
             (->> (icons/open {})
                  (icons/link-to owner [:thunk :id (:db/id props)])) ]
 
@@ -125,12 +86,12 @@
 
            (empty? props)
            [:div
-            (om/build editable-value props
+            (om/build input-field/editable-value props
                       {:init-state {:edit-key :none
                                     :submit-value #(println %)
                                     :editing true
                                     :placeholder "Find or create an attribtue"}
-                       :state (select-keys state [:mode])}
+                       :state (select-keys state [:mode :hovering])}
                       )]
            )
           ])))
