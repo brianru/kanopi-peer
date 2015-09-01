@@ -1,5 +1,5 @@
 (defproject kanopi "0.1.0-SNAPSHOT"
-  :description "A tool for exploring, expressing and documenting your mind."
+  :description "A tool for exploring, expressing and documenting your thoughts."
   :url "http://kanopi.io"
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
@@ -58,7 +58,8 @@
 
   :clean-targets ^{:protect false} [:target-path "resources/public/js/out"]
 
-  :profiles {:dev {:plugins [[lein-environ "1.0.0"]
+  :profiles [{:id "dev"
+              :plugins [[lein-environ "1.0.0"]
                              [lein-ancient "0.6.6"]]
                    :dependencies [[org.clojure/tools.namespace "0.2.10"]
                                   [ring/ring-devel "1.4.0"]
@@ -67,7 +68,9 @@
                                   [org.clojure/data.csv "0.1.3"]]
                    :env {:dev true}
                    :source-paths ["dev"]
-                   :repl-options {:init-ns user}}}
+                   :repl-options {:init-ns user}}
+             ;; TODO: production build
+             ]
 
   :figwheel {:server-logfile "target/logs/figwheel.log" }
 
@@ -81,5 +84,7 @@
                            :main kanopi.core
                            :optimizations :none
                            :pretty-print true
-                           :source-map "resources/public/js/source_map.js"}}]
+                           :source-map "resources/public/js/source_map.js"}}
+               ;; TODO: production build
+               ]
               })

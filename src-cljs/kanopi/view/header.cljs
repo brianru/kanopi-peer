@@ -6,6 +6,7 @@
             [kanopi.view.widgets.dropdown :as dropdown]
             [sablono.core :refer-macros [html] :include-macros true]))
 
+;; TODO: quick-search in center of header
 (defn header
   "
   Logout.
@@ -29,7 +30,7 @@
              {:href (browser/route-for owner :home)}
              "Kanopi"]]
            [:ul.nav.navbar-nav.navbar-right
-            (om/build dropdown props
+            (om/build dropdown/dropdown props
                       {:init-state
                        {:toggle-label (get-in props [:user :username])
                         :menu-items [{:type  :link
