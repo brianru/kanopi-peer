@@ -45,16 +45,28 @@
   [props]
   (fn [msg]
     (info "navigate:" msg)
-    (om/transact! props
-                  (fn [app-state]
-                    (cond-> app-state
-                      true
-                      (assoc :page (get msg :noun))
+    (let [handler (get-in msg [:noun :handler])]
+      (om/transact! props
+                    (fn [app-state]
+                      (cond-> app-state
+                        true
+                        (assoc :page (get msg :noun))
 
-                      (= :thunk (get-in msg [:noun :handler]))
-                      (navigate-to-thunk msg)
+                        ;; TODO: implement user lifecycle in spa
+                        (= :login handler)
+                        identity
 
-                      (not= :thunk (get-in msg [:noun :handler]))
-                      (assoc :thunk {})
+                        (= :logout handler)
+                        identity
 
-                      )))))
+                        (= :register handler)
+                        identity
+
+                        (= :thunk handler)
+                        (navigate-to-thunk msg)
+
+                        (not= :thunk handler)
+                        (assoc :thunk {})
+
+                        ))))
+    ))

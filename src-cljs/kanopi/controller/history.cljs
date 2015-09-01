@@ -19,6 +19,9 @@
             [pushy.core :as pushy]))
 
 (def default-routes ["/" {""         :home
+                          "login"    :login
+                          "logout"   :logout
+                          "register" :register
                           "thunk/"   {[:id ""] :thunk}
                           "settings" :settings}])
 
