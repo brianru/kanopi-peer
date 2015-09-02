@@ -1,4 +1,8 @@
 (ns kanopi.system
+  "TODO: I want a dynamic configuration component that can specify
+  modal parameters. Generally this component would facilitate in
+  switching other components' behavior between online and offline
+  modes or demonstration and authenticated modes."
   (:require [quile.component :as component]
             [kanopi.view.core :as view]
             [kanopi.model.state :as state]

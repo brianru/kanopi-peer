@@ -11,8 +11,10 @@
             [cljs-uuid-utils.core :as uuid]
             [cljs-time.core :as t]))
 
-(defn- open-dropdown! [owner]
-  (om/set-state! owner :expanded true))
+;; NOTE: I'm aware there's no `open-dropdown!`. I don't know if we
+;; need one.
+(defn- toggle-dropdown! [owner]
+  (om/update-state! owner :expanded not))
 
 (defn- close-dropdown! [owner]
   (om/set-state! owner :expanded false))
@@ -42,8 +44,6 @@
   [itm]
   [:li.divider {:role "separator"}])
 
-;; NOTE: amazon expands the dropdown when user hovers for
-;; a few seconds. it's awesome.
 (defn dropdown
   "All configuration is passed via local state."
   [props owner opts]
@@ -52,6 +52,7 @@
     (init-state [_]
       ;; defaults
       {:toggle-label "Toggle label"
+       :selection-handler (constantly nil)
        :menu-items [{:type :link
                      :href ""
                      :label "Item 1"}
@@ -69,17 +70,18 @@
         (html
          [:li.dropdown
           [:a.dropdown-toggle
-           {:on-click #(open-dropdown! owner)
-            :data-toggle "dropdown"
-            :role "button"
-            :aria-haspopup "true"
-            :aria-expanded expanded
+           {:on-click       #(toggle-dropdown! owner)
+            :data-toggle    "dropdown"
+            :role           "button"
+            :aria-haspopup  "true"
+            :aria-expanded  expanded
             :on-mouse-enter #(start-hover! owner)
             :on-mouse-leave #(stop-hover! owner)}
            (str (get state :toggle-label) " ") [:span.caret]]
           (into
            [:ul.dropdown-menu
-            {:style {:display (when expanded "inherit")}
+            {:style          {:display (when expanded "inherit")}
+             :on-click       (get state :selection-handler)
              :on-mouse-leave #(close-dropdown! owner)}]
            (map dropdown-menu-item (get state :menu-items)))
           ])))))

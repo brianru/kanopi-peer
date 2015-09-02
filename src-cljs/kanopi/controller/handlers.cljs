@@ -15,42 +15,67 @@
   [app-state msg]
   (info msg))
 
+(defn- local-fulltext-search
+  "TODO: sort by match quality
+  https://github.com/Yomguithereal/clj-fuzzy
+  TODO: handle upper- vs lower-case better
+  TODO: only show x many
+  TODO: deal with empty q better
+  "
+  [app-state q]
+  (let [regex-pattern (re-pattern q)]
+    (->> (get-in app-state [:cache])
+         (vals)
+         (filter (fn [ent]
+                   (->> ent
+                        ((juxt :thunk/label :value/string))
+                        (apply str)
+                        (re-find regex-pattern)
+                        )))
+         (vec))))
+
 (defmethod local-event-handler :search
   ;; TODO: implement me!
   [app-state msg]
-  (info "search!" msg))
+  (println "here!")
+  (swap! app-state
+         (fn [app-state]
+           (let [{:keys [query]} (get msg :noun)
+                 results (local-fulltext-search app-state query)]
+             (println "results:" results)
+             (assoc-in app-state [:search-results query] results)))))
 
 (defn- lookup-id
   ([props id]
    (->> (get-in props [:cache id])
-       (reduce (fn [acc [k v]]
-                 (cond
-                  (= k :thunk/fact)
-                  (assoc acc k (set (map (partial lookup-id props) v)))
-                  (= k :fact/attribute)
-                  (assoc acc k (set (map (partial lookup-id props) v)))
-                  (= k :fact/value)
-                  (assoc acc k (set (map (partial lookup-id props) v)))
+        (reduce (fn [acc [k v]]
+                  (cond
+                   (= k :thunk/fact)
+                   (assoc acc k (set (map (partial lookup-id props) v)))
+                   (= k :fact/attribute)
+                   (assoc acc k (set (map (partial lookup-id props) v)))
+                   (= k :fact/value)
+                   (assoc acc k (set (map (partial lookup-id props) v)))
 
-                  :default
-                  (assoc acc k v)))
-               {})
-       )))
+                   :default
+                   (assoc acc k v)))
+                {})
+        )))
 
 (defn- build-thunk-data
   "
   Data is stored as flat maps locally and on server, but to simplify
   thunk component model we must nest entities as follows:
   thunk -> facts -> attributes (literals or thunks)
-                 -> values     (literals or thunks)"
+  -> values     (literals or thunks)"
   [props thunk-id]
   {:pre [(integer? thunk-id)]}
   (let [thunk (lookup-id props thunk-id)]
     (hash-map
-     :context-thunks #{;(lookup-id props -1008)
+     :context-thunks #{(lookup-id props -1008)
                        }
      :thunk thunk
-     :similar-thunks #{;(lookup-id props -1016)
+     :similar-thunks #{(lookup-id props -1016)
                        })))
 
 (defn- navigate-to-thunk [props msg]

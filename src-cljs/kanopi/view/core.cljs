@@ -3,6 +3,7 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
+            [kanopi.model.ref-cursors :as ref-cursors]
             [kanopi.model.message :as msg]
             [kanopi.view.header :as header]
             [kanopi.view.thunk :as thunk]
@@ -29,7 +30,6 @@
         [:div.header-container
          (om/build header/header props)]
         [:div.page-container
-         (println "here" (get-in props [:page]))
          (case (get-in props [:page :handler])
            :thunk
            (om/build thunk/container (get props :thunk))
@@ -50,7 +50,13 @@
            [:div.home-page
             (let [thunks (->> (get props :cache)
                               (vals))]
-              (om/build thunk/container (get props :thunk)))
+              [:ul
+              (for [t thunks
+                    :when (:thunk/label t)]
+                [:li
+                 [:a {:href (browser/route-for owner :thunk :id (:db/id t))}
+                  [:span (:thunk/label t)]] ]
+                )])
             ]
            )
          ]
@@ -63,24 +69,23 @@
        (:search-results)
        (om/ref-cursor)))
 
-(defn mount-root! [app-state container ether history]
+(defn mount-root! [app-state container ether history ref-cursors]
   (om/root root-component
            app-state
            {:target container
-            :shared {:ether (:ether ether)
-                     :search-results #(search-results-ref-cursor app-state)
-                     :history history}}))
+            :shared (merge
+                     {:ether (:ether ether)
+                      :history history}
+                     (ref-cursors/mk-ref-cursor-map app-state ref-cursors))}))
 
 (defrecord Om [config app-state ether history app-container]
   component/Lifecycle
   (start [this]
     ;; NOTE: purposely not checking if already mounted to support
     ;; figwheel re-mounting om on-jsload
-
-    ;; TODO: do something with history component
     (let [container (. js/document (getElementById (:container-id config))) ]
       (info "mount om root" (:container-id config))
-      (mount-root! (:app-state app-state) container ether history)
+      (mount-root! (:app-state app-state) container ether history (:ref-cursors config))
       (assoc this :app-container container)))
 
   (stop [this]

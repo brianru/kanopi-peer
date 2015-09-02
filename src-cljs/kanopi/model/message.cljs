@@ -26,6 +26,20 @@
                :context {}})
   nil)
 
+(defn change-entity-type [ent desired-type]
+  (hash-map
+   :noun {:existing-entity ent
+          :desired-type desired-type}
+   :verb :change-entity-type
+   :context {}))
+
+(defn update-entity-value [ent new-value]
+  (hash-map
+   :noun {:existing-entity ent
+          :new-value new-value}
+   :verb :update-entity-value
+   :context {}))
+
 (defn submit-statement [owner stmt]
   (async/put! (publisher owner)
               {:noun stmt
@@ -37,3 +51,10 @@
    :noun {:query q}
    :verb :search
    :context {}))
+
+(defn send!
+  "Ex: (->> (msg/search \"foo\") (msg/send! owner))
+  "
+  [owner msg]
+  (async/put! (publisher owner) msg)
+  nil)

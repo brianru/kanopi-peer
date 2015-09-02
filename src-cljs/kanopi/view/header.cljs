@@ -5,6 +5,7 @@
             [kanopi.util.browser :as browser]
             [kanopi.view.widgets.dropdown :as dropdown]
             [kanopi.view.widgets.typeahead :as typeahead]
+            [kanopi.model.schema :as schema]
             [kanopi.view.icons :as icons]
             [sablono.core :refer-macros [html] :include-macros true]))
 
@@ -36,7 +37,8 @@
             ;; TODO: typeahead search.
             [:span.search
              ;;[:input]
-             (om/build typeahead/typeahead props)
+             (om/build typeahead/typeahead props
+                       {:init-state {:display-fn schema/display-entity}})
              ]
             ]
            [:ul.nav.navbar-nav.navbar-right

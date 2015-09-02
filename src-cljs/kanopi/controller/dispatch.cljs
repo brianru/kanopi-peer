@@ -17,7 +17,7 @@
     ;; seamlessly shift between offline and online, demo to
     ;; authenticated modes?
     (let [
-          local-verbs [:navigate :search]
+          local-verbs [:navigate :search :change-entity-type :update-entity-value]
           remote-verbs []
           _ (info "start dispatcher" local-verbs remote-verbs)
 
@@ -25,8 +25,8 @@
           (doseq [vrb local-verbs]
             (ether/listen*
              (:ether ether) :verb vrb
-             {:handlerfn (partial handlers/local-event-handler (:app-state app-state))})
-            )
+             {:handlerfn (partial handlers/local-event-handler (:app-state app-state))}))
+
           remote-kill-chs
           (doseq [vrb remote-verbs]
             )

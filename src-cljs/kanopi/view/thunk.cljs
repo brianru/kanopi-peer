@@ -83,10 +83,6 @@
     (display-name [_]
       (str "thunk-body"))
 
-    om/IWillMount
-    (will-mount [_]
-      (println "will-mount thunk" props))
-
     om/IRender
     (render [_]
       (let []
@@ -144,25 +140,9 @@
     (display-name [_]
       (str "thunk" (get-in props [:thunk :db/id])))
 
-    om/IWillMount
-    (will-mount [_]
-      ;; TODO: make sure I have the current thunk in app-state
-      ;; get current thunk id from uri
-      )
-
     om/IRender
     (render [_]
-      (let [
-           ;; _ (async/put! (om/get-shared owner [:ether :publisher])
-           ;;               {:noun nil
-           ;;                :verb :request
-           ;;                :context nil})
-            ;;resp (http/GET "/api/" {:params {:ent-id 17592186045429
-            ;;                                 :noun 17592186045429
-            ;;                                 :verb :request
-            ;;                                 :context {:source :web}}} )
-            ;;_ (info resp)
-            ]
+      (let []
         (html
          [:div.thunk-container.container-fluid
           (om/build context-thunks (get props :context-thunks))

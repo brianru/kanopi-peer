@@ -20,16 +20,19 @@
   (reify
     om/IInitState
     (init-state [_]
+      ;; FIXME: debounce is not working
       {:input-ch (-> (async/chan)
-                     (async-util/debounce 250)
+                     (async-util/debounce 10000)
                      (async/pipe (om/get-shared owner [:ether :publisher])))
+       :display-fn str
        :selection-index 0
        })
 
     om/IRenderState
-    (render-state [_ {:keys [focused input-ch input-value] :as state}]
+    (render-state [_ {:keys [focused input-ch input-value display-fn] :as state}]
       (let [search-results
             (get ((om/get-shared owner :search-results)) input-value []) 
+            _ (println search-results)
             ]
         (html
          [:div.typeahead
@@ -62,6 +65,9 @@
                              ;; TODO: select the value! whatever that
                              ;; means.
                              )
+                            ;; TODO: escape to cancel?
+
+                            ;; default
                             nil)
             }]
           [:ul.dropdown-menu.typeahead-results
@@ -70,5 +76,5 @@
            (for [[idx res] (map-indexed vector search-results)]
              [:li
               [:a {:style {:font-weight (when (= idx (get state :selection-index)) "500")} }
-               [:span (str res)]]])]
+               [:span (display-fn res)]]])]
           ])))))

@@ -17,3 +17,13 @@
   (= :fact (describe-entity m)))
 (defn literal? [m]
   (= :literal (describe-entity m)))
+
+(defn display-entity [m]
+  (case (describe-entity m)
+    :thunk
+    (:thunk/label m)
+    :literal
+    (:value/string m)
+
+    ;;default
+    "help, I'm trapped inside the machine!"))

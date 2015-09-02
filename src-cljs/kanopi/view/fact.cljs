@@ -109,23 +109,35 @@
                   [:span.type-input-value
                    (om/build dropdown/dropdown props
                              {:state {:toggle-label (name part-type)}
-                              :init-state {:menu-items
-                                           [{:type     :link
-                                             :on-click println
-                                             :label    "thunk"}
-                                            {:type     :link
-                                             :on-click println
-                                             :label    "text"}]}})
+                              :init-state
+                              {:menu-items
+                               [{:type     :link
+                                 :on-click (fn [evt]
+                                             (->> (msg/change-entity-type props :thunk)
+                                                  (msg/send! owner)))
+                                 :value    :thunk
+                                 :label    "thunk"}
+                                {:type     :link
+                                 :on-click (fn [evt]
+                                             (->> (msg/change-entity-type props :literal/text)
+                                                  (msg/send! owner)))
+                                 :value    :literal/text
+                                 :label    "text"}]}})
                    ]]
                  [:div.value-input
                   [:label.value-input-label (str (text/entity-value-label props) ":")]
                   [:span.value-input-value
                    (om/build input-field/textarea props
-                             {:init-state {:edit-key :thunk/label
-                                           :new-value (get props :thunk/label)
-                                           :submit-value #(do (println %))}})]]
+                             {:init-state
+                              {:edit-key     :thunk/label
+                               :new-value    (get props :thunk/label)
+                               :submit-value (fn [v]
+                                               (->> (msg/update-entity-value props v)
+                                                    (msg/send! owner)))}})]]
                  ]]))
 
+           ;; TODO: implement the literal stuff. why is it different
+           ;; from the thunk stuff?
            (schema/literal? props)
            [:span (get props :value/string)]
 
