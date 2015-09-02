@@ -4,6 +4,7 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.util.browser :as browser]
             [kanopi.view.widgets.dropdown :as dropdown]
+            [kanopi.view.widgets.typeahead :as typeahead]
             [kanopi.view.icons :as icons]
             [sablono.core :refer-macros [html] :include-macros true]))
 
@@ -34,7 +35,9 @@
             (icons/search {})
             ;; TODO: typeahead search.
             [:span.search
-             [:input]]
+             ;;[:input]
+             (om/build typeahead/typeahead props)
+             ]
             ]
            [:ul.nav.navbar-nav.navbar-right
             (if (get-in props [:user :identity])

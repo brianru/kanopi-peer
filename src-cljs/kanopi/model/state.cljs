@@ -41,6 +41,7 @@
                              :thunk (get intro-data -1000)
                              :similar-thunks (select-keys intro-data [-1009 -1012 -1016])
                              }
+                     :search-results {"foo" ["food" "baffoon"]}
 
                      ;; local cache
                      ;; {<ent-id> <entity>}

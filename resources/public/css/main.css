@@ -50,6 +50,13 @@ a:hover {
     font-size: 18px;
     left: 30%;
 }
+.typeahead {
+    display: inline-block;
+}
+.typeahead-results.dropdown-menu {
+    left: 25%;
+    min-width: 50%;
+}
 
 /* Thunks */
 .thunk-container {

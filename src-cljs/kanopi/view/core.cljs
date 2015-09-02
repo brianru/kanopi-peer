@@ -57,9 +57,19 @@
         ]
        ))))
 
+(defn- search-results-ref-cursor [app-state]
+  (->> app-state
+       (om/root-cursor)
+       (:search-results)
+       (om/ref-cursor)))
+
 (defn mount-root! [app-state container ether history]
-  (om/root root-component app-state {:target container, :shared {:ether (:ether ether)
-                                                                 :history history}}))
+  (om/root root-component
+           app-state
+           {:target container
+            :shared {:ether (:ether ether)
+                     :search-results #(search-results-ref-cursor app-state)
+                     :history history}}))
 
 (defrecord Om [config app-state ether history app-container]
   component/Lifecycle

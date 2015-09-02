@@ -1,18 +1,24 @@
 (ns kanopi.controller.handlers
+  "All app-state transformations are defined here."
   (:require [om.core :as om]
             [taoensso.timbre :as timbre
-             :refer-macros (log trace debug info warn error fatal report)]))
+             :refer-macros (log trace debug info warn error fatal report)]
+            ))
 
 (defmulti local-event-handler
   (fn [app-state msg]
-    (info "here" msg)
     (get msg :verb))
   :default
   :log)
 
 (defmethod local-event-handler :log
   [app-state msg]
-  (log msg))
+  (info msg))
+
+(defmethod local-event-handler :search
+  ;; TODO: implement me!
+  [app-state msg]
+  (info "search!" msg))
 
 (defn- lookup-id
   ([props id]
@@ -51,37 +57,6 @@
   (let [thunk-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))
         thunk' (build-thunk-data props thunk-id)]
     (assoc props :thunk thunk')))
-
-(defn navigate!
-  "Transform app-state to support requested page."
-  [props]
-  (fn [msg]
-    (info "navigate:" msg)
-    (let [handler (get-in msg [:noun :handler])]
-      (om/transact! props
-                    (fn [app-state]
-                      (cond-> app-state
-                        true
-                        (assoc :page (get msg :noun))
-
-                        ;; TODO: implement user lifecycle in spa
-                        (= :login handler)
-                        identity
-
-                        (= :logout handler)
-                        (assoc :user nil)
-
-                        (= :register handler)
-                        (assoc :user nil)
-
-                        (= :thunk handler)
-                        (navigate-to-thunk msg)
-
-                        (not= :thunk handler)
-                        (assoc :thunk {})
-
-                        ))))
-    ))
 
 (defmethod local-event-handler :navigate
   [app-state msg]

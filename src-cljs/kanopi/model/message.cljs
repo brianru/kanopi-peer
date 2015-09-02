@@ -32,8 +32,8 @@
                :verb :submit-statement
                :context {}}))
 
-(defn fulltext-search [owner q]
+(defn search [q]
   (hash-map
-   :noun nil
+   :noun {:query q}
    :verb :search
    :context {}))
