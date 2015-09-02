@@ -1,6 +1,7 @@
 (ns kanopi.controller.handlers
   "All app-state transformations are defined here."
   (:require [om.core :as om]
+            [clj-fuzzy.metrics :as fuzzy]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             ))
@@ -15,6 +16,15 @@
   [app-state msg]
   (info msg))
 
+(defn- fuzzy-search-entity [q ent]
+  (cond
+   (:thunk/label ent)
+   (list (fuzzy/levenshtein q (:thunk/label ent)))
+   (:value/string ent)
+   (list (fuzzy/levenshtein q (:value/string ent)))
+   :default
+   nil))
+
 (defn- local-fulltext-search
   "TODO: sort by match quality
   https://github.com/Yomguithereal/clj-fuzzy
@@ -23,15 +33,12 @@
   TODO: deal with empty q better
   "
   [app-state q]
-  (let [regex-pattern (re-pattern q)]
+  (let []
     (->> (get-in app-state [:cache])
          (vals)
-         (filter (fn [ent]
-                   (->> ent
-                        ((juxt :thunk/label :value/string))
-                        (apply str)
-                        (re-find regex-pattern)
-                        )))
+         (map (partial fuzzy-search-entity q))
+         (remove nil?)
+         (sort-by first)
          (vec))))
 
 (defmethod local-event-handler :search

@@ -8,14 +8,17 @@
                  [com.stuartsierra/component "0.2.3"]
                  [com.taoensso/timbre "4.1.0"]
                  [environ "1.0.0"]
-
-                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [com.cognitect/transit-clj "0.8.281"]
+
+                 ;; Core libraries
+                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
                  [com.cognitect/transit-cljs "0.8.220"]
                  ;; resolves a dependency issue with figwheel and
                  ;; core.async
                  [org.clojure/core.memoize "0.5.6"]
 
+                 ;; Fuzzy string matching
+                 [clj-fuzzy "0.3.1"]
                  ;; Client
                  [org.clojure/clojurescript "1.7.48"]
                  [quile/component-cljs "0.2.4"]

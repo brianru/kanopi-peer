@@ -40,7 +40,5 @@
  (go)
  (reset)
 
- (let [creds ((get-in system [:authenticator :user-lookup-fn]) "vin")]
-   (data/recent-thunks (get-in system [:data-service]) creds)) 
  
  )
