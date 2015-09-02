@@ -3,6 +3,17 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]))
 
+(defmulti local-event-handler
+  (fn [app-state msg]
+    (info "here" msg)
+    (get msg :verb))
+  :default
+  :log)
+
+(defmethod local-event-handler :log
+  [app-state msg]
+  (log msg))
+
 (defn- lookup-id
   ([props id]
    (->> (get-in props [:cache id])
@@ -18,8 +29,7 @@
                   :default
                   (assoc acc k v)))
                {})
-       ))
-  )
+       )))
 
 (defn- build-thunk-data
   "
@@ -72,3 +82,31 @@
 
                         ))))
     ))
+
+(defmethod local-event-handler :navigate
+  [app-state msg]
+  (let [handler (get-in msg [:noun :handler])]
+    (swap! app-state
+           (fn [app-state]
+             (cond-> app-state
+               true
+               (assoc :page (get msg :noun))
+
+               ;; TODO: implement user lifecycle in spa
+               (= :login handler)
+               identity
+
+               (= :logout handler)
+               (assoc :user nil)
+
+               (= :register handler)
+               (assoc :user nil)
+
+               (= :thunk handler)
+               (navigate-to-thunk msg)
+
+               (not= :thunk handler)
+               (assoc :thunk {})
+
+               ))))
+  )

@@ -31,3 +31,9 @@
               {:noun stmt
                :verb :submit-statement
                :context {}}))
+
+(defn fulltext-search [owner q]
+  (hash-map
+   :noun nil
+   :verb :search
+   :context {}))

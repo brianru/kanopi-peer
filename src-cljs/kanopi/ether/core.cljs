@@ -111,6 +111,38 @@
     (merge {:publisher publisher}
            (zipmap pub-keys publications))))
 
+(defn- get-publication [ether dimension]
+  (->> dimension (publication-keyword) (get ether)))
+
+(defn listen*
+  ([ether dimension value opts]
+   (let [{:keys [kill-ch handlerfn logfn]
+          :or {kill-ch (async/chan)
+               logfn     (constantly nil)}}
+         opts
+         listener (async/chan 100)
+         publication (get-publication ether dimension)]
+     (assert handlerfn "Handler function is required.")
+     (async/sub publication value listener)
+     (go (loop [[v ch] nil]
+           (if (= ch kill-ch)
+             (do
+              (async/unsub publication value listener)
+              (async/close! listener))
+             (do
+              (when v
+                (logfn v)
+                (handlerfn v))
+              (recur (async/alts! [listener kill-ch]))))))
+     kill-ch)))
+
+(defn feed!
+  "NOTE: experimental."
+  ([ether dimension value recipient-ch]
+   (listen* ether dimension value
+            {:handlerfn (partial async/put! recipient-ch)
+             :logfn (constantly nil)})))
+
 (defn listen!
   "Pass messages matching the supplied dimension and value to a
   callback function.
@@ -118,23 +150,11 @@
   ([owner dimension value handlerfn]
    (listen! owner dimension value handlerfn (constantly nil)))
   ([owner dimension value handlerfn logfn]
-   (let [ether       (om/get-shared owner :ether)
-         listener    (async/chan 100 (map deref-cursor))
-         kill-ch     (async/chan)
-         publication (->> dimension (publication-keyword) (get ether))]
-     (om/set-state! owner [::kill-ch value] kill-ch)
-     (async/sub publication value listener)
-     (go (loop [[v ch] nil]
-           (if (= ch kill-ch)
-             (do
-               (async/unsub publication value listener)
-               (async/close! listener))
-             (do
-               (when v
-                 (logfn v)
-                 (handlerfn v))
-               (recur (async/alts! [listener kill-ch]))))
-           )))))
+   (let [kill-ch (listen* (om/get-shared owner :ether)
+                          dimension value
+                          {:handlerfn handlerfn
+                           :logfn     logfn})]
+     (om/set-state! owner [::kill-ch value] kill-ch))))
 
 (defn trigger-kill-chans!
   ([owner]

@@ -3,6 +3,7 @@
             [kanopi.view.core :as view]
             [kanopi.model.state :as state]
             [kanopi.controller.ajax :as ajax]
+            [kanopi.controller.dispatch :as dispatch]
             [kanopi.controller.history :as history]
             [kanopi.ether.core :as ether]
             ))
@@ -29,6 +30,12 @@
     (component/using
      (history/new-html5-history config)
      {:ether :ether})
+
+    :dispatcher
+    (component/using
+     (dispatch/new-dispatcher config)
+     {:ether :ether
+      :app-state :app-state})
 
     :transporter
     (component/using

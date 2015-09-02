@@ -22,14 +22,6 @@
     (display-name [_]
       "app-root")
 
-    om/IWillMount
-    (will-mount [_]
-      (ether/listen! owner :verb :navigate (handlers/navigate! props)))
-
-    om/IWillUnmount
-    (will-unmount [_]
-      (ether/stop-listening! owner))
-
     om/IRender
     (render [_]
       (html

@@ -12,9 +12,12 @@
     (GET "/welcome" [] spa/welcome)
 
     ;; authentication
-    (ANY "/register" [] auth/registration-resource)
-    (GET "/login"    [] auth/login-resource)
-    (GET "/logout"   [] auth/logout-resource)
+    (POST "/register" [] auth/registration-resource)
+    (GET "/register" [] spa/welcome)
+    (GET "/login" [] spa/welcome)
+    (GET "/logout" [] spa/welcome)
+    ;;(GET "/login"    [] auth/login-resource)
+    ;;(GET "/logout"   [] auth/logout-resource)
 
     (ANY "/api/" [] api-resource)
     (GET "/thunk/:id" [] spa-resource)
