@@ -57,7 +57,9 @@ a:hover {
     left: 25%;
     min-width: 50%;
 }
-
+.dropdown-menu-item {
+    cursor: pointer;
+}
 /* Thunks */
 .thunk-container {
     padding-top: 60px;

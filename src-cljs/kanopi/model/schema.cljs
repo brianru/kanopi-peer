@@ -19,12 +19,19 @@
 (defn literal? [m]
   (= :literal (describe-entity m)))
 
-(defn display-entity [m]
-  (case (describe-entity m)
-    :thunk
-    (:thunk/label m)
-    :literal
-    (:value/string m)
+(defn get-value
+  ([m]
+   (get-value m ""))
+  ([m default-value]
+   (case (describe-entity m)
+     :thunk
+     (:thunk/label m)
 
-    ;;default
-    "help, I'm trapped inside the machine!"))
+     :literal
+     (:value/string m)
+
+     default-value
+     )))
+
+(defn display-entity [m]
+ (get-value m "help, I'm trapped!"))

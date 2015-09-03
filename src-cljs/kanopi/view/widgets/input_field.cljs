@@ -85,9 +85,6 @@
 
 (defn textarea [props owner opts]
   (reify
-    om/IInitState
-    (init-state [_]
-      {})
     om/IRenderState
     (render-state [_ {:keys [submit-value] :as state}]
       (let []

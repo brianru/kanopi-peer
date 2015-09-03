@@ -37,10 +37,11 @@
 
 (defmethod dropdown-menu-item :link
   [owner itm]
-  [:li [:a {:href (get itm :href)
-            :on-click (juxt (get itm :on-click)
-                            #(toggle-dropdown! owner))}
-        (get itm :label)]])
+  [:li.dropdown-menu-item
+   [:a {:href     (get itm :href)
+        :on-click (juxt (get itm :on-click)
+                        #(toggle-dropdown! owner))}
+    [:span (get itm :label)]]])
 
 (defmethod dropdown-menu-item :divider
   [owner itm]

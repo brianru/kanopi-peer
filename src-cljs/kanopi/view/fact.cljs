@@ -9,10 +9,10 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.model.schema :as schema]
-            [kanopi.view.icons :as icons]
-            [kanopi.ether.core :as ether]
             [kanopi.model.message :as msg]
             [kanopi.model.text :as text]
+            [kanopi.view.icons :as icons]
+            [kanopi.ether.core :as ether]
             [kanopi.util.browser :as browser]
             [kanopi.view.widgets.input-field :as input-field]
             [kanopi.view.widgets.dropdown :as dropdown]
@@ -32,11 +32,14 @@
     (render-state [_ {:keys [mode fact-hovering] :as state}]
       (let []
         (html
+         ;; TODO: animate all the width, height and transform
+         ;; attributes
          [:div.fact-handle
           {:on-click #(->> (msg/toggle-fact-mode props)
                            (msg/send! owner))}
           [:svg {:width "24px"
-                 :height "24px"}
+                 :height (if (= mode :view)
+                           "24px" "72px")}
            [:g.handle-borders
             {:transform "translate(4, 4)"}
             [:path {:d "m 0 9 v -9 h 9"
@@ -44,32 +47,41 @@
                     :fill "transparent"}]
             [:path {:d "m 15 6 v 9 h -9"
                     :stroke "black"
+                    :transform (when (= mode :edit)
+                                 "translate(0, 48)")
+                               
                     :fill "transparent"}]]
            [:g.handle-contents
-            {:transform "translate(6.5, 6.5)"}
-            (when fact-hovering
-              [:g.handle-hover-contents
-               [:rect.handle-mode-indicator
-                {:width "10"
-                 :height "10"
-                 :fill "green"
-                 :opacity "0.5"}]]
-              )
-            (when (= mode :edit)
-              [:g.handle-edit-contents
-               [:rect.handle-mode-indicator
-                {:width "10"
-                 :height "10"
-                 :fill "green"}]
-               [:rect.handle-cancel-edit]
-               [:rect.handle-edit-history]
-               [:rect.handle-confirm-edit]
-               ]
-              )
-            ]
-           ]
-
-          ])))))
+            {:transform "translate(4, 4)"}
+            (cond
+             (and (= mode :view)
+                  fact-hovering)
+             [:g.handle-hover-contents
+              {:transform "translate(2.5, 2.5)"}
+              [:rect.handle-mode-indicator
+               {:width "10"
+                :height "10"
+                :fill "green"
+                :opacity "0.5"}]]
+             
+             (= mode :edit)
+             ;; TODO: implement on-click fns for each
+             ;; TODO: implement hover styling
+             [:g.handle-edit-contents
+              [:g {:transform "translate(0,0)"}
+               (icons/svg-clear
+                {:transform (icons/transform-scale :from 48 :to 16)
+                 :fill "black"})]
+              [:g {:transform "translate(0,24)"}
+               (icons/svg-restore
+                {:transform (icons/transform-scale :from 48 :to 16)
+                 :fill "black"})]
+              [:g {:transform "translate(0,48)"}
+               (icons/svg-done
+                {:transform (icons/transform-scale :from 48 :to 16)
+                 :fill "black"})]
+              
+              ])]]])))))
 
 (defn fact-part
   "Here's how this works.
@@ -125,7 +137,8 @@
 
             :edit
             (let [{:keys [selected-type entered-value matching-entity]}
-                  state]
+                  state
+                  ]
               [:div.edit-fact-part
                [:span.fact-part-representation
                 (schema/display-entity props)]
@@ -154,16 +167,21 @@
                 [:div.value-input
                  [:label.value-input-label (str (text/entity-value-label props) ":")]
                  [:span.value-input-value
-                  #_(om/build input-field/textarea props
-                              {:init-state
-                               {:edit-key     :thunk/label
-                                :new-value    (get props :thunk/label)
-                                :submit-value (fn [v]
-                                                (->> (msg/update-entity-value props v)
-                                                     (msg/send! owner)))}})
                   (om/build typeahead/typeahead props
-                            {:init-state {:element-type :textarea
-                                          }})]]
+                            {:state
+                             {:element-type (browser/input-element-for-entity-type
+                                             (or selected-type part-type))}
+                             :init-state
+                             {:input-value (schema/display-entity props)
+                              :on-click
+                              (fn [res _]
+                                (om/update-state!
+                                 owner
+                                 (fn [existing]
+                                   (assoc existing
+                                          :entered-value (schema/get-value res)
+                                          :matching-entity res))))}
+                             })]]
                 ]]))
           ])))
     ))

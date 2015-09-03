@@ -14,8 +14,57 @@
             [kanopi.util.async :as async-util]
             [kanopi.ether.core :as ether]))
 
+(defn- handle-key-down
+  [owner evt search-results]
+  (case (.-key evt)
+    "ArrowDown"
+    (do (om/update-state! owner :selection-index
+                          (fn [x]
+                            (if (< x (dec (count search-results)))
+                              (inc x)
+                              x)))
+        (. evt preventDefault))
+    "ArrowUp"
+    (do (om/update-state! owner :selection-index
+                          (fn [x]
+                            (if (> x 0)
+                              (dec x)
+                              x)))
+        (. evt preventDefault))
+    "Enter"
+    (do
+     (info "enter!" (nth search-results (om/get-state owner :selection-index)))
+     ;; TODO: select the value! whatever that
+     ;; means.
+     )
+    ;; TODO: escape to cancel?
+
+    ;; default
+    nil))
+
+(defn- handle-result-click
+  [owner res evt]
+  (om/update-state! owner
+                    (fn [state]
+                      (assoc state :focused false
+                             :input-value (schema/get-value res)))))
+
+(defn- element-specific-attrs
+  [{:keys [element-type] :as state}]
+  (case element-type
+    :input
+    (hash-map :type "text")
+
+    :textarea
+    (hash-map :cols 32, :rows 3)
+
+    ;; default
+    {}))
+
 (defn typeahead
   "Pre-load with local or cached results.
+
+  Supports different element types.
   "
   [props owner opts]
   (reify
@@ -30,6 +79,7 @@
        :on-click (constantly nil)
        :href-fn (constantly nil)
        :selection-index 0
+       :input-value nil
        })
 
     om/IRenderState
@@ -40,49 +90,29 @@
         (html
          [:div.typeahead
           (vector
+           ;; NOTE: this is insane. It may be better to have separate
+           ;; blocks for each element type, though that would lead to
+           ;; more duplicated code.
            (get state :element-type)
-           {:type        "text"
-            :on-focus    #(om/set-state! owner :focused true)
-            ;:on-blur     #(om/set-state! owner :focused false)
-            :value       (get state :input-value)
-            :on-change   #(let [v (.. % -target -value)]
-                            (async/put! input-ch (msg/search v))
-                            (om/set-state! owner :input-value v)) 
-            :on-key-down #(case (.-key %)
-                            "ArrowDown"
-                            (do (om/update-state! owner :selection-index
-                                                  (fn [x]
-                                                    (if (< x (dec (count search-results)))
-                                                      (inc x)
-                                                      x)))
-                                (. % preventDefault))
-                            "ArrowUp"
-                            (do (om/update-state! owner :selection-index
-                                                  (fn [x]
-                                                    (if (> x 0)
-                                                      (dec x)
-                                                      x)))
-                                (. % preventDefault))
-                            "Enter"
-                            (do
-                             (info "enter!" (nth search-results (get state :selection-index)))
-                             ;; TODO: select the value! whatever that
-                             ;; means.
-                             )
-                            ;; TODO: escape to cancel?
-
-                            ;; default
-                            nil)
-            })
+           (merge (element-specific-attrs state)
+                  {:on-focus    #(om/set-state! owner :focused true)
+                   ;:on-blur     #(om/set-state! owner :focused false)
+                   :value       (get state :input-value)
+                   :on-change   #(let [v (.. % -target -value)]
+                                   (async/put! input-ch (msg/search v))
+                                   (om/set-state! owner :input-value v)) 
+                   :on-key-down #(handle-key-down owner % search-results)
+                   }))
           [:ul.dropdown-menu.typeahead-results
            {:style {:display (when (and focused (not-empty search-results))
                                "inherit")}}
            (for [[idx [score res]] (map-indexed vector search-results)]
-             [:li
-              [:a {:style {:font-weight (when (= idx (get state :selection-index)) "500")}
+             [:li.dropdown-menu-item
+              [:a {:style    {:font-weight (when (= idx (get state :selection-index))
+                                             "500")}
                    :href     ((get state :href-fn) res)
-                   :on-click (juxt (get state :on-click)
-                                   #(om/set-state! owner :focused false))
+                   :on-click (juxt (partial (get state :on-click) res)
+                                   (partial handle-result-click owner res))
                    }
                [:span (display-fn res)]]])]
           ])))))
