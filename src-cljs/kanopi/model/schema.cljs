@@ -8,8 +8,9 @@
    :fact
    (contains? m :value/string)
    :literal
+
    :default
-   nil))
+   :unknown))
 
 (defn thunk? [m]
   (= :thunk (describe-entity m)))
@@ -19,7 +20,6 @@
   (= :literal (describe-entity m)))
 
 (defn display-entity [m]
-  (println "display" m)
   (case (describe-entity m)
     :thunk
     (:thunk/label m)

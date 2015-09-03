@@ -5,26 +5,24 @@
 (defn- publisher [owner]
   (om/get-shared owner [:ether :publisher]))
 
-(defn request-recent-thunks! [owner]
-  (async/put! (publisher owner)
-              {:noun {}
-               :verb :recent-thunks
-               :context {}})
+(defn send!
+  "Ex: (->> (msg/search \"foo\") (msg/send! owner))
+  "
+  [owner msg]
+  (async/put! (publisher owner) msg)
+  ;; NOTE: js evt handlers don't like `false` as a return value, which
+  ;; async/put! often returns. So we add a nil.
   nil)
 
-(defn request-thunk! [owner ent-id]
-  (async/put! (publisher owner)
-              {:noun {:ent-id ent-id}
-               :verb :get
-               :context {}})
-  nil)
+(defn toggle-fact-mode [ent]
+  (hash-map
+   :noun [:fact (:db/id ent)]
+   :verb :toggle-mode
+   :context {}))
 
-(defn toggle-fact-mode! [owner fact-id]
-  (async/put! (publisher owner)
-              {:noun [:fact fact-id]
-               :verb :toggle-mode
-               :context {}})
-  nil)
+(defn update-fact-attribute [ent v]
+  (hash-map
+   :noun nil))
 
 (defn change-entity-type [ent desired-type]
   (hash-map
@@ -40,21 +38,9 @@
    :verb :update-entity-value
    :context {}))
 
-(defn submit-statement [owner stmt]
-  (async/put! (publisher owner)
-              {:noun stmt
-               :verb :submit-statement
-               :context {}}))
-
 (defn search [q]
   (hash-map
    :noun {:query q}
    :verb :search
    :context {}))
 
-(defn send!
-  "Ex: (->> (msg/search \"foo\") (msg/send! owner))
-  "
-  [owner msg]
-  (async/put! (publisher owner) msg)
-  nil)

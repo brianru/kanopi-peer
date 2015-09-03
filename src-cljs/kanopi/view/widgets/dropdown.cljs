@@ -33,15 +33,17 @@
 (defn- stop-hover! [owner]
   (async/put! (om/get-state owner ::kill-hover-clock-ch) :stop!))
 
-(defmulti dropdown-menu-item :type)
+(defmulti dropdown-menu-item (fn [_ itm] (:type itm)))
 
 (defmethod dropdown-menu-item :link
-  [itm]
-  [:li [:a (select-keys itm [:href :on-click])
+  [owner itm]
+  [:li [:a {:href (get itm :href)
+            :on-click (juxt (get itm :on-click)
+                            #(toggle-dropdown! owner))}
         (get itm :label)]])
 
 (defmethod dropdown-menu-item :divider
-  [itm]
+  [owner itm]
   [:li.divider {:role "separator"}])
 
 (defn dropdown
@@ -83,5 +85,5 @@
             {:style          {:display (when expanded "inherit")}
              :on-click       (get state :selection-handler)
              :on-mouse-leave #(close-dropdown! owner)}]
-           (map dropdown-menu-item (get state :menu-items)))
+           (map (partial dropdown-menu-item owner) (get state :menu-items)))
           ])))))

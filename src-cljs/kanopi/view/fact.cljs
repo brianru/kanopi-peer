@@ -16,6 +16,7 @@
             [kanopi.util.browser :as browser]
             [kanopi.view.widgets.input-field :as input-field]
             [kanopi.view.widgets.dropdown :as dropdown]
+            [kanopi.view.widgets.typeahead :as typeahead]
             ))
 
 (defn handle
@@ -32,7 +33,8 @@
       (let []
         (html
          [:div.fact-handle
-          {:on-click #(msg/toggle-fact-mode! owner (get props :db/id))}
+          {:on-click #(->> (msg/toggle-fact-mode props)
+                           (msg/send! owner))}
           [:svg {:width "24px"
                  :height "24px"}
            [:g.handle-borders
@@ -70,6 +72,26 @@
           ])))))
 
 (defn fact-part
+  "Here's how this works.
+
+  Fact parts are selection / initialziation mechanisms.
+
+  The goal is to connect the parent entity to another entity via an attribute.
+
+  We are not modifying any entity besides the parent (really, the
+  fact, which is referenced by the parent).
+
+  I need a typeahead that renders entities with similar values or
+  labels. This is tricky because labels can be long, values can be
+  images or latex.
+
+  First the user determines the type of the fact part. This allows the
+  typeahead on the value to be useful. This is a dropdown menu. It
+  configures the typeahead search that follows.
+
+  Then the user begins populating the value.
+
+  "
   [props owner opts]
   (reify
     om/IDisplayName
@@ -78,7 +100,12 @@
 
     om/IInitState
     (init-state [_]
-      {:hovering false})
+      {:hovering false
+       
+       :selected-type nil
+       :entered-value ""
+       :matching-entity props
+       })
 
     om/IRenderState
     (render-state [_ {:keys [mode] :as state}]
@@ -87,72 +114,57 @@
          [:div.fact-attribute
           {:on-mouse-enter #(om/set-state! owner :hovering true)
            :on-mouse-leave #(om/set-state! owner :hovering false)}
-          (cond
+          (case mode
+            :view
+            [:div.view-fact-part
+             [:a {:href (when-let [id (:db/id props)]
+                          (browser/route-for owner :thunk :id id))}
+              [:span.fact-part-representation
+               (schema/display-entity props)]
+              ]]
 
-           (schema/thunk? props)
-           (case mode
-             :view
-             [:div.view-fact-part
-              [:a {:href (browser/route-for owner :thunk :id (:db/id props))}
+            :edit
+            (let [{:keys [selected-type entered-value matching-entity]}
+                  state]
+              [:div.edit-fact-part
                [:span.fact-part-representation
-                (get props :thunk/label)]
-               ]]
+                (schema/display-entity props)]
+               [:div.fact-part-metadata-container
+                [:div.type-input
+                 [:label.type-input-label "type:"]
+                 [:span.type-input-value
+                  (om/build dropdown/dropdown props
+                            {:state
+                             {:toggle-label (name (or selected-type part-type))}
 
-             :edit
-             (let []
-               [:div.edit-fact-part
-                [:span.fact-part-representation
-                 (get props :thunk/label)]
-                [:div.fact-part-metadata-container
-                 [:div.type-input
-                  [:label.type-input-label "type:"]
-                  [:span.type-input-value
-                   (om/build dropdown/dropdown props
-                             {:state {:toggle-label (name part-type)}
-                              :init-state
-                              {:menu-items
-                               [{:type     :link
-                                 :on-click (fn [evt]
-                                             (->> (msg/change-entity-type props :thunk)
-                                                  (msg/send! owner)))
-                                 :value    :thunk
-                                 :label    "thunk"}
-                                {:type     :link
-                                 :on-click (fn [evt]
-                                             (->> (msg/change-entity-type props :literal/text)
-                                                  (msg/send! owner)))
-                                 :value    :literal/text
-                                 :label    "text"}]}})
-                   ]]
-                 [:div.value-input
-                  [:label.value-input-label (str (text/entity-value-label props) ":")]
-                  [:span.value-input-value
-                   (om/build input-field/textarea props
-                             {:init-state
-                              {:edit-key     :thunk/label
-                               :new-value    (get props :thunk/label)
-                               :submit-value (fn [v]
-                                               (->> (msg/update-entity-value props v)
-                                                    (msg/send! owner)))}})]]
-                 ]]))
-
-           ;; TODO: implement the literal stuff. why is it different
-           ;; from the thunk stuff?
-           (schema/literal? props)
-           [:span (get props :value/string)]
-
-           ;; TODO: spend some time on this case.
-           (empty? props)
-           [:div
-            "Add a fact!"
-            #_(om/build input-field/editable-value props
-                        {:init-state {:edit-key :none
-                                      :submit-value #(println %)
-                                      :editing true
-                                      :placeholder "Find or create an attribtue"}
-                         :state (select-keys state [:mode :hovering])}
-                        )]
-           )
+                             :init-state
+                             {:menu-items
+                              [{:type     :link
+                                :value    :thunk
+                                :label    "thunk"
+                                :on-click (fn [_]
+                                            (om/set-state! owner :selected-type :thunk))
+                                }
+                               {:type     :link
+                                :value    :literal/text
+                                :label    "text"
+                                :on-click (fn [_]
+                                            (om/set-state! owner :selected-type :literal/text))
+                                }]}})]]
+                [:div.value-input
+                 [:label.value-input-label (str (text/entity-value-label props) ":")]
+                 [:span.value-input-value
+                  #_(om/build input-field/textarea props
+                              {:init-state
+                               {:edit-key     :thunk/label
+                                :new-value    (get props :thunk/label)
+                                :submit-value (fn [v]
+                                                (->> (msg/update-entity-value props v)
+                                                     (msg/send! owner)))}})
+                  (om/build typeahead/typeahead props
+                            {:init-state {:element-type :textarea
+                                          }})]]
+                ]]))
           ])))
     ))
 
@@ -237,6 +249,6 @@
       (let []
         (html
          (om/build container {:db/id nil
-                              :fact/attribute #{}
-                              :fact/value     #{}})
+                              :fact/attribute #{{:db/id nil}}
+                              :fact/value     #{{:db/id nil}}})
          )))))

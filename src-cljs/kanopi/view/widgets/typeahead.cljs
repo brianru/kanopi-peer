@@ -22,10 +22,13 @@
     om/IInitState
     (init-state [_]
       ;; FIXME: debounce is not working
-      {:input-ch (-> (async/chan)
-                     (async-util/debounce 10000)
+      {:element-type :input ;; supported values are #{:input :textarea}
+       :input-ch (-> (async/chan)
+                     (async-util/debounce 100)
                      (async/pipe (om/get-shared owner [:ether :publisher])))
        :display-fn schema/display-entity
+       :on-click (constantly nil)
+       :href-fn (constantly nil)
        :selection-index 0
        })
 
@@ -36,14 +39,15 @@
             ]
         (html
          [:div.typeahead
-          [:input
+          (vector
+           (get state :element-type)
            {:type        "text"
             :on-focus    #(om/set-state! owner :focused true)
-            :on-blur     #(om/set-state! owner :focused false)
+            ;:on-blur     #(om/set-state! owner :focused false)
             :value       (get state :input-value)
             :on-change   #(let [v (.. % -target -value)]
-                          (async/put! input-ch (msg/search v))
-                          (om/set-state! owner :input-value v)) 
+                            (async/put! input-ch (msg/search v))
+                            (om/set-state! owner :input-value v)) 
             :on-key-down #(case (.-key %)
                             "ArrowDown"
                             (do (om/update-state! owner :selection-index
@@ -69,12 +73,16 @@
 
                             ;; default
                             nil)
-            }]
+            })
           [:ul.dropdown-menu.typeahead-results
            {:style {:display (when (and focused (not-empty search-results))
                                "inherit")}}
            (for [[idx [score res]] (map-indexed vector search-results)]
              [:li
-              [:a {:style {:font-weight (when (= idx (get state :selection-index)) "500")} }
+              [:a {:style {:font-weight (when (= idx (get state :selection-index)) "500")}
+                   :href     ((get state :href-fn) res)
+                   :on-click (juxt (get state :on-click)
+                                   #(om/set-state! owner :focused false))
+                   }
                [:span (display-fn res)]]])]
           ])))))

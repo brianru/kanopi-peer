@@ -41,6 +41,10 @@
                              :thunk {}
                              :similar-thunks #{}
                              }
+                     ;; TODO: this map grows too fast.
+                     ;; implement a map that only stores the last n
+                     ;; entries, everything else gets dropped off the
+                     ;; back
                      :search-results {"foo" ["food" "baffoon"]}
 
                      ;; local cache

@@ -34,11 +34,11 @@
              "Kanopi"]]
            [:div.navbar-center
             (icons/search {})
-            ;; TODO: typeahead search.
             [:span.search
-             ;;[:input]
              (om/build typeahead/typeahead props
-                       {:init-state {:display-fn schema/display-entity}})
+                       {:init-state {:display-fn schema/display-entity
+                                     :href-fn #(browser/route-for owner :thunk :id (:db/id %))
+                                     :on-click (constantly nil)}})
              ]
             ]
            [:ul.nav.navbar-nav.navbar-right

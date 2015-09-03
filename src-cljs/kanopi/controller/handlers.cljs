@@ -1,7 +1,7 @@
 (ns kanopi.controller.handlers
   "All app-state transformations are defined here."
   (:require [om.core :as om]
-            [clj-fuzzy.metrics :as fuzzy]
+            [kanopi.util.core :as util]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             ))
@@ -18,11 +18,11 @@
 
 (defn- fuzzy-search-entity [q ent]
   (cond
-   (:thunk/label ent)
-   (list (fuzzy/levenshtein q (:thunk/label ent)) ent)
+   (not (clojure.string/blank? (get ent :thunk/label "")))
+   (list (util/levenshtein q (:thunk/label ent)) ent)
 
-   (:value/string ent)
-   (list (fuzzy/levenshtein q (:value/string ent)) ent)
+   (not (clojure.string/blank? (get ent :value/string "")))
+   (list (util/levenshtein q (:value/string ent)) ent)
 
    :default
    nil))
