@@ -19,6 +19,7 @@
   (= :literal (describe-entity m)))
 
 (defn display-entity [m]
+  (println "display" m)
   (case (describe-entity m)
     :thunk
     (:thunk/label m)

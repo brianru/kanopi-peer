@@ -19,9 +19,10 @@
 
                  ;; Fuzzy string matching
                  [clj-fuzzy "0.3.1"]
+
                  ;; Client
                  [org.clojure/clojurescript "1.7.48"]
-                 [quile/component-cljs "0.2.4"]
+                 [quile/component-cljs "0.2.4" :exclusions [org.clojure/clojure]]
                  [org.omcljs/om "0.9.0"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [cljsjs/react-with-addons "0.13.3-0"]
@@ -39,7 +40,7 @@
                   :exclusions [joda-time]]
 
                  ;; Web
-                 [org.immutant/web "2.0.2"]
+                 [org.immutant/web "2.1.0"]
                  [compojure "1.4.0"]
                  [liberator "0.13"]
                  [com.cemerick/friend "0.2.1"]
@@ -49,6 +50,7 @@
                  [cheshire "5.5.0"]
                  [clj-time "0.11.0"]
 
+                 [ring/ring-devel "1.4.0"]
                  ;; Test
                  [org.clojure/test.check "0.7.0"]
                  ]
@@ -64,7 +66,8 @@
   :profiles {"dev"
              {:plugins [[lein-environ "1.0.0"]
                         [lein-ancient "0.6.6"]]
-              :dependencies [[org.clojure/tools.namespace "0.2.10"]
+              :dependencies [[org.clojure/tools.nrepl "0.2.10"]
+                             [org.clojure/tools.namespace "0.2.11"]
                              [ring/ring-devel "1.4.0"]
                              [ring/ring-mock "0.2.0"]
                              [org.clojure/data.codec "0.1.0"]

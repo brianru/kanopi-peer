@@ -14,6 +14,8 @@
   ([config]
    (let [{:keys [port env]} config
          with-dev #(util/select-with-merge config % [:dev])]
+     (println "New System")
+     (println "Configuration:" config)
     (component/system-map
      :datomic-peer
      (datomic-peer (with-dev :datomic))

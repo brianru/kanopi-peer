@@ -9,6 +9,7 @@
             [sablono.core :refer-macros [html] :include-macros true]
             [cljs.core.async :as async]
             [kanopi.model.message :as msg]
+            [kanopi.model.schema :as schema]
             [kanopi.view.widgets.dropdown :as dropdown]
             [kanopi.util.async :as async-util]
             [kanopi.ether.core :as ether]))
@@ -24,7 +25,7 @@
       {:input-ch (-> (async/chan)
                      (async-util/debounce 10000)
                      (async/pipe (om/get-shared owner [:ether :publisher])))
-       :display-fn str
+       :display-fn schema/display-entity
        :selection-index 0
        })
 
@@ -32,7 +33,6 @@
     (render-state [_ {:keys [focused input-ch input-value display-fn] :as state}]
       (let [search-results
             (get ((om/get-shared owner :search-results)) input-value []) 
-            _ (println search-results)
             ]
         (html
          [:div.typeahead
@@ -73,7 +73,7 @@
           [:ul.dropdown-menu.typeahead-results
            {:style {:display (when (and focused (not-empty search-results))
                                "inherit")}}
-           (for [[idx res] (map-indexed vector search-results)]
+           (for [[idx [score res]] (map-indexed vector search-results)]
              [:li
               [:a {:style {:font-weight (when (= idx (get state :selection-index)) "500")} }
                [:span (display-fn res)]]])]

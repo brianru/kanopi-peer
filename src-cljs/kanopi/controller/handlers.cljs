@@ -19,9 +19,11 @@
 (defn- fuzzy-search-entity [q ent]
   (cond
    (:thunk/label ent)
-   (list (fuzzy/levenshtein q (:thunk/label ent)))
+   (list (fuzzy/levenshtein q (:thunk/label ent)) ent)
+
    (:value/string ent)
-   (list (fuzzy/levenshtein q (:value/string ent)))
+   (list (fuzzy/levenshtein q (:value/string ent)) ent)
+
    :default
    nil))
 
@@ -42,14 +44,11 @@
          (vec))))
 
 (defmethod local-event-handler :search
-  ;; TODO: implement me!
   [app-state msg]
-  (println "here!")
   (swap! app-state
          (fn [app-state]
            (let [{:keys [query]} (get msg :noun)
                  results (local-fulltext-search app-state query)]
-             (println "results:" results)
              (assoc-in app-state [:search-results query] results)))))
 
 (defn- lookup-id
