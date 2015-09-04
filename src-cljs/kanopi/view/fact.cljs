@@ -49,7 +49,7 @@
                     :stroke "black"
                     :transform (when (= mode :edit)
                                  "translate(0, 48)")
-                               
+
                     :fill "transparent"}]]
            [:g.handle-contents
             {:transform "translate(4, 4)"}
@@ -71,15 +71,37 @@
               [:g {:transform "translate(0,0)"}
                (icons/svg-clear
                 {:transform (icons/transform-scale :from 48 :to 16)
-                 :fill "black"})]
+                 :fill "black"})
+               [:rect.click-area
+                {:width 16
+                 :height 16
+                 :fill "transparent"
+                 :on-click #(println "hi")
+                 }]]
               [:g {:transform "translate(0,24)"}
                (icons/svg-restore
                 {:transform (icons/transform-scale :from 48 :to 16)
-                 :fill "black"})]
+                 :fill "black"})
+               [:rect.click-area
+                {:width 16
+                 :height 16
+                 :fill "transparent"
+                 :on-click #(println "implement history")
+                 }]
+               ]
               [:g {:transform "translate(0,48)"}
                (icons/svg-done
                 {:transform (icons/transform-scale :from 48 :to 16)
-                 :fill "black"})]
+                 :class "handle-icon"
+                 :fill "black"})
+               [:rect.click-area
+                {:width 16
+                 :height 16
+                 :fill "transparent"
+                 :on-click #(->> (msg/update-fact-part props {})
+                                 (msg/send! owner))
+                 }]
+               ]
               
               ])]]])))))
 

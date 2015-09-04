@@ -34,6 +34,10 @@
              "Kanopi"]]
            [:div.navbar-center
             (icons/search {})
+            ;; TODO: this breaks when screen width <= 544px
+            ;; Consider a clever interface, maybe only the searchglass
+            ;; icon, when clicked, cover entire header with typeahead
+            ;; search.
             [:span.search
              (om/build typeahead/typeahead props
                        {:init-state {:display-fn schema/display-entity

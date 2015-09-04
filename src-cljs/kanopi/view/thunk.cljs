@@ -24,7 +24,7 @@
 
 (defn- corner-styling [size n]
   (let [corner (corner? size n)]
-    (case corner
+    (case "foo" ;;corner
       :top-left
       {:border-top "1px solid black"
        :border-left "1px solid black"}
@@ -66,7 +66,7 @@
                                           (js/Math.sqrt size))))
                  :let []
                  :when (:db/id thunk)]
-             [:div.context-thunk-cell.col-xs-3.vcenter
+             [:div.context-thunk-cell.col-xs-1.col-md-3.vcenter
               {:style (cond-> {}
                         true
                         (merge (corner-styling size (inc idx)))
@@ -88,7 +88,7 @@
       (let []
         (html
          [:div.row
-          [:div.thunk-body.col-xs-offset-3.col-xs-6
+          [:div.thunk-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
            [:div.thunk-title
             [:h1 (get props :thunk/label)]]
            [:div.thunk-facts
@@ -121,7 +121,7 @@
                                          (js/Math.sqrt size))))
                 :let [_ (println thunk)]
                 :when (:db/id thunk)]
-            [:div.similar-thunk-cell.vcenter.col-xs-3
+            [:div.similar-thunk-cell.vcenter.col-xs-1.col-md-3
              {:style (cond-> {}
                        true
                        (merge (corner-styling size (inc idx)))

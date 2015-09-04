@@ -20,7 +20,7 @@
    :verb :toggle-mode
    :context {}))
 
-(defn update-fact-attribute [ent v]
+(defn update-fact-part [ent v]
   (hash-map
    :noun nil))
 

@@ -38,6 +38,17 @@ a:hover {
     list-style: none;
 }
 
+/* Overrides bootstrap styling when width < 768px. */
+.header .navbar-header {
+    float: left;
+}
+/* Overrides bootstrap styling when width < 768px. */
+.header .navbar-right {
+    float: right;
+    margin: 0;
+    margin-right: -15px;
+}
+
 .navbar-center {
     color: #777;
     position: fixed;
@@ -62,12 +73,15 @@ a:hover {
 }
 /* Thunks */
 .thunk-container {
-    padding-top: 60px;
-    padding-bottom: 60px;
+    padding-top: 20px;
+    padding-bottom: 40px;
 }
 .thunk-body {
-    padding-top: 40px;
+    padding-top: 20px;
     padding-bottom: 40px;
+}
+.thunk-title {
+    padding-bottom: 24px;
 }
 .context-thunk-cell, .similar-thunk-cell {
     text-align: center;
@@ -85,6 +99,9 @@ a:hover {
 }
 .fact-body {
     width: 100%;
+}
+.click-area {
+    cursor: pointer;
 }
 
 /* Input Fields */
