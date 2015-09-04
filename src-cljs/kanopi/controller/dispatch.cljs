@@ -32,6 +32,7 @@
             )
 
           ]
+      ;; TODO: batch and log all data on ether log channel
       (assoc this :kill-channels (concat local-kill-chs remote-kill-chs))))
 
   (stop [this]

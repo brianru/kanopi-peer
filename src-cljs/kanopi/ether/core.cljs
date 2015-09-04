@@ -104,11 +104,13 @@
   for a sequence of keywords."
   [& dimension-keys]
   (let [publisher    (async/chan 100)
+        log-chan     (async/chan (async/sliding-buffer 100))
         pub-mult     (async/mult publisher)
         taps         (map (partial mk-tap pub-mult) dimension-keys)
         pub-keys     (map publication-keyword dimension-keys)
         publications (map async/pub taps dimension-keys)]
-    (merge {:publisher publisher}
+    (merge {:publisher publisher
+            :log       (async/tap pub-mult log-chan)}
            (zipmap pub-keys publications))))
 
 (defn- get-publication [ether dimension]
