@@ -98,7 +98,7 @@
                 {:width 16
                  :height 16
                  :fill "transparent"
-                 :on-click #(->> (msg/update-fact-part props {})
+                 :on-click #(->> (msg/update-fact props {})
                                  (msg/send! owner))
                  }]
                ]

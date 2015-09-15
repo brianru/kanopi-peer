@@ -6,8 +6,8 @@
             [com.stuartsierra.component :as component]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [environ.core :refer [env]]
-            [kanopi.system :refer [new-system]]
-            [kanopi.main :refer [default-config]]
+            [kanopi.system :as sys]
+            [kanopi.main]
 
             ;[kanopi.generators :as ngen]
             [clojure.test.check.generators :as gen]
@@ -22,7 +22,7 @@
 (defonce system nil)
 
 (defn init []
-  (alter-var-root #'system (constantly (new-system default-config))))
+  (alter-var-root #'system (constantly (sys/new-system kanopi.main/default-config))))
 
 (defn start []
   (alter-var-root #'system component/start))

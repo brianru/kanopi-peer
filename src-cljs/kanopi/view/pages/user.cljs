@@ -52,7 +52,13 @@
   )
 
 (defn- register! [owner creds]
-  nil)
+  (println "here")
+  (http/POST (browser/route-for owner :register)
+             {:params creds
+              :handler (fn [resp]
+                         (println "success" resp))
+              :error-handler (fn [resp]
+                               (println "error" resp))}))
 
 (defn register [props owner opts]
   (reify

@@ -7,6 +7,7 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.controller.handlers :as handlers]
+            [om.core :as om]
             [kanopi.ether.core :as ether]))
 
 (defrecord Dispatcher [config ether app-state kill-channels]
@@ -25,7 +26,8 @@
           (doseq [vrb local-verbs]
             (ether/listen*
              (:ether ether) :verb vrb
-             {:handlerfn (partial handlers/local-event-handler (:app-state app-state))}))
+             {:handlerfn (partial handlers/local-event-handler
+                                  (om/root-cursor (:app-state app-state)))}))
 
           remote-kill-chs
           (doseq [vrb remote-verbs]

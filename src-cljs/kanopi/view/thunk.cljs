@@ -7,6 +7,8 @@
             [cljs.core.async :as async]
             [ajax.core :as http]
             [kanopi.util.browser :as browser]
+            [kanopi.model.message :as msg]
+            [kanopi.view.widgets.input-field :as input]
             ))
 
 (defn- corner?
@@ -24,7 +26,7 @@
 
 (defn- corner-styling [size n]
   (let [corner (corner? size n)]
-    (case "foo" ;;corner
+    (case false ;;corner
       :top-left
       {:border-top "1px solid black"
        :border-left "1px solid black"}
@@ -66,7 +68,7 @@
                                           (js/Math.sqrt size))))
                  :let []
                  :when (:db/id thunk)]
-             [:div.context-thunk-cell.col-xs-1.col-md-3.vcenter
+             [:div.context-thunk-cell.col-xs-3.col-md-3.vcenter
               {:style (cond-> {}
                         true
                         (merge (corner-styling size (inc idx)))
@@ -83,6 +85,10 @@
     (display-name [_]
       (str "thunk-body"))
 
+    om/IWillUpdate
+    (will-update [this next-props next-state]
+      (println "will-update" next-props))
+
     om/IRender
     (render [_]
       (let []
@@ -90,10 +96,18 @@
          [:div.row
           [:div.thunk-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
            [:div.thunk-title
-            [:h1 (get props :thunk/label)]]
+            (om/build input/editable-value props
+                      {:init-state {:edit-key :thunk/label
+                                    :submit-value
+                                    (fn [label']
+                                      (->> (assoc (om/get-props owner) :thunk/label label')
+                                           (msg/update-entity-value (om/get-props owner))
+                                           (msg/send! owner)))}})
+            ;;[:h1 (get props :thunk/label)]
+            ]
            [:div.thunk-facts
             (for [f (:thunk/fact props)]
-              (om/build fact/container f))
+              (om/build fact/container f {:key-fn :db/id}))
             (om/build fact/new-fact props)]
            ]
           ])))
@@ -121,7 +135,7 @@
                                          (js/Math.sqrt size))))
                 :let [_ (println thunk)]
                 :when (:db/id thunk)]
-            [:div.similar-thunk-cell.vcenter.col-xs-1.col-md-3
+            [:div.similar-thunk-cell.vcenter.col-xs-3.col-md-3
              {:style (cond-> {}
                        true
                        (merge (corner-styling size (inc idx)))

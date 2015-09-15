@@ -2,6 +2,14 @@ body {
     /* for navbar-fixed-top */
     padding-top: 70px;
 }
+/*
+.header, body {
+    background-color: gray !important;
+    color: lightgrey !important;
+    border-color: lightgrey !important;
+}
+.header.navbar { border: none; }
+*/
 .vcenter {
     display: flex;
     align-items: center;
@@ -12,7 +20,7 @@ input {
     border: none;
     -webkit-appearance: none;
     background-color: inherit;
-    border-bottom: 1px solid #777;
+    border-bottom: 1px solid lightgrey;
     display: inline-block;
     line-height: 2rem !important;
     margin: 0 0.5rem !important;
@@ -50,7 +58,7 @@ a:hover {
 }
 
 .navbar-center {
-    color: #777;
+ /*   color: #777; */
     position: fixed;
     min-width: 100px;
     width: 40%;
@@ -106,10 +114,13 @@ a:hover {
 
 /* Input Fields */
 .editable-text-container {
+    display: inline-block;
+    width: 100%;
 }
 .view-editable-text {
     font-size: 16px;
     padding-right: 0.5rem;
+    width: 100%;
  /*   cursor: pointer; */
     /*
     max-width: 75%;
@@ -121,6 +132,7 @@ a:hover {
 }
 .edit-editable-text {
     font-size: 16px;
+    width: 100%;
 }
 .input-textarea {
     font-size: 12px;

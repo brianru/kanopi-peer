@@ -1,5 +1,7 @@
 (ns kanopi.controller.handlers
-  "All app-state transformations are defined here."
+  "All app-state transformations are defined here.
+  
+  TODO: refactor to work with om cursors instead of atoms."
   (:require [om.core :as om]
             [kanopi.util.core :as util]
             [taoensso.timbre :as timbre
@@ -16,40 +18,8 @@
   [app-state msg]
   (info msg))
 
-(defn- fuzzy-search-entity [q ent]
-  (cond
-   (not (clojure.string/blank? (get ent :thunk/label "")))
-   (list (util/levenshtein q (:thunk/label ent)) ent)
-
-   (not (clojure.string/blank? (get ent :value/string "")))
-   (list (util/levenshtein q (:value/string ent)) ent)
-
-   :default
-   nil))
-
-(defn- local-fulltext-search
-  "TODO: sort by match quality
-  https://github.com/Yomguithereal/clj-fuzzy
-  TODO: handle upper- vs lower-case better
-  TODO: only show x many
-  TODO: deal with empty q better
-  "
-  [app-state q]
-  (let []
-    (->> (get-in app-state [:cache])
-         (vals)
-         (map (partial fuzzy-search-entity q))
-         (remove nil?)
-         (sort-by first)
-         (vec))))
-
-(defmethod local-event-handler :search
-  [app-state msg]
-  (swap! app-state
-         (fn [app-state]
-           (let [{:keys [query]} (get msg :noun)
-                 results (local-fulltext-search app-state query)]
-             (assoc-in app-state [:search-results query] results)))))
+(defn- current-thunk [props]
+  (get-in props [:thunk :thunk :db/id]))
 
 (defn- lookup-id
   ([props id]
@@ -89,10 +59,68 @@
         thunk' (build-thunk-data props thunk-id)]
     (assoc props :thunk thunk')))
 
+(defn- ensure-current-thunk-is-updated [props edited-ent-id]
+  (if (= edited-ent-id (current-thunk props))
+    (let []
+      (assoc props :thunk (build-thunk-data props edited-ent-id)))
+    props))
+
+(defmethod local-event-handler :change-entity-type
+  [app-state msg]
+  )
+
+(defmethod local-event-handler :update-entity-value
+  [app-state msg]
+  (om/transact! app-state
+                (fn [app-state]
+                  (let [ent-id (get-in msg [:noun :existing-entity :db/id])
+                        ent'   (get-in msg [:noun :new-value])]
+                    (println ent-id (get-in app-state [:cache ent-id]) ent')
+                    (-> app-state
+                        (assoc-in [:cache ent-id] ent')
+                        (ensure-current-thunk-is-updated ent-id))))))
+
+(defn- fuzzy-search-entity [q ent]
+  (cond
+   (not (clojure.string/blank? (get ent :thunk/label "")))
+   (list (util/levenshtein q (:thunk/label ent)) ent)
+
+   (not (clojure.string/blank? (get ent :value/string "")))
+   (list (util/levenshtein q (:value/string ent)) ent)
+
+   :default
+   nil))
+
+(defn- local-fulltext-search
+  "TODO: sort by match quality
+  https://github.com/Yomguithereal/clj-fuzzy
+  TODO: handle upper- vs lower-case better
+  TODO: only show x many
+  TODO: deal with empty q better
+  "
+  [app-state q]
+  (let []
+    (->> (get-in app-state [:cache])
+         (vals)
+         (map (partial fuzzy-search-entity q))
+         (remove nil?)
+         (sort-by first)
+         (vec))))
+
+(defmethod local-event-handler :search
+  [app-state msg]
+  (om/transact! app-state
+         (fn [app-state]
+           (let [{:keys [query]} (get msg :noun)
+                 results (local-fulltext-search app-state query)]
+             (assoc-in app-state [:search-results query] results)))))
+
+
+
 (defmethod local-event-handler :navigate
   [app-state msg]
   (let [handler (get-in msg [:noun :handler])]
-    (swap! app-state
+    (om/transact! app-state
            (fn [app-state]
              (cond-> app-state
                true

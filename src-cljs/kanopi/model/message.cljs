@@ -20,9 +20,11 @@
    :verb :toggle-mode
    :context {}))
 
-(defn update-fact-part [ent v]
+(defn update-fact [ent v]
   (hash-map
-   :noun nil))
+   :noun nil
+   :verb :update-fact
+   :context {}))
 
 (defn change-entity-type [ent desired-type]
   (hash-map

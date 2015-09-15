@@ -18,7 +18,12 @@
   (handler-fn (.. e -target -value))
   (om/set-state! owner :new-value nil))
 
-(defn editable-value [props owner opts]
+(defn editable-value
+  "Required initial state:
+     edit-key for accessing value to be edited from props
+     submit-value
+  "
+  [props owner opts]
   (reify
     om/IInitState
     (init-state [_]
@@ -48,7 +53,7 @@
            {:style       {:display (when-not editing "none")}
             :ref         "text-field"
             :type        "text"
-            :value       (get state :new-value)
+            :value       (or (get state :new-value) (get props edit-key))
             :placeholder (get state :placeholder)
             :on-change   #(handle-change % owner :new-value)
             :on-key-down #(when (= (.-key %) "Enter")

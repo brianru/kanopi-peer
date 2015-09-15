@@ -118,17 +118,27 @@
 
 (defresource logout-resource
   :allowed-methods [:get]
-  :available-media-types ["text/html"]
+  :available-media-types ["text/html"
+                          "application/transit+json"
+                          "application/edn"
+                          "application/json"]
   :handle-ok logout!)
 
 (defresource login-resource
   :allowed-methods [:get]
-  :available-media-types ["text/html"]
+  :available-media-types ["text/html"
+                          ;;"application/transit+json"
+                          ;;"application/edn"
+                          ;;"application/json"
+                          ]
   :handle-ok login-page)
 
 (defresource registration-resource
   :allowed-methods [:get :post]
-  :available-media-types ["text/html"]
+  :available-media-types ["text/html"
+                          "application/transit+json"
+                          "application/edn"
+                          "application/json"]
   :handle-ok registration-page
   :post! register!
   :post-redirect? success?)
