@@ -25,22 +25,23 @@
                           "thunk/"   {[:id ""] :thunk}
                           "settings" :settings}])
 
-(defn- set-page! [ether match]
+(defn- send-set-page-msg! [ether match]
   (async/put! (get-in ether [:ether :publisher])
               {:noun match
                :verb :navigate
                :context nil}))
 
-(defrecord Html5History [config routes route-for history ether]
+(defrecord Html5History [config routes route-for set-page! history ether]
   component/Lifecycle
   (start [this]
-    (let [hist (pushy/pushy (partial set-page! ether)
+    (let [hist (pushy/pushy (partial send-set-page-msg! ether)
                             (partial bidi/match-route default-routes))]
       (info "start html5 history")
       (pushy/start! hist)
       (assoc this :history hist
              :routes default-routes
-             :route-for (partial bidi/path-for default-routes))))
+             :route-for (partial bidi/path-for default-routes)
+             :set-page! (partial pushy/set-token! hist))))
 
   (stop [this]
     (pushy/stop! history)

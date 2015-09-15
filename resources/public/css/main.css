@@ -85,6 +85,18 @@ a:hover {
     left: 5px;
     width: 100%;
 }
+.dropdown-menu-item-marker {
+    position: absolute;
+    display: inline-block;
+    width: 0;
+    height: 0;
+    margin-top: 0.75rem;
+    margin-left: 0.75rem;
+    vertical-align: middle;
+    border-left: 4px dashed;
+    border-top: 4px solid transparent;
+    border-bottom: 4px solid transparent;
+}
 .dropdown-menu-item > a {
     text-overflow: ellipsis;
     overflow: hidden;

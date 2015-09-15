@@ -11,6 +11,7 @@
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
             [kanopi.view.widgets.dropdown :as dropdown]
+            [kanopi.util.browser :as browser]
             [kanopi.util.async :as async-util]
             [kanopi.ether.core :as ether]))
 
@@ -32,12 +33,18 @@
                               x)))
         (. evt preventDefault))
     "Enter"
+    (let [[_ selected-result] (nth search-results (om/get-state owner :selection-index))]
+      (println "here" selected-result)
+      (om/update-state! owner
+                        (fn [state]
+                          (assoc state :focused false
+                                 :input-value (schema/get-value selected-result))))
+      (when-let [href-fn (om/get-state owner :href-fn)]
+        (println "here")
+        (browser/set-page! owner (href-fn selected-result))))
+    "Escape"
     (do
-     (info "enter!" (nth search-results (om/get-state owner :selection-index)))
-     ;; TODO: select the value! whatever that
-     ;; means.
-     )
-    ;; TODO: escape to cancel?
+     (om/set-state! owner :focused false))
 
     ;; default
     nil))
@@ -108,8 +115,11 @@
                                "inherit")}}
            (for [[idx [score res]] (map-indexed vector search-results)]
              [:li.dropdown-menu-item
-              [:a {:style    {:font-weight (when (= idx (get state :selection-index))
-                                             "500")}
+              (when (= idx (get state :selection-index))
+                [:span.dropdown-menu-item-marker])
+              [:a {
+                   ;;:style    {:font-weight (when (= idx (get state :selection-index))
+                   ;;                          "500")}
                    :href     ((get state :href-fn) res)
                    :on-click (juxt (partial (get state :on-click) res)
                                    (partial handle-result-click owner res))
