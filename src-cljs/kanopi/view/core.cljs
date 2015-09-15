@@ -73,6 +73,8 @@
   (om/root root-component
            app-state
            {:target container
+            ;; TODO: add some config stuff to the shared state
+            ;; (dev-mode?)
             :shared (merge
                      {:ether (:ether ether)
                       :history history}

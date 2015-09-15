@@ -20,24 +20,18 @@
    :verb :toggle-mode
    :context {}))
 
-(defn update-fact [ent v]
+(defn update-fact [thunk-id fact]
   (hash-map
-   :noun nil
+   :noun {:thunk-id thunk-id
+          :fact fact}
    :verb :update-fact
    :context {}))
 
-(defn change-entity-type [ent desired-type]
+(defn update-thunk-label [ent new-label]
   (hash-map
    :noun {:existing-entity ent
-          :desired-type desired-type}
-   :verb :change-entity-type
-   :context {}))
-
-(defn update-entity-value [ent new-value]
-  (hash-map
-   :noun {:existing-entity ent
-          :new-value new-value}
-   :verb :update-entity-value
+          :new-label new-label}
+   :verb :update-thunk-label
    :context {}))
 
 (defn search [q]

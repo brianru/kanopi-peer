@@ -81,11 +81,12 @@
               [:g {:transform "translate(0,24)"}
                (icons/svg-restore
                 {:transform (icons/transform-scale :from 48 :to 16)
-                 :fill "black"})
+                 :fill "lightgray"})
                [:rect.click-area
                 {:width 16
                  :height 16
                  :fill "transparent"
+                 :style {:cursor "inherit"}
                  :on-click #(println "implement history")
                  }]
                ]
@@ -148,6 +149,11 @@
          [:div.fact-attribute
           {:on-mouse-enter #(om/set-state! owner :hovering true)
            :on-mouse-leave #(om/set-state! owner :hovering false)}
+
+          (when true ;;; dev-mode
+            [:span (str (:fact-part state)
+                        ": " (get-in state [:matching-entity :db/id]))])
+
           (case mode
             :view
             [:div.view-fact-part
@@ -192,7 +198,9 @@
                   (om/build typeahead/typeahead props
                             {:state
                              {:element-type (browser/input-element-for-entity-type
-                                             (or selected-type part-type))}
+                                             (or selected-type part-type))
+                              }
+
                              :init-state
                              {:input-value (schema/display-entity props)
                               :on-click
@@ -202,8 +210,8 @@
                                  (fn [existing]
                                    (assoc existing
                                           :entered-value (schema/get-value res)
-                                          :matching-entity res))))}
-                             })]]
+                                          :matching-entity res))))
+                              }})]]
                 ]]))
           ])))
     ))

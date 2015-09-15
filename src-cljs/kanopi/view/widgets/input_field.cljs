@@ -13,8 +13,8 @@
 (defn- handle-change [e owner korks]
   (om/set-state! owner korks (.. e -target -value)))
 
-(defn- end-edit [e owner korks handler-fn]
-  (om/set-state! owner korks false)
+(defn- end-edit [e owner editing-state-korks handler-fn]
+  (om/set-state! owner editing-state-korks false)
   (handler-fn (.. e -target -value))
   (om/set-state! owner :new-value nil))
 
@@ -57,7 +57,8 @@
             :placeholder (get state :placeholder)
             :on-change   #(handle-change % owner :new-value)
             :on-key-down #(when (= (.-key %) "Enter")
-                            (end-edit % owner :editing submit-value))
+                            ;; NOTE: this triggers on-blur.
+                            (om/set-state! owner :editing false))
             :on-blur     #(end-edit % owner :editing submit-value)}]
           #_(when (get state :edit-icon-enabled)
               (icons/edit-in-place {:style {:display (when (or (not hovering)

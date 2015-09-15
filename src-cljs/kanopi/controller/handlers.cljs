@@ -4,6 +4,7 @@
   TODO: refactor to work with om cursors instead of atoms."
   (:require [om.core :as om]
             [kanopi.util.core :as util]
+            [cljs-uuid-utils.core :refer (make-random-uuid)]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             ))
@@ -69,16 +70,34 @@
   [app-state msg]
   )
 
-(defmethod local-event-handler :update-entity-value
+(defmethod local-event-handler :update-thunk-label
   [app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (let [ent-id (get-in msg [:noun :existing-entity :db/id])
-                        ent'   (get-in msg [:noun :new-value])]
-                    (println ent-id (get-in app-state [:cache ent-id]) ent')
+                        label' (get-in msg [:noun :new-label])]
                     (-> app-state
-                        (assoc-in [:cache ent-id] ent')
+                        (assoc-in [:cache ent-id :thunk/label] label')
                         (ensure-current-thunk-is-updated ent-id))))))
+
+(defmethod local-event-handler :update-fact
+  [app-state msg]
+  (om/transact! app-state
+                (fn [app-state]
+                  (let [thunk-id (get-in msg [:noun :thunk-id])
+                        fact     (get-in msg [:noun :fact])
+                        [is-new-fact fact'] (if (:db/id fact)
+                                              [false fact]
+                                              [true  (assoc fact :db/id (make-random-uuid))])
+                        ]
+                    (cond-> (assoc-in app-state [:cache (:db/id fact')] fact')
+
+                      is-new-fact
+                      (update-in [:cache thunk-id :thunk/fact] #(conj % (:db/id fact')))
+                      
+                      true
+                      (ensure-current-thunk-is-updated thunk-id))
+                    ))))
 
 (defn- fuzzy-search-entity [q ent]
   (cond

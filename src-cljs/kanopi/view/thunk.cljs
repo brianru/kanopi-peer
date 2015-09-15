@@ -100,10 +100,9 @@
                       {:init-state {:edit-key :thunk/label
                                     :submit-value
                                     (fn [label']
-                                      (->> (assoc (om/get-props owner) :thunk/label label')
-                                           (msg/update-entity-value (om/get-props owner))
+                                      (->> label'
+                                           (msg/update-thunk-label (om/get-props owner))
                                            (msg/send! owner)))}})
-            ;;[:h1 (get props :thunk/label)]
             ]
            [:div.thunk-facts
             (for [f (:thunk/fact props)]
@@ -133,7 +132,6 @@
                                  (take (if (get state :expand)
                                          size
                                          (js/Math.sqrt size))))
-                :let [_ (println thunk)]
                 :when (:db/id thunk)]
             [:div.similar-thunk-cell.vcenter.col-xs-3.col-md-3
              {:style (cond-> {}
