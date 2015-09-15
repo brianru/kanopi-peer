@@ -85,10 +85,6 @@
     (display-name [_]
       (str "thunk-body"))
 
-    om/IWillUpdate
-    (will-update [this next-props next-state]
-      (println "will-update" next-props))
-
     om/IRender
     (render [_]
       (let []

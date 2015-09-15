@@ -17,7 +17,9 @@
 
 (defn- handle-key-down
   [owner evt search-results]
+ 
   (case (.-key evt)
+
     "ArrowDown"
     (do (om/update-state! owner :selection-index
                           (fn [x]
@@ -25,6 +27,7 @@
                               (inc x)
                               x)))
         (. evt preventDefault))
+
     "ArrowUp"
     (do (om/update-state! owner :selection-index
                           (fn [x]
@@ -32,16 +35,25 @@
                               (dec x)
                               x)))
         (. evt preventDefault))
+
     "Enter"
     (let [[_ selected-result] (nth search-results (om/get-state owner :selection-index))]
-      (println "here" selected-result)
       (om/update-state! owner
                         (fn [state]
                           (assoc state :focused false
                                  :input-value (schema/get-value selected-result))))
-      (when-let [href-fn (om/get-state owner :href-fn)]
-        (println "here")
-        (browser/set-page! owner (href-fn selected-result))))
+      ;; href-fn always exists, but should only be used when it
+      ;; produces a truthy value. by default it always evaluates to
+      ;; nil.
+      (when-let [href ((om/get-state owner :href-fn) selected-result) ]
+        (browser/set-page! owner href))
+
+      ;; on-click fn is side-effecting, so it may always be called
+      ;; even if its default is used, which always evaluates to nil
+      ((om/get-state owner :on-click) selected-result evt)
+
+      (.. evt -target (blur)))
+
     "Escape"
     (do
      (om/set-state! owner :focused false))
@@ -83,8 +95,15 @@
                      (async-util/debounce 100)
                      (async/pipe (om/get-shared owner [:ether :publisher])))
        :display-fn schema/display-entity
+
+       ;; NOTE: on-click is side-effecting
        :on-click (constantly nil)
+       ;; NOTE: href-fn is a pure function which returns a url path
        :href-fn (constantly nil)
+       ;; SUMMARY: these 2 are different because their usage in web
+       ;; browsers is different. we're just sticking to that. when
+       ;; href's value is nil the browser ignores it. 
+
        :selection-index 0
        :input-value nil
        })
@@ -118,8 +137,6 @@
               (when (= idx (get state :selection-index))
                 [:span.dropdown-menu-item-marker])
               [:a {
-                   ;;:style    {:font-weight (when (= idx (get state :selection-index))
-                   ;;                          "500")}
                    :href     ((get state :href-fn) res)
                    :on-click (juxt (partial (get state :on-click) res)
                                    (partial handle-result-click owner res))

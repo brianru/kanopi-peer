@@ -5,6 +5,7 @@
   (apply (om/get-shared owner [:history :route-for]) args))
 
 (defn set-page! [owner path]
+  {:pre [(string? path)]}
   ((om/get-shared owner [:history :set-page!]) path))
 
 (defn input-element-for-entity-type [tp]
