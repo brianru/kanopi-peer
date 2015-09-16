@@ -37,20 +37,21 @@
         (. evt preventDefault))
 
     "Enter"
-    (let [[_ selected-result] (nth search-results (om/get-state owner :selection-index))]
-      (om/update-state! owner
-                        (fn [state]
-                          (assoc state :focused false
-                                 :input-value (schema/get-value selected-result))))
-      ;; href-fn always exists, but should only be used when it
-      ;; produces a truthy value. by default it always evaluates to
-      ;; nil.
-      (when-let [href ((om/get-state owner :href-fn) selected-result) ]
-        (browser/set-page! owner href))
+    (let [[_ selected-result] (nth search-results
+                                   (om/get-state owner :selection-index)
+                                   nil)
+          ]
+      (when selected-result
+        (handle-result-click owner selected-result evt) 
+        ;; href-fn always exists, but should only be used when it
+        ;; produces a truthy value. by default it always evaluates to
+        ;; nil.
+        (when-let [href ((om/get-state owner :href-fn) selected-result) ]
+          (browser/set-page! owner href))
 
-      ;; on-click fn is side-effecting, so it may always be called
-      ;; even if its default is used, which always evaluates to nil
-      ((om/get-state owner :on-click) selected-result evt)
+        ;; on-click fn is side-effecting, so it may always be called
+        ;; even if its default is used, which always evaluates to nil
+        ((om/get-state owner :on-click) selected-result evt))
 
       (.. evt -target (blur)))
 
@@ -63,10 +64,12 @@
 
 (defn- handle-result-click
   [owner res evt]
-  (om/update-state! owner
-                    (fn [state]
-                      (assoc state :focused false
-                             :input-value (schema/get-value res)))))
+  (om/update-state!
+   owner
+   (fn [state]
+     (assoc state
+            :focused false
+            :input-value (schema/get-value res)))))
 
 (defn- element-specific-attrs
   [{:keys [element-type] :as state}]

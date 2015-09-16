@@ -43,6 +43,7 @@
     [:g.handle-contents
      {:transform "translate(4, 4)"}
      (cond
+
       (and (= mode :view) hovering)
       [:g.handle-hover-contents
        {:transform "translate(2.5, 2.5)"}
@@ -74,8 +75,7 @@
           :fill "green"
           :style {:cursor "inherit"}
           :on-click history-handler
-          }]
-        ]
+          }]]
        [:g {:transform "translate(0,48)"}
         (icons/svg-done
          {:transform (icons/transform-scale :from 48 :to 16)
@@ -85,10 +85,19 @@
          {:width 16
           :height 16
           :fill "green"
-          :on-click submit-handler}]
-        ]
+          :on-click submit-handler
+          }]]
 
        ])]))
+
+(defn- merge-updated-data [owner]
+  (let [state (om/get-state owner)
+        fact  (om/get-props owner)]
+    {:db/id (:db/id fact)
+     :fact/attribute #{(:db/id (merge (first (:fact/attribute fact))
+                                      (:fact/attribute state)))}
+     :fact/value     #{(:db/id (merge (first (:fact/value fact))
+                                      (:fact/value state)))}}))
 
 (defn handle
   "TODO: anchor for drag & drop reordering of facts
@@ -116,23 +125,31 @@
             :hovering fact-hovering
             :cancel-handler (constantly nil)
             :history-handler (constantly nil)
-            ;; TODO: populate that empty map
-            :submit-handler #(->> (msg/update-fact props {})
-                                  (msg/send! owner)))
+            :submit-handler (fn []
+                              (->> (msg/update-fact (om/get-state owner :thunk-id)
+                                                    (merge-updated-data owner))
+                                   (msg/send! owner))))
            ]])))))
 
-;; TODO: send msg to fact container
 (defn- handle-type-selection [owner tp evt]
-  (om/set-state! owner :selected-type tp))
+  (om/set-state! owner :selected-type tp)
+  (->> (msg/select-fact-part-type (om/get-state owner :fact)
+                                  (om/get-state owner :fact-part)
+                                  tp)
+       (msg/send! owner)))
 
-;; TODO: send msg to fact container
 (defn- handle-result-selection [owner res evt]
   (om/update-state!
    owner
    (fn [existing]
      (assoc existing
+            :selected-type (schema/describe-entity res)
             :entered-value (schema/get-value res)
-            :matching-entity res))))
+            :matching-entity res)))
+  (->> (msg/select-fact-part-reference (om/get-state owner :fact)
+                                       (om/get-state owner :fact-part)
+                                       res)
+       (msg/send! owner)))
 
 (defn fact-part
   "Here's how this works.
@@ -165,7 +182,10 @@
     (init-state [_]
       {:hovering false
        
-       :selected-type nil
+       :selected-type (let [desc (schema/describe-entity props)]
+                        (if (= :unknown desc)
+                          :literal/text
+                          desc))
        :entered-value ""
        :matching-entity props
        })
@@ -226,7 +246,6 @@
                              {:element-type (browser/input-element-for-entity-type
                                              (or selected-type part-type))
                               }
-
                              :init-state
                              {:input-value (schema/display-entity props)
                               :on-click    (partial handle-result-selection owner)
@@ -251,9 +270,14 @@
            :on-mouse-leave #(om/set-state! owner :fact-hovering false)}
           [:div.inline-10-percent.col-xs-1
            (om/build handle props
-                     {:state (select-keys state [:mode :fact-hovering])})]
+                     {:state (select-keys
+                              state [:mode :thunk-id :fact-hovering
+                                     :fact/attribute :fact/value])})]
 
           [:div.inline-90-percent.col-xs-11
+           ;; BEWARE: (get props :fact/attribute) returns a set which
+           ;; is not compatible with Om cursors. Maps and vectors
+           ;; only.)
            (om/build fact-part (first (get props :fact/attribute))
                      {:init-state {:fact (:db/id props)
                                    :fact-part :fact/attribute}
@@ -291,13 +315,22 @@
                                  :view)]
                            (om/set-state! owner :mode new-mode))
 
-                         :select-result
-                         (let [{:keys [fact-part selection]} noun]
-                           (om/set-state! owner fact-part selection))
+                         :select-fact-part-type
+                         (om/update-state!
+                          owner (get context :fact-part)
+                          #(merge % {:selected-type (get context :value)}))
 
-                         :input-value
-                         (let [{:keys [fact-part input-value]} noun]
-                           (om/set-state! owner [fact-part :input-value] input-value))
+                         :select-fact-part-reference
+                         (let []
+                           (om/update-state!
+                            owner (get context :fact-part)
+                            #(merge % (get context :selection))))
+
+                         :input-fact-part-value
+                         (let []
+                           (om/update-state!
+                            owner (get context :fact-part)
+                            (partial merge {:input-value (get context :value)})))
 
                          ;;default
                          (debug "what?" noun verb)
@@ -307,10 +340,16 @@
     (will-unmount [_]
       (ether/stop-listening! owner))
 
+    om/IWillUpdate
+    (will-update [this next-props next-state]
+      #_(info "will-update" next-state))
+
     om/IRenderState
     (render-state [_ state]
       (let []
         (html
          [:div.fact-container.container
-          (om/build body props {:state (select-keys state [:mode])})])))
+          (om/build body props
+                    {:state (select-keys state [:mode :thunk-id :fact/attribute :fact/value])}
+                    )])))
     ))

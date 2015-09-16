@@ -25,20 +25,26 @@
 
 (defn- lookup-id
   ([props id]
-   (->> (get-in props [:cache id])
-        (reduce (fn [acc [k v]]
-                  (cond
-                   (= k :thunk/fact)
-                   (assoc acc k (set (map (partial lookup-id props) v)))
-                   (= k :fact/attribute)
-                   (assoc acc k (set (map (partial lookup-id props) v)))
-                   (= k :fact/value)
-                   (assoc acc k (set (map (partial lookup-id props) v)))
+   (lookup-id props 0 id))
+  ([props depth id]
+   ;; FIXME: there is a correct depth cut-off. I don't know if this is
+   ;; it. I'm not thinking too clearly right now.
+   (if (> depth 10) id
+     (->> (get-in props [:cache id])
+          (reduce (fn [acc [k v]]
+                    (cond
+                     (= k :thunk/fact)
+                     (assoc acc k (set (map (partial lookup-id props (inc depth)) v)))
+                     (= k :fact/attribute)
+                     (assoc acc k (set (map (partial lookup-id props (inc depth)) v)))
+                     (= k :fact/value)
+                     (assoc acc k (set (map (partial lookup-id props (inc depth)) v)))
 
-                   :default
-                   (assoc acc k v)))
-                {})
-        )))
+                     :default
+                     (assoc acc k v)))
+                  {})
+          ))
+   ))
 
 (def placeholder-fact
   {:db/id nil
@@ -69,22 +75,9 @@
 (defn- ensure-current-thunk-is-updated [props edited-ent-id]
   (if (= edited-ent-id (current-thunk props))
     (let []
+      (println "update current thunk")
       (assoc props :thunk (build-thunk-data props edited-ent-id)))
     props))
-
-(defmethod local-event-handler :change-entity-type
-  [app-state msg]
-  )
-
-(defmethod local-event-handler :update-thunk-label
-  [app-state msg]
-  (om/transact! app-state
-                (fn [app-state]
-                  (let [ent-id (get-in msg [:noun :existing-entity :db/id])
-                        label' (get-in msg [:noun :new-label])]
-                    (-> app-state
-                        (assoc-in [:cache ent-id :thunk/label] label')
-                        (ensure-current-thunk-is-updated ent-id))))))
 
 (defmethod local-event-handler :update-fact
   [app-state msg]
@@ -96,6 +89,7 @@
                                               [false fact]
                                               [true  (assoc fact :db/id (make-random-uuid))])
                         ]
+                    (println "here" is-new-fact fact')
                     (cond-> (assoc-in app-state [:cache (:db/id fact')] fact')
 
                       is-new-fact
@@ -103,7 +97,18 @@
                       
                       true
                       (ensure-current-thunk-is-updated thunk-id))
-                    ))))
+                    )))
+  (println (get-in @app-state [:thunk :thunk :thunk/fact])))
+
+(defmethod local-event-handler :update-thunk-label
+  [app-state msg]
+  (om/transact! app-state
+                (fn [app-state]
+                  (let [ent-id (get-in msg [:noun :existing-entity :db/id])
+                        label' (get-in msg [:noun :new-label])]
+                    (-> app-state
+                        (assoc-in [:cache ent-id :thunk/label] label')
+                        (ensure-current-thunk-is-updated ent-id))))))
 
 (defn- fuzzy-search-entity [q ent]
   (let [base-string (->> ent

@@ -17,22 +17,36 @@
    nil
    ))
 
+;; local component message
 (defn toggle-fact-mode [ent]
   (hash-map
    :noun [:fact (:db/id ent)]
    :verb :toggle-mode
    :context {}))
 
-(defn select-fact-part-type [fact-id tp]
+;; local component message
+(defn select-fact-part-type [fact-id fact-part tp]
   (hash-map
    :noun [:fact fact-id]
-   ))
+   :verb :select-fact-part-type
+   :context {:fact-part fact-part
+             :value tp}))
 
-(defn input-fact-part-value [fact-id input-value]
-  )
+;; local component message
+(defn input-fact-part-value [fact-id fact-part input-value]
+  (hash-map
+   :noun [:fact fact-id]
+   :verb :input-fact-part-value
+   :context {:fact-part fact-part
+             :value input-value}))
 
-(defn select-fact-part-reference [fact-id selection]
-  )
+;; local component message
+(defn select-fact-part-reference [fact-id fact-part selection]
+  (hash-map
+   :noun [:fact fact-id]
+   :verb :select-fact-part-reference
+   :context {:fact-part fact-part
+             :selection selection}))
 
 (defn update-fact [thunk-id fact]
   (hash-map

@@ -18,7 +18,7 @@
     ;; seamlessly shift between offline and online, demo to
     ;; authenticated modes?
     (let [
-          local-verbs [:navigate :search :change-entity-type :update-thunk-label]
+          local-verbs [:navigate :search :update-thunk-label :update-fact]
           remote-verbs []
           _ (info "start dispatcher" local-verbs remote-verbs)
 

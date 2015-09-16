@@ -110,7 +110,8 @@
             ;; NOTE: one of the facts is a placeholder for creating a
             ;; new one
             (for [f (sort-by #(nil? (:db/id %)) (:thunk/fact props))]
-              (om/build fact/container f {:key-fn :db/id})) ]
+              (om/build fact/container f {:key-fn :db/id
+                                          :init-state {:thunk-id (:db/id props)}})) ]
            ]
           ])))
     ))
