@@ -19,6 +19,77 @@
             [kanopi.view.widgets.typeahead :as typeahead]
             ))
 
+(defn- handle-borders-group [mode]
+  [:g.handle-borders
+   {:transform "translate(4, 4)"}
+   [:path {:d "m 0 9 v -9 h 9"
+           :stroke "black"
+           :fill "transparent"}]
+   [:path {:d "m 15 6 v 9 h -9"
+           :stroke "black"
+           :transform (when (= mode :edit)
+                        "translate(0, 48)")
+
+           :fill "transparent"}]])
+
+(defn- handle-contents-group [& args]
+  (let [{:keys [mode hovering cancel-handler history-handler submit-handler]
+         :or {mode :view
+              hovering false
+              cancel-handler  (constantly nil)
+              history-handler (constantly nil)
+              submit-handler  (constantly nil)}}
+        (apply hash-map args)]
+    [:g.handle-contents
+     {:transform "translate(4, 4)"}
+     (cond
+      (and (= mode :view) hovering)
+      [:g.handle-hover-contents
+       {:transform "translate(2.5, 2.5)"}
+       [:rect.handle-mode-indicator
+        {:width "10"
+         :height "10"
+         :fill "green"
+         :opacity "0.5"}]]
+
+      (= mode :edit)
+      [:g.handle-edit-contents
+       [:g {:transform "translate(0,0)"}
+        (icons/svg-clear
+         {:transform (icons/transform-scale :from 48 :to 16)
+          :fill "black"})
+        [:rect.click-area
+         {:width 16
+          :height 16
+          :fill "transparent"
+          :on-click cancel-handler
+          }]]
+       [:g {:transform "translate(0,24)"}
+        (icons/svg-restore
+         {:transform (icons/transform-scale :from 48 :to 16)
+          :fill "lightgray"})
+        [:rect.click-area
+         {:width 16
+          :height 16
+          :fill "transparent"
+          :style {:cursor "inherit"}
+          :on-click history-handler
+          }]
+        ]
+       [:g {:transform "translate(0,48)"}
+        (icons/svg-done
+         {:transform (icons/transform-scale :from 48 :to 16)
+          :class "handle-icon"
+          :fill "black"})
+        [:rect.click-area
+         {:width 16
+          :height 16
+          :fill "transparent"
+          :on-click submit-handler}]
+        ]
+
+       ])]))
+
 (defn handle
   "TODO: anchor for drag & drop reordering of facts
   TODO: "
@@ -38,73 +109,30 @@
           {:on-click #(->> (msg/toggle-fact-mode props)
                            (msg/send! owner))}
           [:svg {:width "24px"
-                 :height (if (= mode :view)
-                           "24px" "72px")}
-           [:g.handle-borders
-            {:transform "translate(4, 4)"}
-            [:path {:d "m 0 9 v -9 h 9"
-                    :stroke "black"
-                    :fill "transparent"}]
-            [:path {:d "m 15 6 v 9 h -9"
-                    :stroke "black"
-                    :transform (when (= mode :edit)
-                                 "translate(0, 48)")
+                 :height (if (= mode :view) "24px" "72px")}
+           (handle-borders-group mode)
+           (handle-contents-group
+            :mode mode
+            :hovering fact-hovering
+            :cancel-handler (constantly nil)
+            :history-handler (constantly nil)
+            ;; TODO: populate that empty map
+            :submit-handler #(->> (msg/update-fact props {})
+                                  (msg/send! owner)))
+           ]])))))
 
-                    :fill "transparent"}]]
-           [:g.handle-contents
-            {:transform "translate(4, 4)"}
-            (cond
-             (and (= mode :view)
-                  fact-hovering)
-             [:g.handle-hover-contents
-              {:transform "translate(2.5, 2.5)"}
-              [:rect.handle-mode-indicator
-               {:width "10"
-                :height "10"
-                :fill "green"
-                :opacity "0.5"}]]
-             
-             (= mode :edit)
-             ;; TODO: implement on-click fns for each
-             ;; TODO: implement hover styling
-             [:g.handle-edit-contents
-              [:g {:transform "translate(0,0)"}
-               (icons/svg-clear
-                {:transform (icons/transform-scale :from 48 :to 16)
-                 :fill "black"})
-               [:rect.click-area
-                {:width 16
-                 :height 16
-                 :fill "transparent"
-                 :on-click #(println "hi")
-                 }]]
-              [:g {:transform "translate(0,24)"}
-               (icons/svg-restore
-                {:transform (icons/transform-scale :from 48 :to 16)
-                 :fill "lightgray"})
-               [:rect.click-area
-                {:width 16
-                 :height 16
-                 :fill "transparent"
-                 :style {:cursor "inherit"}
-                 :on-click #(println "implement history")
-                 }]
-               ]
-              [:g {:transform "translate(0,48)"}
-               (icons/svg-done
-                {:transform (icons/transform-scale :from 48 :to 16)
-                 :class "handle-icon"
-                 :fill "black"})
-               [:rect.click-area
-                {:width 16
-                 :height 16
-                 :fill "transparent"
-                 :on-click #(->> (msg/update-fact props {})
-                                 (msg/send! owner))
-                 }]
-               ]
-              
-              ])]]])))))
+;; TODO: send msg to fact container
+(defn- handle-type-selection [owner tp evt]
+  (om/set-state! owner :selected-type tp))
+
+;; TODO: send msg to fact container
+(defn- handle-result-selection [owner res evt]
+  (om/update-state!
+   owner
+   (fn [existing]
+     (assoc existing
+            :entered-value (schema/get-value res)
+            :matching-entity res))))
 
 (defn fact-part
   "Here's how this works.
@@ -170,6 +198,7 @@
               [:div.edit-fact-part
                [:span.fact-part-representation
                 (schema/display-entity props)]
+
                [:div.fact-part-metadata-container
                 [:div.type-input
                  [:label.type-input-label "type:"]
@@ -183,14 +212,12 @@
                               [{:type     :link
                                 :value    :thunk
                                 :label    "thunk"
-                                :on-click (fn [_]
-                                            (om/set-state! owner :selected-type :thunk))
+                                :on-click (partial handle-type-selection owner :thunk)
                                 }
                                {:type     :link
                                 :value    :literal/text
                                 :label    "text"
-                                :on-click (fn [_]
-                                            (om/set-state! owner :selected-type :literal/text))
+                                :on-click (partial handle-type-selection owner :literal/text)
                                 }]}})]]
                 [:div.value-input
                  [:label.value-input-label (str (text/entity-value-label props) ":")]
@@ -203,14 +230,7 @@
 
                              :init-state
                              {:input-value (schema/display-entity props)
-                              :on-click
-                              (fn [res _]
-                                (om/update-state!
-                                 owner
-                                 (fn [existing]
-                                   (assoc existing
-                                          :entered-value (schema/get-value res)
-                                          :matching-entity res))))
+                              :on-click    (partial handle-result-selection owner)
                               }})]]
                 ]]))
           ])))
@@ -256,7 +276,9 @@
 
     om/IInitState
     (init-state [_]
-      {:mode :view})
+      {:mode :view
+       :fact/attribute {:db/id nil}
+       :fact/value     {:db/id nil}})
 
     om/IWillMount
     (will-mount [_]
@@ -269,6 +291,15 @@
                                  :edit
                                  :view)]
                            (om/set-state! owner :mode new-mode))
+
+                         :select-result
+                         (let [{:keys [fact-part selection]} noun]
+                           (om/set-state! owner fact-part selection))
+
+                         :input-value
+                         (let [{:keys [fact-part input-value]} noun]
+                           (om/set-state! owner [fact-part :input-value] input-value))
+
                          ;;default
                          (debug "what?" noun verb)
                          ))
@@ -284,19 +315,3 @@
          [:div.fact-container.container
           (om/build body props {:state (select-keys state [:mode])})])))
     ))
-
-(defn new-fact
-  [props owner opts]
-  (reify
-    om/IDisplayName
-    (display-name [_]
-      (str "add-fact"))
-
-    om/IRenderState
-    (render-state [_ state]
-      (let []
-        (html
-         (om/build container {:db/id nil
-                              :fact/attribute #{{:db/id nil}}
-                              :fact/value     #{{:db/id nil}}})
-         )))))

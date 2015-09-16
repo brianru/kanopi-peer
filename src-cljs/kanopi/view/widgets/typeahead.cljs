@@ -16,7 +16,7 @@
             [kanopi.ether.core :as ether]))
 
 (defn- handle-key-down
-  [owner evt search-results]
+  [owner search-results evt]
  
   (case (.-key evt)
 
@@ -80,6 +80,12 @@
     ;; default
     {}))
 
+(defn handle-typeahead-input [owner evt]
+  (let [v (.. evt -target -value)]
+    (async/put! (om/get-state owner :input-ch) (msg/search v))
+    ((om/get-state owner :on-change) v)
+    (om/set-state! owner :input-value v)))
+
 (defn typeahead
   "Pre-load with local or cached results.
 
@@ -96,6 +102,8 @@
                      (async/pipe (msg/publisher owner)))
        :display-fn schema/display-entity
 
+       :on-change (constantly nil)
+
        ;; NOTE: on-click is side-effecting
        :on-click (constantly nil)
        ;; NOTE: href-fn is a pure function which returns a url path
@@ -109,7 +117,8 @@
        })
 
     om/IRenderState
-    (render-state [_ {:keys [focused input-ch input-value display-fn] :as state}]
+    (render-state [_ {:keys [focused input-ch input-value display-fn on-change]
+                      :as state}]
       (let [search-results
             (get ((om/get-shared owner :search-results)) input-value []) 
             ]
@@ -124,10 +133,8 @@
                   {:on-focus    #(om/set-state! owner :focused true)
                    ;:on-blur     #(om/set-state! owner :focused false)
                    :value       (get state :input-value)
-                   :on-change   #(let [v (.. % -target -value)]
-                                   (async/put! input-ch (msg/search v))
-                                   (om/set-state! owner :input-value v)) 
-                   :on-key-down #(handle-key-down owner % search-results)
+                   :on-change   (partial handle-typeahead-input owner) 
+                   :on-key-down (partial handle-key-down owner search-results)
                    }))
           [:ul.dropdown-menu.typeahead-results
            {:style {:display (when (and focused (not-empty search-results))

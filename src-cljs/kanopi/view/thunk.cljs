@@ -107,9 +107,10 @@
             [:span.thunk-type (name (schema/describe-entity props))]
             [:span.horizontal-line]]
            [:div.thunk-facts
-            (for [f (:thunk/fact props)]
-              (om/build fact/container f {:key-fn :db/id}))
-            (om/build fact/new-fact props)]
+            ;; NOTE: one of the facts is a placeholder for creating a
+            ;; new one
+            (for [f (sort-by #(nil? (:db/id %)) (:thunk/fact props))]
+              (om/build fact/container f {:key-fn :db/id})) ]
            ]
           ])))
     ))

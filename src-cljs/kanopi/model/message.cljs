@@ -23,6 +23,17 @@
    :verb :toggle-mode
    :context {}))
 
+(defn select-fact-part-type [fact-id tp]
+  (hash-map
+   :noun [:fact fact-id]
+   ))
+
+(defn input-fact-part-value [fact-id input-value]
+  )
+
+(defn select-fact-part-reference [fact-id selection]
+  )
+
 (defn update-fact [thunk-id fact]
   (hash-map
    :noun {:thunk-id thunk-id

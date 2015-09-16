@@ -40,6 +40,11 @@
                 {})
         )))
 
+(def placeholder-fact
+  {:db/id nil
+   :fact/attribute #{{:db/id nil}}
+   :fact/value     #{{:db/id nil}}})
+
 (defn- build-thunk-data
   "
   Data is stored as flat maps locally and on server, but to simplify
@@ -52,7 +57,7 @@
     (hash-map
      :context-thunks #{(lookup-id props -1008)
                        }
-     :thunk thunk
+     :thunk (update thunk :thunk/fact #(conj % placeholder-fact))
      :similar-thunks #{(lookup-id props -1016)
                        })))
 
@@ -108,7 +113,8 @@
                          )
         query-string (clojure.string/lower-case q)
         match-string (re-find (re-pattern query-string) base-string)]
-    (when-not (clojure.string/blank? base-string)
+    (when-not (or (clojure.string/blank? base-string)
+                  (clojure.string/blank? match-string))
       (list (/ (count base-string) (count match-string))
             ent)))
   )
