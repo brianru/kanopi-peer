@@ -61,7 +61,7 @@
         [:rect.click-area
          {:width 16
           :height 16
-          :fill "transparent"
+          :fill "green"
           :on-click cancel-handler
           }]]
        [:g {:transform "translate(0,24)"}
@@ -71,7 +71,7 @@
         [:rect.click-area
          {:width 16
           :height 16
-          :fill "transparent"
+          :fill "green"
           :style {:cursor "inherit"}
           :on-click history-handler
           }]
@@ -84,7 +84,7 @@
         [:rect.click-area
          {:width 16
           :height 16
-          :fill "transparent"
+          :fill "green"
           :on-click submit-handler}]
         ]
 
@@ -188,8 +188,7 @@
              [:a {:href (when-let [id (:db/id props)]
                           (browser/route-for owner :thunk :id id))}
               [:span.fact-part-representation
-               (schema/display-entity props)]
-              ]]
+               (schema/display-entity props)]]]
 
             :edit
             (let [{:keys [selected-type entered-value matching-entity]}
@@ -197,7 +196,7 @@
                   ]
               [:div.edit-fact-part
                [:span.fact-part-representation
-                (schema/display-entity props)]
+                (schema/display-entity matching-entity)]
 
                [:div.fact-part-metadata-container
                 [:div.type-input

@@ -148,8 +148,15 @@ a:hover {
 .fact-body {
     width: 100%;
 }
+/* this styling with constant fill (see fact.cljs) and varying opacity
+ * is weird
+ */
 .click-area {
     cursor: pointer;
+    opacity: 0;
+}
+.click-area:hover {
+    opacity: 0.3;
 }
 
 /* Input Fields */
@@ -203,8 +210,14 @@ a:hover {
     width: 5rem;
     padding-right: 1rem;
 }
+/* matches input element from value-input-value input */
+.type-input-value {
+    margin-left: 5px;
+    padding-left: 1px;
+}
 .type-input-value, .value-input-value {
     display: inline-block;
+    width: calc(80% - 5rem);
 }
 .view-fact-part {
     margin-bottom: inherit;
