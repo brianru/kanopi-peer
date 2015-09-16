@@ -4,6 +4,7 @@
   TODO: refactor to work with om cursors instead of atoms."
   (:require [om.core :as om]
             [kanopi.util.core :as util]
+            [kanopi.model.schema :as schema]
             [cljs-uuid-utils.core :refer (make-random-uuid)]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
@@ -100,15 +101,21 @@
                     ))))
 
 (defn- fuzzy-search-entity [q ent]
-  (cond
-   (not (clojure.string/blank? (get ent :thunk/label "")))
-   (list (util/levenshtein q (:thunk/label ent)) ent)
+  (let [base-string (->> ent
+                         ((juxt :thunk/label :value/string))
+                         (apply str)
+                         (clojure.string/lower-case)
+                         )
+        query-string (clojure.string/lower-case q)
+        match-string (re-find (re-pattern query-string) base-string)]
+    (when-not (clojure.string/blank? base-string)
+      (list (/ (count base-string) (count match-string))
+            ent)))
+  )
 
-   (not (clojure.string/blank? (get ent :value/string "")))
-   (list (util/levenshtein q (:value/string ent)) ent)
-
-   :default
-   nil))
+(defn- matching-entity-type [tp ent]
+  (if-not tp true
+    (= tp (schema/describe-entity ent))))
 
 (defn- local-fulltext-search
   "TODO: sort by match quality
@@ -117,10 +124,11 @@
   TODO: only show x many
   TODO: deal with empty q better
   "
-  [app-state q]
+  [app-state q tp]
   (let []
     (->> (get-in app-state [:cache])
          (vals)
+         (filter (partial matching-entity-type tp))
          (map (partial fuzzy-search-entity q))
          (remove nil?)
          (sort-by first)
@@ -130,9 +138,11 @@
   [app-state msg]
   (om/transact! app-state
          (fn [app-state]
-           (let [{:keys [query]} (get msg :noun)
-                 results (local-fulltext-search app-state query)]
-             (assoc-in app-state [:search-results query] results)))))
+           (let [{:keys [query-string entity-type]} (get msg :noun)
+                 results (local-fulltext-search app-state query-string entity-type)]
+             ;; wipes out map with each new search.
+             ;; not using this data structure very well
+             (assoc-in app-state [:search-results] {query-string results})))))
 
 
 

@@ -42,6 +42,14 @@ a:hover {
     font-weight: 500;
 }
 
+.horizontal-line {
+    border-bottom: 1px solid gray;
+    display: inline-block;
+    vertical-align: middle;
+    margin: 0 2rem;
+    width: 15%
+}
+
 .dropdown {
     list-style: none;
 }
@@ -114,7 +122,14 @@ a:hover {
     padding-bottom: 40px;
 }
 .thunk-title {
-    padding-bottom: 24px;
+    padding-bottom: 6px;
+}
+.thunk-type-line {
+    padding-bottom: 12px;
+    font-size: 1rem;
+    text-align: center;
+    letter-spacing: 0.3rem;
+    font-weight: 500;
 }
 .context-thunk-cell, .similar-thunk-cell {
     text-align: center;

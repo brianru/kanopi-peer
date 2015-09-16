@@ -8,6 +8,7 @@
             [ajax.core :as http]
             [kanopi.util.browser :as browser]
             [kanopi.model.message :as msg]
+            [kanopi.model.schema :as schema]
             [kanopi.view.widgets.input-field :as input]
             ))
 
@@ -100,6 +101,11 @@
                                            (msg/update-thunk-label (om/get-props owner))
                                            (msg/send! owner)))}})
             ]
+           [:div.thunk-type-line
+            [:span.horizontal-line]
+            [:span.thunk-type-label "TYPE: "]
+            [:span.thunk-type (name (schema/describe-entity props))]
+            [:span.horizontal-line]]
            [:div.thunk-facts
             (for [f (:thunk/fact props)]
               (om/build fact/container f {:key-fn :db/id}))

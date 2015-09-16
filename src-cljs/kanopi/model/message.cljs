@@ -2,17 +2,20 @@
   (:require [om.core :as om]
             [cljs.core.async :as async]))
 
-(defn- publisher [owner]
+(defn publisher [owner]
   (om/get-shared owner [:ether :publisher]))
 
 (defn send!
   "Ex: (->> (msg/search \"foo\") (msg/send! owner))
-  "
-  [owner msg]
-  (async/put! (publisher owner) msg)
-  ;; NOTE: js evt handlers don't like `false` as a return value, which
-  ;; async/put! often returns. So we add a nil.
-  nil)
+  TODO: allow specification of transducers or debounce msec via args
+        - otherwise user must create some extra wiring on their end,
+          which is what this fn is trying to avoid. layered abstractions."
+  ([owner msg & args]
+   (async/put! (publisher owner) msg)
+   ;; NOTE: js evt handlers don't like `false` as a return value, which
+   ;; async/put! often returns. So we add a nil.
+   nil
+   ))
 
 (defn toggle-fact-mode [ent]
   (hash-map
@@ -34,9 +37,13 @@
    :verb :update-thunk-label
    :context {}))
 
-(defn search [q]
-  (hash-map
-   :noun {:query q}
-   :verb :search
-   :context {}))
+(defn search
+  ([q]
+   (search q nil))
+  ([q tp]
+   (hash-map
+    :noun {:query-string q
+           :entity-type  tp}
+    :verb :search
+    :context {})))
 

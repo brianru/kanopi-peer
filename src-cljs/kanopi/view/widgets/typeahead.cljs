@@ -93,7 +93,7 @@
       {:element-type :input ;; supported values are #{:input :textarea}
        :input-ch (-> (async/chan)
                      (async-util/debounce 100)
-                     (async/pipe (om/get-shared owner [:ether :publisher])))
+                     (async/pipe (msg/publisher owner)))
        :display-fn schema/display-entity
 
        ;; NOTE: on-click is side-effecting
