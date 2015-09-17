@@ -109,9 +109,11 @@
            [:div.thunk-facts
             ;; NOTE: one of the facts is a placeholder for creating a
             ;; new one
-            (for [f (sort-by #(nil? (:db/id %)) (:thunk/fact props))]
-              (om/build fact/container f {:key-fn :db/id
-                                          :init-state {:thunk-id (:db/id props)}})) ]
+            (if (:db/id props)
+              (for [f (sort-by #(nil? (:db/id %)) (:thunk/fact props))]
+                (om/build fact/container f {:key-fn :db/id
+                                            :init-state {:thunk-id (:db/id props)}}))
+              [:span "This thunk does not exist."])]
            ]
           ])))
     ))
@@ -158,7 +160,7 @@
 
     om/IRender
     (render [_]
-      (let []
+      (let [_ (println "thunk container:" props)]
         (html
          [:div.thunk-container.container-fluid
           (om/build context-thunks (get props :context-thunks))

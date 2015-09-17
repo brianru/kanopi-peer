@@ -1,11 +1,10 @@
 (ns kanopi.controller.handlers
   "All app-state transformations are defined here.
-  
+
   TODO: refactor to work with om cursors instead of atoms."
   (:require [om.core :as om]
             [kanopi.util.core :as util]
             [kanopi.model.schema :as schema]
-            [cljs-uuid-utils.core :refer (make-random-uuid)]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             ))
@@ -34,11 +33,11 @@
           (reduce (fn [acc [k v]]
                     (cond
                      (= k :thunk/fact)
-                     (assoc acc k (set (map (partial lookup-id props (inc depth)) v)))
+                     (assoc acc k (mapv (partial lookup-id props (inc depth)) v))
                      (= k :fact/attribute)
-                     (assoc acc k (set (map (partial lookup-id props (inc depth)) v)))
+                     (assoc acc k (mapv (partial lookup-id props (inc depth)) v))
                      (= k :fact/value)
-                     (assoc acc k (set (map (partial lookup-id props (inc depth)) v)))
+                     (assoc acc k (mapv (partial lookup-id props (inc depth)) v))
 
                      :default
                      (assoc acc k v)))
@@ -48,8 +47,8 @@
 
 (def placeholder-fact
   {:db/id nil
-   :fact/attribute #{{:db/id nil}}
-   :fact/value     #{{:db/id nil}}})
+   :fact/attribute [{:db/id nil}]
+   :fact/value     [{:db/id nil}]})
 
 (defn- build-thunk-data
   "
@@ -61,11 +60,9 @@
   {:pre [(integer? thunk-id)]}
   (let [thunk (lookup-id props thunk-id)]
     (hash-map
-     :context-thunks #{(lookup-id props -1008)
-                       }
-     :thunk (update thunk :thunk/fact #(conj % placeholder-fact))
-     :similar-thunks #{(lookup-id props -1016)
-                       })))
+     :context-thunks [(lookup-id props -1008)]
+     :thunk (update thunk :thunk/fact #(vec (conj % placeholder-fact)))
+     :similar-thunks [(lookup-id props -1016)])))
 
 (defn- navigate-to-thunk [props msg]
   (let [thunk-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))
@@ -74,10 +71,47 @@
 
 (defn- ensure-current-thunk-is-updated [props edited-ent-id]
   (if (= edited-ent-id (current-thunk props))
-    (let []
-      (println "update current thunk")
-      (assoc props :thunk (build-thunk-data props edited-ent-id)))
+    (let [thunk' (build-thunk-data props edited-ent-id)]
+      (assoc props :thunk thunk'))
     props))
+
+(defn new-ent? [ent]
+  (cond
+   (map? ent)
+   (nil? (:db/id ent))
+   
+   (integer? ent)
+   false
+   
+   :default
+   true))
+
+(defn- prepare-fact [fact]
+  (cond-> {:is-new-fact false
+           :is-new-referenced-attribute false
+           :is-new-referenced-value false
+           :fact fact}
+
+    (new-ent? fact)
+    ((fn [{:keys [fact] :as existing}]
+       (let [fact' (assoc fact :db/id (util/next-id))]
+         (assoc existing
+                :is-new-fact true
+                :fact fact'))))
+    
+    (new-ent? (-> fact :fact/attribute first))
+    ((fn [{:keys [fact] :as existing}]
+       (let [attr' (-> fact :fact/attribute first (assoc :db/id (util/next-id)))]
+         (assoc existing
+                :new-referenced-attribute attr'
+                :fact (assoc fact :fact/attribute [(get attr' :db/id)])))))
+
+    (new-ent? (-> fact :fact/value first))
+    ((fn [{:keys [fact] :as existing}]
+       (let [value' (-> fact :fact/value first (assoc :db/id (util/next-id)))]
+         (assoc existing
+                :new-referenced-value value'
+                :fact (assoc fact :fact/value [(get value' :db/id)])))))))
 
 (defmethod local-event-handler :update-fact
   [app-state msg]
@@ -85,20 +119,36 @@
                 (fn [app-state]
                   (let [thunk-id (get-in msg [:noun :thunk-id])
                         fact     (get-in msg [:noun :fact])
-                        [is-new-fact fact'] (if (:db/id fact)
-                                              [false fact]
-                                              [true  (assoc fact :db/id (make-random-uuid))])
-                        ]
-                    (println "here" is-new-fact fact')
-                    (cond-> (assoc-in app-state [:cache (:db/id fact')] fact')
 
-                      is-new-fact
-                      (update-in [:cache thunk-id :thunk/fact] #(conj % (:db/id fact')))
-                      
-                      true
-                      (ensure-current-thunk-is-updated thunk-id))
-                    )))
-  (println (get-in @app-state [:thunk :thunk :thunk/fact])))
+                        {fact' :fact
+                         :keys [is-new-fact new-referenced-attribute new-referenced-value]
+                         :as prepared-info}
+                        (prepare-fact fact)
+
+                        app-state'
+
+                        (cond-> (assoc-in app-state [:cache (:db/id fact')] fact')
+
+                          is-new-fact
+                          (update-in [:cache thunk-id :thunk/fact] #(conj % (:db/id fact')))
+
+                          is-new-fact
+                          (assoc-in [:cache (:db/id fact')] fact')
+
+                          new-referenced-attribute
+                          (assoc-in [:cache (:db/id new-referenced-attribute)]
+                                    new-referenced-attribute)
+
+                          new-referenced-value
+                          (assoc-in [:cache (:db/id new-referenced-value)]
+                                    new-referenced-value)
+
+                          true
+                          (ensure-current-thunk-is-updated thunk-id))
+                        ]
+                    (println "here pelase" (get-in app-state' [:cache (:db/id fact')]))
+                    app-state'
+                    ))))
 
 (defmethod local-event-handler :update-thunk-label
   [app-state msg]
@@ -148,39 +198,37 @@
 (defmethod local-event-handler :search
   [app-state msg]
   (om/transact! app-state
-         (fn [app-state]
-           (let [{:keys [query-string entity-type]} (get msg :noun)
-                 results (local-fulltext-search app-state query-string entity-type)]
-             ;; wipes out map with each new search.
-             ;; not using this data structure very well
-             (assoc-in app-state [:search-results] {query-string results})))))
-
-
+                (fn [app-state]
+                  (let [{:keys [query-string entity-type]} (get msg :noun)
+                        results (local-fulltext-search app-state query-string entity-type)]
+                    ;; wipes out map with each new search.
+                    ;; not using this data structure very well
+                    (assoc-in app-state [:search-results] {query-string results})))))
 
 (defmethod local-event-handler :navigate
   [app-state msg]
   (let [handler (get-in msg [:noun :handler])]
     (om/transact! app-state
-           (fn [app-state]
-             (cond-> app-state
-               true
-               (assoc :page (get msg :noun))
+                  (fn [app-state]
+                    (cond-> app-state
+                      true
+                      (assoc :page (get msg :noun))
 
-               ;; TODO: implement user lifecycle in spa
-               (= :login handler)
-               identity
+                      ;; TODO: implement user lifecycle in spa
+                      (= :login handler)
+                      identity
 
-               (= :logout handler)
-               (assoc :user nil)
+                      (= :logout handler)
+                      (assoc :user nil)
 
-               (= :register handler)
-               (assoc :user nil)
+                      (= :register handler)
+                      (assoc :user nil)
 
-               (= :thunk handler)
-               (navigate-to-thunk msg)
+                      (= :thunk handler)
+                      (navigate-to-thunk msg)
 
-               (not= :thunk handler)
-               (assoc :thunk {})
+                      (not= :thunk handler)
+                      (assoc :thunk {})
 
-               ))))
+                      ))))
   )

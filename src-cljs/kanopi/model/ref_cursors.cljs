@@ -1,5 +1,7 @@
 (ns kanopi.model.ref-cursors
-  "Ref cursor helper functions."
+  "Ref cursor helper functions.
+  
+  BEWARE: DO NOT FORGET TO CALL `om/observe` on the resulting ref-cursor!"
   (:require [om.core :as om]))
 
 (defn get-ref-cursor [owner k]

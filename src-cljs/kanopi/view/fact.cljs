@@ -91,13 +91,19 @@
        ])]))
 
 (defn- merge-updated-data [owner]
-  (let [state (om/get-state owner)
-        fact  (om/get-props owner)]
+  (let [attr'  (om/get-state owner :fact/attribute)
+        value' (om/get-state owner :fact/value)
+        fact   (om/get-props owner)]
     {:db/id (:db/id fact)
-     :fact/attribute #{(:db/id (merge (first (:fact/attribute fact))
-                                      (:fact/attribute state)))}
-     :fact/value     #{(:db/id (merge (first (:fact/value fact))
-                                      (:fact/value state)))}}))
+     :fact/attribute [(->> attr'
+                           (merge (first (:fact/attribute fact)))
+                           ((juxt :db/id identity))
+                           (some identity))]
+     :fact/value     [(->> value'
+                           (merge (first (:fact/value fact)))
+                           ((juxt :db/id identity))
+                           (some identity))]
+     }))
 
 (defn handle
   "TODO: anchor for drag & drop reordering of facts
@@ -151,6 +157,23 @@
                                        res)
        (msg/send! owner)))
 
+(defn- handle-input-submission
+  "This is always used to create new entities.
+  FIXME: this fails when there was previously a matching entity."
+  [owner value evt]
+  (let [res (schema/create-entity (om/get-state owner :selected-type) value)]
+    (om/update-state!
+     owner
+     (fn [existing]
+       (assoc existing
+              :selected-type (schema/describe-entity res)
+              :entered-value (schema/get-value res)
+              :matching-entity res)))
+    (->> (msg/select-fact-part-reference (om/get-state owner :fact)
+                                         (om/get-state owner :fact-part)
+                                         res)
+         (msg/send! owner))))
+
 (defn fact-part
   "Here's how this works.
 
@@ -181,7 +204,7 @@
     om/IInitState
     (init-state [_]
       {:hovering false
-       
+
        :selected-type (let [desc (schema/describe-entity props)]
                         (if (= :unknown desc)
                           :literal/text
@@ -242,13 +265,17 @@
                  [:label.value-input-label (str (text/entity-value-label props) ":")]
                  [:span.value-input-value
                   (om/build typeahead/typeahead props
-                            {:state
-                             {:element-type (browser/input-element-for-entity-type
+                            {
+                             :state
+                             {
+                              :element-type (browser/input-element-for-entity-type
                                              (or selected-type part-type))
+                              :fact-part (get state :fact-part)
                               }
                              :init-state
                              {:input-value (schema/display-entity props)
                               :on-click    (partial handle-result-selection owner)
+                              :on-submit   (partial handle-input-submission owner)
                               }})]]
                 ]]))
           ])))
@@ -292,6 +319,7 @@
 
 (defn container
   [props owner opts]
+  {:pre [(om/cursor? props)]}
   (reify
     om/IDisplayName
     (display-name [_]
@@ -328,6 +356,7 @@
 
                          :input-fact-part-value
                          (let []
+                           (println "here!")
                            (om/update-state!
                             owner (get context :fact-part)
                             (partial merge {:input-value (get context :value)})))

@@ -15,6 +15,21 @@
             [kanopi.util.async :as async-util]
             [kanopi.ether.core :as ether]))
 
+(defn- handle-result-click
+  [owner res evt]
+  (om/update-state!
+   owner
+   (fn [state]
+     (assoc state
+            ;:focused false
+            :input-value (schema/get-value res))))
+  ((om/get-state owner :on-click) res evt))
+
+(defn- handle-submission [owner evt]
+  (let [submit-fn (om/get-state owner :on-submit)
+        value     (om/get-state owner :input-value)]
+    (submit-fn value evt)))
+
 (defn- handle-key-down
   [owner search-results evt]
  
@@ -37,21 +52,25 @@
         (. evt preventDefault))
 
     "Enter"
-    (let [[_ selected-result] (nth search-results
-                                   (om/get-state owner :selection-index)
-                                   nil)
+    (let [[idx selected-result]
+          (nth search-results (om/get-state owner :selection-index) nil)
           ]
-      (when selected-result
-        (handle-result-click owner selected-result evt) 
-        ;; href-fn always exists, but should only be used when it
-        ;; produces a truthy value. by default it always evaluates to
-        ;; nil.
-        (when-let [href ((om/get-state owner :href-fn) selected-result) ]
-          (browser/set-page! owner href))
+      (if selected-result
+        (do
+         (handle-result-click owner selected-result evt) 
+         ;; href-fn always exists, but should only be used when it
+         ;; produces a truthy value. by default it always evaluates to
+         ;; nil.
+         (when-let [href ((om/get-state owner :href-fn) selected-result) ]
+           (browser/set-page! owner href))
 
-        ;; on-click fn is side-effecting, so it may always be called
-        ;; even if its default is used, which always evaluates to nil
-        ((om/get-state owner :on-click) selected-result evt))
+         ;; on-click fn is side-effecting, so it may always be called
+         ;; even if its default is used, which always evaluates to nil
+         ((om/get-state owner :on-click) selected-result evt))
+        (do
+         (handle-submission owner evt))
+
+        )
 
       (.. evt -target (blur)))
 
@@ -62,14 +81,6 @@
     ;; default
     nil))
 
-(defn- handle-result-click
-  [owner res evt]
-  (om/update-state!
-   owner
-   (fn [state]
-     (assoc state
-            :focused false
-            :input-value (schema/get-value res)))))
 
 (defn- element-specific-attrs
   [{:keys [element-type] :as state}]
@@ -93,20 +104,30 @@
   "Pre-load with local or cached results.
 
   Supports different element types.
+
+  NOTE: everything this component does besides take input and return
+  matching search reuslts is configurable by passing functions in as
+  initial state.
   "
   [props owner opts]
+  {:pre [(om/cursor? props)]}
   (reify
     om/IInitState
     (init-state [_]
-      ;; FIXME: debounce is not working
       {:element-type :input ;; supported values are #{:input :textarea}
-       :input-ch (-> (async/chan)
-                     (async-util/debounce 100)
-                     (async/pipe (msg/publisher owner)))
+
+       ;; TODO: document the required arity for each of these
+       ;; functions
+
+       ;; Used to render search results into strings for display.
        :display-fn schema/display-entity
 
+       ;; Escape hatch for tracking the input field's value.
        :on-change (constantly nil)
+       ;; Submission is different from selection (below).
+       :on-submit (constantly nil)
 
+       ;; The Selection Handlers.
        ;; NOTE: on-click is side-effecting
        :on-click (constantly nil)
        ;; NOTE: href-fn is a pure function which returns a url path
@@ -115,15 +136,22 @@
        ;; browsers is different. we're just sticking to that. when
        ;; href's value is nil the browser ignores it. 
 
+       ;; INTERNAL
+       ;; TODO: use namespaced keywords for internal stuff
+       ;; FIXME: debounce is not working
+       :input-ch (-> (async/chan)
+                     (async-util/debounce 100)
+                     (async/pipe (msg/publisher owner)))
        :selection-index 0
+       :focused false
        :input-value nil
        })
 
     om/IRenderState
     (render-state [_ {:keys [focused input-ch input-value display-fn on-change]
                       :as state}]
-      (let [search-results
-            (get ((om/get-shared owner :search-results)) input-value []) 
+      (let [all-search-results (om/observe owner ((om/get-shared owner :search-results)))
+            search-results (get all-search-results input-value [])
             ]
         (html
          [:div.typeahead
@@ -134,22 +162,27 @@
            (get state :element-type)
            (merge (element-specific-attrs state)
                   {:on-focus    #(om/set-state! owner :focused true)
-                   ;:on-blur     #(om/set-state! owner :focused false)
+                  ; :on-blur     #(om/set-state! owner :focused false)
                    :value       (get state :input-value)
+                   ;; NOTE: debugging
+                   :style {:color (when-not focused "red")}
                    :on-change   (partial handle-typeahead-input owner) 
                    :on-key-down (partial handle-key-down owner search-results)
                    }))
           [:ul.dropdown-menu.typeahead-results
-           {:style {:display (when (and focused (not-empty search-results))
-                               "inherit")}}
+           {:style {:display (if (and (om/get-state owner :focused) (not-empty search-results))
+                               "inherit"
+                               "none"
+                               )}}
            (for [[idx [score res]] (map-indexed vector search-results)]
              [:li.dropdown-menu-item
               (when (= idx (get state :selection-index))
                 [:span.dropdown-menu-item-marker])
               [:a {
+                   ;; TODO: should I collapse these 2 into a single
+                   ;; selection handler?
                    :href     ((get state :href-fn) res)
-                   :on-click (juxt (partial (get state :on-click) res)
-                                   (partial handle-result-click owner res))
+                   :on-click (partial handle-result-click owner res)
                    }
                [:span (display-fn res)]]])]
           ])))))

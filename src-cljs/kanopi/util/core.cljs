@@ -18,3 +18,9 @@
     (reduce (fn [previous current] (next-row previous current sequence2))
             (map #(identity %2) (cons nil sequence2) (range))
             sequence1)))
+
+;; Should this go somewhere more prominent?
+(def last-id (atom -111111))
+
+(defn next-id []
+  (swap! last-id dec))
