@@ -18,13 +18,13 @@
             ;;           (component/start))
             ]
         ;; TODO: make a spout for api requests
-        )))
+        this)))
   
   (stop [this]
     (if-not (not-empty spouts)
       this
       (let []
-        ))))
+        this))))
 
 (defn new-ajax-spout [config]
   (map->AjaxSpout {:config config}))

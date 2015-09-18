@@ -6,6 +6,7 @@
             [cemerick.url :as url]
             [cognitect.transit :as transit]
             [kanopi.model.intro-data :refer (intro-data)]
+            [kanopi.util.core :as util]
             ))
 
 #_(defrecord PersistentAppState [config app-state])
@@ -45,7 +46,7 @@
                      ;; implement a map that only stores the last n
                      ;; entries, everything else gets dropped off the
                      ;; back
-                     :search-results {"foo" ["food" "baffoon"]}
+                     :search-results {"foo" [[0.75 "food"] [0.42 "baffoon"]]}
 
                      ;; local cache
                      ;; {<ent-id> <entity>}

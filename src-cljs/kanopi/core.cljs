@@ -18,5 +18,12 @@
 (defonce system
   (component/start (sys/new-system dev-config)))
 
+(set! js/window.onbeforeunload
+      (fn [evt]
+        (component/stop system)
+        ;; if a non-void value is returned a dialog box is displayed
+        ;; asking the user to confirm the unload event.
+        js/undefined))
+
 (defn reload-om []
   (component/start (get system :om)))
