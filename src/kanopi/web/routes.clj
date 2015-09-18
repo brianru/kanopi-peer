@@ -9,7 +9,6 @@
 (defn app-routes []
   (->
    (routes
-    (GET "/welcome" [] spa/welcome)
 
     ;; authentication
     (ANY "/register" [] auth/registration-resource)

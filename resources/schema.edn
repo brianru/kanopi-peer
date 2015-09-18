@@ -151,58 +151,58 @@
  ;; :db/id #db/id[:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- ;; Values
+ ;; Literals
  ;; TODO: fulltext search should be enabled on a number of these.
- ;;{:db/ident :value/uri
+ ;;{:db/ident :literal/uri
  ;; :db/valueType :db.type/uri
  ;; :db/cardinality :db.cardinality/one
  ;; :db/id #db/id[:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :value/image-uri
+ ;;{:db/ident :literal/image-uri
  ;; :db/valueType :db.type/uri
  ;; :db/cardinality :db.cardinality/one
  ;; :db/id #db/id[:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :value/email-address
+ ;;{:db/ident :literal/email-address
  ;; :db/valueType :db.type/string
  ;; :db/cardinality :db.cardinality/one
  ;; :db/id #db/id [:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :value/sms-number
+ ;;{:db/ident :literal/sms-number
  ;; :db/valueType :db.type/long
  ;; :db/cardinality :db.cardinality/one
  ;; :db/id #db/id [:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- {:db/ident :value/string
+ {:db/ident :literal/string
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/fulltext true
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
- {:db/ident :value/thunk
+ {:db/ident :literal/thunk
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :value/function
+ ;;{:db/ident :literal/function
  ;; :db/valueType :db.type/keyword
  ;; :db/cardinality :db.cardinality/one
  ;; :db/id #db/id[:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :value/integer
+ ;;{:db/ident :literal/integer
  ;; :db/valueType :db.type/bigint
  ;; :db/cardinality :db.cardinality/one
  ;; :db/id #db/id[:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :value/decimal
+ ;;{:db/ident :literal/decimal
  ;; :db/valueType :db.type/bigdec
  ;; :db/cardinality :db.cardinality/one
  ;; :db/id #db/id[:db.part/db]

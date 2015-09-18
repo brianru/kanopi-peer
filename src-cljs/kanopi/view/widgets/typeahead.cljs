@@ -138,7 +138,7 @@
 
        ;; INTERNAL
        ;; TODO: use namespaced keywords for internal stuff
-       ;; FIXME: debounce is not working
+       ;; FIXME: debounce is not working...or is it?
        :input-ch (-> (async/chan)
                      (async-util/debounce 100)
                      (async/pipe (msg/publisher owner)))

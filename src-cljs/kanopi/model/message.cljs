@@ -3,7 +3,7 @@
             [cljs.core.async :as async]))
 
 (defn publisher [owner]
-  (om/get-shared owner [:ether :publisher]))
+  (om/get-shared owner [:aether :publisher]))
 
 (defn send!
   "Ex: (->> (msg/search \"foo\") (msg/send! owner))
