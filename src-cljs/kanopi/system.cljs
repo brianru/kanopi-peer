@@ -10,6 +10,7 @@
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.controller.history :as history]
             [kanopi.ether.core :as ether]
+            [kanopi.util.local-storage :as local-storage]
             ))
 
 (defn new-system
@@ -24,8 +25,13 @@
       :ether     :ether
       :history   :history})
 
+    :local-storage
+    (local-storage/new-local-storage (get config :local-storage-key "kanopi"))
+
     :app-state
-    (state/new-app-state config)
+    (component/using
+     (state/new-app-state config)
+     {:local-storage :local-storage})
 
     :ether
     (ether/new-ether config)

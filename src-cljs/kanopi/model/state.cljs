@@ -7,6 +7,7 @@
             [cognitect.transit :as transit]
             [kanopi.model.intro-data :refer (intro-data)]
             [kanopi.util.core :as util]
+            [kanopi.util.local-storage :as local-storage]
             ))
 
 #_(defrecord PersistentAppState [config app-state])
@@ -29,33 +30,40 @@
     (delete-cookie! id)
     c))
 
-(defrecord EphemeralAppState [config app-state]
+(defrecord EphemeralAppState [config local-storage app-state]
   component/Lifecycle
   (start [this]
     (let [cookie (get-and-remove-cookie "kanopi-init")
-          atm (atom {:tempo {:pulse nil}
-                     :user  (merge {:actions {}} (get cookie :user)) 
-                     ;; I don't want to use the URI as a place to
-                     ;; store state. All state is here.
-                     :page  {}
-                     :thunk {:context-thunks []
-                             :thunk {}
-                             :similar-thunks []
-                             }
-                     ;; TODO: this map grows too fast.
-                     ;; implement a map that only stores the last n
-                     ;; entries, everything else gets dropped off the
-                     ;; back
-                     :search-results {"foo" [[0.75 "food"] [0.42 "baffoon"]]}
+          stored-app-state (local-storage/get! local-storage)
+          atm (atom
+               (util/deep-merge
+                {:tempo {:pulse nil}
+                 :user  (merge {:actions {}} (get cookie :user)) 
+                 ;; I don't want to use the URI as a place to
+                 ;; store state. All state is here.
+                 :page  {}
+                 :thunk {:context-thunks []
+                         :thunk {}
+                         :similar-thunks []
+                         }
+                 ;; TODO: this map grows too fast.
+                 ;; implement a map that only stores the last n
+                 ;; entries, everything else gets dropped off the
+                 ;; back
+                 :search-results {"foo" [[0.75 "food"] [0.42 "baffoon"]]}
 
-                     ;; local cache
-                     ;; {<ent-id> <entity>}
-                     :cache (merge {} intro-data)
-                     })]
+                 ;; local cache
+                 ;; {<ent-id> <entity>}
+                 :cache (merge {} intro-data)
+                 }
+                stored-app-state
+                ))]
       (info "create ephemeral app state" @atm)
       (assoc this :app-state atm)))
 
   (stop [this]
+    (info "save app state to local storage")
+    (local-storage/commit! local-storage @app-state)
     (info "destroy ephemeral app state")
     (assoc this :app-state nil)))
 
