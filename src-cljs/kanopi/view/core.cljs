@@ -9,7 +9,7 @@
             [kanopi.view.thunk :as thunk]
             [kanopi.view.pages.settings :as settings]
             [kanopi.view.pages.user :as user]
-            [kanopi.ether.core :as ether]
+            [kanopi.aether.core :as aether]
             [kanopi.controller.handlers :as handlers]
             [kanopi.util.browser :as browser]
             [ajax.core :as http]
@@ -69,25 +69,25 @@
        (:search-results)
        (om/ref-cursor)))
 
-(defn mount-root! [app-state container ether history ref-cursors]
+(defn mount-root! [app-state container aether history ref-cursors]
   (om/root root-component
            app-state
            {:target container
             ;; TODO: add some config stuff to the shared state
             ;; (dev-mode?)
             :shared (merge
-                     {:ether (:ether ether)
+                     {:aether (:aether aether)
                       :history history}
                      (ref-cursors/mk-ref-cursor-map app-state ref-cursors))}))
 
-(defrecord Om [config app-state ether history app-container]
+(defrecord Om [config app-state aether history app-container]
   component/Lifecycle
   (start [this]
     ;; NOTE: purposely not checking if already mounted to support
     ;; figwheel re-mounting om on-jsload
     (let [container (. js/document (getElementById (:container-id config))) ]
       (info "mount om root" (:container-id config))
-      (mount-root! (:app-state app-state) container ether history (:ref-cursors config))
+      (mount-root! (:app-state app-state) container aether history (:ref-cursors config))
       (assoc this :app-container container)))
 
   (stop [this]

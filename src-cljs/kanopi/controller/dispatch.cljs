@@ -1,5 +1,5 @@
 (ns kanopi.controller.dispatch
-  "Route messages traveling in the ether to local event handlers
+  "Route messages traveling in the aether to local event handlers
   and/or spouts for external processing."
   (:require-macros [cljs.core.async.macros :as asyncm])
   (:require [quile.component :as component]
@@ -8,9 +8,9 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.controller.handlers :as handlers]
             [om.core :as om]
-            [kanopi.ether.core :as ether]))
+            [kanopi.aether.core :as aether]))
 
-(defrecord Dispatcher [config ether app-state kill-channels]
+(defrecord Dispatcher [config aether app-state kill-channels]
   component/Lifecycle
   (start [this]
     ;; TODO: How should I inject the local and remote verbs into this
@@ -24,8 +24,8 @@
 
           local-kill-chs
           (doseq [vrb local-verbs]
-            (ether/listen*
-             (:ether ether) :verb vrb
+            (aether/listen*
+             (:aether aether) :verb vrb
              {:handlerfn (partial handlers/local-event-handler
                                   (om/root-cursor (:app-state app-state)))}))
 
@@ -34,7 +34,7 @@
             )
 
           ]
-      ;; TODO: batch and log all data on ether log channel
+      ;; TODO: batch and log all data on aether log channel
       (assoc this :kill-channels (concat local-kill-chs remote-kill-chs))))
 
   (stop [this]

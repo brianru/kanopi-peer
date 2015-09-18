@@ -9,7 +9,7 @@
             [kanopi.controller.ajax :as ajax]
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.controller.history :as history]
-            [kanopi.ether.core :as ether]
+            [kanopi.aether.core :as aether]
             [kanopi.util.local-storage :as local-storage]
             ))
 
@@ -22,7 +22,7 @@
     (component/using
      (view/new-om-root config)
      {:app-state :app-state
-      :ether     :ether
+      :aether     :aether
       :history   :history})
 
     :local-storage
@@ -33,24 +33,24 @@
      (state/new-app-state config)
      {:local-storage :local-storage})
 
-    :ether
-    (ether/new-ether config)
+    :aether
+    (aether/new-aether config)
 
     :history
     (component/using
      (history/new-html5-history config)
-     {:ether :ether})
+     {:aether :aether})
 
     :dispatcher
     (component/using
      (dispatch/new-dispatcher config)
-     {:ether :ether
+     {:aether :aether
       :app-state :app-state})
 
     :transporter
     (component/using
      (ajax/new-ajax-spout config)
-     {:ether :ether})
+     {:aether :aether})
     
     
     )))

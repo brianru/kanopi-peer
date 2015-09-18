@@ -5,10 +5,10 @@
 ;; computing process, physical environment and code structure.
 ;;
 ;; There is a single publisher channel, :publisher.
-;; For each dimension supplied to mk-ether, a publication
+;; For each dimension supplied to mk-aether, a publication
 ;; is constructed whose topic-fn is the dimension keyword.
 ;;
-;; Suggested ethereum:
+;; Suggested aethereum:
 ;;
 ;; 1. [:signal]
 ;; 2. [:verb :payload]
@@ -54,7 +54,7 @@
 ;; Spouts and funnels are components implementing protocols.
 ;;
 ;; Spouts are listeners with their own backpressure
-;; semantics independent of the ether. Spouts may have transducers.
+;; semantics independent of the aether. Spouts may have transducers.
 ;;
 ;; Funnels mix input from other channels and transduce the input into
 ;; messages, which are then pushed onto the publisher.
@@ -63,7 +63,7 @@
 ;; Listeners are ripe for improvement.
 ;;
 ;; I want to do
-;; (ether/listen! owner
+;; (aether/listen! owner
 ;;  '{:subject [?ns ?iri], :predicate [:swap!], :object ?object}
 ;;  (fn [{:keys [?ns ?iri ?object]} msg]
 ;;    ))
@@ -72,7 +72,7 @@
 ;; publication map mutable. Listeners must be able to create a new
 ;; publication with its custom topicfn.
 ;;
-(ns kanopi.ether.core
+(ns kanopi.aether.core
   (:require-macros [cljs.core.async.macros :as asyncm :refer [go]])
   (:require [cljs.core.async :as async]
             [taoensso.timbre :as timbre
@@ -94,8 +94,8 @@
 (defn- publication-keyword [dimension-key]
   (-> dimension-key name (str "-publication") keyword))
 
-(defn mk-ether
-  "Both construct and start ether.
+(defn mk-aether
+  "Both construct and start aether.
 
   Can I construct publications for every permutation of keywords?
   If so, I'd need to name them in a predictable manner.
@@ -113,17 +113,17 @@
             :log       (async/tap pub-mult log-chan)}
            (zipmap pub-keys publications))))
 
-(defn- get-publication [ether dimension]
-  (->> dimension (publication-keyword) (get ether)))
+(defn- get-publication [aether dimension]
+  (->> dimension (publication-keyword) (get aether)))
 
 (defn listen*
-  ([ether dimension value opts]
+  ([aether dimension value opts]
    (let [{:keys [kill-ch handlerfn logfn]
           :or {kill-ch (async/chan)
                logfn     (constantly nil)}}
          opts
          listener (async/chan 100)
-         publication (get-publication ether dimension)]
+         publication (get-publication aether dimension)]
      (assert handlerfn "Handler function is required.")
      (async/sub publication value listener)
      (go (loop [[v ch] nil]
@@ -140,8 +140,8 @@
 
 (defn feed!
   "NOTE: experimental."
-  ([ether dimension value recipient-ch]
-   (listen* ether dimension value
+  ([aether dimension value recipient-ch]
+   (listen* aether dimension value
             {:handlerfn (partial async/put! recipient-ch)
              :logfn (constantly nil)})))
 
@@ -152,7 +152,7 @@
   ([owner dimension value handlerfn]
    (listen! owner dimension value handlerfn (constantly nil)))
   ([owner dimension value handlerfn logfn]
-   (let [kill-ch (listen* (om/get-shared owner :ether)
+   (let [kill-ch (listen* (om/get-shared owner :aether)
                           dimension value
                           {:handlerfn handlerfn
                            :logfn     logfn})]
@@ -179,22 +179,22 @@
 
 (def stop-listening! shutdown-component!)
 
-(defrecord Ether [config ether]
+(defrecord Aether [config aether]
   component/Lifecycle
   (start [this]
-    (if ether
+    (if aether
       this
-      (let [ethr (apply mk-ether (:dimensions config))]
-        (info "start ether" (:dimensions config))
-        (assoc this :ether ethr))))
+      (let [aethr (apply mk-aether (:dimensions config))]
+        (info "start aether" (:dimensions config))
+        (assoc this :aether aethr))))
 
   (stop [this]
-    (if-not ether
+    (if-not aether
       this
       (do
-       (info "stop ether")
-       ;; TODO: kill ether
-       (assoc this :ether nil)))))
+       (info "stop aether")
+       ;; TODO: kill aether
+       (assoc this :aether nil)))))
 
-(defn new-ether [config]
-  (map->Ether {:config config}))
+(defn new-aether [config]
+  (map->Aether {:config config}))

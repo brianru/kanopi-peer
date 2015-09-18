@@ -1,4 +1,4 @@
-(ns kanopi.ether.spout
+(ns kanopi.aether.spout
   "Queued listener with n-parallelism, fifo semantics, duplicate
   request elimination, exponential back-off worker throttling and
   failed request logging.
@@ -12,7 +12,7 @@
   "
   (:require-macros [cljs.core.async.macros :refer (go go-loop)])
   (:require [om.core :as om]
-            [kanopi.ether.core :as ether]
+            [kanopi.aether.core :as aether]
             [ajax.core :as http]
             [cljs-uuid-utils.core :refer (make-random-uuid)]
             [cljs-time.core :as time]
@@ -152,7 +152,7 @@
           this'     (assoc this :queue q :notify-ch notify-ch :workers workers)]
 
       (om/set-state! owner [:spouts [dimension value]] this')
-      (ether/listen! owner dimension value
+      (aether/listen! owner dimension value
                      (fn [req] (enqueue this' (xform req)))
                      logfn)
 

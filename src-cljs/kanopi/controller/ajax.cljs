@@ -2,12 +2,12 @@
   (:require [quile.component :as component]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
-            [kanopi.ether.core :as ether]
-            [kanopi.ether.spout :as spout]
+            [kanopi.aether.core :as aether]
+            [kanopi.aether.spout :as spout]
             [cljs.core.async :as async]
             ))
 
-(defrecord AjaxSpout [config spouts ether]
+(defrecord AjaxSpout [config spouts aether]
   component/Lifecycle
   (start [this]
     (if (not-empty spouts)

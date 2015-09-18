@@ -6,7 +6,7 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.util.browser :as browser]
             [sablono.core :refer-macros [html] :include-macros true]
-            [kanopi.ether.core :as ether]
+            [kanopi.aether.core :as aether]
             [cljs.core.async :as async]
             [cljs-uuid-utils.core :as uuid]
             [cljs-time.core :as t]))

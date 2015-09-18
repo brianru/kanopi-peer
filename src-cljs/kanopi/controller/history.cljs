@@ -13,7 +13,7 @@
   (:require [quile.component :as component]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
-            [kanopi.ether.core :as ether]
+            [kanopi.aether.core :as aether]
             [cljs.core.async :as async]
             [bidi.bidi :as bidi]
             [pushy.core :as pushy]))
@@ -25,16 +25,16 @@
                           "thunk/"   {[:id ""] :thunk}
                           "settings" :settings}])
 
-(defn- send-set-page-msg! [ether match]
-  (async/put! (get-in ether [:ether :publisher])
+(defn- send-set-page-msg! [aether match]
+  (async/put! (get-in aether [:aether :publisher])
               {:noun match
                :verb :navigate
                :context nil}))
 
-(defrecord Html5History [config routes route-for set-page! history ether]
+(defrecord Html5History [config routes route-for set-page! history aether]
   component/Lifecycle
   (start [this]
-    (let [hist (pushy/pushy (partial send-set-page-msg! ether)
+    (let [hist (pushy/pushy (partial send-set-page-msg! aether)
                             (partial bidi/match-route default-routes))]
       (info "start html5 history")
       (pushy/start! hist)

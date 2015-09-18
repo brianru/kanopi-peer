@@ -12,7 +12,7 @@
             [kanopi.model.message :as msg]
             [kanopi.model.text :as text]
             [kanopi.view.icons :as icons]
-            [kanopi.ether.core :as ether]
+            [kanopi.aether.core :as aether]
             [kanopi.util.browser :as browser]
             [kanopi.view.widgets.input-field :as input-field]
             [kanopi.view.widgets.dropdown :as dropdown]
@@ -333,7 +333,7 @@
 
     om/IWillMount
     (will-mount [_]
-      (ether/listen! owner :noun [:fact (:db/id props)]
+      (aether/listen! owner :noun [:fact (:db/id props)]
                      (fn [{:keys [noun verb context]}]
                        (case verb
                          :toggle-mode
@@ -367,7 +367,7 @@
                      #_(partial println "here")))
     om/IWillUnmount
     (will-unmount [_]
-      (ether/stop-listening! owner))
+      (aether/stop-listening! owner))
 
     om/IWillUpdate
     (will-update [this next-props next-state]

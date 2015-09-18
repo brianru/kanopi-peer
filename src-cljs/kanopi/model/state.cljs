@@ -28,6 +28,10 @@
     (delete-cookie! id)
     c))
 
+;; FIXME: local storage must be stored per user
+;; FIXME: must wipe out localstorage when user logs out
+;; FIXME: this is accomplished simply by ensuring app-state is
+;; properly updated when user logs in and out.
 (defrecord LocalStorageAppState [config local-storage app-state]
   component/Lifecycle
   (start [this]

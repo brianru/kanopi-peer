@@ -13,7 +13,7 @@
             [kanopi.view.widgets.dropdown :as dropdown]
             [kanopi.util.browser :as browser]
             [kanopi.util.async :as async-util]
-            [kanopi.ether.core :as ether]))
+            [kanopi.aether.core :as aether]))
 
 (defn- handle-result-click
   [owner res evt]
