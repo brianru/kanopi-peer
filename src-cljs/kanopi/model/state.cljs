@@ -10,8 +10,6 @@
             [kanopi.util.local-storage :as local-storage]
             ))
 
-#_(defrecord PersistentAppState [config app-state])
-
 (defn get-cookie [id]
   (-> (cookies/get id)
       (url/query->map)
@@ -30,7 +28,7 @@
     (delete-cookie! id)
     c))
 
-(defrecord EphemeralAppState [config local-storage app-state]
+(defrecord LocalStorageAppState [config local-storage app-state]
   component/Lifecycle
   (start [this]
     (let [cookie (get-and-remove-cookie "kanopi-init")
@@ -68,4 +66,4 @@
     (assoc this :app-state nil)))
 
 (defn new-app-state [config]
-  (map->EphemeralAppState {:config config}))
+  (map->LocalStorageAppState {:config config}))
