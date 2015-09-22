@@ -127,6 +127,7 @@
   (->> dimension (publication-keyword) (get aether)))
 
 (defn listen*
+  "NOTE: this is the right fn for creating listeners when outside of an Om component."
   ([aether dimension value opts]
    (let [{:keys [kill-ch handlerfn logfn]
           :or {kill-ch (async/chan)
@@ -157,7 +158,10 @@
 
 (defn listen!
   "Pass messages matching the supplied dimension and value to a
-  callback function.
+  callback function
+
+  FIXME: This function is not well-named. It's only valuable when used
+  within an Om component.
   "
   ([owner dimension value handlerfn]
    (listen! owner dimension value handlerfn (constantly nil)))
@@ -203,7 +207,7 @@
       this
       (do
        (info "stop aether")
-       ;; TODO: kill aether
+       ;; FIXME: kill aether
        (assoc this :aether nil)))))
 
 (defn new-aether [config]

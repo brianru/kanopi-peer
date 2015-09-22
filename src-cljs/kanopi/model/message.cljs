@@ -5,6 +5,8 @@
 (defn publisher [owner]
   (om/get-shared owner [:aether :publisher]))
 
+;; TODO: make work with different first args
+;; eg. a core.async channel, an aether map, an aether record, etc
 (defn send!
   "Ex: (->> (msg/search \"foo\") (msg/send! owner))
   TODO: allow specification of transducers or debounce msec via args
@@ -72,3 +74,13 @@
     :verb :search
     :context {})))
 
+(defmulti local->remote
+  (fn [app-state msg]
+    (get msg :verb))
+  :default :request)
+
+(defmethod local->remote :request
+  [app-state msg]
+  (hash-map :noun msg
+            :verb :request
+            :context {}))

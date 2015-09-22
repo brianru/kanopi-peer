@@ -12,6 +12,8 @@
   "
   (:require-macros [cljs.core.async.macros :refer (go go-loop)])
   (:require [om.core :as om]
+            [taoensso.timbre :as timbre
+             :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
             [ajax.core :as http]
             [cljs-uuid-utils.core :refer (make-random-uuid)]
@@ -19,10 +21,6 @@
             [cljs-time.coerce :as time-coerce]
             [quile.component :as component]
             [cljs.core.async :as async :refer (<! >!)]))
-
-(defprotocol ISpout
-  (enqueue [this itm])
-  (dequeue [this]))
 
 (defn k-comparator [k]
   (fn [x y]
@@ -149,56 +147,55 @@
 ;;   - NOTE: all response handling is defined in the request map,
 ;;           which is produced by this xform fn.
 ;; - logfn
-(defrecord HTTPSpout [config queue notify-ch owner workers]
+(defrecord HTTPSpout [config queue notify-ch workers kill-ch aether app-state]
   component/Lifecycle
   (start [this]
-    ;;(println "start spout" (clj->js (select-keys config [:dimension :value])))
     (let [{:keys [n-parallelism priority-fn
                   dimension     value
                   xform         logfn]}
           config
+          _         (info "start spout" dimension value)
           q         (new-request-queue priority-fn)
           notify-ch (watch-and-notify q)
           workers   (doall (repeatedly n-parallelism
                                        #(component/start (new-http-worker q notify-ch))))
-          this'     (assoc this :queue q :notify-ch notify-ch :workers workers)]
-
-      (om/set-state! owner [:spouts [dimension value]] this')
-      (aether/listen! owner dimension value
-                     (fn [req] (enqueue this' (xform req)))
-                     logfn)
-
-      this'))
+          kill-ch   (aether/listen* (get aether :aether)
+                                    dimension value
+                                    {:handlerfn
+                                     (fn [req]
+                                       (let [req' (xform req)]
+                                         (enqueue-set! q req' #(= (:uri %) (:uri req')))))
+                                     :logfn logfn
+                                     })
+          ]
+      (assoc this
+             :queue q
+             :notify-ch notify-ch
+             :workers workers
+             :kill-ch kill-ch)))
 
   (stop [this]
-    ;;(println "stop spout")
+    (info "stop spout" (get config :dimension) (get config :value))
     (assoc this
-           :queue (swap! queue (constantly {}))
+           :queue     (swap! queue (constantly {}))
            :notify-ch (async/close! notify-ch)
-           :workers (doall (map component/stop workers))))
-
-  ISpout
-  (enqueue [this request]
-    (let [dupe-fn #(= (:uri %) (:uri request))]
-      (enqueue-set! queue request dupe-fn)
-      ;;(println "queue count: " (count @queue))
-      ))
-  (dequeue [_]
-    (dequeue-set! queue)))
+           :kill-ch   (async/put! kill-ch :kill!)
+           :workers   (doall (map component/stop workers))))
+  )
 
 (defn new-http-spout
   "Handle all default configuration values here.
 
-  Required args: owner, dimension, value.
+  Required args: dimension, value.
   Optional args: n, priority-fn, logfn.
   "
-  ([owner dimension value & args]
+  ([dimension value config]
    (let [{:or {xform       identity
                logfn       (constantly nil)
                priority-fn :timestamp
                n           3}
           :keys [n priority-fn xform logfn]}
-         (apply hash-map args)]
+         config]
      (map->HTTPSpout
       {:config {:n-parallelism n
                 :dimension dimension
@@ -206,7 +203,7 @@
                 :priority-fn priority-fn
                 :xform xform
                 :logfn logfn}
-       :owner owner}))))
+       }))))
 
 (defn spout!
   "See new-http-spout for arg guidance."

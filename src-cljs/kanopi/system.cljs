@@ -10,6 +10,7 @@
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.controller.history :as history]
             [kanopi.aether.core :as aether]
+            [kanopi.aether.spout :as aether-spout]
             [kanopi.util.local-storage :as local-storage]
             ))
 
@@ -47,10 +48,26 @@
      {:aether :aether
       :app-state :app-state})
 
+    ;; synchronous (useful responses)
+    ;; :request-spout
+    ;; (component/using
+    ;;  (aether-spout/new-http-spout :verb :request config)
+    ;; {:aether    :aether
+    ;;  :app-state :app-state})
+
+    ;; asynchronous (responses come back via another channel)
+    ;; :submit-spout
+    ;; (component/using
+    ;;  (aether-spout/new-http-spout :verb :submit config)
+    ;;  {:aether :aether})
+    
+
+    ;; FIXME: do i need this?
     :transporter
     (component/using
      (ajax/new-ajax-spout config)
-     {:aether :aether})
+     {:aether :aether
+      })
     
     
     )))

@@ -6,9 +6,11 @@
             [cljs.core.async :as async]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
+            [kanopi.aether.core :as aether]
             [kanopi.controller.handlers :as handlers]
+            [kanopi.model.message :as msg]
             [om.core :as om]
-            [kanopi.aether.core :as aether]))
+            ))
 
 (def mode-verbs
   {:demo
@@ -16,16 +18,15 @@
     :remote #{}}
 
    :authenticated
-   {:local  #{} 
-    :remote #{}}})
+   {:local  #{:navigate :search} 
+    :remote #{:update-thunk-label :update-fact}}})
 
 (defrecord Dispatcher [config aether app-state kill-channel]
   component/Lifecycle
   (start [this]
     (info "start dispatcher")
     (let [kill-ch  (async/chan 1)
-          listener (aether/replicate! (get aether :aether))
-          ]
+          listener (aether/replicate! (get aether :aether))]
       (asyncm/go (loop [[v ch] nil]
                    (if (= ch kill-ch)
                      (do
@@ -40,10 +41,9 @@
                          (when (contains? local-verbs verb)
                            (handlers/local-event-handler root-crsr v))
                          (when (contains? remote-verbs verb)
-                           (async/put! (get-in aether [:aether :publisher])
-                                       (hash-map :noun v
-                                                 :verb :request)))
-                         )
+                           (->> v
+                                (msg/local->remote root-crsr)
+                                (async/put! (get-in aether [:aether :publisher])))))
 
                        (recur (async/alts! [listener kill-ch]))))))
       (assoc this :kill-channel kill-ch)))
