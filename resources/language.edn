@@ -1,0 +1,43 @@
+{
+ :user-interaction
+ #{
+   "navigate"
+   "search"
+   "update thunk label"
+   "update fact"
+   "login"
+   "logout"
+   "register"
+   }
+ :client-messaging
+ #{
+   "noun"
+   "verb"
+   "context"
+   }
+ :aether
+ #{
+   "listen!"
+   "send!"
+   "replicate!"
+   "publisher"
+   "log"
+   }
+ :system
+ #{
+   "start"
+   "stop"
+   }
+ :system-messaging
+ #{
+   "get"
+   "update"
+   "create"
+   "request"
+   "response"
+   }
+ :system-architecture
+ #{
+   }
+
+ }
