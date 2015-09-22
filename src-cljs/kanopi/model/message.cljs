@@ -81,6 +81,13 @@
 
 (defmethod local->remote :request
   [app-state msg]
-  (hash-map :noun msg
-            :verb :request
-            :context {}))
+  ;; FIXME: what does this need?
+  ;; :method
+  ;; :body? :content?
+  ;; handlerfn
+  ;; errorfn
+  ;; finallyfn
+  (hash-map 
+   :noun msg
+   :verb :request
+   :context {}))

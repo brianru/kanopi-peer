@@ -129,13 +129,13 @@
 (defn listen*
   "NOTE: this is the right fn for creating listeners when outside of an Om component."
   ([aether dimension value opts]
+   {:pre [(get opts :handlerfn)]}
    (let [{:keys [kill-ch handlerfn logfn]
           :or {kill-ch (async/chan)
                logfn     (constantly nil)}}
          opts
          listener (async/chan 100)
          publication (get-publication aether dimension)]
-     (assert handlerfn "Handler function is required.")
      (async/sub publication value listener)
      (go (loop [[v ch] nil]
            (if (= ch kill-ch)

@@ -48,6 +48,7 @@
   ([s itm]
    (enqueue-set! s itm (constantly nil)))
   ([s itm dupe-fn]
+   (debug s itm)
    (swap! s (fn [s]
               (if (some dupe-fn s)
                 s

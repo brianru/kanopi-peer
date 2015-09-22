@@ -49,11 +49,11 @@
       :app-state :app-state})
 
     ;; synchronous (useful responses)
-    ;; :request-spout
-    ;; (component/using
-    ;;  (aether-spout/new-http-spout :verb :request config)
-    ;; {:aether    :aether
-    ;;  :app-state :app-state})
+     :request-spout
+     (component/using
+      (aether-spout/new-http-spout :verb :request config)
+     {:aether    :aether
+      :app-state :app-state})
 
     ;; asynchronous (responses come back via another channel)
     ;; :submit-spout

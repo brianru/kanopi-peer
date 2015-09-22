@@ -169,7 +169,6 @@
                           true
                           (ensure-current-thunk-is-updated thunk-id))
                         ]
-                    (println "here pelase" (get-in app-state' [:cache (:db/id fact')]))
                     app-state'
                     ))))
 
@@ -231,7 +230,6 @@
 (defmethod local-event-handler :navigate
   [app-state msg]
   (let [handler (get-in msg [:noun :handler])]
-    (println "here")
     (om/transact! app-state
                   (fn [app-state]
                     (cond-> app-state

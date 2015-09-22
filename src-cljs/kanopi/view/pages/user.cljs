@@ -52,7 +52,6 @@
   )
 
 (defn- register! [owner creds]
-  (println "here")
   (http/POST (browser/route-for owner :register)
              {:params creds
               :handler (fn [resp]
