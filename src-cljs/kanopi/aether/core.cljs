@@ -115,6 +115,14 @@
             :log       (async/tap pub-mult log-chan)}
            (zipmap pub-keys publications))))
 
+(defn replicate!
+  "Use aether's pub-mult to replicate the publisher onto another core.async channel."
+  ([aether]
+   (replicate! aether (async/chan 100)))
+  ([aether destination-ch]
+   (async/tap (get aether :pub-mult) destination-ch)
+   destination-ch))
+
 (defn- get-publication [aether dimension]
   (->> dimension (publication-keyword) (get aether)))
 

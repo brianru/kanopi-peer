@@ -12,24 +12,19 @@
 
 (def mode-verbs
   {:demo
-   {:local #{:navigate :search :update-thunk-label :update-fact}
+   {:local  #{:navigate :search :update-thunk-label :update-fact}
     :remote #{}}
 
    :authenticated
-   {:local #{} 
+   {:local  #{} 
     :remote #{}}})
 
 (defrecord Dispatcher [config aether app-state kill-channel]
   component/Lifecycle
   (start [this]
-    ;; TODO: How should I inject the local and remote verbs into this
-    ;; component? How can this get me closer to a system that can
-    ;; seamlessly shift between offline and online, demo to
-    ;; authenticated modes?
     (info "start dispatcher")
     (let [kill-ch  (async/chan 1)
-          listener (async/chan 100)
-          _        (async/tap (get-in aether [:aether :pub-mult]) listener)
+          listener (aether/replicate! (get aether :aether))
           ]
       (asyncm/go (loop [[v ch] nil]
                    (if (= ch kill-ch)
@@ -45,7 +40,9 @@
                          (when (contains? local-verbs verb)
                            (handlers/local-event-handler root-crsr v))
                          (when (contains? remote-verbs verb)
-                           (println "Remote!"))
+                           (async/put! (get-in aether [:aether :publisher])
+                                       (hash-map :noun v
+                                                 :verb :request)))
                          )
 
                        (recur (async/alts! [listener kill-ch]))))))
