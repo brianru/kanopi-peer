@@ -10,37 +10,50 @@
             [om.core :as om]
             [kanopi.aether.core :as aether]))
 
-(defrecord Dispatcher [config aether app-state kill-channels]
+(def mode-verbs
+  {:demo
+   {:local #{:navigate :search :update-thunk-label :update-fact}
+    :remote #{}}
+
+   :authenticated
+   {:local #{} 
+    :remote #{}}})
+
+(defrecord Dispatcher [config aether app-state kill-channel]
   component/Lifecycle
   (start [this]
     ;; TODO: How should I inject the local and remote verbs into this
     ;; component? How can this get me closer to a system that can
     ;; seamlessly shift between offline and online, demo to
     ;; authenticated modes?
-    (let [
-          local-verbs [:navigate :search :update-thunk-label :update-fact]
-          remote-verbs []
-          _ (info "start dispatcher" local-verbs remote-verbs)
-
-          local-kill-chs
-          (doseq [vrb local-verbs]
-            (aether/listen*
-             (:aether aether) :verb vrb
-             {:handlerfn (partial handlers/local-event-handler
-                                  (om/root-cursor (:app-state app-state)))}))
-
-          remote-kill-chs
-          (doseq [vrb remote-verbs]
-            )
-
+    (info "start dispatcher")
+    (let [kill-ch  (async/chan 1)
+          listener (async/chan 100)
+          _        (async/tap (get-in aether [:aether :pub-mult]) listener)
           ]
-      ;; TODO: batch and log all data on aether log channel
-      (assoc this :kill-channels (concat local-kill-chs remote-kill-chs))))
+      (asyncm/go (loop [[v ch] nil]
+                   (if (= ch kill-ch)
+                     (do
+                      (async/close! kill-ch))
+                     (let [{:keys [noun verb context]} v
+                           root-crsr    (om/root-cursor (:app-state app-state))
+                           mode         (get @root-crsr :mode)
+                           local-verbs  (get-in mode-verbs [mode :local])
+                           remote-verbs (get-in mode-verbs [mode :remote])]
+                       ;; first run v is nil
+                       (when v
+                         (when (contains? local-verbs verb)
+                           (handlers/local-event-handler root-crsr v))
+                         (when (contains? remote-verbs verb)
+                           (println "Remote!"))
+                         )
+
+                       (recur (async/alts! [listener kill-ch]))))))
+      (assoc this :kill-channel kill-ch)))
 
   (stop [this]
-    (doseq [ch kill-channels]
-      (async/put! ch :kill))
-    (assoc this :kill-channels nil)))
+    (async/put! kill-channel :kill)
+    (assoc this :kill-channel nil)))
 
 (defn new-dispatcher
   ([] (new-dispatcher {}))

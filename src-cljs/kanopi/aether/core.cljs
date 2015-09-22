@@ -110,6 +110,8 @@
         pub-keys     (map publication-keyword dimension-keys)
         publications (map async/pub taps dimension-keys)]
     (merge {:publisher publisher
+            ;; in case anyone wants to create additional log-replicas
+            :pub-mult  pub-mult
             :log       (async/tap pub-mult log-chan)}
            (zipmap pub-keys publications))))
 

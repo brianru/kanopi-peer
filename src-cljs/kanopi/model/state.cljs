@@ -37,7 +37,6 @@
   (start [this]
     (let [cookie (get-and-remove-cookie "kanopi-init")
           stored-app-state (local-storage/get! local-storage {})
-          _ (println "store-app-state" stored-app-state)
           atm (atom
                (util/deep-merge
                 {

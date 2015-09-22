@@ -6,6 +6,7 @@
             [kanopi.model.ref-cursors :as ref-cursors]
             [kanopi.model.message :as msg]
             [kanopi.view.header :as header]
+            [kanopi.view.footer :as footer]
             [kanopi.view.thunk :as thunk]
             [kanopi.view.pages.settings :as settings]
             [kanopi.view.pages.user :as user]
@@ -64,6 +65,8 @@
             ]
            )
          ]
+        [:div.footer-container
+         (om/build footer/footer props)]
         ]
        ))))
 
