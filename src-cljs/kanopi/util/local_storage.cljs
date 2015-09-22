@@ -3,7 +3,7 @@
             [cognitect.transit :as transit]))
 
 (defprotocol IPersistentStorage
-  (get! [this])
+  (get! [this default-value])
   (commit! [this v]))
 
 (defrecord LocalStorage [storage writer reader k]
@@ -19,9 +19,9 @@
            :writer  nil
            :reader  nil))
   IPersistentStorage
-  (get! [this]
+  (get! [this default-value]
     (let [v (.getItem storage k)]
-      (transit/read reader v)))
+      (or (transit/read reader v) default-value)))
   (commit! [this v]
     (let [v' (transit/write writer v)]
       (.setItem storage k v'))))

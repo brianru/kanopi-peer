@@ -36,10 +36,13 @@
   component/Lifecycle
   (start [this]
     (let [cookie (get-and-remove-cookie "kanopi-init")
-          stored-app-state (local-storage/get! local-storage)
+          stored-app-state (local-storage/get! local-storage {})
+          _ (println "store-app-state" stored-app-state)
           atm (atom
                (util/deep-merge
-                {:tempo {:pulse nil}
+                {
+                 :mode :demo
+                 ;;:tempo {:pulse nil}
                  :user  (merge {:actions {}} (get cookie :user)) 
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.

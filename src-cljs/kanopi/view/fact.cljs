@@ -378,7 +378,9 @@
       (let []
         (html
          [:div.fact-container.container
+          ;; TODO: receiving (get state :fact-count). if (= 1 %) and
+          ;; (nil? (:db/id %)) then initialize in edit mode.
           (om/build body props
                     {:state (select-keys state [:mode :thunk-id :fact/attribute :fact/value])}
-                    )])))
+                    )] )))
     ))

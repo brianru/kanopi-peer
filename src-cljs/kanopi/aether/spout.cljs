@@ -137,6 +137,18 @@
                         (async/put! ch diff))))
    ch))
 
+;; Spouts act like pipelines where the receiving end is not a
+;; core.async channel.
+;;
+;; Required configuration parameters:
+;; - n-parallelism
+;; - priority-fn
+;; - dimension
+;; - value
+;; - xform
+;;   - NOTE: all response handling is defined in the request map,
+;;           which is produced by this xform fn.
+;; - logfn
 (defrecord HTTPSpout [config queue notify-ch owner workers]
   component/Lifecycle
   (start [this]

@@ -102,17 +102,20 @@
                                            (msg/send! owner)))}})
             ]
            [:div.thunk-type-line
-            [:span.horizontal-line]
-            [:span.thunk-type-label "TYPE: "]
-            [:span.thunk-type (name (schema/describe-entity props))]
-            [:span.horizontal-line]]
+            ;[:span.horizontal-line]
+            ;[:span.thunk-type-label "TYPE: "]
+            ;[:span.thunk-type (name (schema/describe-entity props))]
+            ;[:span.horizontal-line]
+            ]
            [:div.thunk-facts
             ;; NOTE: one of the facts is a placeholder for creating a
             ;; new one
             (if (:db/id props)
-              (for [f (sort-by #(nil? (:db/id %)) (:thunk/fact props))]
-                (om/build fact/container f {:key-fn :db/id
-                                            :init-state {:thunk-id (:db/id props)}}))
+              (om/build-all fact/container
+                            (get props :thunk/fact)
+                            {:key-fn :db/id
+                             :init-state {:thunk-id (:db/id props)}
+                             :state {:fact-count (count (:thunk/fact props))}})
               [:span "This thunk does not exist."])]
            ]
           ])))
@@ -160,7 +163,7 @@
 
     om/IRender
     (render [_]
-      (let [_ (println "thunk container:" props)]
+      (let []
         (html
          [:div.thunk-container.container-fluid
           (om/build context-thunks (get props :context-thunks))

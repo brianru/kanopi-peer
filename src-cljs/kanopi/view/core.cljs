@@ -23,6 +23,10 @@
     (display-name [_]
       "app-root")
 
+    om/IWillMount
+    (will-mount [_]
+      (info "mounting root component"))
+
     om/IRender
     (render [_]
       (html
@@ -69,7 +73,10 @@
        (:search-results)
        (om/ref-cursor)))
 
-(defn mount-root! [app-state container aether history ref-cursors]
+(defn mount-root!
+  [app-state container aether history ref-cursors]
+  {:pre [(instance? Atom app-state)
+         (not-empty @app-state)]}
   (om/root root-component
            app-state
            {:target container

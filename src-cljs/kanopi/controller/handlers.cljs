@@ -11,6 +11,7 @@
 
 (defmulti local-event-handler
   (fn [app-state msg]
+    (println msg)
     (get msg :verb))
   :default
   :log)
@@ -45,6 +46,26 @@
           ))
    ))
 
+(defn- references-thunk? [props base-id ent]
+  (->> ent
+       :db/id
+       (lookup-id props)
+       :thunk/fact))
+
+(defn- context-thunks
+  "Find all thunks in `data` which reference the base-id."
+  [props base-id]
+  (let [data    (-> props :cache (vals))
+        ref-ids (->> data
+                     (filter schema/thunk?)
+                     (filter (partial references-thunk? props base-id))
+                     (map :db/id)
+                     (take 9)
+                     )]
+    ))
+(defn- similar-thunks [data base-id]
+  )
+
 (def placeholder-fact
   {:db/id nil
    :fact/attribute [{:db/id nil}]
@@ -58,7 +79,9 @@
   -> values     (literals or thunks)"
   [props thunk-id]
   {:pre [(integer? thunk-id)]}
-  (let [thunk (lookup-id props thunk-id)]
+  (let [context (context-thunks (-> props :cache vals) thunk-id)
+        similar (similar-thunks (-> props :cache vals) thunk-id)
+        thunk (lookup-id props thunk-id)]
     (hash-map
      :context-thunks [(lookup-id props -1008)]
      :thunk (update thunk :thunk/fact #(vec (conj % placeholder-fact)))
@@ -208,6 +231,7 @@
 (defmethod local-event-handler :navigate
   [app-state msg]
   (let [handler (get-in msg [:noun :handler])]
+    (println "here")
     (om/transact! app-state
                   (fn [app-state]
                     (cond-> app-state

@@ -23,7 +23,7 @@
   :thunk/role #db/id [:db.part/users -1000]}
 
  {:db/id #db/id [:db.part/structure -3003]
-  :value/string "David Foster Wallace"}
+  :literal/string "David Foster Wallace"}
 
  {:db/id #db/id [:db.part/structure -3004]
   :fact/attribute #db/id [:db.part/structure -3005]
@@ -34,7 +34,7 @@
   :thunk/role #db/id [:db.part/users -1000]}
 
  {:db/id #db/id [:db.part/structure -3006]
-  :value/string "Infinite Jest"}
+  :literal/string "Infinite Jest"}
 
  ]
 
