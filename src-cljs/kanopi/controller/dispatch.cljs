@@ -14,11 +14,19 @@
 
 (def mode-verbs
   {:demo
-   {:local  #{:navigate :search :update-thunk-label :update-fact}
+   {:local  #{:navigate :search :update-thunk-label :update-fact
+              :login-success    :login-failure
+              :logout-success   :logout-failure
+              :register-success :register-failure
+              }
     :remote #{}}
 
    :authenticated
-   {:local  #{:navigate :search} 
+   {:local  #{:navigate :search
+              :login-success    :login-failure
+              :logout-success   :logout-failure
+              :register-success :register-failure
+              } 
     :remote #{:update-thunk-label :update-fact}}})
 
 (defrecord Dispatcher [config aether app-state kill-channel]

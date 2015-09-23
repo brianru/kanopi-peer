@@ -1,10 +1,10 @@
 (ns kanopi.view.pages.user
-  "TODO: implement an ajax auth workflow.
-  https://gist.github.com/ebaxt/11244031
+  "TODO: refactor to use aether and ajax spout for initiating GET/POST requests.
   "
   (:require [sablono.core :refer-macros [html] :include-macros true]
             [om.core :as om]
             [kanopi.util.browser :as browser]
+            [kanopi.model.message :as msg]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [ajax.core :as http]))
@@ -29,17 +29,25 @@
   (http/POST (browser/route-for owner :login)
              {:params creds
               :handler (fn [resp]
-                         (println "Success" resp))
+                         (->> resp
+                              (msg/login-success)
+                              (msg/send! owner)))
               :error-handler (fn [resp]
-                               (println "Error" resp))}))
+                               (->> resp
+                                    (msg/login-failure)
+                                    (msg/send! owner)))}))
 
 (defn- register! [owner creds]
   (http/POST (browser/route-for owner :register)
              {:params creds
               :handler (fn [resp]
-                         (println "Success" resp))
+                         (->> resp
+                              (msg/register-success)
+                              (msg/send! owner)))
               :error-handler (fn [resp]
-                               (println "Error" resp))}))
+                               (->> resp
+                                    (msg/register-failure)
+                                    (msg/send! owner)))}))
 
 (defn login [props owner opts]
   (reify
@@ -80,18 +88,19 @@
          "Register"]
         ]))))
 
-(defn- logout! []
+(defn- logout! [owner]
   (http/GET "/logout"
             {:handler (fn [resp]
-                        (println "Success" resp))
+                        (->> resp
+                             (msg/logout-success)
+                             (msg/send! owner)))
              :error-handler (fn [resp]
-                              (println "Error" resp))}))
+                              (->> resp
+                                   (msg/logout-failure)
+                                   (msg/send! owner)))}))
 
 (defn logout [props owner opts]
   (reify
-    om/IWillMount
-    (will-mount [_]
-      (logout!))
     om/IRender
     (render [_]
       (html

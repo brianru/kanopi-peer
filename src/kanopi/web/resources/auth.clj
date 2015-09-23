@@ -1,4 +1,7 @@
 (ns kanopi.web.resources.auth
+  "BEWARE: this used to be an html/redirect-based auth flow. I then
+  refactored it into a pure transit+json flow but I left the bones of
+  the old flow because at some point I'll want both to work."
   (:require [liberator.core :refer [defresource]]
             [io.clojure.liberator-transit]
             [cemerick.friend :as friend]
