@@ -30,7 +30,8 @@
           [:div.container-fluid
            [:div.navbar-header
             [:a.navbar-brand
-             {:href (browser/route-for owner :home)}
+             {:href (browser/route-for owner :home)
+              :tab-index -1}
              "Kanopi"]]
            [:div.navbar-center
             (icons/search {})
@@ -42,7 +43,8 @@
              (om/build typeahead/typeahead props
                        {:init-state {:display-fn schema/display-entity
                                      :href-fn #(browser/route-for owner :thunk :id (:db/id %))
-                                     :on-click (constantly nil)}})
+                                     :on-click (constantly nil)
+                                     :tabindex 1}})
              ]
             ]
            [:ul.nav.navbar-nav.navbar-right
@@ -50,6 +52,7 @@
               (om/build dropdown/dropdown props
                         {:init-state
                          {:toggle-label (get-in props [:user :username])
+                          :tabindex -1
                           :menu-items [{:type  :link
                                         :href  (browser/route-for owner :settings)
                                         :label "Settings"}

@@ -56,6 +56,7 @@
       ;; defaults
       {:toggle-label "Toggle label"
        :selection-handler (constantly nil)
+       :tabindex 0
        :menu-items [{:type :link
                      :href ""
                      :label "Item 1"}
@@ -75,6 +76,7 @@
           [:a.dropdown-toggle
            {:on-click       #(toggle-dropdown! owner)
             :data-toggle    "dropdown"
+            :tab-index      (get state :tabindex)
             :role           "button"
             :aria-haspopup  "true"
             :aria-expanded  expanded
