@@ -9,16 +9,28 @@
             [kanopi.storage.datomic :as datomic]
             [com.stuartsierra.component :as component]))
 
+;; TODO: json workflow
+;; http://stackoverflow.com/questions/20273190/use-friend-for-authentication-and-authorisation-in-a-single-page-clojure-web-app
+;; https://github.com/cemerick/friend/issues/83
 (defn authentication-middleware
   [handler credential-fn]
   (let [friend-m
-        {:credential-fn (partial creds/bcrypt-credential-fn credential-fn)
-         ;; TODO: define unauthorized handler.
-         ;; :unauthorized-handler {:status 403 :body ___}
+        {
+         :allow-anon? true
+         :redirect-on-auth? false
+
+         :credential-fn (partial creds/bcrypt-credential-fn credential-fn)
+         :login-failure-handler (fn [e]
+                                  (println "login failure handler")
+                                  {:status 401})
+         ;; :unauthenticated-handler (constantly {:status 401})
+         :unauthorized-handler    (fn [e]
+                                    (println "unauthorized handler")
+                                    {:status 401})
          :login-uri "/login"
          :default-landing-uri "/"
-         :workflows [(workflows/http-basic :realm "/")
-                     (workflows/interactive-form)]}]
+         :workflows [;(workflows/http-basic :realm "/")
+                     (workflows/interactive-form :redirect-on-auth? false)]}]
     (-> handler
         (friend/authenticate friend-m))))
 
@@ -41,12 +53,14 @@
       ;; NOTE: friend expects this to return nil when the given
       ;; username is unidentified.
       (when (not-empty creds)
+        (println "credentials" creds)
         {:ent-id   ent-id
          :role     (-> creds :user/role first :db/id)
          :username (-> creds :user/id first)
          :password (-> creds :user/password first)})))
 
   (verify-creds [this {:keys [username password]}]
+    (println "verify-creds" username password)
     (some->> (credentials this username)
              :password
              (creds/bcrypt-verify password)))

@@ -1,5 +1,6 @@
 (ns kanopi.web.resources.api
-  "Glue api routes to database component."
+  "Synchronous message passing api.
+  TODO: send all messages to Kafka then let Onyx handle them."
   (:require [liberator.core :refer (defresource)]
             [liberator.representation :refer (ring-response)]
             [kanopi.web.resources.base :as base]
@@ -21,6 +22,7 @@
                           "application/json"]
 
   :processable? (partial msg/request-context->action-message ::message) 
+  :handle-unprocessable-entity "The request is in some way incomplete or illogical."
 
   :exists? (fn [ctx]
              (let [data-svc (util/get-data-service ctx)
@@ -36,5 +38,4 @@
   :respond-with-entity? true
 
   :handle-ok (fn [ctx] (str (get ctx ::entity)))
-  :handle-unprocessable-entity "The request is in some way incomplete or illogical."
   )

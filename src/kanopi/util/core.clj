@@ -45,3 +45,9 @@
         writer (transit/writer out :json)]
     (transit/write writer data)
     (.toString out)))
+
+(defn transit-read [stream]
+  (let [in (ByteArrayInputStream. (.getBytes (slurp stream)))
+        reader (transit/reader in :json)
+        ]
+    (transit/read reader)))

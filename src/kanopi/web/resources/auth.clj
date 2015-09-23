@@ -1,5 +1,6 @@
 (ns kanopi.web.resources.auth
   (:require [liberator.core :refer [defresource]]
+            [io.clojure.liberator-transit]
             [cemerick.friend :as friend]
             [kanopi.web.resources.templates :as html]
             [kanopi.web.auth :as auth]
@@ -102,7 +103,9 @@
   "TODO: if success, redirect to internal page
   TODO: if failure, redirect to same page with fail msg in route params"
   [ctx]
-  (let [{:keys [username password]} (get-in ctx [:request :params])
+  (let [params (get-in ctx [:request :params])
+        body   (util/transit-read (get-in ctx [:request :body]))
+        {:keys [username password]} (merge params body)
         authenticator (util/get-authenticator ctx)
         user-ent-id (auth/register! authenticator username password)
         ]
@@ -127,18 +130,30 @@
 (defresource login-resource
   :allowed-methods [:get]
   :available-media-types ["text/html"
-                          ;;"application/transit+json"
-                          ;;"application/edn"
-                          ;;"application/json"
                           ]
   :handle-ok login-page)
 
+(defresource ajax-login-resource
+  :allowed-methods [:post]
+  :available-media-types ["application/transit+json"
+                          "application/edn"
+                          "application/json"]
+  :new? false
+  :respond-with-entity? true
+  :post-redirect? false
+  :handle-ok (fn [ctx]
+               (friend/current-authentication (get-in ctx [:request]))))
+
 (defresource registration-resource
-  :allowed-methods [:get :post]
-  :available-media-types ["text/html"
+  :allowed-methods [:post]
+  :available-media-types [;;"text/html"
                           "application/transit+json"
                           "application/edn"
                           "application/json"]
-  :handle-ok registration-page
+  ;;:handle-ok registration-page
   :post! register!
-  :post-redirect? success?)
+  :new? false
+  :respond-with-entity? true
+  :post-redirect? false ;;; success?
+  :handle-ok ::result
+  )

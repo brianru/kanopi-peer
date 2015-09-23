@@ -43,8 +43,11 @@
                  [org.immutant/web "2.1.0"]
                  [compojure "1.4.0"]
                  [liberator "0.13"]
+                 [io.clojure/liberator-transit "0.3.0"]
                  [com.cemerick/friend "0.2.1"]
                  [ring/ring-defaults "0.1.5"]
+                 [ring-middleware-format "0.6.0"]
+                 ;;[ring-transit "0.1.3"]
                  [hiccup "1.0.5"]
                  [crypto-password "0.1.3"]
                  [cheshire "5.5.0"]
@@ -63,7 +66,7 @@
 
   :clean-targets ^{:protect false} [:target-path "resources/public/js/out"]
 
-  :profiles {"dev"
+  :profiles {:dev
              {:plugins [[lein-environ "1.0.0"]
                         [lein-ancient "0.6.6"]]
               :dependencies [[org.clojure/tools.nrepl "0.2.10"]

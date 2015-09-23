@@ -11,12 +11,16 @@
    (routes
 
     ;; authentication
-    (ANY "/register" [] auth/registration-resource)
-    ;;(GET "/register" [] spa/welcome)
-    ;;(GET "/login" [] spa/welcome)
-    ;;(GET "/logout" [] spa/welcome)
-    (GET "/login"    [] auth/login-resource)
-    (GET "/logout"   [] auth/logout-resource)
+    (GET "/register" [] spa-resource)
+    (POST "/register" [] auth/registration-resource)
+
+    (GET "/login" [] spa-resource)
+    ;; friend intercepts POST then passes on to here
+    (POST "/login" [] auth/ajax-login-resource)
+
+    (GET "/logout" [] spa-resource)
+    ;;(GET "/login"    [] auth/login-resource)
+    ;;(GET "/logout"   [] auth/logout-resource)
 
     (ANY "/api/" [] api-resource)
     (GET "/thunk/:id" [] spa-resource)

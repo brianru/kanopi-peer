@@ -7,6 +7,8 @@
             [ring.middleware.params]
             [ring.middleware.keyword-params]
             [ring.middleware.cookies]
+            [ring.middleware.format]
+            ;;[ring.middleware.transit]
             [kanopi.web.auth :refer (authentication-middleware)]
             [kanopi.util.core :as util]))
 
@@ -51,8 +53,11 @@
              (-> ring.middleware.defaults/site-defaults
                  (dissoc :session)
                  (assoc :security false)))
+            ;;(ring.middleware.transit/wrap-transit-body)
+            ;;(ring.middleware.transit/wrap-transit-params)
             (ring.middleware.params/wrap-params)
             (ring.middleware.keyword-params/wrap-keyword-params)
+            (ring.middleware.format/wrap-restful-format :formats [:json :edn :transit-json])
             (ring.middleware.cookies/wrap-cookies)
             (cond-> (:dev config)
               (wrap-trace :header :ui))

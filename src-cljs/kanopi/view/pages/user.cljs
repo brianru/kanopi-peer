@@ -29,7 +29,15 @@
   (http/POST (browser/route-for owner :login)
              {:params creds
               :handler (fn [resp]
-                         (println "success" resp))
+                         (println "Success" resp))
+              :error-handler (fn [resp]
+                               (println "Error" resp))}))
+
+(defn- register! [owner creds]
+  (http/POST (browser/route-for owner :register)
+             {:params creds
+              :handler (fn [resp]
+                         (println "Success" resp))
               :error-handler (fn [resp]
                                (println "Error" resp))}))
 
@@ -48,16 +56,11 @@
         [:button.btn.btn-primary
          {:on-click #(login! owner (select-keys state [:username :password]))}
          "Login"]
+        [:button.btn.btn-warning
+         {:on-click #(register! owner (select-keys state [:username :password]))}
+         "Register"]
         ])))
   )
-
-(defn- register! [owner creds]
-  (http/POST (browser/route-for owner :register)
-             {:params creds
-              :handler (fn [resp]
-                         (println "success" resp))
-              :error-handler (fn [resp]
-                               (println "error" resp))}))
 
 (defn register [props owner opts]
   (reify
@@ -80,7 +83,7 @@
 (defn- logout! []
   (http/GET "/logout"
             {:handler (fn [resp]
-                        (println "success" resp))
+                        (println "Success" resp))
              :error-handler (fn [resp]
                               (println "Error" resp))}))
 
