@@ -39,7 +39,7 @@
   [owner itm]
   [:li.dropdown-menu-item
    [:a {:href     (get itm :href)
-        :on-click (juxt (get itm :on-click)
+        :on-click (juxt (get itm :on-click (constantly nil))
                         #(toggle-dropdown! owner))}
     [:span (get itm :label)]]])
 
