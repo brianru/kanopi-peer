@@ -29,7 +29,7 @@
               } 
     :remote #{:update-thunk-label :update-fact}}})
 
-(defrecord Dispatcher [config aether app-state kill-channel]
+(defrecord Dispatcher [config aether history app-state kill-channel]
   component/Lifecycle
   (start [this]
     (info "start dispatcher")
@@ -47,7 +47,8 @@
                        ;; first run v is nil
                        (when v
                          (when (contains? local-verbs verb)
-                           (handlers/local-event-handler root-crsr v))
+                           (handlers/local-event-handler
+                            (get aether :aether) history root-crsr v))
                          (when (contains? remote-verbs verb)
                            (->> v
                                 (msg/local->remote root-crsr)

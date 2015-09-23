@@ -4,20 +4,22 @@
   TODO: refactor to work with om cursors instead of atoms."
   (:require [om.core :as om]
             [kanopi.util.core :as util]
+            [kanopi.aether.core :as aether]
             [kanopi.model.schema :as schema]
+            [kanopi.controller.history :as history]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             ))
 
 (defmulti local-event-handler
-  (fn [app-state msg]
+  (fn [aether history app-state msg]
     (println msg)
     (get msg :verb))
   :default
   :log)
 
 (defmethod local-event-handler :log
-  [app-state msg]
+  [aether history app-state msg]
   (info msg))
 
 (defn- current-thunk [props]
@@ -137,7 +139,7 @@
                 :fact (assoc fact :fact/value [(get value' :db/id)])))))))
 
 (defmethod local-event-handler :update-fact
-  [app-state msg]
+  [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (let [thunk-id (get-in msg [:noun :thunk-id])
@@ -173,7 +175,7 @@
                     ))))
 
 (defmethod local-event-handler :update-thunk-label
-  [app-state msg]
+  [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (let [ent-id (get-in msg [:noun :existing-entity :db/id])
@@ -218,7 +220,7 @@
          (vec))))
 
 (defmethod local-event-handler :search
-  [app-state msg]
+  [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (let [{:keys [query-string entity-type]} (get msg :noun)
@@ -228,23 +230,13 @@
                     (assoc-in app-state [:search-results] {query-string results})))))
 
 (defmethod local-event-handler :navigate
-  [app-state msg]
+  [aether history app-state msg]
   (let [handler (get-in msg [:noun :handler])]
     (om/transact! app-state
                   (fn [app-state]
                     (cond-> app-state
                       true
                       (assoc :page (get msg :noun))
-
-                      ;; TODO: implement user lifecycle in spa
-                      (= :login handler)
-                      identity
-
-                      (= :logout handler)
-                      (assoc :user nil)
-
-                      (= :register handler)
-                      (assoc :user nil)
 
                       (= :thunk handler)
                       (navigate-to-thunk msg)
@@ -255,31 +247,47 @@
                       )))))
 
 (defmethod local-event-handler :register-success
-  [app-state msg]
+  [aether history app-state msg]
   (let []
-    ))
+    (om/transact! app-state
+                  (fn [app-state]
+                    (assoc app-state
+                           :user (get msg :noun)
+                           :mode :authenticated)))
+    (history/navigate-to! history :home)))
 
 (defmethod local-event-handler :register-failure
-  [app-state msg]
+  [aether history app-state msg]
   (let []
     ))
 
 (defmethod local-event-handler :login-success
-  [app-state msg]
+  [aether history app-state msg]
   (let []
+    (om/transact! app-state
+                  (fn [app-state]
+                    (assoc app-state
+                           :user (get msg :noun)
+                           :mode :authenticated)))
+    (history/navigate-to! history :home)
     ))
 
 (defmethod local-event-handler :login-failure
-  [app-state msg]
+  [aether history app-state msg]
   (let []
     ))
 
 (defmethod local-event-handler :logout-success
-  [app-state msg]
+  [aether history app-state msg]
   (let []
-    ))
+    (om/transact! app-state
+                  (fn [app-state]
+                    (assoc app-state
+                           :user nil
+                           :mode :demo)))
+    (history/navigate-to! history :home)))
 
 (defmethod local-event-handler :logout-failure
-  [app-state msg]
+  [aether history app-state msg]
   (let []
     ))

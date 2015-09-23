@@ -41,8 +41,7 @@
                (util/deep-merge
                 {
                  :mode :demo
-                 ;;:tempo {:pulse nil}
-                 :user  (merge {:actions {}} (get cookie :user)) 
+                 :user  (get cookie :user) 
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
                  :page  {}

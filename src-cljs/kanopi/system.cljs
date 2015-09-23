@@ -45,7 +45,8 @@
     :dispatcher
     (component/using
      (dispatch/new-dispatcher config)
-     {:aether :aether
+     {:aether    :aether
+      :history   :history
       :app-state :app-state})
 
     ;; synchronous (useful responses)

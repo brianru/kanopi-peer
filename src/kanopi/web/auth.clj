@@ -20,6 +20,8 @@
          :redirect-on-auth? false
 
          :credential-fn (partial creds/bcrypt-credential-fn credential-fn)
+         ;; TODO: make better error handlers which return errors
+         ;; described as data
          :login-failure-handler (fn [e]
                                   (println "login failure handler")
                                   {:status 401})

@@ -193,6 +193,9 @@
 
 (def stop-listening! shutdown-component!)
 
+(defprotocol IBroadcast
+  (send! [this msg]))
+
 (defrecord Aether [config aether]
   component/Lifecycle
   (start [this]
@@ -208,7 +211,11 @@
       (do
        (info "stop aether")
        ;; FIXME: kill aether
-       (assoc this :aether nil)))))
+       (assoc this :aether nil))))
+  
+  IBroadcast
+  (send! [this msg]
+    (async/put! (get-in this [:aether :publisher]) msg)))
 
 (defn new-aether [config]
   (map->Aether {:config config}))

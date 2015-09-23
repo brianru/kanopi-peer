@@ -31,6 +31,9 @@
                :verb :navigate
                :context nil}))
 
+(defprotocol INavigator
+  (navigate-to! [this path]))
+
 (defrecord Html5History [config routes route-for set-page! history aether]
   component/Lifecycle
   (start [this]
@@ -45,7 +48,12 @@
 
   (stop [this]
     (pushy/stop! history)
-    (assoc this :history nil, :routes nil, :route-for (constantly nil))))
+    (assoc this :history nil, :routes nil, :route-for (constantly nil)))
+  
+  INavigator
+  (navigate-to! [this path]
+    (let [path (if (coll? path) path [path])]
+      ((get this :set-page!) (apply (get this :route-for) path)))))
 
 (defn new-html5-history [config]
   (map->Html5History {:config config}))
