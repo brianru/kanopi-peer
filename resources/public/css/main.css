@@ -28,6 +28,25 @@ input {
 input:focus {
     outline: none;
 }
+.form-control {
+    padding: none !important;
+    border: none !important;
+    border-bottom: 1px solid lightgrey !important;
+    border-radius: 0 !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+    /*
+    -webkit-transition: none;
+    -o-transition: none;
+    transition: none;
+    */
+}
+.form-control:focus {
+    border-color: inherit !important;
+    outline: inherit !important;
+    -webkit-box-shadow: none !important;
+    box-shadow: none !important;
+}
 a {
     color: inherit !important;
 }

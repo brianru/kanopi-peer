@@ -69,7 +69,7 @@
       {:username nil, :password nil})
 
     om/IRenderState
-    (render-state [_ state]
+    (render-state [_ {:keys [username password] :as state}]
       (let [mode (get-in props [:page :handler])]
         (html
          [:div.container-fluid
@@ -93,12 +93,14 @@
               (case mode
                 :login
                 [:button.btn.btn-primary.btn-block
-                 {:on-click #(login! owner (select-keys state [:username :password]))}
+                 {:on-click #(login! owner (select-keys state [:username :password]))
+                  :disabled (some nil? [username password])}
                  "Login"]
 
                 :register
                 [:button.btn.btn-warning.btn-block
-                 {:on-click #(register! owner (select-keys state [:username :password]))}
+                 {:on-click #(register! owner (select-keys state [:username :password]))
+                  :disabled (some nil? [username password])}
                  "Register"]
 
                 :logout
