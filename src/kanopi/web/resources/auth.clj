@@ -111,6 +111,9 @@
         user-ent-id (auth/register! authenticator username password)
         ]
     {::result {:db/id user-ent-id}
+     ;; NOTE: could this actually created an authenticated response?
+     ;; I don't think that's happening b/c registration does not flow
+     ;; through friend.
      ::identity (-> (auth/credentials authenticator username)
                     (select-keys [:ent-id :role :username])
                     ;; to make this match the friend

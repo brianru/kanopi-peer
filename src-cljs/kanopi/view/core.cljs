@@ -42,14 +42,8 @@
            :settings
            (om/build settings/settings props)
 
-           :login
-           (om/build user/login props)
-
-           :register
-           (om/build user/register props)
-
-           :logout
-           (om/build user/logout props)
+           (:login :logout :register)
+           (om/build user/authentication props)
 
            ;; TODO: welcome thunk
            [:div.home-page
