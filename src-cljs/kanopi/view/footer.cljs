@@ -24,20 +24,18 @@
              [:div.row
               [:div.col-md-offset-2.col-md-2
                [:label "Mode:"]
-               [:div (name (get props :mode))]
-               [:div
-                (when (= :demo (get props :mode))
-                  [:button {:on-click #(om/update! props :mode :authenticated)}
-                   "Authenticate!"])
-                (when (= :authenticated (get props :mode))
-                  [:button {:on-click #(om/update! props :mode :demo)}
-                   "Demo Mode!"])
-                ]]
+               [:div (str (get props :mode))]
+               ]
               [:div.col-md-2
                [:label "Aether"]
                ]
               [:div.col-md-2
-               [:label "User"]]
+               [:label "User"]
+               [:table
+                (for [[k v] (get props :user)]
+                  [:tr {:key k}
+                   [:td (str k)]
+                   [:td (str v)]])] ]
               [:div.col-md-2
                [:label "Other stuff"]]])
            [:div.row
