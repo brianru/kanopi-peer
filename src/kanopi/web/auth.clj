@@ -53,14 +53,12 @@
       ;; NOTE: friend expects this to return nil when the given
       ;; username is unidentified.
       (when (not-empty creds)
-        (println "credentials" creds)
         {:ent-id   ent-id
          :role     (-> creds :user/role first :db/id)
          :username (-> creds :user/id first)
          :password (-> creds :user/password first)})))
 
   (verify-creds [this {:keys [username password]}]
-    (println "verify-creds" username password)
     (some->> (credentials this username)
              :password
              (creds/bcrypt-verify password)))

@@ -103,8 +103,6 @@
            ]]]]]])))
 
 (defn register!
-  "TODO: if success, redirect to internal page
-  TODO: if failure, redirect to same page with fail msg in route params"
   [ctx]
   (let [params (get-in ctx [:request :params])
         body   (util/transit-read (get-in ctx [:request :body]))
@@ -112,7 +110,12 @@
         authenticator (util/get-authenticator ctx)
         user-ent-id (auth/register! authenticator username password)
         ]
-    {::result {:db/id user-ent-id}}))
+    {::result {:db/id user-ent-id}
+     ::identity (-> (auth/credentials authenticator username)
+                    (select-keys [:ent-id :role :username])
+                    ;; to make this match the friend
+                    ;; current-authentication map
+                    ((fn [x] (assoc x :identity (:username x)))))}))
 
 (defn success?
   ""
@@ -158,5 +161,5 @@
   :new? false
   :respond-with-entity? true
   :post-redirect? false ;;; success?
-  :handle-ok ::result
+  :handle-ok ::identity
   )

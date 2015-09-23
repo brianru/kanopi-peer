@@ -252,5 +252,34 @@
                       (not= :thunk handler)
                       (assoc :thunk {})
 
-                      ))))
-  )
+                      )))))
+
+(defmethod local-event-handler :register-success
+  [app-state msg]
+  (let []
+    ))
+
+(defmethod local-event-handler :register-failure
+  [app-state msg]
+  (let []
+    ))
+
+(defmethod local-event-handler :login-success
+  [app-state msg]
+  (let []
+    ))
+
+(defmethod local-event-handler :login-failure
+  [app-state msg]
+  (let []
+    ))
+
+(defmethod local-event-handler :logout-success
+  [app-state msg]
+  (let []
+    ))
+
+(defmethod local-event-handler :logout-failure
+  [app-state msg]
+  (let []
+    ))
