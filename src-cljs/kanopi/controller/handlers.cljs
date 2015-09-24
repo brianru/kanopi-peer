@@ -6,6 +6,7 @@
             [kanopi.util.core :as util]
             [kanopi.aether.core :as aether]
             [kanopi.model.schema :as schema]
+            [kanopi.model.message :as msg]
             [kanopi.controller.history :as history]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]

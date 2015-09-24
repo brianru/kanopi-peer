@@ -143,7 +143,7 @@
   (fn [history app-state msg]
     (println "local->remote" msg)
     (get msg :verb))
-  :default :request)
+  :default :default)
 
 (defmethod local->remote :register
   [history app-state msg]
@@ -184,12 +184,12 @@
           :response-method :aether
           :response-xform  logout-success
           :error-method    :aether
-          :error-xform     logut-failure
+          :error-xform     logout-failure
           }
    :verb :request
    :context {}))
 
-(defmethod local->remote :request
+(defmethod local->remote :default
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map 

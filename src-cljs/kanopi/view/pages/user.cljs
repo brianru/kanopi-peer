@@ -6,8 +6,7 @@
             [kanopi.util.browser :as browser]
             [kanopi.model.message :as msg]
             [taoensso.timbre :as timbre
-             :refer-macros (log trace debug info warn error fatal report)]
-            [ajax.core :as http]))
+             :refer-macros (log trace debug info warn error fatal report)]))
 
 (defn- handle-key-down [owner submit-fn submittable evt]
   (case (.-key evt)
@@ -103,8 +102,6 @@
                  {:on-click submit-fn}
                  "Logout"]
                 )
-
-
               ]
              [:div.panel-footer
               (case mode
@@ -126,6 +123,6 @@
 
               ]]
             ]]]
-         )  )
+         ))
       ))
   )
