@@ -110,20 +110,27 @@
    :verb :logout-failure
    :context {}))
 
+(defn valid-remote-message? [msg]
+  (-> msg
+      (get :noun)
+      ((juxt :uri :method :response-method :error-method))
+      (->> (every? identity))))
+
 (defmulti local->remote
   (fn [app-state msg]
+    (println "local->remote" msg)
     (get msg :verb))
   :default :request)
 
 (defmethod local->remote :request
   [app-state msg]
-  ;; FIXME: what does this need?
-  ;; :method
-  ;; :body? :content?
-  ;; handlerfn
-  ;; errorfn
-  ;; finallyfn
+  {:post [(valid-remote-message? %)]}
   (hash-map 
-   :noun msg
+   :noun {:body msg
+          :uri  "/api"
+          :method :post
+          :response-method :aether
+          :error-method    :aether
+          }
    :verb :request
    :context {}))

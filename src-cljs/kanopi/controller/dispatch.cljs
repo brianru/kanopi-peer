@@ -27,7 +27,8 @@
               :logout-success   :logout-failure
               :register-success :register-failure
               } 
-    :remote #{:update-thunk-label :update-fact}}})
+    :remote #{:update-thunk-label :update-fact
+              }}})
 
 (defrecord Dispatcher [config aether history app-state kill-channel]
   component/Lifecycle

@@ -6,8 +6,14 @@
    "update thunk label"
    "update fact"
    "login"
+   "login-success"
+   "login-failure"
    "logout"
+   "logout-success"
+   "logout-failure"
    "register"
+   "register-success"
+   "register-failure"
    }
  :client-messaging
  #{

@@ -54,6 +54,50 @@
                 s
                 (conj s itm))))))
 
+(defn- parse-response-handler
+  [{:keys [response-method] :as req} aether]
+  (cond
+   (nil? response-method)
+   (assoc req :handler (constantly nil))
+
+   (= response-method :log)
+   (assoc req :handler println)
+
+   ;; TODO: this.
+   (= response-method :aether)
+   (assoc req :handler (partial aether/send! aether))
+
+   (fn? response-method)
+   (assoc req :handler response-method)
+
+   :default
+   (assoc req :handler (constantly nil))
+   ))
+
+(defn- parse-error-handler
+  [{:keys [error-method] :as req} aether]
+  (cond
+   (nil? error-method)
+   (assoc req :error-handler (constantly nil))
+
+   (= error-method :log)
+   (assoc req :error-handler println)
+
+   (= response-method :aether)
+   (assoc req :error-handler (partial aether/send! aether))
+
+   (fn? error-method)
+   (assoc req :error-handler error-method)
+
+   :default
+   (assoc req :error-handler (constantly nil))
+   ))
+
+(defn- parse-handlers
+  "Handlers are provided"
+  [req aether]
+  (-> req (parse-response-handler aether) (parse-error-handler aether)))
+
 (defn- wrap-handlers
   "Wrap success and error handlers to continue HTTPWorker's
   lifecycle after the given request is completed.
@@ -79,7 +123,7 @@
                    (error-fn error))))
        )))
 
-(defrecord HTTPWorker [id kill-ch notify-ch queue]
+(defrecord HTTPWorker [id aether kill-ch notify-ch queue]
   component/Lifecycle
   (start [this]
     ;;(println id "start worker")
@@ -99,7 +143,10 @@
                                   :put  http/PUT
                                   :post http/POST)
                       req-map   (-> (:request next-item)
-                                    (wrap-handlers recur-ch))]
+                                    (parse-handlers aether)
+                                    (wrap-handlers recur-ch)
+                                    (select-keys [:method :body
+                                                  :handler :error-handler]))]
                   ;;(println id "ACTIVE")
                   (req-fn (:uri next-item) req-map)
                   (<! recur-ch)
@@ -118,13 +165,12 @@
     (assoc this :kill-ch nil)))
 
 (defn new-http-worker
-  ([notify-ch]
-   (new-http-worker (new-request-queue) notify-ch))
-  ([queue notify-ch]
+  ([aether queue notify-ch]
    (map->HTTPWorker
-    {:notify-ch notify-ch
-     :id (make-random-uuid)
-     :queue queue}
+    {:aether    aether
+     :notify-ch notify-ch
+     :id        (make-random-uuid)
+     :queue     queue}
     )))
 
 (defn- watch-and-notify
@@ -159,7 +205,7 @@
           q         (new-request-queue priority-fn)
           notify-ch (watch-and-notify q)
           workers   (doall (repeatedly n-parallelism
-                                       #(component/start (new-http-worker q notify-ch))))
+                                       #(component/start (new-http-worker aether q notify-ch))))
           kill-ch   (aether/listen* (get aether :aether)
                                     dimension value
                                     {:handlerfn

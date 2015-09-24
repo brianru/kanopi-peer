@@ -52,7 +52,7 @@
     ;; synchronous (useful responses)
      :request-spout
      (component/using
-      (aether-spout/new-http-spout :verb :request config)
+      (aether-spout/new-http-spout :verb :request {:xform (fn [msg] (get msg :noun))})
      {:aether    :aether
       :app-state :app-state})
 

@@ -13,7 +13,7 @@
 
 (defmulti local-event-handler
   (fn [aether history app-state msg]
-    (println msg)
+    (println "local-event-handler" msg)
     (get msg :verb))
   :default
   :log)
@@ -256,6 +256,7 @@
                            :mode :authenticated)))
     (history/navigate-to! history :home)))
 
+;; TODO: implement.
 (defmethod local-event-handler :register-failure
   [aether history app-state msg]
   (let []
@@ -272,6 +273,7 @@
     (history/navigate-to! history :home)
     ))
 
+;; TODO: implement.
 (defmethod local-event-handler :login-failure
   [aether history app-state msg]
   (let []
@@ -287,6 +289,7 @@
                            :mode :demo)))
     (history/navigate-to! history :home)))
 
+;; TODO: implement.
 (defmethod local-event-handler :logout-failure
   [aether history app-state msg]
   (let []
