@@ -9,9 +9,6 @@
             [kanopi.storage.datomic :as datomic]
             [com.stuartsierra.component :as component]))
 
-;; TODO: json workflow
-;; http://stackoverflow.com/questions/20273190/use-friend-for-authentication-and-authorisation-in-a-single-page-clojure-web-app
-;; https://github.com/cemerick/friend/issues/83
 (defn authentication-middleware
   [handler credential-fn]
   (let [friend-m
@@ -104,6 +101,7 @@
   (authorized? [this creds request])
   (enforce-entitlements [this ]))
 
+;; TODO: implement this.
 (defrecord AuthorizationService [config database]
 
   IAuthorize

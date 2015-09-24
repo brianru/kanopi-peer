@@ -11,16 +11,15 @@
    (routes
 
     ;; authentication
-    (GET "/register" [] spa-resource)
+    (GET  "/register" [] spa-resource)
     (POST "/register" [] auth/registration-resource)
 
-    (GET "/login" [] spa-resource)
+    (GET  "/login" [] spa-resource)
     ;; friend intercepts POST then passes on to here
     (POST "/login" [] auth/ajax-login-resource)
 
-    (GET "/logout" [] spa-resource)
-    ;;(GET "/login"    [] auth/login-resource)
-    ;;(GET "/logout"   [] auth/logout-resource)
+    (GET  "/logout" [] spa-resource)
+    (POST "/logout" [] auth/ajax-logout-resource)
 
     (ANY "/api/" [] api-resource)
     (GET "/thunk/:id" [] spa-resource)
@@ -28,5 +27,7 @@
     (GET "/" [] spa-resource)
 
     (route/files "" {:root "target/public"})
+
+    ;; TODO: better not-found page
     (route/not-found "<h1>Page not found</h1>")
     )))

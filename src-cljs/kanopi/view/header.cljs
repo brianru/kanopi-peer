@@ -35,7 +35,7 @@
              "Kanopi"]]
            [:div.navbar-center
             (icons/search {})
-            ;; TODO: this breaks when screen width <= 544px
+            ;; FIXME: this breaks when screen width <= 544px
             ;; Consider a clever interface, maybe only the searchglass
             ;; icon, when clicked, cover entire header with typeahead
             ;; search.
@@ -62,8 +62,7 @@
                                         :label "Logout"}]
                           }})
               (->> (icons/log-in {})
-                   (icons/link-to owner :login {:class "navbar-brand"}))
-              )
+                   (icons/link-to owner :login {:class "navbar-brand", :tab-index -1})))
             ]]
           ])))
     ))

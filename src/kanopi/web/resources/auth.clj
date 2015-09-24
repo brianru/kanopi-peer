@@ -153,6 +153,18 @@
   :handle-ok (fn [ctx]
                (friend/current-authentication (get-in ctx [:request]))))
 
+(defresource ajax-logout-resource
+  :allowed-methods [:post]
+  :available-media-types ["application/transit+json"
+                          "application/edn"
+                          "application/json"]
+  :new? false
+  :respond-with-entity? true
+  :post-redirect? false
+  :handle-ok (fn [ctx]
+               (-> (r/response {:logout-success true})
+                   (friend/logout*))))
+
 (defresource registration-resource
   :allowed-methods [:post]
   :available-media-types [;;"text/html"

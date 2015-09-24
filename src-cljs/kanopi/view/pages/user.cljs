@@ -51,15 +51,15 @@
                                     (msg/send! owner)))}))
 
 (defn- logout! [owner]
-  (http/GET "/logout"
-            {:handler (fn [resp]
-                        (->> resp
-                             (msg/logout-success)
-                             (msg/send! owner)))
-             :error-handler (fn [resp]
-                              (->> resp
-                                   (msg/logout-failure)
-                                   (msg/send! owner)))}))
+  (http/POST "/logout"
+             {:handler (fn [resp]
+                         (->> resp
+                              (msg/logout-success)
+                              (msg/send! owner)))
+              :error-handler (fn [resp]
+                               (->> resp
+                                    (msg/logout-failure)
+                                    (msg/send! owner)))}))
 
 (defn- register! [owner creds]
   (http/POST (browser/route-for owner :register)

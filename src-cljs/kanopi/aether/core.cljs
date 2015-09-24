@@ -194,7 +194,10 @@
 (def stop-listening! shutdown-component!)
 
 (defprotocol IBroadcast
-  (send! [this msg]))
+  (send! [this msg])
+  ;(listen! [this dimension value opts])
+  ;(replicate! [this] [this destination-chan])
+  )
 
 (defrecord Aether [config aether]
   component/Lifecycle
@@ -216,6 +219,24 @@
   IBroadcast
   (send! [this msg]
     (async/put! (get-in this [:aether :publisher]) msg)))
+
+;; (defrecord Listener [config aether dimension value]
+;;   )
+
+;; TODO: implement to replace existing mk-aether fn
+(defrecord LocalAether [config publisher pub-mult log publications]
+  component/Lifecycle
+  (start [this]
+    (if publisher
+      this
+      (let []
+        )
+      ))
+  (stop [this]
+    (if-not publisher
+      this
+      (let []
+        ))))
 
 (defn new-aether [config]
   (map->Aether {:config config}))
