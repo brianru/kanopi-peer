@@ -55,39 +55,42 @@
                 (conj s itm))))))
 
 (defn- parse-response-handler
-  [{:keys [response-method] :as req} aether]
+  [{:keys [response-method response-xform]
+    :or {response-xform identity}
+    :as req} aether]
   (cond
    (nil? response-method)
    (assoc req :handler (constantly nil))
 
    (= response-method :log)
-   (assoc req :handler println)
+   (assoc req :handler (comp println response-xform))
 
-   ;; TODO: this.
    (= response-method :aether)
-   (assoc req :handler (partial aether/send! aether))
+   (assoc req :handler (comp (partial aether/send! aether) response-xform))
 
    (fn? response-method)
-   (assoc req :handler response-method)
+   (assoc req :handler (comp response-method response-xform))
 
    :default
    (assoc req :handler (constantly nil))
    ))
 
 (defn- parse-error-handler
-  [{:keys [error-method] :as req} aether]
+  [{:keys [error-method error-xform]
+    :or {error-xform identity}
+    :as req} aether]
   (cond
    (nil? error-method)
    (assoc req :error-handler (constantly nil))
 
    (= error-method :log)
-   (assoc req :error-handler println)
+   (assoc req :error-handler (comp println error-xform))
 
-   (= response-method :aether)
-   (assoc req :error-handler (partial aether/send! aether))
+   (= error-method :aether)
+   (assoc req :error-handler (comp (partial aether/send! aether) error-xform))
 
    (fn? error-method)
-   (assoc req :error-handler error-method)
+   (assoc req :error-handler (comp error-method error-xform))
 
    :default
    (assoc req :error-handler (constantly nil))
@@ -126,7 +129,7 @@
 (defrecord HTTPWorker [id aether kill-ch notify-ch queue]
   component/Lifecycle
   (start [this]
-    ;;(println id "start worker")
+    (debug id "start worker")
     (assert (not (nil? queue)))
     (let [kill-ch  (async/chan 100)
           recur-ch (async/chan 100)]
@@ -142,25 +145,24 @@
                                   :get  http/GET
                                   :put  http/PUT
                                   :post http/POST)
-                      req-map   (-> (:request next-item)
+                      req-map   (-> next-item
                                     (parse-handlers aether)
                                     (wrap-handlers recur-ch)
-                                    (select-keys [:method :body
-                                                  :handler :error-handler]))]
-                  ;;(println id "ACTIVE")
+                                    (select-keys [:params :body :handler :error-handler]))]
+                  #_(debug id "ACTIVE")
                   (req-fn (:uri next-item) req-map)
                   (<! recur-ch)
                   (recur (async/alts! [kill-ch notify-ch])))
 
                 ;; IDLE Recur Branch
                 (let []
-                  ;;(println id "IDLE")
+                  #_(debug id "IDLE")
                   (recur (async/alts! [kill-ch notify-ch])))))))
 
       (assoc this :kill-ch kill-ch)))
 
   (stop [this]
-    ;;(println id "stop worker")
+    (debug id "stop worker")
     (async/put! kill-ch :kill)
     (assoc this :kill-ch nil)))
 
@@ -179,6 +181,7 @@
   ([a ch]
    (add-watch a nil (fn [key atom old-state new-state]
                       (when-let [diff (not-empty (clojure.set/difference new-state old-state))]
+                        (println "here" diff)
                         (async/put! ch diff))))
    ch))
 
@@ -199,7 +202,11 @@
   (start [this]
     (let [{:keys [n-parallelism priority-fn
                   dimension     value
-                  xform         logfn]}
+                  xform         logfn]
+           :or   {xform       identity
+                  logfn       (constantly nil)
+                  priority-fn (constantly 0)
+                  n           3}}
           config
           _         (info "start spout" dimension value)
           q         (new-request-queue priority-fn)
@@ -239,7 +246,7 @@
   ([dimension value config]
    (let [{:or {xform       identity
                logfn       (constantly nil)
-               priority-fn :timestamp
+               priority-fn (constantly 0)
                n           3}
           :keys [n priority-fn xform logfn]}
          config]

@@ -38,7 +38,7 @@
 
 (defprotocol INavigator
   (navigate-to! [this path])
-  (route-for [this path]))
+  (get-route-for [this path]))
 
 (defrecord Html5History [config routes route-for set-page! history aether]
   component/Lifecycle
@@ -57,12 +57,12 @@
     (assoc this :history nil, :routes nil, :route-for (constantly nil)))
   
   INavigator
-  (route-for [this path]
+  (get-route-for [this path]
     (let [path (if (coll? path) path [path])]
-      (apply (get this :route-for) path)))
+      (apply route-for path)))
 
   (navigate-to! [this path]
-    ((get this :set-page!) (route-for this path))))
+    ((get this :set-page!) (get-route-for this path))))
 
 (defn new-html5-history [config]
   (map->Html5History {:config config}))

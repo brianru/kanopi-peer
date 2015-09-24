@@ -75,6 +75,12 @@
     :verb :search
     :context {})))
 
+(defn register [creds]
+  (hash-map
+   :noun creds
+   :verb :register
+   :context {}))
+
 (defn register-success [creds]
   (hash-map
    :noun creds
@@ -87,6 +93,12 @@
    :verb :register-failure
    :context {}))
 
+(defn login [creds]
+  (hash-map
+   :noun creds
+   :verb :login
+   :context {}))
+
 (defn login-success [creds]
   (hash-map
    :noun creds
@@ -97,6 +109,12 @@
   (hash-map
    :noun err
    :verb :login-failure
+   :context {}))
+
+(defn logout []
+  (hash-map
+   :noun nil
+   :verb :logout
    :context {}))
 
 (defn logout-success [foo]
@@ -131,26 +149,52 @@
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
-   :noun {:body msg}))
+   :noun {:uri             (history/get-route-for history :register)
+          :params          (get msg :noun)
+          :method          :post
+          :response-method :aether
+          :response-xform  register-success
+          :error-method    :aether
+          :error-xform     register-failure
+          }
+   :verb :request
+   :context {}))
 
 (defmethod local->remote :login
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
-   :noun {:body msg}))
+   :noun {:uri             (history/get-route-for history :login)
+          :params          (get msg :noun)
+          :method          :post
+          :response-method :aether
+          :response-xform  login-success
+          :error-method    :aether
+          :error-xform     login-failure
+          }
+   :verb :request
+   :context {}))
 
 (defmethod local->remote :logout
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
-   :noun {:body msg}))
+   :noun {:uri             (history/get-route-for history :logout)
+          :method          :post
+          :response-method :aether
+          :response-xform  logout-success
+          :error-method    :aether
+          :error-xform     logut-failure
+          }
+   :verb :request
+   :context {}))
 
 (defmethod local->remote :request
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map 
    :noun {:body msg
-          :uri  (history/route-for history :api)
+          :uri  (history/get-route-for history :api)
           :method :post
           :response-method :aether
           :error-method    :aether

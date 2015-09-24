@@ -39,39 +39,18 @@
      }]])
 
 (defn- login! [owner creds]
-  (http/POST (browser/route-for owner :login)
-             {:params creds
-              :handler (fn [resp]
-                         (->> resp
-                              (msg/login-success)
-                              (msg/send! owner)))
-              :error-handler (fn [resp]
-                               (->> resp
-                                    (msg/login-failure)
-                                    (msg/send! owner)))}))
+  (->> creds
+       (msg/login)
+       (msg/send! owner)))
 
 (defn- logout! [owner]
-  (http/POST "/logout"
-             {:handler (fn [resp]
-                         (->> resp
-                              (msg/logout-success)
-                              (msg/send! owner)))
-              :error-handler (fn [resp]
-                               (->> resp
-                                    (msg/logout-failure)
-                                    (msg/send! owner)))}))
+  (->> (msg/logout)
+       (msg/send! owner)))
 
 (defn- register! [owner creds]
-  (http/POST (browser/route-for owner :register)
-             {:params creds
-              :handler (fn [resp]
-                         (->> resp
-                              (msg/register-success)
-                              (msg/send! owner)))
-              :error-handler (fn [resp]
-                               (->> resp
-                                    (msg/register-failure)
-                                    (msg/send! owner)))}))
+  (->> creds
+       (msg/register)
+       (msg/send! owner)))
 
 (defn authentication [props owner opts]
   (reify

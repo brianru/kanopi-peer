@@ -132,9 +132,9 @@
    {:pre [(get opts :handlerfn)]}
    (let [{:keys [kill-ch handlerfn logfn]
           :or {kill-ch (async/chan)
-               logfn     (constantly nil)}}
+               logfn   (constantly nil)}}
          opts
-         listener (async/chan 100)
+         listener    (async/chan 100)
          publication (get-publication aether dimension)]
      (async/sub publication value listener)
      (go (loop [[v ch] nil]
@@ -218,6 +218,7 @@
   
   IBroadcast
   (send! [this msg]
+    (println "send!" msg)
     (async/put! (get-in this [:aether :publisher]) msg)))
 
 ;; (defrecord Listener [config aether dimension value]

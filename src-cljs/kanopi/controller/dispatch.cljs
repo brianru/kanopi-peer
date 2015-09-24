@@ -19,7 +19,9 @@
               :logout-success   :logout-failure
               :register-success :register-failure
               }
-    :remote #{}}
+    :remote #{
+              :login :logout :register
+              }}
 
    :authenticated
    {:local  #{:navigate :search
@@ -28,6 +30,7 @@
               :register-success :register-failure
               } 
     :remote #{:update-thunk-label :update-fact
+              :login :logout :register
               }}})
 
 (defrecord Dispatcher [config aether history app-state kill-channel]
@@ -53,7 +56,7 @@
                          (when (contains? remote-verbs verb)
                            (->> v
                                 (msg/local->remote history root-crsr)
-                                (async/put! (get-in aether [:aether :publisher])))))
+                                (aether/send! aether))))
 
                        (recur (async/alts! [listener kill-ch]))))))
       (assoc this :kill-channel kill-ch)))

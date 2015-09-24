@@ -64,11 +64,11 @@
     
 
     ;; FIXME: do i need this?
-    :transporter
-    (component/using
-     (ajax/new-ajax-spout config)
-     {:aether :aether
-      })
+    ;; :transporter
+    ;; (component/using
+    ;;  (ajax/new-ajax-spout config)
+    ;;  {:aether :aether
+    ;;   })
     
     
     )))
