@@ -20,6 +20,13 @@
    nil
    ))
 
+(defn get-thunk [thunk-id]
+  {:pre [(integer? thunk-id)]}
+  (hash-map
+   :noun thunk-id
+   :verb :get-thunk
+   :context {}))
+
 ;; local component message
 (defn toggle-fact-mode [ent]
   (hash-map

@@ -90,11 +90,6 @@
      :thunk (update thunk :thunk/fact #(vec (conj % placeholder-fact)))
      :similar-thunks [(lookup-id props -1016)])))
 
-(defn- navigate-to-thunk [props msg]
-  (let [thunk-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))
-        thunk' (build-thunk-data props thunk-id)]
-    (assoc props :thunk thunk')))
-
 (defn- ensure-current-thunk-is-updated [props edited-ent-id]
   (if (= edited-ent-id (current-thunk props))
     (let [thunk' (build-thunk-data props edited-ent-id)]
@@ -230,6 +225,14 @@
                     ;; not using this data structure very well
                     (assoc-in app-state [:search-results] {query-string results})))))
 
+(defmethod local-event-handler :get-thunk
+  [aether history app-state msg]
+  (om/transact! app-state
+                (fn [app-state]
+                  (->> (get msg :noun)
+                       (build-thunk-data app-state)
+                       (assoc app-state :thunk)))))
+
 (defmethod local-event-handler :navigate
   [aether history app-state msg]
   (let [handler (get-in msg [:noun :handler])]
@@ -239,13 +242,14 @@
                       true
                       (assoc :page (get msg :noun))
 
-                      (= :thunk handler)
-                      (navigate-to-thunk msg)
-
                       (not= :thunk handler)
                       (assoc :thunk {})
 
-                      )))))
+                      )))
+    (when (= :thunk handler)
+      (let [thunk-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))]
+        (->> (msg/get-thunk thunk-id)
+             (aether/send! aether))))))
 
 (defmethod local-event-handler :register-success
   [aether history app-state msg]

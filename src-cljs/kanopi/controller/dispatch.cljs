@@ -14,22 +14,32 @@
 
 (def mode-verbs
   {:demo
-   {:local  #{:navigate :search :update-thunk-label :update-fact
+   {:local  #{
+              :navigate
+              :search
+              :update-thunk-label
+              :update-fact
               :login-success    :login-failure
               :logout-success   :logout-failure
               :register-success :register-failure
+              :get-thunk
               }
     :remote #{
               :login :logout :register
               }}
 
    :authenticated
-   {:local  #{:navigate :search
+   {:local  #{
+              :search
+              :navigate
               :login-success    :login-failure
               :logout-success   :logout-failure
               :register-success :register-failure
               } 
-    :remote #{:update-thunk-label :update-fact
+    :remote #{
+              :get-thunk
+              :update-thunk-label
+              :update-fact
               :login :logout :register
               }}})
 
@@ -50,9 +60,12 @@
                            remote-verbs (get-in mode-verbs [mode :remote])]
                        ;; first run v is nil
                        (when v
+                         ;; NOTE: a verb can belong to both
+                         ;; local-verbs and remote-verbs.
+                         ;; In that case the message is handled twice:
+                         ;; once locally, once remotely.
                          (when (contains? local-verbs verb)
-                           (handlers/local-event-handler
-                            (get aether :aether) history root-crsr v))
+                           (handlers/local-event-handler aether history root-crsr v))
                          (when (contains? remote-verbs verb)
                            (->> v
                                 (msg/local->remote history root-crsr)
