@@ -34,6 +34,7 @@
                  [com.cemerick/url "0.1.1"]
                  [sablono "0.3.6"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
+                 [jamesmacaulay/zelkova "0.4.0"]
 
                  ;; Database
                  [com.datomic/datomic-free "0.9.5206"
