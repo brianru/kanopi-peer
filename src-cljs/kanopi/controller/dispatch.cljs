@@ -52,7 +52,7 @@
                             (get aether :aether) history root-crsr v))
                          (when (contains? remote-verbs verb)
                            (->> v
-                                (msg/local->remote root-crsr)
+                                (msg/local->remote history root-crsr)
                                 (async/put! (get-in aether [:aether :publisher])))))
 
                        (recur (async/alts! [listener kill-ch]))))))

@@ -14,18 +14,22 @@
     (GET  "/register" [] spa-resource)
     (POST "/register" [] auth/registration-resource)
 
-    (GET  "/login" [] spa-resource)
+    (GET  "/login"    [] spa-resource)
     ;; friend intercepts POST then passes on to here
-    (POST "/login" [] auth/ajax-login-resource)
+    (POST "/login"    [] auth/ajax-login-resource)
 
-    (GET  "/logout" [] spa-resource)
-    (POST "/logout" [] auth/ajax-logout-resource)
+    (GET  "/logout"   [] spa-resource)
+    (POST "/logout"   [] auth/ajax-logout-resource)
 
-    (ANY "/api/" [] api-resource)
+    ;; api
+    (ANY "/api"       [] api-resource)
+
+    ;; spa
+    (GET "/"          [] spa-resource)
+    (GET "/settings"  [] spa-resource)
     (GET "/thunk/:id" [] spa-resource)
-    (GET "/settings" [] spa-resource)
-    (GET "/" [] spa-resource)
 
+    ;; static assets
     (route/files "" {:root "target/public"})
 
     ;; TODO: better not-found page

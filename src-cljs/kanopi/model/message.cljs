@@ -1,5 +1,6 @@
 (ns kanopi.model.message
   (:require [om.core :as om]
+            [kanopi.controller.history :as history]
             [cljs.core.async :as async]))
 
 (defn publisher [owner]
@@ -110,24 +111,46 @@
    :verb :logout-failure
    :context {}))
 
-(defn valid-remote-message? [msg]
+(defn valid-remote-message?
+  "Some simple assertions on the shape of the remote message.
+  It's not as willy-nilly as local messages, though that must change
+  as well."
+  [msg]
   (-> msg
       (get :noun)
       ((juxt :uri :method :response-method :error-method))
       (->> (every? identity))))
 
 (defmulti local->remote
-  (fn [app-state msg]
+  (fn [history app-state msg]
     (println "local->remote" msg)
     (get msg :verb))
   :default :request)
 
+(defmethod local->remote :register
+  [history app-state msg]
+  {:post [(valid-remote-message? %)]}
+  (hash-map
+   :noun {:body msg}))
+
+(defmethod local->remote :login
+  [history app-state msg]
+  {:post [(valid-remote-message? %)]}
+  (hash-map
+   :noun {:body msg}))
+
+(defmethod local->remote :logout
+  [history app-state msg]
+  {:post [(valid-remote-message? %)]}
+  (hash-map
+   :noun {:body msg}))
+
 (defmethod local->remote :request
-  [app-state msg]
+  [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map 
    :noun {:body msg
-          :uri  "/api"
+          :uri  (history/route-for history :api)
           :method :post
           :response-method :aether
           :error-method    :aether

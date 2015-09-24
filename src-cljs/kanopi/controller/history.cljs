@@ -18,12 +18,17 @@
             [bidi.bidi :as bidi]
             [pushy.core :as pushy]))
 
-(def default-routes ["/" {""         :home
+(def default-routes ["/" {
+                          ;; SPA
+                          ""         :home
                           "login"    :login
                           "logout"   :logout
                           "register" :register
                           "thunk/"   {[:id ""] :thunk}
-                          "settings" :settings}])
+                          "settings" :settings
+                          
+                          ;; Server
+                          "api"      :api}])
 
 (defn- send-set-page-msg! [aether match]
   (async/put! (get-in aether [:aether :publisher])
@@ -32,7 +37,8 @@
                :context nil}))
 
 (defprotocol INavigator
-  (navigate-to! [this path]))
+  (navigate-to! [this path])
+  (route-for [this path]))
 
 (defrecord Html5History [config routes route-for set-page! history aether]
   component/Lifecycle
@@ -51,9 +57,12 @@
     (assoc this :history nil, :routes nil, :route-for (constantly nil)))
   
   INavigator
-  (navigate-to! [this path]
+  (route-for [this path]
     (let [path (if (coll? path) path [path])]
-      ((get this :set-page!) (apply (get this :route-for) path)))))
+      (apply (get this :route-for) path)))
+
+  (navigate-to! [this path]
+    ((get this :set-page!) (route-for this path))))
 
 (defn new-html5-history [config]
   (map->Html5History {:config config}))
