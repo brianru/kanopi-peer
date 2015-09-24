@@ -32,10 +32,12 @@
               [:div.col-md-2
                [:label "User"]
                [:table
-                (for [[k v] (get props :user)]
-                  [:tr {:key k}
-                   [:td (str k)]
-                   [:td (str v)]])] ]
+                [:tbody
+                 (for [[k v] (get props :user)]
+                   [:tr {:key k}
+                    [:td (str k)]
+                    [:td (str v)]])]
+                ]]
               [:div.col-md-2
                [:label "Other stuff"]]])
            [:div.row

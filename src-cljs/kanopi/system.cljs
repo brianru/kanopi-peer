@@ -6,7 +6,6 @@
   (:require [quile.component :as component]
             [kanopi.view.core :as view]
             [kanopi.model.state :as state]
-            [kanopi.controller.ajax :as ajax]
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.controller.history :as history]
             [kanopi.aether.core :as aether]
@@ -56,19 +55,13 @@
      {:aether    :aether
       :app-state :app-state})
 
-    ;; asynchronous (responses come back via another channel)
+    ;; asynchronous
+    ;; (responses come back via another channel -- websockets?)
+    ;;
     ;; :submit-spout
     ;; (component/using
     ;;  (aether-spout/new-http-spout :verb :submit config)
     ;;  {:aether :aether})
-    
-
-    ;; FIXME: do i need this?
-    ;; :transporter
-    ;; (component/using
-    ;;  (ajax/new-ajax-spout config)
-    ;;  {:aether :aether
-    ;;   })
     
     
     )))

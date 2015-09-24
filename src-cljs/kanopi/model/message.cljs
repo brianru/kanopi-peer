@@ -208,3 +208,30 @@
           }
    :verb :request
    :context {}))
+
+;; TODO: implement
+(defmethod local->remote :get-thunk
+  [history app-state msg]
+  {:post [(valid-remote-message? %)]}
+  (hash-map
+   :noun {}
+   :verb :request
+   :context {}))
+
+;; TODO: implement
+(defmethod local->remote :update-thunk-label
+  [history app-state msg]
+  {:post [(valid-remote-message? %)]}
+  (hash-map
+   :noun {}
+   :verb :request
+   :context {}))
+
+;; TODO: implement
+(defmethod local->remote :update-fact
+  [history app-state msg]
+  {:post [(valid-remote-message? %)]}
+  (hash-map
+   :noun {}
+   :verb :request
+   :context {}))

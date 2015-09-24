@@ -15,14 +15,16 @@
 (def mode-verbs
   {:demo
    {:local  #{
-              :navigate
               :search
-              :update-thunk-label
-              :update-fact
+              :navigate
+
               :login-success    :login-failure
               :logout-success   :logout-failure
               :register-success :register-failure
+
               :get-thunk
+              :update-fact
+              :update-thunk-label
               }
     :remote #{
               :login :logout :register
@@ -32,15 +34,18 @@
    {:local  #{
               :search
               :navigate
+
               :login-success    :login-failure
               :logout-success   :logout-failure
               :register-success :register-failure
               } 
     :remote #{
-              :get-thunk
-              :update-thunk-label
-              :update-fact
               :login :logout :register
+
+              :get-thunk
+              :update-fact
+              :update-thunk-label
+
               }}})
 
 (defrecord Dispatcher [config aether history app-state kill-channel]
@@ -48,7 +53,7 @@
   (start [this]
     (info "start dispatcher")
     (let [kill-ch  (async/chan 1)
-          listener (aether/replicate! (get aether :aether))]
+          listener (aether/replicate! aether)]
       (asyncm/go (loop [[v ch] nil]
                    (if (= ch kill-ch)
                      (do

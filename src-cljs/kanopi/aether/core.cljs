@@ -1,3 +1,8 @@
+;; FIXME: so much has to be done here.
+;; All pieces here must be components independent of Om.
+;; Place API functions behind protocols (eg. listen! replicate!)
+;; Extend Om 'owner' to adhere to the protocol via shared state.
+;;
 ;; ## An application's message-passing medium.
 ;; ### Because cities aren't made of trees. (they're made of graphs!)
 ;;
@@ -115,14 +120,6 @@
             :log       (async/tap pub-mult log-chan)}
            (zipmap pub-keys publications))))
 
-(defn replicate!
-  "Use aether's pub-mult to replicate the publisher onto another core.async channel."
-  ([aether]
-   (replicate! aether (async/chan 100)))
-  ([aether destination-ch]
-   (async/tap (get aether :pub-mult) destination-ch)
-   destination-ch))
-
 (defn- get-publication [aether dimension]
   (->> dimension (publication-keyword) (get aether)))
 
@@ -195,10 +192,13 @@
 
 (defprotocol IBroadcast
   (send! [this msg])
-  ;(listen! [this dimension value opts])
-  ;(replicate! [this] [this destination-chan])
+  ;; TODO: move listen! and maybe listen* to this protocol
+  ;; (listen! [this dimension value opts])
+  (replicate! [this] [this destination-chan])
   )
 
+;; TODO: move aether contents into this record instead of the extra
+;; layer of nesting.
 (defrecord Aether [config aether]
   component/Lifecycle
   (start [this]
@@ -218,26 +218,12 @@
   
   IBroadcast
   (send! [this msg]
-    (println "send!" msg)
-    (async/put! (get-in this [:aether :publisher]) msg)))
-
-;; (defrecord Listener [config aether dimension value]
-;;   )
-
-;; TODO: implement to replace existing mk-aether fn
-(defrecord LocalAether [config publisher pub-mult log publications]
-  component/Lifecycle
-  (start [this]
-    (if publisher
-      this
-      (let []
-        )
-      ))
-  (stop [this]
-    (if-not publisher
-      this
-      (let []
-        ))))
+    (async/put! (get-in this [:aether :publisher]) msg))
+  (replicate! [this]
+    (replicate! this (async/chan 100)))
+  (replicate! [this destination-ch]
+    (async/tap (get-in this [:aether :pub-mult]) destination-ch)
+    destination-ch))
 
 (defn new-aether [config]
   (map->Aether {:config config}))
