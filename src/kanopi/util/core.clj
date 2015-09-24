@@ -1,5 +1,6 @@
 (ns kanopi.util.core
-  (:require [cognitect.transit :as transit])
+  (:require [cognitect.transit :as transit]
+            [clojure.string])
   (:import java.util.UUID
            [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
@@ -33,7 +34,7 @@
 ;; TODO: refactor to support values of any type
 (defn get-literal-or-label [ent k]
   (or (-> ent (get k) (first) (get :thunk/label))
-      (-> ent (get k) (first) (get :value/string))))
+      (-> ent (get k) (first) (get :literal/text))))
 
 (defn fact-entity->tuple [ent]
   (let [attr (get-literal-or-label ent :fact/attribute)
@@ -47,7 +48,9 @@
     (.toString out)))
 
 (defn transit-read [stream]
-  (let [in (ByteArrayInputStream. (.getBytes (slurp stream)))
-        reader (transit/reader in :json)
-        ]
-    (transit/read reader)))
+  (let [string (slurp stream)]
+    (if (clojure.string/blank? string)
+      {}
+      (let [in (ByteArrayInputStream. (.getBytes string))
+            reader (transit/reader in :json)]
+        (transit/read reader)))))

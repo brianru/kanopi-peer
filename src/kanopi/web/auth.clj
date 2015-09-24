@@ -20,11 +20,9 @@
          ;; TODO: make better error handlers which return errors
          ;; described as data
          :login-failure-handler (fn [e]
-                                  (println "login failure handler")
                                   {:status 401})
          ;; :unauthenticated-handler (constantly {:status 401})
          :unauthorized-handler    (fn [e]
-                                    (println "unauthorized handler")
                                     {:status 401})
          :login-uri "/login"
          :default-landing-uri "/"

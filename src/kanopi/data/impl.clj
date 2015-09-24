@@ -16,7 +16,7 @@
 (defn describe-value-literal [value]
   (cond
    (string? value)
-   :value/string
+   :literal/text
 
    :default
    nil))

@@ -11,6 +11,7 @@
             [kanopi.web.app :as web-app]
             [kanopi.web.auth :as auth]))
 
+;; Test JSON/EDN/Transit auth API
 (deftest authentication
   (let [system (component/start (test-util/system-excl-web-server))
         handler (get-in system [:web-app :app-handler])
@@ -20,29 +21,34 @@
              (d/db (get-in system [:datomic-peer :connection])))
         ]
 
-    (testing "unauthorized-access"
+    (testing "access-spa-anonymously"
       (let [req  (mock/request :get "/")
             resp (handler req)]
-        (is (= 302 (:status resp)))))
+        (is (= 200 (:status resp)))))
 
     (testing "unauthorized-login"
       (let [req   (-> (mock/request :post "/login" creds)) 
             resp  (handler req)]
-        (is (= 302 (:status resp)))
-        (is (re-find #"login_failed" (get-in resp [:headers "Location"])))))
+        (is (= 401 (:status resp)))
+        #_(is (re-find #"login_failed" (get-in resp [:headers "Location"])))))
 
     (testing "register"
       (let [req   (mock/request :post "/register" creds)
             resp  (handler req)]
-        (is (= 303 (:status resp)))
-        (is (re-find #"welcome=true" (get-in resp [:headers "Location"])))
+        (is (= 200 (:status resp)))
+        #_(is (re-find #"welcome=true" (get-in resp [:headers "Location"])))
         (is (auth/verify-creds (:authenticator system) creds))))
 
-    (testing "login-redirect"
+    (testing "login-success"
       (let [req (mock/request :post "/login" creds)
             resp (handler req)]
-        (is (= 303 (:status resp)))
-        (is (= "http://localhost/" (get-in resp [:headers "Location"])))))
+        (is (= 200 (:status resp)))))
+ 
+    #_(testing "login-redirect"
+        (let [req (mock/request :post "/login" creds)
+              resp (handler req)]
+          (is (= 303 (:status resp)))
+          (is (= "http://localhost/" (get-in resp [:headers "Location"])))))
 
     (testing "access-spa-creds"
       (let [req  (-> (mock/request :get "/")
@@ -51,32 +57,33 @@
         (is (= 200 (:status resp)))
         (is (re-find #"<title>kanopi</title>" (:body resp)))))
 
-    (testing "access-api-GET"
-      (let [req (-> (mock/request :get "/api/"
-                                  {:ent-id (first test-ent-ids)
-                                   :verb :get
-                                   :place :unit-test
-                                   :time (time/now)
-                                   })
-                    (test-util/assoc-basic-auth creds))
+    (component/stop system)))
+
+(deftest message-passing-api
+  (let [system  (component/start (test-util/system-excl-web-server))
+        handler (get-in system [:web-app :app-handler])
+        creds   {:username "mickey", :password "mouse"}]
+
+    (testing "get-thunk"
+      (let [req (mock/request :post "/api" {:noun -1000
+                                            :verb :get-thunk
+                                            :context {}})
             resp (handler req)
-            resp-body (read-string (:body resp))]
-        (is (not-empty (get resp-body :focus-entity)))))
+            ]
+        (is (= 200 (:status resp)))
+        (is (not-empty (:body resp)))
+        ))
 
-    (testing "access-api-POST"
+    (testing "update-thunk-label"
       (let []
         ))
 
-    (testing "access-api-PUT"
-      (let []
-        ))
-
-    (testing "access-api-PATCH"
-      (let []
-        ))
-
-    (testing "access-api-DELETE"
+    (testing "update-fact"
       (let []
         ))
 
     (component/stop system)))
+
+
+
+
