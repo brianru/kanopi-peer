@@ -76,7 +76,7 @@
   NOTE: ent-id can also be an ident or datomic lookup-ref."
   [db ent-id]
   {:post [(->> (vals %) (every? set?))]}
-  (when-let [ent (d/touch (not-empty (d/entity db ent-id)))]
+  (when-let [ent (some-> (d/entity db ent-id) (not-empty) (d/touch))]
     (let [pretty-ent (->> ent
                           (mapcat make-datomic-kv-consistent)
                           (apply hash-map))]

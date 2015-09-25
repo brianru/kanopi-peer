@@ -14,6 +14,7 @@
             [quile.component :as component]
             [kanopi.aether.core :as aether]
             [om.core :as om]
+            [jamesmacaulay.zelkova.signal :as signal]
             ))
 
 (defrecord TempoMonitor [config aether app-state message-stream kill-channel]
