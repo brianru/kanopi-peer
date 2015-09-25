@@ -49,7 +49,7 @@
 
 (defn transit-read [stream]
   (let [string (slurp stream)]
-    (if (clojure.string/blank? string)
+    (if (or (nil? string) (clojure.string/blank? string))
       {}
       (let [in (ByteArrayInputStream. (.getBytes string))
             reader (transit/reader in :json)]

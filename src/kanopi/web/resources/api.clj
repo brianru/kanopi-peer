@@ -8,12 +8,8 @@
             [kanopi.data :as data]
             [kanopi.util.core :as util]
             [kanopi.web.message :as msg]
+            [kanopi.web.handlers :as handlers]
             ))
-
-(defn query-db [data-fn path]
-  (fn [ctx]
-    (data-fn (util/get-data-service ctx)
-             (get-in ctx path))))
 
 (defresource api-resource base/requires-authentication
   :allowed-methods [:get :put :patch :post :delete]
@@ -21,21 +17,24 @@
                           "application/edn"
                           "application/json"]
 
-  :processable? (partial msg/request-context->action-message ::message) 
+  :processable? (fn [ctx]
+                  (hash-map ::message (msg/request-context->action-message ctx))) 
   :handle-unprocessable-entity "The request is in some way incomplete or illogical."
 
-  :exists? (fn [ctx]
-             (let [data-svc (util/get-data-service ctx)
-                   msg      (get ctx ::message)]
-               (hash-map ::entity (data/user-thunk data-svc msg))))
+  ;; :exists? (fn [ctx]
+  ;;            (let [data-svc (util/get-data-service ctx)
+  ;;                  msg      (get ctx ::message)]
+  ;;              (hash-map ::entity (data/user-thunk data-svc msg))))
 
-  ;;:put!    (query-db data/swap-entity   [:request :params :entity])
-  ;;:delete! (query-db data/retract-thunk [:request :params :id])
-  ;;:patch!  (query-db data/assert-statements [:request :params :statements])
-  ;;:post!   (query-db data/add-entity        [:request :params :entity])
+  :post! (fn [ctx]
+           (->> (get ctx ::message)
+                (handlers/request-handler ctx)
+                (hash-map ::result)))
 
-  :new? ::new
+  :new? false
   :respond-with-entity? true
+  :post-redirect? false
 
-  :handle-ok (fn [ctx] (str (get ctx ::entity)))
+  :handle-ok (fn [ctx]
+               (get-in ctx [::result]))
   )

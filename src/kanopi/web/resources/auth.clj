@@ -107,7 +107,6 @@
   (let [params (get-in ctx [:request :params])
         body   (util/transit-read (get-in ctx [:request :body]))
         {:keys [username password]} (merge params body)
-        _ (println "creds" username password)
         authenticator (util/get-authenticator ctx)
         user-ent-id (auth/register! authenticator username password)
         ]
@@ -178,6 +177,5 @@
   :respond-with-entity? true
   :post-redirect? false ;;; success?
   :handle-ok (fn [ctx]
-               (println "here" (::identity ctx))
                (get ctx ::identity {}))
   )

@@ -1,5 +1,6 @@
 (ns kanopi.web.app-test
   (:require [clojure.test :refer :all]
+            [clojure.pprint :refer (pprint)]
             [kanopi.test-util :as test-util]
             [kanopi.util.core :as util]
             [com.stuartsierra.component :as component]
@@ -39,7 +40,6 @@
             body  (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
         (is (not-empty body))
-        (println "resp body!" body)
         #_(is (re-find #"welcome=true" (get-in resp [:headers "Location"])))
         (is (auth/verify-creds (:authenticator system) creds))))
 
@@ -64,20 +64,38 @@
 
     (component/stop system)))
 
-#_(deftest message-passing-api
+(deftest message-passing-api
   (let [system  (component/start (test-util/system-excl-web-server))
         handler (get-in system [:web-app :app-handler])
-        creds   {:username "mickey", :password "mouse"}]
+        creds   {:username "mickey", :password "mouse"}
+        _       (-> (mock/request :post "/register" creds)
+                    (handler))]
 
-    (testing "get-thunk"
-      (let [req (mock/request :post "/api" {:noun -1000
-                                            :verb :get-thunk
-                                            :context {}})
+    (testing "get-thunk-failure"
+      (let [message {:noun -1000
+                     :verb :get-thunk
+                     :context {}}
+            req (-> (mock/request :post "/api" message)
+                    (test-util/assoc-basic-auth creds))
+            resp (handler req)
+            body (util/transit-read (:body resp))
+            ]
+        (is (= 200 (:status resp)))
+        (is (= :get-thunk-failure (get body :verb)))
+        (is (nil? (get body :noun)))
+        ))
+
+    (testing "get-thunk-success"
+      (let [message {:noun nil
+                     :verb :get-thunk
+                     :context {}}
+            req (-> (mock/request :post "/api" message)
+                    (test-util/assoc-basic-auth creds))
             resp (handler req)
             body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
-        (is (not-empty body))
-        ))
+        (is (= :get-thunk-success (get body :verb)))
+        (is (get body :noun))))
 
     (testing "update-thunk-label"
       (let []

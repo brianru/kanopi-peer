@@ -1,17 +1,32 @@
 (ns kanopi.web.handlers
   (:require [kanopi.web.message :as msg]
-            [kanopi.data :as data]))
+            [kanopi.data :as data]
+            [kanopi.util.core :as util]
+            [cemerick.friend :as friend]
+            [clojure.pprint :refer (pprint)]
+            ))
 
 (defmulti request-handler
   (fn [request-context message]
+    (println "Request-handler")
+    (pprint message)
     (get message :verb))
   :default
   :echo)
 
 (defmethod request-handler :echo
   [request-context message]
-  message)
+  (identity message))
 
-(defmethod request-handler :request
+(defmethod request-handler :get-thunk
   [request-context message]
-  (request-handler request-context (get message :noun)))
+  (let [data-svc (util/get-data-service request-context)
+        ;; TODO: get creds added to message ctx as part of its parsing
+        creds (friend/current-authentication (get request-context :request))
+        data  (data/get-thunk data-svc creds (get message :noun))]
+    (hash-map
+     :noun    data
+     :verb    (if (not-empty data)
+                :get-thunk-success
+                :get-thunk-failure)
+     :context {})))

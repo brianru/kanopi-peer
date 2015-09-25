@@ -21,6 +21,12 @@
    "verb"
    "context"
    }
+ :data-flow
+ #{
+   "get thunk"
+   "get thunk success"
+   "get thunk failure"
+   }
  :aether
  #{
    "listen!"

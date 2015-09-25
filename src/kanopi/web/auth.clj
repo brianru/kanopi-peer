@@ -26,7 +26,7 @@
                                     {:status 401})
          :login-uri "/login"
          :default-landing-uri "/"
-         :workflows [;(workflows/http-basic :realm "/")
+         :workflows [(workflows/http-basic :realm "/")
                      (workflows/interactive-form :redirect-on-auth? false)]}]
     (-> handler
         (friend/authenticate friend-m))))
