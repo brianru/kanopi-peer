@@ -85,7 +85,7 @@
             ]
         (is (= 200 (:status resp)))
         (is (= :get-thunk-failure (get body :verb)))
-        (is (nil? (get body :noun)))
+        (is (nil? (get-in body [:noun :thunk])))
         ))
 
     (testing "get-thunk-success"
@@ -99,7 +99,7 @@
             body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
         (is (= :get-thunk-success (get body :verb)))
-        (is (= test-ent-id (-> body :noun :db/id first)))
+        (is (= test-ent-id (-> body :noun :thunk :db/id first)))
         ))
 
     (testing "update-thunk-label"

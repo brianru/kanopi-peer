@@ -26,7 +26,7 @@
         data  (data/user-thunk data-svc creds (get message :noun))]
     (hash-map
      :noun    data
-     :verb    (if (not-empty data)
+     :verb    (if (not-empty (get-in data [:thunk]))
                 :get-thunk-success
                 :get-thunk-failure)
      :context {})))

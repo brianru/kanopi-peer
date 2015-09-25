@@ -209,12 +209,16 @@
    :verb :request
    :context {}))
 
-;; TODO: implement
 (defmethod local->remote :get-thunk
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
-   :noun {}
+   :noun {:uri             (history/get-route-for history :api)
+          :body            msg
+          :method          :post
+          :response-method :aether
+          :error-method    :aether
+          }
    :verb :request
    :context {}))
 

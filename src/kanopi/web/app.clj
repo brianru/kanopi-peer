@@ -61,10 +61,10 @@
             (ring.middleware.cookies/wrap-cookies)
             (cond-> (:dev config)
               (wrap-trace :header :ui))
-            (wrap-ensure-session)
+            ;(wrap-ensure-session)
             (wrap-add-to-req :data-service data-service)
             (wrap-add-to-req :authenticator authenticator)
-            (wrap-session {:timeout 0})
+            (wrap-session {:timeout -1}) ;;; timeout <= 0 means no timeout
             (->> (assoc this :app-handler))))))
 
   (stop [this]

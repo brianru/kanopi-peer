@@ -38,6 +38,8 @@
               :login-success    :login-failure
               :logout-success   :logout-failure
               :register-success :register-failure
+
+              :get-thunk-success :get-thunk-failure
               } 
     :remote #{
               :login :logout :register

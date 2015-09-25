@@ -21,13 +21,15 @@
          ;; described as data
          :login-failure-handler (fn [e]
                                   {:status 401})
-         ;; :unauthenticated-handler (constantly {:status 401})
+         :unauthenticated-handler (constantly {:status 401})
          :unauthorized-handler    (fn [e]
                                     {:status 401})
          :login-uri "/login"
          :default-landing-uri "/"
-         :workflows [(workflows/http-basic :realm "/")
-                     (workflows/interactive-form :redirect-on-auth? false)]}]
+         :workflows [
+                     (workflows/interactive-form :redirect-on-auth? false :allow-anon? true)
+                     (workflows/http-basic :realm "/")
+                     ]}]
     (-> handler
         (friend/authenticate friend-m))))
 

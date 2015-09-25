@@ -51,8 +51,9 @@
               :in $ ?ent-id
               :where [?s ?a ?ent-id]]
             (datomic/db datomic-peer creds)
-            (sort-by first)
-            (partition-by first)))
+            ent-id)
+           (sort-by first)
+           (partition-by first))
       ))
 
   (similar-thunks [this creds ent-id]
@@ -68,11 +69,11 @@
       ))
 
   (user-thunk [this creds thunk-id]
-    (hash-map :context-entities
+    (hash-map :context-thunks
               (context-thunks this creds thunk-id)
-              :focus-entity
+              :thunk
               (get-thunk this creds thunk-id)
-              :similar-entities
+              :similar-thunks
               (similar-thunks this creds thunk-id)
               ))
   (user-thunk [this creds as-of thunk-id]

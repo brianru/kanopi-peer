@@ -233,6 +233,14 @@
                        (build-thunk-data app-state)
                        (assoc app-state :thunk)))))
 
+(defmethod local-event-handler :get-thunk-success
+  [aether history app-state msg]
+  (om/transact! app-state
+                (fn [app-state]
+                  (->> (get msg :noun)
+                       (build-thunk-data app-state)
+                       (assoc app-state :thunk)))))
+
 (defmethod local-event-handler :navigate
   [aether history app-state msg]
   (let [handler (get-in msg [:noun :handler])]

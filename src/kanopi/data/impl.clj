@@ -56,6 +56,8 @@
    :ent-id nil
    :txdata [[:db.fn/retractEntity ent-id]]))
 
+(declare make-datomic-kv-consistent)
+
 (defn- to-regular-map [entity-map]
   (->> entity-map
        (into {})
