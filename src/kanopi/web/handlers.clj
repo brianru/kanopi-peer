@@ -23,7 +23,7 @@
   (let [data-svc (util/get-data-service request-context)
         ;; TODO: get creds added to message ctx as part of its parsing
         creds (friend/current-authentication (get request-context :request))
-        data  (data/get-thunk data-svc creds (get message :noun))]
+        data  (data/user-thunk data-svc creds (get message :noun))]
     (hash-map
      :noun    data
      :verb    (if (not-empty data)

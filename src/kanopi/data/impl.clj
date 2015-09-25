@@ -56,13 +56,23 @@
    :ent-id nil
    :txdata [[:db.fn/retractEntity ent-id]]))
 
+(defn- to-regular-map [entity-map]
+  (->> entity-map
+       (into {})
+       (mapcat make-datomic-kv-consistent)
+       (apply hash-map)))
+
 (defn- make-datomic-kv-consistent [[k v]]
   (let [v' (cond
             (instance? datomic.query.EntityMap v)
-            (list v)
+            (list (to-regular-map v))
 
-            (every? (partial instance? datomic.query.EntityMap) v)
-            v
+            (some (partial instance? datomic.query.EntityMap) v)
+            (map (fn [itm]
+                   (if (instance? datomic.query.EntityMap itm)
+                     (to-regular-map itm)
+                     itm))
+                 v)
 
             (not (set? v))
             (list v)
@@ -75,7 +85,8 @@
   "TODO: may want to use pull api to grab facts as well.
   NOTE: ent-id can also be an ident or datomic lookup-ref."
   [db ent-id]
-  {:post [(->> (vals %) (every? set?))]}
+  {:post [(->> (vals %) (every? set?))
+          (or (nil? %) (map? %))]}
   (when-let [ent (some-> (d/entity db ent-id) (not-empty) (d/touch))]
     (let [pretty-ent (->> ent
                           (mapcat make-datomic-kv-consistent)

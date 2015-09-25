@@ -69,7 +69,10 @@
         handler (get-in system [:web-app :app-handler])
         creds   {:username "mickey", :password "mouse"}
         _       (-> (mock/request :post "/register" creds)
-                    (handler))]
+                    (handler))
+        thunk-ent-ids
+        (d/q '[:find [?eid ...] :in $ :where [?eid :thunk/label _]]
+             (d/db (get-in system [:datomic-peer :connection])))]
 
     (testing "get-thunk-failure"
       (let [message {:noun -1000
@@ -86,7 +89,8 @@
         ))
 
     (testing "get-thunk-success"
-      (let [message {:noun nil
+      (let [test-ent-id (first thunk-ent-ids)
+            message {:noun test-ent-id
                      :verb :get-thunk
                      :context {}}
             req (-> (mock/request :post "/api" message)
@@ -95,7 +99,8 @@
             body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
         (is (= :get-thunk-success (get body :verb)))
-        (is (get body :noun))))
+        (is (= test-ent-id (-> body :noun :db/id first)))
+        ))
 
     (testing "update-thunk-label"
       (let []

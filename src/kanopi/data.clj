@@ -18,7 +18,8 @@
                  [this creds as-of thunk-id])
   (context-thunks [this creds thunk-id])
   (similar-thunks [this creds thunk-id])
-  (user-thunk    [this msg])
+  (user-thunk [this creds thunk-id]
+              [this creds as-of thunk-id])
   (recent-thunks [this creds])
   (add-fact      [this creds thunk-id attribute value])
   (update-fact   [this creds fact-id attribute value]
@@ -66,18 +67,22 @@
            (partition-by first)) 
       ))
 
-  (user-thunk [this {:keys [noun verb context] :as msg}]
-    (let [{:keys [creds as-of]} context
-          {:keys [ent-id]}      noun]
-      (hash-map :context-entities
-                (context-thunks this creds ent-id)
-                :focus-entity
-                (if as-of
-                  (get-thunk this creds as-of ent-id)
-                  (get-thunk this creds ent-id))
-                :similar-entities
-                (similar-thunks this creds ent-id)
-                )))
+  (user-thunk [this creds thunk-id]
+    (hash-map :context-entities
+              (context-thunks this creds thunk-id)
+              :focus-entity
+              (get-thunk this creds thunk-id)
+              :similar-entities
+              (similar-thunks this creds thunk-id)
+              ))
+  (user-thunk [this creds as-of thunk-id]
+    (hash-map :context-entities
+              (context-thunks this creds thunk-id)
+              :focus-entity
+              (get-thunk this creds as-of thunk-id)
+              :similar-entities
+              (similar-thunks this creds thunk-id)
+              ))
 
   (recent-thunks [this creds]
     (let [user-id (-> creds :role)]
