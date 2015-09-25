@@ -44,7 +44,9 @@
                  [org.immutant/web "2.1.0"]
                  [compojure "1.4.0"]
                  [liberator "0.13"]
-                 [io.clojure/liberator-transit "0.3.0"]
+                 ;; NOTE: this is installed in my local maven
+                 ;; manually.
+                 [io.clojure/liberator-transit "0.3.1"]
                  [com.cemerick/friend "0.2.1"]
                  [ring/ring-defaults "0.1.5"]
                  [ring-middleware-format "0.6.0"]

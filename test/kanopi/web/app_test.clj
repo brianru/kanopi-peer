@@ -1,6 +1,7 @@
 (ns kanopi.web.app-test
   (:require [clojure.test :refer :all]
             [kanopi.test-util :as test-util]
+            [kanopi.util.core :as util]
             [com.stuartsierra.component :as component]
             [liberator.dev]
             [datomic.api :as d]
@@ -34,16 +35,20 @@
 
     (testing "register"
       (let [req   (mock/request :post "/register" creds)
-            resp  (handler req)]
+            resp  (handler req)
+            body  (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
+        (is (not-empty body))
+        (println "resp body!" body)
         #_(is (re-find #"welcome=true" (get-in resp [:headers "Location"])))
         (is (auth/verify-creds (:authenticator system) creds))))
 
     (testing "login-success"
       (let [req (mock/request :post "/login" creds)
             resp (handler req)]
-        (is (= 200 (:status resp)))))
- 
+        (is (= 200 (:status resp)))
+        (is (not-empty (util/transit-read (:body resp))))))
+
     #_(testing "login-redirect"
         (let [req (mock/request :post "/login" creds)
               resp (handler req)]
@@ -59,7 +64,7 @@
 
     (component/stop system)))
 
-(deftest message-passing-api
+#_(deftest message-passing-api
   (let [system  (component/start (test-util/system-excl-web-server))
         handler (get-in system [:web-app :app-handler])
         creds   {:username "mickey", :password "mouse"}]
@@ -69,9 +74,9 @@
                                             :verb :get-thunk
                                             :context {}})
             resp (handler req)
-            ]
+            body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
-        (is (not-empty (:body resp)))
+        (is (not-empty body))
         ))
 
     (testing "update-thunk-label"
