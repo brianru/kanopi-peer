@@ -37,10 +37,11 @@
         (is (= 200 (:status resp)))))
 
     (testing "unauthorized-login"
-      (let [req   (-> (mock/request :post "/login" creds)) 
+      (let [req   (-> (mock/request :post "/login" creds)
+                      (mock/header :accept "application/transit+json")) 
             resp  (handler req)]
         (is (= 401 (:status resp)))
-        #_(is (re-find #"login_failed" (get-in resp [:headers "Location"])))))
+        #_(is (re-find #"login_failed" (get-in resp [:headers "Location"] "")))))
 
     (testing "register"
       (let [req   (-> (mock/request :post "/register" creds)
@@ -49,20 +50,22 @@
             body  (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
         (is (not-empty body))
-        #_(is (re-find #"welcome=true" (get-in resp [:headers "Location"])))
+        #_(is (re-find #"welcome=true" (get-in resp [:headers "Location"] "")))
         (is (auth/verify-creds (:authenticator system) creds))))
 
     (testing "login-success"
-      (let [req (mock/request :post "/login" creds)
+      (let [req (-> (mock/request :post "/login" creds)
+                    (mock/header :accept "application/transit+json"))
             resp (handler req)]
         (is (= 200 (:status resp)))
         (is (not-empty (util/transit-read (:body resp))))))
 
-    #_(testing "login-redirect"
-        (let [req (mock/request :post "/login" creds)
-              resp (handler req)]
-          (is (= 303 (:status resp)))
-          (is (= "http://localhost/" (get-in resp [:headers "Location"])))))
+    (testing "login-redirect"
+      (let [req (-> (mock/request :post "/login" creds)
+                    (mock/header :accept "text/html"))
+            resp (handler req)]
+        (is (= 303 (:status resp)))
+        (is (= "http://localhost/?welcome=true" (get-in resp [:headers "Location"] "")))))
 
     (testing "access-spa-creds"
       (let [req  (-> (mock/request :get "/")
@@ -97,8 +100,48 @@
             {:keys [status headers body] :as resp} (handler req)
             ]
         (is (= 303 status))
-        (is (re-find #"welcome=true" (get-in headers ["Location"])))))
-    
+        (is (re-find #"welcome=true" (get-in headers ["Location"] "")))))
+
+    (testing "login: transit+json"
+      (let [creds {:username "minney" :password "mouse"}
+            req   (-> (mock/request :post "/login" creds)
+                      (mock/header :accept "application/transit+json"))
+            {:keys [status headers body] :as resp} (handler req)
+            body' (util/transit-read body)
+            cookie (-> (get headers "Set-Cookie") (first)) 
+            ]
+        (is (= 200 status))
+        (is (:username creds) (:username body))
+        (is (not-empty cookie))
+        (let [msg {:foo :bar}
+              req (-> (mock/request :post "/api" msg)
+                      (mock/header :accept "application/transit+json")
+                      (mock/header :cookie cookie))
+              {:keys [status headers body]} (handler req)
+              body' (util/transit-read body)]
+          (is (= 200 status))
+          (is (= msg body')))))
+
+    (testing "login: text/html"
+      (let [creds {:username "homer" :password "simpson"}
+            req   (-> (mock/request :post "/login" creds)
+                      (mock/header :accept "text/html"))
+            {:keys [status headers body] :as resp} (handler req)
+            cookie (-> (get headers "Set-Cookie") (first))
+            ]
+        (is (= 303 status))
+        (is (re-find #"welcome=true" (get-in headers ["Location"] "")))
+        (is (not-empty cookie))
+        (let [msg {:foo :bar}
+              req (-> (mock/request :post "/api" msg)
+                      (mock/header :accept "application/transit+json")
+                      (mock/header :cookie cookie)
+                      )
+              {:keys [status headers body]} (handler req)
+              body' (util/transit-read body)]
+          (is (= 200 status))
+          (is (= msg body')))))
+
     (component/stop system)))
 
 (deftest message-passing-api

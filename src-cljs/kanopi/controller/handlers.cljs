@@ -21,7 +21,8 @@
 
 (defmethod local-event-handler :log
   [aether history app-state msg]
-  (info msg))
+  (info msg)
+  msg)
 
 (defn- current-thunk [props]
   (get-in props [:thunk :thunk :db/id]))

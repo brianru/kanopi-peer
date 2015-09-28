@@ -148,7 +148,12 @@
                       req-map   (-> next-item
                                     (parse-handlers aether)
                                     (wrap-handlers recur-ch)
-                                    (select-keys [:params :body :handler :error-handler]))]
+                                    (select-keys [
+                                                  :headers
+                                                  :params :body
+                                                  :handler :error-handler
+                                                  :format :response-format
+                                                  ]))]
                   #_(debug id "ACTIVE")
                   (req-fn (:uri next-item) req-map)
                   (<! recur-ch)

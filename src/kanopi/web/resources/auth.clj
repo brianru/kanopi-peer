@@ -144,23 +144,46 @@
 
 (defresource ajax-login-resource
   :allowed-methods [:post]
-  :available-media-types ["application/transit+json"
+  :available-media-types ["text/html"
+                          "application/transit+json"
                           "application/edn"
                           "application/json"]
   :new? false
   :respond-with-entity? true
-  :post-redirect? false
+  ;; FIXME: media-type is always text/html?
+  :post-redirect? (fn [ctx]
+                    (let [media-type (get-in ctx [:representation :media-type])]
+                      (cond
+                       (not= media-type "text/html")
+                       false
+                       
+                       ;;default
+                       (= media-type "text/html")
+                       (if-let [current-auth (friend/current-authentication (:request ctx))]
+                         {:location "/?welcome=true"}
+                         {:location "/login?fail=true"})))
+                    
+                    false)
   :handle-ok (fn [ctx]
                (friend/current-authentication (get-in ctx [:request]))))
 
 (defresource ajax-logout-resource
   :allowed-methods [:post]
-  :available-media-types ["application/transit+json"
+  :available-media-types ["text/html"
+                          "application/transit+json"
                           "application/edn"
                           "application/json"]
   :new? false
   :respond-with-entity? true
-  :post-redirect? false
+  :post-redirect? (fn [ctx]
+                    (let [media-type (get-in ctx [:representation :media-type])]
+                      (cond
+                       (not= media-type "text/html")
+                       false
+                       
+                       ;;default
+                       (= media-type "text/html")
+                       {:location "/?logout=true"})))
   :handle-ok (fn [ctx]
                (-> (r/response {:logout-success true})
                    (friend/logout*))))
@@ -171,7 +194,6 @@
                           "application/transit+json"
                           "application/edn"
                           "application/json"]
-  ;;:handle-ok registration-page
   :post! register!
   :new? false
   :respond-with-entity? true

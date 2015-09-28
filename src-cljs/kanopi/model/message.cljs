@@ -159,6 +159,7 @@
    :noun {:uri             (history/get-route-for history :register)
           :params          (get msg :noun)
           :method          :post
+          :response-format :transit
           :response-method :aether
           :response-xform  register-success
           :error-method    :aether
@@ -174,6 +175,7 @@
    :noun {:uri             (history/get-route-for history :login)
           :params          (get msg :noun)
           :method          :post
+          :response-format :transit
           :response-method :aether
           :response-xform  login-success
           :error-method    :aether
@@ -188,6 +190,7 @@
   (hash-map
    :noun {:uri             (history/get-route-for history :logout)
           :method          :post
+          :response-format :transit
           :response-method :aether
           :response-xform  logout-success
           :error-method    :aether
@@ -203,6 +206,7 @@
    :noun {:body msg
           :uri  (history/get-route-for history :api)
           :method :post
+          :response-format :transit
           :response-method :aether
           :error-method    :aether
           }
@@ -216,6 +220,7 @@
    :noun {:uri             (history/get-route-for history :api)
           :body            msg
           :method          :post
+          :response-format :transit
           :response-method :aether
           :error-method    :aether
           }
