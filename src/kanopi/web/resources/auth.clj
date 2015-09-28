@@ -167,7 +167,7 @@
 
 (defresource registration-resource
   :allowed-methods [:post]
-  :available-media-types [;;"text/html"
+  :available-media-types ["text/html"
                           "application/transit+json"
                           "application/edn"
                           "application/json"]
@@ -175,7 +175,20 @@
   :post! register!
   :new? false
   :respond-with-entity? true
-  :post-redirect? false ;;; success?
+  :post-redirect? (fn [ctx]
+                    (let [media-type (get-in ctx [:representation :media-type])
+                          ]
+                      (cond
+                       (not= media-type "text/html")
+                       false
+
+                       ;; default
+                       (= media-type "text/html")
+                       (if-let [user-id (get-in ctx [::identity :ent-id])]
+                         {:location (str "/?welcome=true" "&id=" user-id)}
+                         {:location "/register?fail=true"})
+                       
+                       )))
   :handle-ok (fn [ctx]
                (get ctx ::identity {}))
   )

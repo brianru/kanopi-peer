@@ -77,11 +77,11 @@
               (similar-thunks this creds thunk-id)
               ))
   (user-thunk [this creds as-of thunk-id]
-    (hash-map :context-entities
+    (hash-map :context-thunks
               (context-thunks this creds thunk-id)
-              :focus-entity
+              :thunk
               (get-thunk this creds as-of thunk-id)
-              :similar-entities
+              :similar-thunks
               (similar-thunks this creds thunk-id)
               ))
 

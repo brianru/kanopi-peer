@@ -1,17 +1,25 @@
 (ns kanopi.web.app-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
-            [kanopi.test-util :as test-util]
-            [kanopi.util.core :as util]
+
             [com.stuartsierra.component :as component]
-            [liberator.dev]
             [datomic.api :as d]
+
+            [liberator.dev]
             [ring.mock.request :as mock]
+            [org.httpkit.client :as http]
+
             [cheshire.core :as json]
             [clojure.data.codec.base64 :as base64]
             [clj-time.core :as time]
+
+            [kanopi.test-util :as test-util]
+            [kanopi.util.core :as util]
+            [kanopi.system :as sys]
+            [kanopi.main :as main]
             [kanopi.web.app :as web-app]
-            [kanopi.web.auth :as auth]))
+            [kanopi.web.auth :as auth]
+            ))
 
 ;; Test JSON/EDN/Transit auth API
 (deftest authentication
@@ -35,7 +43,8 @@
         #_(is (re-find #"login_failed" (get-in resp [:headers "Location"])))))
 
     (testing "register"
-      (let [req   (mock/request :post "/register" creds)
+      (let [req   (-> (mock/request :post "/register" creds)
+                      (mock/header :accept "application/transit+json"))
             resp  (handler req)
             body  (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
@@ -64,11 +73,40 @@
 
     (component/stop system)))
 
+(deftest session-management
+  (let [system (component/start (test-util/system-excl-web-server)
+                                ;(sys/new-system main/default-config)
+                                )
+        handler (get-in system [:web-app :app-handler])
+        ]
+    (testing "register: transit+json response"
+      (let [creds  {:username "minney" :password "mouse"}
+            req (-> (mock/request :post "/register" creds)
+                    (mock/header :accept "application/transit+json"))
+            {:keys [status headers body] :as resp} (handler req)
+            body' (util/transit-read body)
+            ]
+        (is (= 200 status))
+        (is (= (:username creds) (:username body')))))
+
+    (testing "register: http response"
+      (let [
+            creds  {:username "homer" :password "simpson"}
+            req (-> (mock/request :post "/register" creds)
+                    (mock/header :accept "text/html"))
+            {:keys [status headers body] :as resp} (handler req)
+            ]
+        (is (= 303 status))
+        (is (re-find #"welcome=true" (get-in headers ["Location"])))))
+    
+    (component/stop system)))
+
 (deftest message-passing-api
   (let [system  (component/start (test-util/system-excl-web-server))
         handler (get-in system [:web-app :app-handler])
         creds   {:username "mickey", :password "mouse"}
         _       (-> (mock/request :post "/register" creds)
+                    (mock/header :accept "application/transit+json")
                     (handler))
         thunk-ent-ids
         (d/q '[:find [?eid ...] :in $ :where [?eid :thunk/label _]]
@@ -100,6 +138,9 @@
         (is (= 200 (:status resp)))
         (is (= :get-thunk-success (get body :verb)))
         (is (= test-ent-id (-> body :noun :thunk :db/id first)))
+        ;; NOTE: not testing similar-thunks and context-thunks 
+        ;; contents here because their existence depends on the
+        ;; particular test-ent-id
         ))
 
     (testing "update-thunk-label"

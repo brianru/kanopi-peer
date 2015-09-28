@@ -50,7 +50,6 @@
                  [com.cemerick/friend "0.2.1"]
                  [ring/ring-defaults "0.1.5"]
                  [ring-middleware-format "0.6.0"]
-                 ;;[ring-transit "0.1.3"]
                  [hiccup "1.0.5"]
                  [crypto-password "0.1.3"]
                  [cheshire "5.5.0"]
@@ -77,7 +76,10 @@
                              [ring/ring-devel "1.4.0"]
                              [ring/ring-mock "0.2.0"]
                              [org.clojure/data.codec "0.1.0"]
-                             [org.clojure/data.csv "0.1.3"]]
+                             [org.clojure/data.csv "0.1.3"]
+                             
+                             ;; use client lib for testing
+                             [http-kit "2.1.18"]]
               :env {:dev true}
               :source-paths ["dev"]
               :repl-options {:init-ns user}}}

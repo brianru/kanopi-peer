@@ -233,6 +233,7 @@
                        (build-thunk-data app-state)
                        (assoc app-state :thunk)))))
 
+;; TODO: don't I also have to put this stuff in the cache?
 (defmethod local-event-handler :get-thunk-success
   [aether history app-state msg]
   (om/transact! app-state
