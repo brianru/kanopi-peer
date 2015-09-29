@@ -96,26 +96,32 @@
 (defn get-fact*
   ""
   [db fact-id]
-  (d/pull db
-          '[:db/id
-            {:fact/attribute [*]}
-            {:fact/value [*]}
-            :fact/role]
-          fact-id))
+  (let [ent (d/pull db
+                    '[:db/id
+                      {:fact/attribute [*]}
+                      {:fact/value [*]}
+                      :fact/role]
+                    fact-id)]
+    (if (empty? (dissoc ent :db/id))
+      nil
+      ent)))
 
 (defn get-thunk*
   "TODO: may want to use pull api to grab facts as well.
   NOTE: ent-id can also be an ident or datomic lookup-ref."
   [db ent-id]
-  (d/pull db
-          '[:db/id
-            :thunk/label
-            :thunk/role
-            {:thunk/fact [:db/id
-                          {:fact/attribute [*]}
-                          {:fact/value [*]}
-                          :fact/role]}]
-          ent-id))
+  (let [ent (d/pull db
+                    '[:db/id
+                      :thunk/label
+                      :thunk/role
+                      {:thunk/fact [:db/id
+                                    {:fact/attribute [*]}
+                                    {:fact/value [*]}
+                                    :fact/role]}]
+                    ent-id)]
+    (if (empty? (dissoc ent :db/id))
+      nil
+      ent)))
 
 (defn mk-literal
   ""

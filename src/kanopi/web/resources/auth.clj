@@ -119,7 +119,11 @@
                     (select-keys [:ent-id :role :username])
                     ;; to make this match the friend
                     ;; current-authentication map
-                    ((fn [x] (assoc x :identity (:username x)))))}))
+                    ((fn [x] (-> x
+                                 (dissoc :role)
+                                 (assoc :identity (:username x)
+                                        :roles (->> x :role (map :db/id) (set)))
+                                 ))))}))
 
 (defn success?
   ""
@@ -160,16 +164,31 @@
                        
                        ;;default
                        (= media-type "text/html")
-                       (if-let [current-auth (friend/current-authentication (:request ctx))]
-                         {:location "/?welcome=true"}
-                         {:location "/login?fail=true"}))))
+                       ;;false
+                       ;; BEWARE: redirect causes session/cookie to be
+                       ;; dropped somewhere in friend authentication
+                       ;; middleware -> :session in response never
+                       ;; makes it to ring session middleware
+                       ;;
+                        (if-let [current-auth (friend/current-authentication (:request ctx))]
+                          {:location "/?welcome=true"}
+                          {:location "/login?fail=true"})
+                       )))
 
   :handle-ok (fn [ctx]
-               (-> (friend/current-authentication (get-in ctx [:request]))
-                   (rep/as-response ctx)
-                   ;(r/set-cookie "foo" "bar")
-                   (rep/ring-response)
-                   )))
+               (let [media-type (get-in ctx [:representation :media-type])]
+                 (cond
+                  (not= media-type "text/html")
+                  (-> (friend/current-authentication (get-in ctx [:request]))
+                      (rep/as-response ctx)
+                      (rep/ring-response)
+                      )
+                  
+                  (= media-type "text/html")
+                  (-> "<h1>\"Success\"</h1>"
+                      (rep/as-response ctx)
+                      (rep/ring-response))))
+               ))
 
 (defresource ajax-logout-resource
   :allowed-methods [:post]
@@ -219,12 +238,22 @@
                        ;;(if-let [user-id (get-in ctx [::identity :ent-id])]
                        ;;  {:location (str "/?welcome=true" "&id=" user-id)}
                        ;;  {:location "/register?fail=true"})
-                       
+
                        )))
   :handle-ok (fn [ctx]
-               (let [user (get ctx ::identity {})]
-                 (-> user
-                  (rep/as-response ctx)
-                  (friend/merge-authentication user)
-                  ;(r/set-cookie "foo "bar)
-                  (rep/ring-response)))))
+               (let [media-type (get-in ctx [:representation :media-type])
+                     user (get ctx ::identity {})]
+                 (cond
+                  (not= media-type "text/html")
+                  (-> user
+                      (rep/as-response ctx)
+                      (friend/merge-authentication user)
+                      (rep/ring-response))
+                  
+                  (= media-type "text/html")
+                  (-> "<h1>\"Success!\"</h1>"
+                      (rep/as-response ctx)
+                      (friend/merge-authentication user)
+                      (rep/ring-response))
+                  )
+                 )))

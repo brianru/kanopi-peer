@@ -54,19 +54,20 @@
   (credentials [this username]
     (let [db     (datomic/db database nil)
           ent-id (-> (d/entity db [:user/id username]) :db/id)
-          creds (d/pull db
+          creds  (d/pull db
                         '[:db/id
                           {:user/role [:db/id :role/label]}
                           :user/id
                           :user/password]
                         ent-id) 
-          creds' (when creds
+          creds' (when (not-empty (dissoc creds :db/id))
                    (hash-map
                     :ent-id   (get-in creds [:db/id])
                     :role     (get-in creds [:user/role])
                     :username (get-in creds [:user/id])
                     :password (get-in creds [:user/password])))]
       (when creds'
+        (println "HERE" creds')
         (assert (valid-credentials? creds') "Invalid credential map."))
       creds'))
 

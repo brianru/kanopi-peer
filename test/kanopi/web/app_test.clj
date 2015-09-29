@@ -237,7 +237,7 @@
             body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
         (is (= :get-thunk-success (get body :verb)))
-        (is (= test-ent-id (-> body :noun :thunk :db/id first)))
+        (is (= test-ent-id (-> body :noun :thunk :db/id)))
         ;; NOTE: not testing similar-thunks and context-thunks 
         ;; contents here because their existence depends on the
         ;; particular test-ent-id

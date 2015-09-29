@@ -15,7 +15,7 @@
 (defprotocol IDataService
 
   (init-thunk    [this creds])
-  (update-thunk  [this creeds thunk'])
+  (update-thunk  [this creds thunk'])
   (get-thunk     [this creds thunk-id]
                  [this creds as-of thunk-id])
 

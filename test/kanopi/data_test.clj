@@ -55,8 +55,7 @@
 
     (testing "retract new thunk"
       (let [report (data/retract-thunk (:data-service system) creds ent-id)]
-        (is (empty? (-> (data/get-thunk (:data-service system) creds ent-id)
-                        (dissoc :db/id))))))
+        (is (nil? (data/get-thunk (:data-service system) creds ent-id)))))
 
     (component/stop system)))
 
@@ -80,33 +79,33 @@
 
     (testing "update-fact: change value literal. attr label same."
       (let [fact' ["age" "new-value!"]
-            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact') ]
-        (println "fact-ent:" fact-ent)
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
         (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change value literal. attr label nil."
       (let [fact' [nil "new-value2!"]
-            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact') ]
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
         (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change value from literal to ref"
       (let [fact' ["age2" [:db/id "42"]]
-            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact') ]
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
         (is (= ["age2" "42"] (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change value from ref to literal"
       (let [fact' ["age2" "43"]
-            fact-ent  (apply data/update-fact (:data-service system) creds fact-id fact') ]
+            fact-ent  (apply data/update-fact (:data-service system) creds fact-id fact')]
         (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
-    (testing "update-fact: change attribute literal"
-      )
-
     (testing "update-fact: change attribute from literal to ref"
-      )
+      (let [fact' ["age2" [:db/id "infinity"]]
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
+        (is (= ["age2" "infinity"] (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change attribute from ref to literal"
-      )
+      (let [fact' ["age2" "a real number"]
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
+        (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
     (testing "retract fact"
       )))
