@@ -107,8 +107,10 @@
             fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
         (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
-    (testing "retract fact"
-      )))
+    (testing "update thunk label"
+      (let [lbl' "new label dude!"
+            thunk' (data/update-thunk-label (:data-service system) creds ent-id lbl')]
+        (is (= lbl' (get thunk' :thunk/label)))))))
 
 ;; TODO: test user-thunk input fns
 (deftest context-thunks

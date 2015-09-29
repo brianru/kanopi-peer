@@ -181,6 +181,16 @@
                         (assoc-in [:cache ent-id :thunk/label] label')
                         (ensure-current-thunk-is-updated ent-id))))))
 
+;; TODO: implement.
+(defmethod local-event-handler :update-thunk-label-success
+  [aether history app-state msg]
+  )
+
+;; TODO: implement.
+(defmethod local-event-handler :update-thunk-label-failure
+  [aether history app-state msg]
+  )
+
 (defn- fuzzy-search-entity [q ent]
   (let [base-string (->> ent
                          ((juxt :thunk/label :value/string))
@@ -226,6 +236,10 @@
                     ;; not using this data structure very well
                     (assoc-in app-state [:search-results] {query-string results})))))
 
+;; TODO: when handled locally, shouldn't I follow the same code path
+;; as performing action remotely? eg. send success/failure msgs?
+;; OR, should I purposely not do this and have a clear distinction b/w
+;; actions handled transactionally vs hypothetically
 (defmethod local-event-handler :get-thunk
   [aether history app-state msg]
   (om/transact! app-state

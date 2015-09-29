@@ -232,7 +232,13 @@
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
-   :noun {}
+   :noun {:uri             (history/get-route-for history :api)
+          :body            msg
+          :method          :post
+          :response-format :transit
+          :response-method :aether
+          :error-method    :aether
+          }
    :verb :request
    :context {}))
 

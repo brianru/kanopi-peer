@@ -29,7 +29,16 @@
                 :get-thunk-failure)
      :context {})))
 
-(defmethod request-handler :update-thunk
+(defmethod request-handler :update-thunk-label
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
-        creds (friend/current-authentication (get request-context :request))]))
+        creds (friend/current-authentication (get request-context :request))
+        data  (data/update-thunk-label data-svc creds
+                                       (get-in message [:noun :existing-entity])
+                                       (get-in message [:noun :new-label]))]
+    (hash-map
+     :noun data
+     :verb (if data
+             :update-thunk-label-success
+             :update-thunk-label-failure)
+     :context {})))

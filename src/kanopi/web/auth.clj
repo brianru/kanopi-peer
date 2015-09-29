@@ -54,6 +54,9 @@
   (credentials [this username]
     (let [db     (datomic/db database nil)
           ent-id (-> (d/entity db [:user/id username]) :db/id)
+          ;; NOTE: this pull call and the following when/not-empty
+          ;; check belong in a lower-level ns. see kanopi.data vs
+          ;; kanopi.data.impl as example
           creds  (d/pull db
                         '[:db/id
                           {:user/role [:db/id :role/label]}
