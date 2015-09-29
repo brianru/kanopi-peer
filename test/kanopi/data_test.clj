@@ -75,14 +75,13 @@
     (testing "assert fact"
       (let [new-fact (->> (clojure.set/difference (set (get ent-1 :thunk/fact))
                                                   (set (get ent-0 :thunk/fact)))
-                          (first)
-                          (:db/id)
-                          (data/get-thunk (:data-service system) creds))]
+                          (first))]
         (is (= (util/fact-entity->tuple new-fact) fact-1))))
 
     (testing "update-fact: change value literal. attr label same."
       (let [fact' ["age" "new-value!"]
             fact-ent (apply data/update-fact (:data-service system) creds fact-id fact') ]
+        (println "fact-ent:" fact-ent)
         (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
     (testing "update-fact: change value literal. attr label nil."

@@ -54,13 +54,12 @@
   (credentials [this username]
     (let [db     (datomic/db database nil)
           ent-id (-> (d/entity db [:user/id username]) :db/id)
-          creds (when ent-id
-                  (d/pull db
-                          '[:db/id
-                            {:user/role [:db/id :role/label]}
-                            :user/id
-                            :user/password]
-                          ent-id))
+          creds (d/pull db
+                        '[:db/id
+                          {:user/role [:db/id :role/label]}
+                          :user/id
+                          :user/password]
+                        ent-id) 
           creds' (when creds
                    (hash-map
                     :ent-id   (get-in creds [:db/id])
@@ -78,7 +77,7 @@
 
   (register! [this username password]
     ;; TODO: should this return nil when user already exists or throw
-    ;; an exception?
+    ;; an exception? Currently it throws an exception.
     (assert (every? identity [username password]) "Missing username or password.")
     (assert (nil? (d/entid (datomic/db database nil) [:user/id username]))
             "This username is already taken. Please choose another.")

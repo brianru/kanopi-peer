@@ -93,7 +93,17 @@
         v'' (if (set? v') v' (set v'))]
     [k v'']))
 
-(defn get-entity*
+(defn get-fact*
+  ""
+  [db fact-id]
+  (d/pull db
+          '[:db/id
+            {:fact/attribute [*]}
+            {:fact/value [*]}
+            :fact/role]
+          fact-id))
+
+(defn get-thunk*
   "TODO: may want to use pull api to grab facts as well.
   NOTE: ent-id can also be an ident or datomic lookup-ref."
   [db ent-id]
@@ -102,8 +112,8 @@
             :thunk/label
             :thunk/role
             {:thunk/fact [:db/id
-                          {:fact/attribute [:db/id :thunk/label]}
-                          {:fact/value [:db/id :thunk/label]}
+                          {:fact/attribute [*]}
+                          {:fact/value [*]}
                           :fact/role]}]
           ent-id))
 
@@ -158,7 +168,7 @@
 
 (defn update-thunk->txdata
   [datomic-peer creds thunk']
-  (let [thunk-id (-> thunk' (get :db/id) (first))]
+  (let [thunk-id (-> thunk' (get :db/id))]
     (hash-map
      :ent-id thunk-id
      :txdata [
@@ -226,15 +236,15 @@
                      [:db/add fact-id part (get literal :ent-id)])))
 
     ::retract
-    (let [fact (get-entity* (datomic/db datomic-peer creds) fact-id)
-          part-ent-id (-> fact part first :db/id)]
+    (let [fact (get-fact* (datomic/db datomic-peer creds) fact-id)
+          part-ent-id (-> fact part :db/id)]
       (hash-map
        :ent-id fact-id
        :txdata (vector [:db/retract fact-id part part-ent-id])))))
 
 (defn update-fact->txdata
   [datomic-peer creds fact-id attribute value]
-  (let [fact (get-entity* (datomic/db datomic-peer creds) fact-id)]
+  (let [fact (get-thunk* (datomic/db datomic-peer creds) fact-id)]
     (hash-map
      :ent-id fact-id
      :txdata (->> [[:fact/attribute attribute]
