@@ -10,7 +10,6 @@
             [org.httpkit.client :as http]
 
             [cheshire.core :as json]
-            [clojure.data.codec.base64 :as base64]
             [clj-time.core :as time]
 
             [kanopi.test-util :as test-util]
@@ -41,6 +40,13 @@
                       (mock/header :accept "application/transit+json")) 
             resp  (handler req)]
         (is (= 401 (:status resp)))
+        ))
+    (testing "unauthorized-login html"
+      (let [req (-> (mock/request :post "/login" creds)
+                    (mock/header :accept "text/html"))
+            resp (handler req)
+            ]
+        (is (= 401 (:status resp)))
         #_(is (re-find #"login_failed" (get-in resp [:headers "Location"] "")))))
 
     (testing "register"
@@ -49,16 +55,18 @@
             resp  (handler req)
             body  (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
-        (is (not-empty body))
+        (is (= (:username creds) (:username body)))
         #_(is (re-find #"welcome=true" (get-in resp [:headers "Location"] "")))
         (is (auth/verify-creds (:authenticator system) creds))))
 
     (testing "login-success"
       (let [req (-> (mock/request :post "/login" creds)
                     (mock/header :accept "application/transit+json"))
-            resp (handler req)]
+            resp (handler req)
+            body' (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
-        (is (not-empty (util/transit-read (:body resp))))))
+        (is (= (:username creds) (:username body')))
+        ))
 
     (testing "login-redirect"
       (let [req (-> (mock/request :post "/login" creds)
@@ -77,32 +85,73 @@
     (component/stop system)))
 
 (deftest session-management
-  (let [system (component/start (test-util/system-excl-web-server)
-                                ;(sys/new-system main/default-config)
-                                )
-        handler (get-in system [:web-app :app-handler])
-        ]
+  (let [system (component/start (test-util/system-excl-web-server))
+        handler (get-in system [:web-app :app-handler]) ]
+
+    (testing "new session each time"
+      (let [register (fn [username password]
+                       (-> (mock/request :post "/register"
+                                         {:username username, :password password})
+                           (mock/header :accept "text/html")))
+            responses (map (comp handler register) (range 400 410) (range 300 310))
+            response-cookies
+            (->> responses
+                 (mapcat (comp
+                          #(map (comp rest (partial re-find #"([^=]+)=(.+);Path=")) %)
+                          #(-> % (get-in [:headers "Set-Cookie"]))))
+                 (doall))
+            cookie-names (->> response-cookies (map first) (set))
+            cookie-values (->> response-cookies (map last) (set))]
+        (is (= cookie-names #{"kanopi-session"}))
+        (is (= 10 (count cookie-values)))))
+
     (testing "register: transit+json response"
       (let [creds  {:username "minney" :password "mouse"}
             req (-> (mock/request :post "/register" creds)
                     (mock/header :accept "application/transit+json"))
             {:keys [status headers body] :as resp} (handler req)
             body' (util/transit-read body)
+            cookie (-> (get headers "Set-Cookie") (first))
             ]
         (is (= 200 status))
-        (is (= (:username creds) (:username body')))))
+        (is (= (:username creds) (:username body')))
+        (is (not-empty cookie))
+        (let [msg {:fizz :buzz}
+              req (-> (mock/request :post "/api" msg)
+                      (mock/header :accept "application/transit+json")
+                      (mock/header :cookie cookie))
+              {:keys [status headers body]} (handler req)
+              body' (util/transit-read body)
+              ]
+          (is (= 200 status))
+          (is (= msg body'))
+          )))
 
     (testing "register: http response"
-      (let [
+      (let [cookie-zero (-> (mock/request :get "/register")
+                            (handler)
+                            (get-in [:headers "Set-Cookie"]))
             creds  {:username "homer" :password "simpson"}
             req (-> (mock/request :post "/register" creds)
                     (mock/header :accept "text/html"))
             {:keys [status headers body] :as resp} (handler req)
+            cookie (-> (get headers "Set-Cookie") (first))
             ]
-        (is (= 303 status))
-        (is (re-find #"welcome=true" (get-in headers ["Location"] "")))))
+        (is (re-find #"kanopi-init" (first cookie-zero)))
+        (is (= 200 status))
+        #_(is (= 303 status))
+        #_(is (re-find #"welcome=true" (get-in headers ["Location"] "")))
+        (is (not-empty cookie))
+        (let [msg {:fizz :buzz}
+              req (-> (mock/request :post "/api" msg)
+                      (mock/header :accept "application/transit+json")
+                      (mock/header :cookie cookie))
+              {:keys [status headers body]} (handler req)
+              body' (util/transit-read body)]
+          (is (= 200 status))
+          (is (= msg body')))))
 
-    (testing "login: transit+json"
+    (testing "login: transit+json and post a message to api"
       (let [creds {:username "minney" :password "mouse"}
             req   (-> (mock/request :post "/login" creds)
                       (mock/header :accept "application/transit+json"))
@@ -122,7 +171,7 @@
           (is (= 200 status))
           (is (= msg body')))))
 
-    (testing "login: text/html"
+    (testing "login: text/html and post a message to api"
       (let [creds {:username "homer" :password "simpson"}
             req   (-> (mock/request :post "/login" creds)
                       (mock/header :accept "text/html"))
@@ -135,8 +184,7 @@
         (let [msg {:foo :bar}
               req (-> (mock/request :post "/api" msg)
                       (mock/header :accept "application/transit+json")
-                      (mock/header :cookie cookie)
-                      )
+                      (mock/header :cookie cookie))
               {:keys [status headers body]} (handler req)
               body' (util/transit-read body)]
           (is (= 200 status))
@@ -195,7 +243,4 @@
         ))
 
     (component/stop system)))
-
-
-
 

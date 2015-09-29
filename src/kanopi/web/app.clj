@@ -1,6 +1,6 @@
 (ns kanopi.web.app
   (:require [com.stuartsierra.component :as component]
-            [immutant.web.middleware :refer [wrap-session]]
+            [immutant.web.middleware :as immutant-session]
             [liberator.dev :refer [wrap-trace]]
             [liberator.representation :as rep]
             [ring.middleware.defaults]
@@ -8,7 +8,6 @@
             [ring.middleware.keyword-params]
             [ring.middleware.cookies]
             [ring.middleware.format]
-            ;;[ring.middleware.transit]
             [kanopi.web.auth :refer (authentication-middleware)]
             [kanopi.util.core :as util]))
 
@@ -46,15 +45,17 @@
   (start [this]
     (if app-handler
       this
-      (let [http-handler ((:handler config))]
+      (let [http-handler ((:handler config))
+            kanopi-session-name "kanopi-session"]
         (-> http-handler
             (authentication-middleware (:user-lookup-fn authenticator))
+            (immutant-session/wrap-session
+             {:timeout -1
+              :cookie-name kanopi-session-name})
             (ring.middleware.defaults/wrap-defaults
              (-> ring.middleware.defaults/site-defaults
                  (dissoc :session)
                  (assoc :security false)))
-            ;;(ring.middleware.transit/wrap-transit-body)
-            ;;(ring.middleware.transit/wrap-transit-params)
             (ring.middleware.params/wrap-params)
             (ring.middleware.keyword-params/wrap-keyword-params)
             (ring.middleware.format/wrap-restful-format :formats [:json :edn :transit-json])
@@ -64,7 +65,6 @@
             ;(wrap-ensure-session)
             (wrap-add-to-req :data-service data-service)
             (wrap-add-to-req :authenticator authenticator)
-            (wrap-session {:timeout -1}) ;;; timeout <= 0 means no timeout
             (->> (assoc this :app-handler))))))
 
   (stop [this]

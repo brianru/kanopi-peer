@@ -8,6 +8,7 @@
             [kanopi.web.resources.templates :as html]
             [kanopi.web.auth :as auth]
             [kanopi.util.core :as util]
+            [liberator.representation :as rep]
             [ring.util.response :as r]
             [hiccup.page :refer (html5 include-js include-css)]))
 
@@ -161,11 +162,14 @@
                        (= media-type "text/html")
                        (if-let [current-auth (friend/current-authentication (:request ctx))]
                          {:location "/?welcome=true"}
-                         {:location "/login?fail=true"})))
-                    
-                    false)
+                         {:location "/login?fail=true"}))))
+
   :handle-ok (fn [ctx]
-               (friend/current-authentication (get-in ctx [:request]))))
+               (-> (friend/current-authentication (get-in ctx [:request]))
+                   (rep/as-response ctx)
+                   ;(r/set-cookie "foo" "bar")
+                   (rep/ring-response)
+                   )))
 
 (defresource ajax-logout-resource
   :allowed-methods [:post]
@@ -185,7 +189,7 @@
                        (= media-type "text/html")
                        {:location "/?logout=true"})))
   :handle-ok (fn [ctx]
-               (-> (r/response {:logout-success true})
+               (-> (rep/ring-response {:logout-success true} ctx)
                    (friend/logout*))))
 
 (defresource registration-resource
@@ -206,11 +210,21 @@
 
                        ;; default
                        (= media-type "text/html")
-                       (if-let [user-id (get-in ctx [::identity :ent-id])]
-                         {:location (str "/?welcome=true" "&id=" user-id)}
-                         {:location "/register?fail=true"})
+                       false
+                       ;; BEWARE: redirect causes session/cookie to be
+                       ;; dropped somewhere in friend authentication
+                       ;; middleware -> :session in response never
+                       ;; makes it to ring session middleware
+                       ;;
+                       ;;(if-let [user-id (get-in ctx [::identity :ent-id])]
+                       ;;  {:location (str "/?welcome=true" "&id=" user-id)}
+                       ;;  {:location "/register?fail=true"})
                        
                        )))
   :handle-ok (fn [ctx]
-               (get ctx ::identity {}))
-  )
+               (let [user (get ctx ::identity {})]
+                 (-> user
+                  (rep/as-response ctx)
+                  (friend/merge-authentication user)
+                  ;(r/set-cookie "foo "bar)
+                  (rep/ring-response)))))

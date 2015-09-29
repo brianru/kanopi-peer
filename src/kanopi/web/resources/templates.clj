@@ -23,11 +23,10 @@
   "TODO: set cookie with no expiration (expire at end of session)
   which contains user identity and recently modified thunks and config information"
   [ctx {:keys [title cookie] :as opts}]
-  (let []
+  (let [cookies (get-in ctx [:request :cookies])]
     (rep/ring-response
      {:cookies
-      {"kanopi-init"
-       {:value {:init (json/generate-string cookie)}}}
+      (assoc cookies "kanopi-init" {:value {:init (json/generate-string cookie)}})
 
       :body
       (html5

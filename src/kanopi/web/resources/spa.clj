@@ -1,5 +1,6 @@
 (ns kanopi.web.resources.spa
   (:require [liberator.core :refer [defresource]]
+            [liberator.representation :as rep]
             [cemerick.friend :as friend]
             [kanopi.web.resources.base :as base]
             [kanopi.web.resources.templates :as html]))
