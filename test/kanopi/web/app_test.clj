@@ -116,7 +116,9 @@
         (is (= 200 status))
         (is (= (:username creds) (:username body')))
         (is (not-empty cookie))
-        (let [msg {:fizz :buzz}
+        (let [msg {:noun :fizzbuzz
+                   :verb :fobar
+                   :context {}}
               req (-> (mock/request :post "/api" msg)
                       (mock/header :accept "application/transit+json")
                       (mock/header :cookie cookie))
@@ -124,7 +126,7 @@
               body' (util/transit-read body)
               ]
           (is (= 200 status))
-          (is (= msg body'))
+          (is (= (select-keys msg [:noun :verb]) (select-keys body' [:noun :verb])))
           )))
 
     (testing "register: http response"
@@ -142,14 +144,16 @@
         #_(is (= 303 status))
         #_(is (re-find #"welcome=true" (get-in headers ["Location"] "")))
         (is (not-empty cookie))
-        (let [msg {:fizz :buzz}
+        (let [msg {:noun :fizzbuzz
+                   :verb :foobar}
               req (-> (mock/request :post "/api" msg)
                       (mock/header :accept "application/transit+json")
                       (mock/header :cookie cookie))
               {:keys [status headers body]} (handler req)
               body' (util/transit-read body)]
           (is (= 200 status))
-          (is (= msg body')))))
+          (is (= (select-keys msg [:noun :verb])
+                 (select-keys body' [:noun :verb]))))))
 
     (testing "login: transit+json and post a message to api"
       (let [creds {:username "minney" :password "mouse"}
@@ -162,14 +166,16 @@
         (is (= 200 status))
         (is (:username creds) (:username body))
         (is (not-empty cookie))
-        (let [msg {:foo :bar}
+        (let [msg {:noun :foobar
+                   :verb :testing123}
               req (-> (mock/request :post "/api" msg)
                       (mock/header :accept "application/transit+json")
                       (mock/header :cookie cookie))
               {:keys [status headers body]} (handler req)
               body' (util/transit-read body)]
           (is (= 200 status))
-          (is (= msg body')))))
+          (is (= (select-keys msg [:noun :verb])
+                 (select-keys body' [:noun :verb]))))))
 
     (testing "login: text/html and post a message to api"
       (let [creds {:username "homer" :password "simpson"}
@@ -181,14 +187,17 @@
         (is (= 303 status))
         (is (re-find #"welcome=true" (get-in headers ["Location"] "")))
         (is (not-empty cookie))
-        (let [msg {:foo :bar}
+        (let [msg {:noun :foobar
+                   :verb :testingplay}
               req (-> (mock/request :post "/api" msg)
                       (mock/header :accept "application/transit+json")
                       (mock/header :cookie cookie))
               {:keys [status headers body]} (handler req)
               body' (util/transit-read body)]
           (is (= 200 status))
-          (is (= msg body')))))
+          (is (= (select-keys msg [:noun :verb])
+                 (select-keys body' [:noun :verb])
+                 )))))
 
     (component/stop system)))
 

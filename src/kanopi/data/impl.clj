@@ -144,6 +144,14 @@
                             (get fact-coll :ent-ids))
                       (get fact-coll :txdata))))))
 
+(defn update-thunk->txdata
+  [datomic-peer creds thunk']
+  (let [thunk-id (-> thunk' (get :db/id) (first))]
+    (hash-map
+     :ent-id thunk-id
+     :txdata [
+              ])))
+
 (defmethod add-fact->txdata [::entity-id ::entity-id]
   [datomic-peer creds ent-id [_ attribute-id] [_ value-id]]
   (let [fact (mk-fact datomic-peer creds attribute-id value-id)]

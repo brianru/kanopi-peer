@@ -14,6 +14,7 @@
 ;;(remove-fact   [this creds ent-id fact-id])
 (defprotocol IDataService
   (init-thunk    [this creds])
+  (update-thunk  [this creeds thunk'])
   (get-thunk     [this creds thunk-id]
                  [this creds as-of thunk-id])
   (context-thunks [this creds thunk-id])
@@ -35,6 +36,9 @@
     (let [thunk  (mk-thunk datomic-peer creds "banana boat" ["type" "welcome"])
           report @(datomic/transact datomic-peer creds (get thunk :txdata))]
       (d/resolve-tempid (:db-after report) (:tempids report) (get thunk :ent-id))))
+
+  (update-thunk [this creds thunk']
+    )
 
   (get-thunk [this creds ent-id]
     (let [db (datomic/db datomic-peer creds)]

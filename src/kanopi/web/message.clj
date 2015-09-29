@@ -5,34 +5,34 @@
             [clojure.string]
             [cemerick.friend :as friend]))
 
-#_(defn build-noun [ctx]
-    {:post [(when-let [eid (:ent-id %)]
-              (integer? eid))]}
-    (-> ctx
-        (get-in [:request :params])
-        (select-keys [:ent-id :attribute :value])
-        (update :ent-id read-string)))
+(defn build-noun [ctx noun]
+  noun)
 
-#_(defn build-verb [ctx]
-    {:post [(keyword? %)]}
-    (or (keyword (get-in ctx [:request :params :verb]))
-        (get-in ctx [:request :request-method])))
+(defn build-verb [ctx verb]
+  {:post [(keyword? %)]}
+  verb)
 
-#_(defn build-context [{:keys [request] :as ctx}]
-    (let []
-      (merge (-> (get-in ctx [:request :params])
-                 (select-keys [:time :place]))
-             {:creds (friend/current-authentication request)})))
+(defn build-context
+  [request-context message-context]
+  {:post [(map? %)]}
+  (let []
+    (assoc message-context
+           :creds (friend/current-authentication (:request request-context)))))
 
 (defn request-context->action-message
   "If for some reason the request is in some way logically incomplete,
   here's the place to indicate that."
   ([ctx]
-   (let [body (util/transit-read (get-in ctx [:request :body]))
-         params (get-in ctx [:request :params])]
-     (->> (merge body params)
-          (reduce (fn [acc [k v]]
-                    (if (clojure.string/blank? v)
-                      (assoc acc k {})
-                      (assoc acc k (read-string v))))
-                  {})))))
+   (let [body   (util/transit-read (get-in ctx [:request :body]))
+         params (get-in ctx [:request :params])
+         parsed-body (->> (merge body params)
+                          (reduce (fn [acc [k v]]
+                                    (if (clojure.string/blank? v)
+                                      (assoc acc k {})
+                                      (assoc acc k (read-string v))))
+                                  {}))]
+     (println "parsed-body" parsed-body)
+     (hash-map
+      :noun    (build-noun ctx (:noun parsed-body))
+      :verb    (build-noun ctx (:verb parsed-body))
+      :context (build-context ctx (:context parsed-body))))))
