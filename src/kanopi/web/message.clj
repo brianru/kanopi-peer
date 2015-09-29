@@ -23,15 +23,14 @@
   "If for some reason the request is in some way logically incomplete,
   here's the place to indicate that."
   ([ctx]
-   (let [body   (util/transit-read (get-in ctx [:request :body]))
-         params (get-in ctx [:request :params])
+   (let [body        (util/transit-read (get-in ctx [:request :body]))
+         params      (get-in ctx [:request :params])
          parsed-body (->> (merge body params)
                           (reduce (fn [acc [k v]]
                                     (if (clojure.string/blank? v)
                                       (assoc acc k {})
                                       (assoc acc k (read-string v))))
                                   {}))]
-     (println "parsed-body" parsed-body)
      (hash-map
       :noun    (build-noun ctx (:noun parsed-body))
       :verb    (build-noun ctx (:verb parsed-body))

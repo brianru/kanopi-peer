@@ -38,6 +38,14 @@
   (verify-creds [this input-creds])
   (register!    [this username password]))
 
+(defn- valid-credentials? [creds]
+  (and
+   (integer? (:ent-id creds))
+   (coll?    (:role creds))
+   (every? (comp integer? :db/id) (:role creds))
+   (string?  (:username creds))
+   (string?  (:password creds))))
+
 ;; FIXME: refactor to use the data-service
 (defrecord AuthenticationService [config database user-lookup-fn]
 
@@ -46,16 +54,22 @@
   (credentials [this username]
     (let [db     (datomic/db database nil)
           ent-id (-> (d/entity db [:user/id username]) :db/id)
-          creds  (when ent-id
-                   (data-impl/get-entity* db ent-id)) 
-          ]
-      ;; NOTE: friend expects this to return nil when the given
-      ;; username is unidentified.
-      (when (not-empty creds)
-        {:ent-id   ent-id
-         :role     (-> creds :user/role first :db/id)
-         :username (-> creds :user/id first)
-         :password (-> creds :user/password first)})))
+          creds (when ent-id
+                  (d/pull db
+                          '[:db/id
+                            {:user/role [:db/id :role/label]}
+                            :user/id
+                            :user/password]
+                          ent-id))
+          creds' (when creds
+                   (hash-map
+                    :ent-id   (get-in creds [:db/id])
+                    :role     (get-in creds [:user/role])
+                    :username (get-in creds [:user/id])
+                    :password (get-in creds [:user/password])))]
+      (when creds'
+        (assert (valid-credentials? creds') "Invalid credential map."))
+      creds'))
 
   (verify-creds [this {:keys [username password]}]
     (some->> (credentials this username)
@@ -69,7 +83,7 @@
     (assert (nil? (d/entid (datomic/db database nil) [:user/id username]))
             "This username is already taken. Please choose another.")
     ;; TODO: add audit datoms to the tx entity
-    (let [user-ent-id (d/tempid :db.part/user -1)
+    (let [user-ent-id  (d/tempid :db.part/user -1)
           user-role-id (d/tempid :db.part/users -1000)
           txdata [
                   [:db/add user-role-id :role/id username]
@@ -113,7 +127,7 @@
       (contains?
        (authorized-methods this creds ent-id)
        (:request-method request))))
-  
+
   ;;(enforce-entitlements [this creds ])
   )
 

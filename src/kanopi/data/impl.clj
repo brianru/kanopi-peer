@@ -5,6 +5,15 @@
 
 (declare describe-value-literal)
 
+(defn user-default-role [creds]
+  (let [username (get creds :username)]
+    (->> creds
+         :role
+         (filter (fn [rl]
+                   (= (:username creds) (:role/label rl))))
+         (first)
+         :db/id)))
+
 (defn entity-id-tuple?
   "(second input) => either an integer (id) or a string (label of new thunk)"
   [input]
@@ -65,6 +74,7 @@
        (apply hash-map)))
 
 (defn- make-datomic-kv-consistent [[k v]]
+  (println "make-consistent:" k v)
   (let [v' (cond
             (instance? datomic.query.EntityMap v)
             (list (to-regular-map v))
@@ -87,13 +97,15 @@
   "TODO: may want to use pull api to grab facts as well.
   NOTE: ent-id can also be an ident or datomic lookup-ref."
   [db ent-id]
-  {:post [(->> (vals %) (every? set?))
-          (or (nil? %) (map? %))]}
-  (when-let [ent (some-> (d/entity db ent-id) (not-empty) (d/touch))]
-    (let [pretty-ent (->> ent
-                          (mapcat make-datomic-kv-consistent)
-                          (apply hash-map))]
-      (assoc pretty-ent :db/id #{ent-id}))))
+  (d/pull db
+          '[:db/id
+            :thunk/label
+            :thunk/role
+            {:thunk/fact [:db/id
+                          {:fact/attribute [:db/id :thunk/label]}
+                          {:fact/value [:db/id :thunk/label]}
+                          :fact/role]}]
+          ent-id))
 
 (defn mk-literal
   ""
@@ -123,7 +135,7 @@
    (let [thunk-id (d/tempid :db.part/structure)]
      (hash-map
       :ent-id thunk-id
-      :txdata [[:db/add thunk-id :thunk/role (get creds :role)]
+      :txdata [[:db/add thunk-id :thunk/role (user-default-role creds)]
                [:db/add thunk-id :thunk/label label]])))
 
   ([datomic-peer creds label & facts]
@@ -138,7 +150,7 @@
                     facts)]
      (hash-map
       :ent-id thunk-id
-      :txdata (concat [[:db/add thunk-id :thunk/role  (get creds :role)]
+      :txdata (concat [[:db/add thunk-id :thunk/role (user-default-role creds)]
                        [:db/add thunk-id :thunk/label label]]
                       (mapv (partial vector :db/add thunk-id :thunk/fact)
                             (get fact-coll :ent-ids))

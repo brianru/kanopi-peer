@@ -9,6 +9,7 @@
             [kanopi.util.core :as util]
             [kanopi.system :as sys]
             [kanopi.data :as data]
+            [kanopi.data.impl :as impl]
             [kanopi.storage.datomic :as datomic]
             [kanopi.web.auth :as auth]
             [kanopi.generators :refer :all]
@@ -27,32 +28,35 @@
       (is (not (nil? ent-id))))
     
     (testing "thunk has user's default role"
-      (is (= (:role creds) (-> ent :thunk/role first :db/id))))
+      (is (= (impl/user-default-role creds) (-> ent :thunk/role first :db/id))))
 
     (testing "thunk shape as given by data service"
       (is (every? keyword? (keys ent)))
       (is (->> (get ent :thunk/role)
-               (set?)))
+               (coll?)))
       (is (->> (get ent :thunk/role)
-               (every? (partial instance? datomic.query.EntityMap))))
+               (every? map?)))
       (is (->> (get ent :thunk/role)
                (map :db/id)
                (every? integer?)))
       (is (->> (get ent :thunk/label)
-               (every? string?)))
+               (string?)))
+      (is (= "banana boat" (get ent :thunk/label)))
+
       (when (get ent :thunk/fact)
         (is (->> (get ent :thunk/fact)
-                 (set?)))
+                 (coll?)))
         (is (->> (get ent :thunk/fact)
-                 (every? (partial instance? datomic.query.EntityMap))))
+                 (every? map?)))
         (is (->> (get ent :thunk/fact)
                  (map :db/id)
                  (every? integer?)))
         ))
 
     (testing "retract new thunk"
-      (let [report (data/retract-thunk (:data-service system) creds ent-id) ]
-        (is (nil? (data/get-thunk (:data-service system) creds ent-id)))))
+      (let [report (data/retract-thunk (:data-service system) creds ent-id)]
+        (is (empty? (-> (data/get-thunk (:data-service system) creds ent-id)
+                        (dissoc :db/id))))))
 
     (component/stop system)))
 
@@ -69,8 +73,8 @@
         ]
 
     (testing "assert fact"
-      (let [new-fact (->> (clojure.set/difference (get ent-1 :thunk/fact)
-                                                  (get ent-0 :thunk/fact))
+      (let [new-fact (->> (clojure.set/difference (set (get ent-1 :thunk/fact))
+                                                  (set (get ent-0 :thunk/fact)))
                           (first)
                           (:db/id)
                           (data/get-thunk (:data-service system) creds))]
