@@ -1,4 +1,4 @@
-(defproject kanopi "0.1.0-SNAPSHOT"
+(defproject io.kanopi/kanopi "0.1.0-SNAPSHOT"
   :description "A tool for exploring, expressing and documenting your thoughts."
   :url "http://kanopi.io"
   :license {:name "Eclipse Public License"
