@@ -2,6 +2,7 @@
   (:require [com.stuartsierra.component :as component]
             [environ.core :refer [env]]
             [immutant.web :as web]
+            [immutant.web.middleware :as middleware]
             [kanopi.web.routes :as routes]
             [kanopi.web.app :as web-app]))
 
@@ -13,7 +14,11 @@
         (let [options       (select-keys config [:port :host])
               handler       (web-app/get-handler web-app)
               server-handle (if (:dev config)
-                              (web/run-dmc handler options)
+                              ;; NOTE: not using web/run-dmc because
+                              ;; it opens a web browser. sometimes dev
+                              ;; mode is used in environments lacking
+                              ;; a gui, such as docker
+                              (web/run (middleware/wrap-development handler) options)
                               (web/run handler options))]
           (assoc this :server-handle server-handle))))
   (stop [this]

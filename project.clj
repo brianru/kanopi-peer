@@ -58,7 +58,7 @@
                  ;; Test
                  [org.clojure/test.check "0.7.0"]
                  ]
-  ;; :main kanopi.main
+  :main kanopi.main
 
   :plugins [[lein-marginalia "0.8.0"]
             [lein-cljsbuild "1.0.6"]
