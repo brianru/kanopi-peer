@@ -46,7 +46,6 @@
                  [liberator "0.13"]
                  ;; NOTE: this is installed in my local maven
                  ;; manually.
-                 [io.clojure/liberator-transit "0.3.1"]
                  [com.cemerick/friend "0.2.1"]
                  [ring/ring-defaults "0.1.5"]
                  [ring-middleware-format "0.6.0"]
