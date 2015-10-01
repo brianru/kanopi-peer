@@ -244,7 +244,18 @@
         ))
 
     (testing "update-thunk-label"
-      (let []
+      (let [test-ent-id (first thunk-ent-ids)
+            lbl' "duuuude"
+            message {:noun {:existing-entity test-ent-id
+                            :new-label lbl'}
+                     :verb :update-thunk-label
+                     :context {}}
+            req (-> (mock/request :post "/api" message)
+                    (test-util/associ-basic-auth creds))
+            resp (handler req)
+            body (util/transit-read (:body resp))]
+        (is (= 200 (:status resp)))
+        (is (= :update-thunk-label-success (get body :verb)))
         ))
 
     (testing "update-fact"
