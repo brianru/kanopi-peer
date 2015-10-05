@@ -7,7 +7,7 @@
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [com.stuartsierra/component "0.2.3"]
                  [com.taoensso/timbre "4.1.0"]
-                 [environ "1.0.0"]
+                 [environ "1.0.1"]
                  [com.cognitect/transit-clj "0.8.281"]
 
                  ;; Core libraries
@@ -68,7 +68,7 @@
   :clean-targets ^{:protect false} [:target-path "resources/public/js/out"]
 
   :profiles {:dev
-             {:plugins [[lein-environ "1.0.0"]
+             {:plugins [[lein-environ "1.0.1"]
                         [lein-ancient "0.6.6"]]
               :dependencies [[org.clojure/tools.nrepl "0.2.10"]
                              [org.clojure/tools.namespace "0.2.11"]
