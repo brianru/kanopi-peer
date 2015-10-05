@@ -22,7 +22,7 @@
 (defonce system nil)
 
 (defn init []
-  (alter-var-root #'system (constantly (sys/new-system kanopi.main/default-config))))
+  (alter-var-root #'system (constantly (sys/new-system (kanopi.main/system-config)))))
 
 (defn start []
   (alter-var-root #'system component/start))

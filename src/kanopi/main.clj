@@ -6,14 +6,20 @@
             [environ.core :refer [env]]))
 
 (def default-config
-  {:web-server {:port    8080
-                :host    "0.0.0.0"}
+  {:web-server {:port    (or (env :web-server-port) 8080)
+                :host    (or (env :web-server-host) "0.0.0.0")}
    :web-app    {:handler #'routes/app-routes}
-   :datomic    {:uri     "datomic:mem://kanopi42"
+   :datomic    {:uri     (or (env :datomic-uri) "datomic:mem://kanopi42")
                 :schema  ["resources/schema.edn"]
                 :data    ["resources/test-data.edn"
                           "resources/init-data.edn"]}
    :dev true})
+
+(defn system-config
+  "For some reason I feel an extra layer of indirection may come in
+  handy. Maybe this should take some arguments."
+  []
+  default-config)
 
 (defn -main [& args]
   "Default application entry point."
