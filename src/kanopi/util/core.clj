@@ -55,7 +55,7 @@
 ;; TODO: refactor to support values of any type
 (defn get-literal-or-label [ent k]
   (or (-> ent (get k) (get :thunk/label))
-      (-> ent (get k) (get :literal/text))))
+      (-> ent (get k) (dissoc :db/id) (vals) (first))))
 
 (defn fact-entity->tuple [ent]
   (let [attr (get-literal-or-label ent :fact/attribute)

@@ -22,11 +22,48 @@
        (or (integer? (second input))
            (describe-value-literal (second input)))))
 
+(def literal-types
+  {:literal/text
+   {:ident :literal/text
+    :predicate string?}
+
+   :literal/integer
+   {:ident :literal/integer
+    :predicate integer?}
+
+   :literal/decimal
+   {:ident :literal/decimal
+    :predicate (fn [v] (instance? java.lang.Double v))
+    }
+
+   ;; TODO: implement.
+   :literal/uri
+   {:ident :literal/uri
+    :predicate (constantly nil)}
+
+   ;; TODO: implement.
+   :literal/email-address
+   {:ident :literal/email-address
+    :predicate (constantly nil)
+    }
+   })
+
+(defn valid-tagged-literal? [[tp v :as literal]]
+  (and
+   (vector? literal)
+   (identity tp)
+   (identity v)
+   (get literal-types tp)
+   ((get-in literal-types [tp :predicate]) v)))
+
 (defn describe-value-literal [value]
   (cond
    (string? value)
-   :literal/text
-
+   [:literal/text value]
+   
+   (valid-tagged-literal? value)
+   value
+   
    :default
    nil))
 
@@ -127,11 +164,12 @@
   ""
   ([datomic-peer creds value]
    (let [value-id (d/tempid :db.part/structure)
-         value-attribute (describe-value-literal value)
+         ;; FIXME: this breaks with tagged value literals.
+         [value-attribute parsed-value] (describe-value-literal value)
          ]
      (hash-map
       :ent-id value-id
-      :txdata [[:db/add value-id value-attribute value]]))))
+      :txdata [[:db/add value-id value-attribute parsed-value]]))))
 
 (defn mk-fact
   [datomic-peer creds attribute-id value-id]

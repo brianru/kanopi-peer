@@ -154,11 +154,12 @@
 
  ;; Literals
  ;; TODO: fulltext search should be enabled on a number of these.
- ;;{:db/ident :literal/uri
- ;; :db/valueType :db.type/uri
- ;; :db/cardinality :db.cardinality/one
- ;; :db/id #db/id[:db.part/db]
- ;; :db.install/_attribute :db.part/db}
+ {:db/ident :literal/uri
+  :db/valueType :db.type/uri
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
 
  ;;{:db/ident :literal/image-uri
  ;; :db/valueType :db.type/uri
@@ -166,11 +167,12 @@
  ;; :db/id #db/id[:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :literal/email-address
- ;; :db/valueType :db.type/string
- ;; :db/cardinality :db.cardinality/one
- ;; :db/id #db/id [:db.part/db]
- ;; :db.install/_attribute :db.part/db}
+ {:db/ident :literal/email-address
+  :db/valueType :db.type/string
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
  ;;{:db/ident :literal/sms-number
  ;; :db/valueType :db.type/long
@@ -191,16 +193,18 @@
  ;; :db/id #db/id[:db.part/db]
  ;; :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :literal/integer
- ;; :db/valueType :db.type/bigint
- ;; :db/cardinality :db.cardinality/one
- ;; :db/id #db/id[:db.part/db]
- ;; :db.install/_attribute :db.part/db}
+ {:db/ident :literal/integer
+  :db/valueType :db.type/long
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
 
- ;;{:db/ident :literal/decimal
- ;; :db/valueType :db.type/bigdec
- ;; :db/cardinality :db.cardinality/one
- ;; :db/id #db/id[:db.part/db]
- ;; :db.install/_attribute :db.part/db}
+ {:db/ident :literal/decimal
+  :db/valueType :db.type/double
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
 
  ]

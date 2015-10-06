@@ -112,6 +112,35 @@
             thunk' (data/update-thunk-label (:data-service system) creds ent-id lbl')]
         (is (= lbl' (get thunk' :thunk/label)))))))
 
+(deftest literal-types
+  (let [system  (component/start (test-util/system-excl-web))
+        creds   (do (auth/register!   (:authenticator system) "brian" "rubinton")
+                    (auth/credentials (:authenticator system) "brian"))
+        ent-id  (data/init-thunk (:data-service system) creds)
+        ent-0   (data/get-thunk  (:data-service system) creds ent-id)
+        fact-1  ["age" "42"]
+        ent-1   (apply data/add-fact (:data-service system) creds ent-id fact-1)
+        fact-id (-> ent-1 :thunk/fact first :db/id)
+        ]
+    (testing "tagged text literal"
+      (let [fact' ["age" [:literal/text "new-value!"]]
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
+        (is (= ["age" "new-value!"] (util/fact-entity->tuple fact-ent)))))
+
+    (testing "tagged integer literal"
+      (let [fact' ["age" [:literal/integer 42]]
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
+        (is (= ["age" 42] (util/fact-entity->tuple fact-ent)))))
+
+    (testing "tagged decimal literal"
+      (let [fact' ["age" [:literal/decimal 73.65]]
+            fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
+        (is (= ["age" 73.65] (util/fact-entity->tuple fact-ent)))))
+
+    (testing "tagged uri literal")
+    (testing "tagged email-address literal")
+    ))
+
 ;; TODO: test user-thunk input fns
 (deftest context-thunks
   (let []
