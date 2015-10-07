@@ -9,7 +9,10 @@
   {:web-server {:port    (or (env :web-server-port) 8080)
                 :host    (or (env :web-server-host) "0.0.0.0")}
    :web-app    {:handler #'routes/app-routes}
-   :datomic    {:uri     (or (env :datomic-uri) "datomic:mem://kanopi42")
+   :datomic    {:uri     (or (env :datomic-transactor-uri)
+                             (env :transactor-env-datomic-transactor-uri)
+                             "datomic:mem://")
+                :db-name (or (env :datomic-database-name) "kanopi42")
                 :schema  ["resources/schema.edn"]
                 :data    ["resources/test-data.edn"
                           "resources/init-data.edn"]}
@@ -25,4 +28,5 @@
   "Default application entry point."
   (let [sys (new-system default-config)]
     (println "starting system")
+    (clojure.pprint/pprint env)
     (component/start sys)))

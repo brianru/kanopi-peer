@@ -37,7 +37,7 @@
                  [jamesmacaulay/zelkova "0.4.0"]
 
                  ;; Database
-                 [com.datomic/datomic-free "0.9.5206"
+                 [com.datomic/datomic-pro "0.9.5302"
                   :exclusions [joda-time]]
 
                  ;; Web
@@ -58,10 +58,15 @@
                  ;; Test
                  [org.clojure/test.check "0.7.0"]
                  ]
+
+  :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
+                                   :username "brian@kanopi.io"
+                                   :password "04fd123f-c4c5-4bb5-939b-18f41be8a18f"
+                                   }}
   :main kanopi.main
 
   :plugins [[lein-marginalia "0.8.0"]
-            [lein-cljsbuild "1.0.6"]
+            [lein-cljsbuild "1.1.0"]
             [lein-figwheel "0.3.7"
              :exclusions [org.clojure/core.async]]]
 

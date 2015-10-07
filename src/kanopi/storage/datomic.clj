@@ -10,7 +10,7 @@
       @(d/transact conn txdata))))
 
 (defn- connect-to-database [config]
-  (let [uri (:uri config)]
+  (let [uri (->> config ((juxt :uri :db-name)) (apply str))]
     (d/delete-database uri)
     (d/create-database uri)
     (d/connect uri)))
