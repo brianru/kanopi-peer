@@ -9,12 +9,6 @@
     (when-let [txdata (not-empty (read-string (slurp file-path)))]
       @(d/transact conn txdata))))
 
-(defn- connect-to-database [config]
-  (let [uri (->> config ((juxt :uri :db-name)) (apply str))]
-    (d/delete-database uri)
-    (d/create-database uri)
-    (d/connect uri)))
-
 ;; TODO: study https://www.youtube.com/watch?v=7lm3K8zVOdY
 (defprotocol ISecureDatomic
   "Provide secured Datomic api fns based on provided credentials."
@@ -26,26 +20,28 @@
             NOTE: remember user registration case (creds are nil)")
   (entity [this creds ent-id]))
 
-;; NOTE: in future, give DP zookeeper conn info so it can then find
-;; the uri for the correct Datomic DB
-(defrecord DatomicPeer [config connection]
+(defrecord DatomicPeer [config connection db-mode]
   component/Lifecycle
   (start [this]
     (println "starting datomic peer")
     (if connection
       this
-      (let [conn (connect-to-database config)]
-
-        ;; init DB from peer, but only once
-        (when-not (d/entid (d/db conn) :user/id)
+      (let [uri (->> config ((juxt :uri :db-name)) (apply str))
+            db-mode (-> (re-find #"datomic:([a-z]+):" uri) (last))  
+            _ (when (= db-mode "mem")
+                (d/delete-database uri)
+                (d/create-database uri))
+            conn (d/connect uri)
+            ]
+        (when (= db-mode "mem")
           (println "load schema")
           (load-files! conn (:schema config)))
-        
+
         (when (:dev config)
           (println "load data")
           (load-files! conn (:data config)))
         
-        (assoc this :connection conn))))
+        (assoc this :connection conn :db-mode db-mode))))
 
   (stop [this]
     (println "stopping datomic peer")
@@ -53,7 +49,7 @@
       this
       (do
        (d/release connection)
-       (assoc this :connection nil))))
+       (assoc this :connection nil :db-mode nil))))
 
   ISecureDatomic
   (db [this creds]
