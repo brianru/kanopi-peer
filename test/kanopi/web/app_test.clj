@@ -251,7 +251,7 @@
                      :verb :update-thunk-label
                      :context {}}
             req (-> (mock/request :post "/api" message)
-                    (test-util/associ-basic-auth creds))
+                    (test-util/assoc-basic-auth creds))
             resp (handler req)
             body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
@@ -259,8 +259,17 @@
         ))
 
     (testing "update-fact"
-      (let []
-        ))
+      (let [test-ent-id (first thunk-ent-ids)
+            fact' ["age" 42]
+            message {:noun {}
+                     :verb :update-fact
+                     :context {}}
+            req   (-> (mock/request :post "/api" message)
+                      (test-util/assoc-basic-auth creds))
+            resp  (handler req)
+            body  (util/transit-read (:body resp))]
+        (is (= 200 (:status resp)))
+        (is (= :update-fact-success (get body :verb)))))
 
     (component/stop system)))
 
