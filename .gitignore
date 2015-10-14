@@ -2,6 +2,9 @@
 /classes
 /checkouts
 /resources/public/js/out
+/resources/public/js/main.js
+/dev-resources/public/js/out
+/dev-resources/public/js/main.js
 pom.xml
 pom.xml.asc
 *.jar
