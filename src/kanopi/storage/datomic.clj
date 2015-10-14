@@ -28,12 +28,12 @@
       this
       (let [uri (->> config ((juxt :uri :db-name)) (apply str))
             db-mode (-> (re-find #"datomic:([a-z]+):" uri) (last))  
-            _ (when (= db-mode "mem")
+            _ (when (or true (= db-mode "mem"))
                 (d/delete-database uri)
                 (d/create-database uri))
             conn (d/connect uri)
             ]
-        (when (= db-mode "mem")
+        (when (or true (= db-mode "mem"))
           (println "load schema")
           (load-files! conn (:schema config)))
 
