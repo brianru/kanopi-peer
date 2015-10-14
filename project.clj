@@ -6,13 +6,13 @@
   :min-lein-version "2.5.0"
   :dependencies [[org.clojure/clojure "1.7.0"]
                  [com.stuartsierra/component "0.2.3"]
-                 [com.taoensso/timbre "4.1.0"]
+                 [com.taoensso/timbre "4.1.4"]
                  [environ "1.0.1"]
-                 [com.cognitect/transit-clj "0.8.281"]
+                 [com.cognitect/transit-clj "0.8.283"]
 
                  ;; Core libraries
                  [org.clojure/core.async "0.1.346.0-17112a-alpha"]
-                 [com.cognitect/transit-cljs "0.8.220"]
+                 [com.cognitect/transit-cljs "0.8.225"]
                  ;; resolves a dependency issue with figwheel and
                  ;; core.async
                  [org.clojure/core.memoize "0.5.6"]
@@ -21,15 +21,15 @@
                  [clj-fuzzy "0.3.1"]
 
                  ;; Client
-                 [org.clojure/clojurescript "1.7.48"]
+                 [org.clojure/clojurescript "1.7.145"]
                  [quile/component-cljs "0.2.4" :exclusions [org.clojure/clojure]]
-                 [org.omcljs/om "0.9.0"
+                 [org.omcljs/om "1.0.0-alpha1"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
-                 [cljsjs/react-with-addons "0.13.3-0"]
-                 [bidi "1.20.3"]
-                 [kibu/pushy "0.3.3"]
-                 [cljs-ajax "0.3.14"]
-                 [com.andrewmcveigh/cljs-time "0.3.11"]
+                 [cljsjs/react-with-addons "0.14.0-0"]
+                 [bidi "1.21.0"]
+                 [kibu/pushy "0.3.6"]
+                 [cljs-ajax "0.5.0"]
+                 [com.andrewmcveigh/cljs-time "0.3.14"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.cemerick/url "0.1.1"]
                  [sablono "0.3.6"
@@ -83,7 +83,7 @@
                              [org.clojure/data.csv "0.1.3"]
                              
                              ;; use client lib for testing
-                             [http-kit "2.1.18"]]
+                             [http-kit "2.1.19"]]
               :env {:dev true}
               :source-paths ["dev"]
               :repl-options {:init-ns user}}}
