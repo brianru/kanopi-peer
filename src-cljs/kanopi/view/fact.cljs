@@ -132,7 +132,7 @@
             :cancel-handler (constantly nil)
             :history-handler (constantly nil)
             :submit-handler (fn []
-                              (->> (msg/update-fact (om/get-state owner :thunk-id)
+                              (->> (msg/update-fact (om/get-state owner :datum-id)
                                                     (merge-updated-data owner))
                                    (msg/send! owner))))
            ]])))))
@@ -229,7 +229,7 @@
             :view
             [:div.view-fact-part
              [:a {:href (when-let [id (:db/id props)]
-                          (browser/route-for owner :thunk :id id))}
+                          (browser/route-for owner :datum :id id))}
               [:span.fact-part-representation
                (schema/display-entity props)]]]
 
@@ -252,9 +252,9 @@
                              :init-state
                              {:menu-items
                               [{:type     :link
-                                :value    :thunk
-                                :label    "thunk"
-                                :on-click (partial handle-type-selection owner :thunk)
+                                :value    :datum
+                                :label    "datum"
+                                :on-click (partial handle-type-selection owner :datum)
                                 }
                                {:type     :link
                                 :value    :literal/text
@@ -298,7 +298,7 @@
           [:div.inline-10-percent.col-xs-1
            (om/build handle props
                      {:state (select-keys
-                              state [:mode :thunk-id :fact-hovering
+                              state [:mode :datum-id :fact-hovering
                                      :fact/attribute :fact/value])})]
 
           [:div.inline-90-percent.col-xs-11
@@ -381,6 +381,6 @@
           ;; TODO: receiving (get state :fact-count). if (= 1 %) and
           ;; (nil? (:db/id %)) then initialize in edit mode.
           (om/build body props
-                    {:state (select-keys state [:mode :thunk-id :fact/attribute :fact/value])}
+                    {:state (select-keys state [:mode :datum-id :fact/attribute :fact/value])}
                     )] )))
     ))

@@ -22,9 +22,9 @@
               :logout-success   :logout-failure
               :register-success :register-failure
 
-              :get-thunk
+              :get-datum
               :update-fact
-              :update-thunk-label
+              :update-datum-label
               }
     :remote #{
               :login :logout :register
@@ -39,14 +39,14 @@
               :logout-success   :logout-failure
               :register-success :register-failure
 
-              :get-thunk-success :get-thunk-failure
+              :get-datum-success :get-datum-failure
               } 
     :remote #{
               :login :logout :register
 
-              :get-thunk
+              :get-datum
               :update-fact
-              :update-thunk-label
+              :update-datum-label
 
               }}})
 

@@ -1,4 +1,4 @@
-(ns kanopi.view.thunk
+(ns kanopi.view.datum
   (:require [om.core :as om :include-macros true]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
@@ -47,12 +47,12 @@
       ;;default
       {})))
 
-(defn context-thunks
+(defn context-datums
   [props owner opts]
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "thunk-parents"))
+      (str "datum-parents"))
 
     om/IInitState
     (init-state [_]
@@ -62,21 +62,21 @@
     (render-state [_ state]
       (let [size 9]
         (html
-         [:div.row.context-thunks
-           (for [[idx thunk] (->> props (map-indexed vector)
+         [:div.row.context-datums
+           (for [[idx datum] (->> props (map-indexed vector)
                                   (take (if (get state :expand)
                                           size
                                           (js/Math.sqrt size))))
                  :let []
-                 :when (:db/id thunk)]
-             [:div.context-thunk-cell.col-xs-3.col-md-3.vcenter
+                 :when (:db/id datum)]
+             [:div.context-datum-cell.col-xs-3.col-md-3.vcenter
               {:style (cond-> {}
                         true
                         (merge (corner-styling size (inc idx)))
                         (= 0 idx)
                         (merge {:margin-left "11%"}))}
-              [:a {:href (browser/route-for owner :thunk :id (:db/id thunk))}
-               [:span (:thunk/label thunk)]]])
+              [:a {:href (browser/route-for owner :datum :id (:db/id datum))}
+               [:span (:datum/label datum)]]])
           ])))))
 
 (defn body
@@ -84,49 +84,49 @@
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "thunk-body"))
+      (str "datum-body"))
 
     om/IRender
     (render [_]
       (let []
         (html
          [:div.row
-          [:div.thunk-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
-           [:div.thunk-title
+          [:div.datum-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
+           [:div.datum-title
             (om/build input/editable-value props
-                      {:init-state {:edit-key :thunk/label
+                      {:init-state {:edit-key :datum/label
                                     :submit-value
                                     (fn [label']
                                       (->> label'
-                                           (msg/update-thunk-label (om/get-props owner))
+                                           (msg/update-datum-label (om/get-props owner))
                                            (msg/send! owner)))}})
             ]
-           [:div.thunk-type-line
+           [:div.datum-type-line
             ;[:span.horizontal-line]
-            ;[:span.thunk-type-label "TYPE: "]
-            ;[:span.thunk-type (name (schema/describe-entity props))]
+            ;[:span.datum-type-label "TYPE: "]
+            ;[:span.datum-type (name (schema/describe-entity props))]
             ;[:span.horizontal-line]
             ]
-           [:div.thunk-facts
+           [:div.datum-facts
             ;; NOTE: one of the facts is a placeholder for creating a
             ;; new one
             (if (:db/id props)
               (om/build-all fact/container
-                            (get props :thunk/fact)
+                            (get props :datum/fact)
                             {:key-fn :db/id
-                             :init-state {:thunk-id (:db/id props)}
-                             :state {:fact-count (count (:thunk/fact props))}})
-              [:span "This thunk does not exist."])]
+                             :init-state {:datum-id (:db/id props)}
+                             :state {:fact-count (count (:datum/fact props))}})
+              [:span "This datum does not exist."])]
            ]
           ])))
     ))
 
-(defn similar-thunks
+(defn similar-datums
   [props owner opts]
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "thunk-similar-thunks"))
+      (str "datum-similar-datums"))
 
     om/IInitState
     (init-state [_]
@@ -136,20 +136,20 @@
     (render-state [_ state]
       (let [size 9]
         (html
-         [:div.similar-thunks.row
-          (for [[idx thunk] (->> props (map-indexed vector)
+         [:div.similar-datums.row
+          (for [[idx datum] (->> props (map-indexed vector)
                                  (take (if (get state :expand)
                                          size
                                          (js/Math.sqrt size))))
-                :when (:db/id thunk)]
-            [:div.similar-thunk-cell.vcenter.col-xs-3.col-md-3
+                :when (:db/id datum)]
+            [:div.similar-datum-cell.vcenter.col-xs-3.col-md-3
              {:style (cond-> {}
                        true
                        (merge (corner-styling size (inc idx)))
                        (= 0 idx)
                        (merge {:margin-left "11%"}))}
-             [:a {:href (browser/route-for owner :thunk :id (:db/id thunk))}
-              [:span (:thunk/label thunk)]]]
+             [:a {:href (browser/route-for owner :datum :id (:db/id datum))}
+              [:span (:datum/label datum)]]]
             )
           ])))))
 
@@ -159,15 +159,15 @@
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "thunk" (get-in props [:thunk :db/id])))
+      (str "datum" (get-in props [:datum :db/id])))
 
     om/IRender
     (render [_]
       (let []
         (html
-         [:div.thunk-container.container-fluid
-          (om/build context-thunks (get props :context-thunks))
-          (om/build body (get props :thunk))
-          (om/build similar-thunks (get props :similar-thunks))
+         [:div.datum-container.container-fluid
+          (om/build context-datums (get props :context-datums))
+          (om/build body (get props :datum))
+          (om/build similar-datums (get props :similar-datums))
           ])))
     ))

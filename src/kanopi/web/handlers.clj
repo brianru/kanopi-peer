@@ -17,31 +17,31 @@
   [request-context message]
   (identity message))
 
-(defmethod request-handler :get-thunk
+(defmethod request-handler :get-datum
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
-        data     (data/user-thunk data-svc creds (get message :noun))]
+        data     (data/user-datum data-svc creds (get message :noun))]
     (hash-map
      :noun    data
-     :verb    (if (not-empty (get-in data [:thunk]))
-                :get-thunk-success
-                :get-thunk-failure)
+     :verb    (if (not-empty (get-in data [:datum]))
+                :get-datum-success
+                :get-datum-failure)
      :context {})))
 
-(defmethod request-handler :update-thunk-label
+(defmethod request-handler :update-datum-label
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
-        data     (data/update-thunk-label
+        data     (data/update-datum-label
                   data-svc creds
                   (get-in message [:noun :existing-entity])
                   (get-in message [:noun :new-label]))]
     (hash-map
      :noun data
      :verb (if data
-             :update-thunk-label-success
-             :update-thunk-label-failure)
+             :update-datum-label-success
+             :update-datum-label-failure)
      :context {})))
 
 (defmethod request-handler :update-fact

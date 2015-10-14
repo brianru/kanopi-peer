@@ -4,8 +4,8 @@
 
 (defn describe-entity [m]
   (cond
-   (contains? m :thunk/label)
-   :thunk
+   (contains? m :datum/label)
+   :datum
    (contains? m :fact/attribute)
    :fact
    (contains? m :value/string)
@@ -14,15 +14,15 @@
    :default
    :unknown))
 
-(defn thunk? [m]
-  (= :thunk (describe-entity m)))
+(defn datum? [m]
+  (= :datum (describe-entity m)))
 (defn fact? [m]
   (= :fact (describe-entity m)))
 (defn literal? [m]
   (= :literal/text (describe-entity m)))
 
 (def default-value-key
-  {:thunk :thunk/label
+  {:datum :datum/label
    :literal/text :value/string})
 
 (defn get-value

@@ -19,11 +19,11 @@
       (is (not (nil? res)))
       (is (= username (:username creds))))
 
-    (testing "user stored as thunk"
-      (is (data/get-thunk (:data-service sys) creds (:ent-id creds))))
+    (testing "user stored as datum"
+      (is (data/get-datum (:data-service sys) creds (:ent-id creds))))
 
     (testing "user role created"
-      (is (data/get-thunk (:data-service sys) creds (:role creds))))
+      (is (data/get-datum (:data-service sys) creds (:role creds))))
 
     (testing "password crypto works"
       (is (not= password (:password creds)))

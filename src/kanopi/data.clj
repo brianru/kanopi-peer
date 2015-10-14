@@ -14,23 +14,23 @@
 ;;(remove-fact   [this creds ent-id fact-id])
 (defprotocol IDataService
 
-  (init-thunk    [this creds])
-  (update-thunk-label [this creds thunk-id label])
-  (get-thunk     [this creds thunk-id]
-                 [this creds as-of thunk-id])
+  (init-datum    [this creds])
+  (update-datum-label [this creds datum-id label])
+  (get-datum     [this creds datum-id]
+                 [this creds as-of datum-id])
 
-  (context-thunks [this creds thunk-id])
-  (similar-thunks [this creds thunk-id])
-  (user-thunk [this creds thunk-id]
-              [this creds as-of thunk-id])
+  (context-datums [this creds datum-id])
+  (similar-datums [this creds datum-id])
+  (user-datum [this creds datum-id]
+              [this creds as-of datum-id])
 
-  (recent-thunks [this creds])
+  (recent-datums [this creds])
 
-  (add-fact      [this creds thunk-id attribute value])
+  (add-fact      [this creds datum-id attribute value])
   (update-fact   [this creds fact-id attribute value]
                  "attribute and value can be nil.")
 
-  (retract-thunk [this creds ent-id]
+  (retract-datum [this creds ent-id]
                  "Assumes only 1 user has access, and thus retracting totally retracts it.
                  If more than 1 user has that access this must only retract the appropriate
                  role(s) from the entity.")
@@ -38,25 +38,25 @@
 
 (defrecord DatomicDataService [config datomic-peer]
   IDataService
-  (init-thunk [this creds]
-    (let [thunk  (mk-thunk datomic-peer creds "banana boat" ["type" "welcome"])
-          report @(datomic/transact datomic-peer creds (get thunk :txdata))]
-      (d/resolve-tempid (:db-after report) (:tempids report) (get thunk :ent-id))))
+  (init-datum [this creds]
+    (let [datum  (mk-datum datomic-peer creds "banana boat" ["type" "welcome"])
+          report @(datomic/transact datomic-peer creds (get datum :txdata))]
+      (d/resolve-tempid (:db-after report) (:tempids report) (get datum :ent-id))))
 
-  (update-thunk-label [this creds thunk-id label]
-    (let [txdata [[:db/add thunk-id :thunk/label label]]
+  (update-datum-label [this creds datum-id label]
+    (let [txdata [[:db/add datum-id :datum/label label]]
           report @(datomic/transact datomic-peer creds txdata)]
-      (get-thunk* (:db-after report) thunk-id)))
+      (get-datum* (:db-after report) datum-id)))
 
-  (get-thunk [this creds ent-id]
+  (get-datum [this creds ent-id]
     (let [db (datomic/db datomic-peer creds)]
-      (get-thunk* db ent-id)))
+      (get-datum* db ent-id)))
 
-  (get-thunk [this creds as-of ent-id]
+  (get-datum [this creds as-of ent-id]
     (let [db (datomic/db datomic-peer creds as-of)]
-      (get-thunk* db ent-id)))
+      (get-datum* db ent-id)))
 
-  (context-thunks [this creds ent-id]
+  (context-datums [this creds ent-id]
     (let []
       (->> (d/q
             '[:find ?s ?a ?ent-id
@@ -68,7 +68,7 @@
            (partition-by first))
       ))
 
-  (similar-thunks [this creds ent-id]
+  (similar-datums [this creds ent-id]
     (let []
       (->> (d/q
             '[:find ?s ?a ?v
@@ -80,29 +80,29 @@
            (partition-by first)) 
       ))
 
-  (user-thunk [this creds thunk-id]
-    (hash-map :context-thunks
-              (context-thunks this creds thunk-id)
-              :thunk
-              (get-thunk this creds thunk-id)
-              :similar-thunks
-              (similar-thunks this creds thunk-id)
+  (user-datum [this creds datum-id]
+    (hash-map :context-datums
+              (context-datums this creds datum-id)
+              :datum
+              (get-datum this creds datum-id)
+              :similar-datums
+              (similar-datums this creds datum-id)
               ))
-  (user-thunk [this creds as-of thunk-id]
-    (hash-map :context-thunks
-              (context-thunks this creds thunk-id)
-              :thunk
-              (get-thunk this creds as-of thunk-id)
-              :similar-thunks
-              (similar-thunks this creds thunk-id)
+  (user-datum [this creds as-of datum-id]
+    (hash-map :context-datums
+              (context-datums this creds datum-id)
+              :datum
+              (get-datum this creds as-of datum-id)
+              :similar-datums
+              (similar-datums this creds datum-id)
               ))
 
-  (recent-thunks [this creds]
+  (recent-datums [this creds]
     (let [user-id (-> creds :role)]
       (d/q '[:find [?e ?time]
              :in $ ?user-role
              :where
-             [?e :thunk/role ?user-role]
+             [?e :datum/role ?user-role]
              [?e _ _ ?tx]
              [?tx :db/txinstant ?time]
              ]
@@ -112,16 +112,16 @@
   (add-fact [this creds ent-id attribute value]
     (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)
           txdata (conj (:txdata fact)
-                       [:db/add ent-id :thunk/fact (:ent-id fact)])
+                       [:db/add ent-id :datum/fact (:ent-id fact)])
           report @(datomic/transact datomic-peer creds txdata)]
-      (get-thunk* (:db-after report) ent-id)))
+      (get-datum* (:db-after report) ent-id)))
 
   (update-fact [this creds fact-id attribute value]
     (let [fact-diff (update-fact->txdata datomic-peer creds fact-id attribute value)
           report    @(datomic/transact datomic-peer creds (:txdata fact-diff))]
       (get-fact* (:db-after report) fact-id)))
 
-  (retract-thunk [this creds ent-id]
+  (retract-datum [this creds ent-id]
     (let [{:keys [txdata]} (retract-entity->txdata datomic-peer creds ent-id)
           report @(datomic/transact datomic-peer creds txdata)]
       report)))

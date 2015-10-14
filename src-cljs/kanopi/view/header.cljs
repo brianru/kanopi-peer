@@ -42,7 +42,7 @@
             [:span.search
              (om/build typeahead/typeahead props
                        {:init-state {:display-fn schema/display-entity
-                                     :href-fn #(browser/route-for owner :thunk :id (:db/id %))
+                                     :href-fn #(browser/route-for owner :datum :id (:db/id %))
                                      :on-click (constantly nil)
                                      :tabindex 1}})
              ]

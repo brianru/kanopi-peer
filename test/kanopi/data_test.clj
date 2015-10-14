@@ -16,64 +16,64 @@
             [kanopi.test-util :as test-util]
             [com.stuartsierra.component :as component]))
 
-(deftest init-thunk
+(deftest init-datum
   (let [system (component/start (test-util/system-excl-web))
 
         creds  (do (auth/register! (:authenticator system) "brian" "rubinton")
                    (auth/credentials (:authenticator system) "brian"))
-        ent-id (data/init-thunk (:data-service system) creds)
-        ent    (data/get-thunk (:data-service system) creds ent-id)]
+        ent-id (data/init-datum (:data-service system) creds)
+        ent    (data/get-datum (:data-service system) creds ent-id)]
 
-    (testing "init thunk returns the thunk's entity id"
+    (testing "init datum returns the datum's entity id"
       (is (not (nil? ent-id))))
     
-    (testing "thunk has user's default role"
-      (is (= (impl/user-default-role creds) (-> ent :thunk/role first :db/id))))
+    (testing "datum has user's default role"
+      (is (= (impl/user-default-role creds) (-> ent :datum/role first :db/id))))
 
-    (testing "thunk shape as given by data service"
+    (testing "datum shape as given by data service"
       (is (every? keyword? (keys ent)))
-      (is (->> (get ent :thunk/role)
+      (is (->> (get ent :datum/role)
                (coll?)))
-      (is (->> (get ent :thunk/role)
+      (is (->> (get ent :datum/role)
                (every? map?)))
-      (is (->> (get ent :thunk/role)
+      (is (->> (get ent :datum/role)
                (map :db/id)
                (every? integer?)))
-      (is (->> (get ent :thunk/label)
+      (is (->> (get ent :datum/label)
                (string?)))
-      (is (= "banana boat" (get ent :thunk/label)))
+      (is (= "banana boat" (get ent :datum/label)))
 
-      (when (get ent :thunk/fact)
-        (is (->> (get ent :thunk/fact)
+      (when (get ent :datum/fact)
+        (is (->> (get ent :datum/fact)
                  (coll?)))
-        (is (->> (get ent :thunk/fact)
+        (is (->> (get ent :datum/fact)
                  (every? map?)))
-        (is (->> (get ent :thunk/fact)
+        (is (->> (get ent :datum/fact)
                  (map :db/id)
                  (every? integer?)))
         ))
 
-    (testing "retract new thunk"
-      (let [report (data/retract-thunk (:data-service system) creds ent-id)]
-        (is (nil? (data/get-thunk (:data-service system) creds ent-id)))))
+    (testing "retract new datum"
+      (let [report (data/retract-datum (:data-service system) creds ent-id)]
+        (is (nil? (data/get-datum (:data-service system) creds ent-id)))))
 
     (component/stop system)))
 
-(deftest construct-thunk
+(deftest construct-datum
   (let [system (component/start (test-util/system-excl-web))
         creds  (do (auth/register! (:authenticator system) "brian" "rubinton")
                    (auth/credentials (:authenticator system) "brian"))
 
-        ent-id (data/init-thunk (:data-service system) creds)
-        ent-0  (data/get-thunk (:data-service system) creds ent-id)
+        ent-id (data/init-datum (:data-service system) creds)
+        ent-0  (data/get-datum (:data-service system) creds ent-id)
         fact-1 ["age" "42"]
         ent-1  (apply data/add-fact (:data-service system) creds ent-id fact-1)
-        fact-id (-> ent-1 :thunk/fact first :db/id)
+        fact-id (-> ent-1 :datum/fact first :db/id)
         ]
 
     (testing "assert fact"
-      (let [new-fact (->> (clojure.set/difference (set (get ent-1 :thunk/fact))
-                                                  (set (get ent-0 :thunk/fact)))
+      (let [new-fact (->> (clojure.set/difference (set (get ent-1 :datum/fact))
+                                                  (set (get ent-0 :datum/fact)))
                           (first))]
         (is (= (util/fact-entity->tuple new-fact) fact-1))))
 
@@ -107,20 +107,20 @@
             fact-ent (apply data/update-fact (:data-service system) creds fact-id fact')]
         (is (= fact' (util/fact-entity->tuple fact-ent)))))
 
-    (testing "update thunk label"
+    (testing "update datum label"
       (let [lbl' "new label dude!"
-            thunk' (data/update-thunk-label (:data-service system) creds ent-id lbl')]
-        (is (= lbl' (get thunk' :thunk/label)))))))
+            datum' (data/update-datum-label (:data-service system) creds ent-id lbl')]
+        (is (= lbl' (get datum' :datum/label)))))))
 
 (deftest literal-types
   (let [system  (component/start (test-util/system-excl-web))
         creds   (do (auth/register!   (:authenticator system) "brian" "rubinton")
                     (auth/credentials (:authenticator system) "brian"))
-        ent-id  (data/init-thunk (:data-service system) creds)
-        ent-0   (data/get-thunk  (:data-service system) creds ent-id)
+        ent-id  (data/init-datum (:data-service system) creds)
+        ent-0   (data/get-datum  (:data-service system) creds ent-id)
         fact-1  ["age" "42"]
         ent-1   (apply data/add-fact (:data-service system) creds ent-id fact-1)
-        fact-id (-> ent-1 :thunk/fact first :db/id)
+        fact-id (-> ent-1 :datum/fact first :db/id)
         ]
     (testing "tagged text literal"
       (let [fact' ["age" [:literal/text "new-value!"]]
@@ -141,13 +141,13 @@
     (testing "tagged email-address literal")
     ))
 
-;; TODO: test user-thunk input fns
-(deftest context-thunks
+;; TODO: test user-datum input fns
+(deftest context-datums
   (let []
     
     ))
 
-(deftest similar-thunks
+(deftest similar-datums
   (let []
     ))
 

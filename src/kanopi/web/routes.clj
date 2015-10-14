@@ -27,7 +27,7 @@
     ;; spa
     (GET "/"          [] spa-resource)
     (GET "/settings"  [] spa-resource)
-    (GET "/thunk/:id" [] spa-resource)
+    (GET "/datum/:id" [] spa-resource)
 
     ;; static assets
     (route/files "" {:root "target/public"})

@@ -10,7 +10,7 @@
 
 (defn input-element-for-entity-type [tp]
   (case tp
-    :thunk
+    :datum
     :input
     
     :literal/text

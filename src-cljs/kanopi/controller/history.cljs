@@ -3,8 +3,8 @@
   0) do not use URI as local state
      Only synchronize browser URI with app-state page data.
 
-  1) navigate to a thunk
-     Wipe existing thunk app-state.
+  1) navigate to a datum
+     Wipe existing datum app-state.
      Try to initialize from cache.
      Regardless, request from server.
      => where are these tasks performed?
@@ -24,7 +24,7 @@
                           "login"    :login
                           "logout"   :logout
                           "register" :register
-                          "thunk/"   {[:id ""] :thunk}
+                          "datum/"   {[:id ""] :datum}
                           "settings" :settings
                           
                           ;; Server

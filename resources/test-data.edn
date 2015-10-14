@@ -9,9 +9,9 @@
   :user/role #db/id [:db.part/users -1000]}
 
  {:db/id #db/id [:db.part/structure -3000]
-  :thunk/label "Infinite Jest"
-  :thunk/role #db/id [:db.part/users -1000]
-  :thunk/fact [#db/id [:db.part/structure -3001]
+  :datum/label "Infinite Jest"
+  :datum/role #db/id [:db.part/users -1000]
+  :datum/fact [#db/id [:db.part/structure -3001]
                #db/id [:db.part/structure -3004]]}
 
  {:db/id #db/id [:db.part/structure -3001]
@@ -19,8 +19,8 @@
   :fact/value #db/id [:db.part/structure -3003]}
 
  {:db/id #db/id [:db.part/structure -3002]
-  :thunk/label "Author"
-  :thunk/role #db/id [:db.part/users -1000]}
+  :datum/label "Author"
+  :datum/role #db/id [:db.part/users -1000]}
 
  {:db/id #db/id [:db.part/structure -3003]
   :literal/text "David Foster Wallace"}
@@ -30,8 +30,8 @@
   :fact/value #db/id [:db.part/structure -3006]}
 
  {:db/id #db/id [:db.part/structure -3005]
-  :thunk/label "Title"
-  :thunk/role #db/id [:db.part/users -1000]}
+  :datum/label "Title"
+  :datum/role #db/id [:db.part/users -1000]}
 
  {:db/id #db/id [:db.part/structure -3006]
   :literal/text "Infinite Jest"}

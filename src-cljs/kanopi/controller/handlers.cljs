@@ -24,8 +24,8 @@
   (info msg)
   msg)
 
-(defn- current-thunk [props]
-  (get-in props [:thunk :thunk :db/id]))
+(defn- current-datum [props]
+  (get-in props [:datum :datum :db/id]))
 
 (defn- lookup-id
   ([props id]
@@ -37,7 +37,7 @@
      (->> (get-in props [:cache id])
           (reduce (fn [acc [k v]]
                     (cond
-                     (= k :thunk/fact)
+                     (= k :datum/fact)
                      (assoc acc k (mapv (partial lookup-id props (inc depth)) v))
                      (= k :fact/attribute)
                      (assoc acc k (mapv (partial lookup-id props (inc depth)) v))
@@ -50,24 +50,24 @@
           ))
    ))
 
-(defn- references-thunk? [props base-id ent]
+(defn- references-datum? [props base-id ent]
   (->> ent
        :db/id
        (lookup-id props)
-       :thunk/fact))
+       :datum/fact))
 
-(defn- context-thunks
-  "Find all thunks in `data` which reference the base-id."
+(defn- context-datums
+  "Find all datums in `data` which reference the base-id."
   [props base-id]
   (let [data    (-> props :cache (vals))
         ref-ids (->> data
-                     (filter schema/thunk?)
-                     (filter (partial references-thunk? props base-id))
+                     (filter schema/datum?)
+                     (filter (partial references-datum? props base-id))
                      (map :db/id)
                      (take 9)
                      )]
     ))
-(defn- similar-thunks [data base-id]
+(defn- similar-datums [data base-id]
   )
 
 (def placeholder-fact
@@ -75,26 +75,26 @@
    :fact/attribute [{:db/id nil}]
    :fact/value     [{:db/id nil}]})
 
-(defn- build-thunk-data
+(defn- build-datum-data
   "
   Data is stored as flat maps locally and on server, but to simplify
-  thunk component model we must nest entities as follows:
-  thunk -> facts -> attributes (literals or thunks)
-  -> values     (literals or thunks)"
-  [props thunk-id]
-  {:pre [(integer? thunk-id)]}
-  (let [context (context-thunks (-> props :cache vals) thunk-id)
-        similar (similar-thunks (-> props :cache vals) thunk-id)
-        thunk (lookup-id props thunk-id)]
+  datum component model we must nest entities as follows:
+  datum -> facts -> attributes (literals or datums)
+  -> values     (literals or datums)"
+  [props datum-id]
+  {:pre [(integer? datum-id)]}
+  (let [context (context-datums (-> props :cache vals) datum-id)
+        similar (similar-datums (-> props :cache vals) datum-id)
+        datum (lookup-id props datum-id)]
     (hash-map
-     :context-thunks [(lookup-id props -1008)]
-     :thunk (update thunk :thunk/fact #(vec (conj % placeholder-fact)))
-     :similar-thunks [(lookup-id props -1016)])))
+     :context-datums [(lookup-id props -1008)]
+     :datum (update datum :datum/fact #(vec (conj % placeholder-fact)))
+     :similar-datums [(lookup-id props -1016)])))
 
-(defn- ensure-current-thunk-is-updated [props edited-ent-id]
-  (if (= edited-ent-id (current-thunk props))
-    (let [thunk' (build-thunk-data props edited-ent-id)]
-      (assoc props :thunk thunk'))
+(defn- ensure-current-datum-is-updated [props edited-ent-id]
+  (if (= edited-ent-id (current-datum props))
+    (let [datum' (build-datum-data props edited-ent-id)]
+      (assoc props :datum datum'))
     props))
 
 (defn new-ent? [ent]
@@ -139,7 +139,7 @@
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
-                  (let [thunk-id (get-in msg [:noun :thunk-id])
+                  (let [datum-id (get-in msg [:noun :datum-id])
                         fact     (get-in msg [:noun :fact])
 
                         {fact' :fact
@@ -152,7 +152,7 @@
                         (cond-> (assoc-in app-state [:cache (:db/id fact')] fact')
 
                           is-new-fact
-                          (update-in [:cache thunk-id :thunk/fact] #(conj % (:db/id fact')))
+                          (update-in [:cache datum-id :datum/fact] #(conj % (:db/id fact')))
 
                           is-new-fact
                           (assoc-in [:cache (:db/id fact')] fact')
@@ -166,34 +166,34 @@
                                     new-referenced-value)
 
                           true
-                          (ensure-current-thunk-is-updated thunk-id))
+                          (ensure-current-datum-is-updated datum-id))
                         ]
                     app-state'
                     ))))
 
-(defmethod local-event-handler :update-thunk-label
+(defmethod local-event-handler :update-datum-label
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (let [ent-id (get-in msg [:noun :existing-entity :db/id])
                         label' (get-in msg [:noun :new-label])]
                     (-> app-state
-                        (assoc-in [:cache ent-id :thunk/label] label')
-                        (ensure-current-thunk-is-updated ent-id))))))
+                        (assoc-in [:cache ent-id :datum/label] label')
+                        (ensure-current-datum-is-updated ent-id))))))
 
 ;; TODO: implement.
-(defmethod local-event-handler :update-thunk-label-success
+(defmethod local-event-handler :update-datum-label-success
   [aether history app-state msg]
   )
 
 ;; TODO: implement.
-(defmethod local-event-handler :update-thunk-label-failure
+(defmethod local-event-handler :update-datum-label-failure
   [aether history app-state msg]
   )
 
 (defn- fuzzy-search-entity [q ent]
   (let [base-string (->> ent
-                         ((juxt :thunk/label :value/string))
+                         ((juxt :datum/label :value/string))
                          (apply str)
                          (clojure.string/lower-case)
                          )
@@ -240,22 +240,22 @@
 ;; as performing action remotely? eg. send success/failure msgs?
 ;; OR, should I purposely not do this and have a clear distinction b/w
 ;; actions handled transactionally vs hypothetically
-(defmethod local-event-handler :get-thunk
+(defmethod local-event-handler :get-datum
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (->> (get msg :noun)
-                       (build-thunk-data app-state)
-                       (assoc app-state :thunk)))))
+                       (build-datum-data app-state)
+                       (assoc app-state :datum)))))
 
 ;; TODO: don't I also have to put this stuff in the cache?
-(defmethod local-event-handler :get-thunk-success
+(defmethod local-event-handler :get-datum-success
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (->> (get msg :noun)
-                       (build-thunk-data app-state)
-                       (assoc app-state :thunk)))))
+                       (build-datum-data app-state)
+                       (assoc app-state :datum)))))
 
 (defmethod local-event-handler :navigate
   [aether history app-state msg]
@@ -266,13 +266,13 @@
                       true
                       (assoc :page (get msg :noun))
 
-                      (not= :thunk handler)
-                      (assoc :thunk {})
+                      (not= :datum handler)
+                      (assoc :datum {})
 
                       )))
-    (when (= :thunk handler)
-      (let [thunk-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))]
-        (->> (msg/get-thunk thunk-id)
+    (when (= :datum handler)
+      (let [datum-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))]
+        (->> (msg/get-datum datum-id)
              (aether/send! aether))))))
 
 (defmethod local-event-handler :register-success
@@ -291,6 +291,8 @@
   (let []
     ))
 
+;; TODO: this must get a lot more data. we must re-initialize
+;; app-state with this users' data.
 (defmethod local-event-handler :login-success
   [aether history app-state msg]
   (let []
@@ -298,7 +300,11 @@
                   (fn [app-state]
                     (assoc app-state
                            :user (get msg :noun)
-                           :mode :authenticated)))
+                           :mode :authenticated
+                           :datum {:context-datums []
+                                   :datum {}
+                                   :similar-datums []}
+                           :cache {})))
     (history/navigate-to! history :home)
     ))
 

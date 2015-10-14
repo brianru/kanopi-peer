@@ -15,7 +15,7 @@
          :db/id)))
 
 (defn entity-id-tuple?
-  "(second input) => either an integer (id) or a string (label of new thunk)"
+  "(second input) => either an integer (id) or a string (label of new datum)"
   [input]
   (and (vector? input)
        (= :db/id (first input))
@@ -143,15 +143,15 @@
       nil
       ent)))
 
-(defn get-thunk*
+(defn get-datum*
   "TODO: may want to use pull api to grab facts as well.
   NOTE: ent-id can also be an ident or datomic lookup-ref."
   [db ent-id]
   (let [ent (d/pull db
                     '[:db/id
-                      :thunk/label
-                      :thunk/role
-                      {:thunk/fact [:db/id
+                      :datum/label
+                      :datum/role
+                      {:datum/fact [:db/id
                                     {:fact/attribute [*]}
                                     {:fact/value [*]}
                                     :fact/role]}]
@@ -179,22 +179,22 @@
      :txdata  [[:db/add fact-id :fact/attribute attribute-id]
                [:db/add fact-id :fact/value     value-id]])))
 
-(defn mk-thunk
-  "ex: (mk-thunk dp creds label [attr-id-tuple val-id-tuple]
+(defn mk-datum
+  "ex: (mk-datum dp creds label [attr-id-tuple val-id-tuple]
   [attr-literal  val-id-tuple] ... etc)"
   ([datomic-peer creds]
-   (mk-thunk datomic-peer creds ""))
+   (mk-datum datomic-peer creds ""))
 
   ([datomic-peer creds label]
-   (let [thunk-id (d/tempid :db.part/structure)]
+   (let [datum-id (d/tempid :db.part/structure)]
      (hash-map
-      :ent-id thunk-id
-      :txdata [[:db/add thunk-id :thunk/role (user-default-role creds)]
-               [:db/add thunk-id :thunk/label label]])))
+      :ent-id datum-id
+      :txdata [[:db/add datum-id :datum/role (user-default-role creds)]
+               [:db/add datum-id :datum/label label]])))
 
   ([datomic-peer creds label & facts]
-   (let [thunk-id  (d/tempid :db.part/structure)
-         facts     (map (partial apply add-fact->txdata datomic-peer creds thunk-id) facts)
+   (let [datum-id  (d/tempid :db.part/structure)
+         facts     (map (partial apply add-fact->txdata datomic-peer creds datum-id) facts)
          fact-coll (reduce
                     (fn [{:keys [ent-ids txdata] :as acc} fact]
                       (hash-map :ent-ids (conj ent-ids (:ent-id fact))
@@ -203,18 +203,18 @@
                      :txdata  []}
                     facts)]
      (hash-map
-      :ent-id thunk-id
-      :txdata (concat [[:db/add thunk-id :thunk/role (user-default-role creds)]
-                       [:db/add thunk-id :thunk/label label]]
-                      (mapv (partial vector :db/add thunk-id :thunk/fact)
+      :ent-id datum-id
+      :txdata (concat [[:db/add datum-id :datum/role (user-default-role creds)]
+                       [:db/add datum-id :datum/label label]]
+                      (mapv (partial vector :db/add datum-id :datum/fact)
                             (get fact-coll :ent-ids))
                       (get fact-coll :txdata))))))
 
-(defn update-thunk->txdata
-  [datomic-peer creds thunk']
-  (let [thunk-id (-> thunk' (get :db/id))]
+(defn update-datum->txdata
+  [datomic-peer creds datum']
+  (let [datum-id (-> datum' (get :db/id))]
     (hash-map
-     :ent-id thunk-id
+     :ent-id datum-id
      :txdata [
               ])))
 
@@ -224,7 +224,7 @@
     (hash-map
      :ent-id (get fact :ent-id)
      :txdata (conj (get fact :txdata)
-                   [:db/add ent-id :thunk/fact (get fact :ent-id)]))))
+                   [:db/add ent-id :datum/fact (get fact :ent-id)]))))
 
 (defmethod add-fact->txdata [::literal ::entity-id]
   [datomic-peer creds ent-id attribute [_ value-id]]
@@ -234,7 +234,7 @@
      :ent-id (get fact :ent-id)
      :txdata (concat (get attr :txdata)
                      (get fact :txdata)
-                     [[:db/add ent-id :thunk/fact (get fact :ent-id)]]))))
+                     [[:db/add ent-id :datum/fact (get fact :ent-id)]]))))
 
 (defmethod add-fact->txdata [::entity-id ::literal]
   [datomic-peer creds ent-id [_ attribute-id] value]
@@ -244,7 +244,7 @@
      :ent-id (get fact :ent-id)
      :txdata (concat (get value :txdata)
                      (get fact :txdata)
-                     [[:db/add ent-id :thunk/fact (get fact :ent-id)]]))))
+                     [[:db/add ent-id :datum/fact (get fact :ent-id)]]))))
 
 (defmethod add-fact->txdata [::literal ::literal]
   [datomic-peer creds ent-id attribute value]
@@ -256,7 +256,7 @@
      :txdata (concat (get value :txdata)
                      (get attr :txdata)
                      (get fact :txdata)
-                     [[:db/add ent-id :thunk/fact (get fact :ent-id)]]))))
+                     [[:db/add ent-id :datum/fact (get fact :ent-id)]]))))
 
 (defn update-fact-part->txdata
   [datomic-peer creds fact-id part input]
@@ -266,7 +266,7 @@
           input-ent
           (if (d/entity (datomic/db datomic-peer creds) input-ent-arg)
             (hash-map :ent-id input-ent-arg, :txdata [])
-            (mk-thunk datomic-peer creds input-ent-arg))]
+            (mk-datum datomic-peer creds input-ent-arg))]
       (hash-map
        :ent-id fact-id
        :txdata (conj (get input-ent :txdata)
@@ -288,7 +288,7 @@
 
 (defn update-fact->txdata
   [datomic-peer creds fact-id attribute value]
-  (let [fact (get-thunk* (datomic/db datomic-peer creds) fact-id)]
+  (let [fact (get-datum* (datomic/db datomic-peer creds) fact-id)]
     (hash-map
      :ent-id fact-id
      :txdata (->> [[:fact/attribute attribute]

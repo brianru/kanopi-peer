@@ -137,29 +137,29 @@ a.navbar-brand:focus {
     cursor: pointer;
 }
 /* Thunks */
-.thunk-container {
+.datum-container {
     padding-top: 20px;
     padding-bottom: 40px;
 }
-.thunk-body {
+.datum-body {
     padding-top: 20px;
     padding-bottom: 40px;
 }
-.thunk-title {
+.datum-title {
     padding-bottom: 6px;
 }
-.thunk-type-line {
+.datum-type-line {
     padding-bottom: 12px;
     font-size: 1rem;
     text-align: center;
     letter-spacing: 0.3rem;
     font-weight: 500;
 }
-.context-thunk-cell, .similar-thunk-cell {
+.context-datum-cell, .similar-datum-cell {
     text-align: center;
     height: 40px;
 }
-.context-thunks {
+.context-datums {
 }
 
 /* Facts */

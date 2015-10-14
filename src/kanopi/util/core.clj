@@ -54,7 +54,7 @@
 ;; ### Datomic EntityMap helper fns for navigating the schema
 ;; TODO: refactor to support values of any type
 (defn get-literal-or-label [ent k]
-  (or (-> ent (get k) (get :thunk/label))
+  (or (-> ent (get k) (get :datum/label))
       (-> ent (get k) (dissoc :db/id) (vals) (first))))
 
 (defn fact-entity->tuple [ent]
@@ -69,7 +69,8 @@
     (.toString out)))
 
 (defn transit-read [stream]
-  (let [string (slurp stream)]
+  ;; NOTE: type hint avoids warning when calling .getBytes below
+  (let [^java.lang.String string (slurp stream)]
     (if (or (nil? string) (clojure.string/blank? string))
       {}
       (let [in (ByteArrayInputStream. (.getBytes string))

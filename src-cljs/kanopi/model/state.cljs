@@ -45,9 +45,9 @@
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
                  :page  {}
-                 :thunk {:context-thunks []
-                         :thunk {}
-                         :similar-thunks []
+                 :datum {:context-datums []
+                         :datum {}
+                         :similar-datums []
                          }
                  ;; TODO: this map grows too fast.
                  ;; implement a map that only stores the last n

@@ -21,7 +21,7 @@
 
 (defn om-page
   "TODO: set cookie with no expiration (expire at end of session)
-  which contains user identity and recently modified thunks and config information"
+  which contains user identity and recently modified datums and config information"
   [ctx {:keys [title cookie] :as opts}]
   (let [cookies (get-in ctx [:request :cookies])]
     (rep/ring-response

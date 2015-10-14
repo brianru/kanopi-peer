@@ -20,11 +20,11 @@
    nil
    ))
 
-(defn get-thunk [thunk-id]
-  {:pre [(integer? thunk-id)]}
+(defn get-datum [datum-id]
+  {:pre [(integer? datum-id)]}
   (hash-map
-   :noun thunk-id
-   :verb :get-thunk
+   :noun datum-id
+   :verb :get-datum
    :context {}))
 
 ;; local component message
@@ -58,18 +58,18 @@
    :context {:fact-part fact-part
              :selection selection}))
 
-(defn update-fact [thunk-id fact]
+(defn update-fact [datum-id fact]
   (hash-map
-   :noun {:thunk-id thunk-id
+   :noun {:datum-id datum-id
           :fact fact}
    :verb :update-fact
    :context {}))
 
-(defn update-thunk-label [ent new-label]
+(defn update-datum-label [ent new-label]
   (hash-map
    :noun {:existing-entity ent
           :new-label new-label}
-   :verb :update-thunk-label
+   :verb :update-datum-label
    :context {}))
 
 (defn search
@@ -213,7 +213,7 @@
    :verb :request
    :context {}))
 
-(defmethod local->remote :get-thunk
+(defmethod local->remote :get-datum
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
@@ -228,7 +228,7 @@
    :context {}))
 
 ;; TODO: implement
-(defmethod local->remote :update-thunk-label
+(defmethod local->remote :update-datum-label
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map

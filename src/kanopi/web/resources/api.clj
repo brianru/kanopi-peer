@@ -24,7 +24,7 @@
   ;; :exists? (fn [ctx]
   ;;            (let [data-svc (util/get-data-service ctx)
   ;;                  msg      (get ctx ::message)]
-  ;;              (hash-map ::entity (data/user-thunk data-svc msg))))
+  ;;              (hash-map ::entity (data/user-datum data-svc msg))))
 
   :post! (fn [ctx]
            (->> (get ctx ::message)

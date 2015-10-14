@@ -7,7 +7,7 @@
             [kanopi.model.message :as msg]
             [kanopi.view.header :as header]
             [kanopi.view.footer :as footer]
-            [kanopi.view.thunk :as thunk]
+            [kanopi.view.datum :as datum]
             [kanopi.view.pages.settings :as settings]
             [kanopi.view.pages.user :as user]
             [kanopi.aether.core :as aether]
@@ -36,8 +36,8 @@
          (om/build header/header props)]
         [:div.page-container
          (case (get-in props [:page :handler])
-           :thunk
-           (om/build thunk/container (get props :thunk))
+           :datum
+           (om/build datum/container (get props :datum))
 
            :settings
            (om/build settings/settings props)
@@ -45,16 +45,16 @@
            (:login :logout :register)
            (om/build user/authentication props)
 
-           ;; TODO: welcome thunk
+           ;; TODO: welcome datum
            [:div.home-page
-            (let [thunks (->> (get props :cache)
+            (let [datums (->> (get props :cache)
                               (vals))]
               [:ul
-              (for [t thunks
-                    :when (:thunk/label t)]
+              (for [t datums
+                    :when (:datum/label t)]
                 [:li
-                 [:a {:href (browser/route-for owner :thunk :id (:db/id t))}
-                  [:span (:thunk/label t)]] ]
+                 [:a {:href (browser/route-for owner :datum :id (:db/id t))}
+                  [:span (:datum/label t)]] ]
                 )])
             ]
            )

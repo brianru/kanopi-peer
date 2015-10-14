@@ -26,7 +26,7 @@
         handler (get-in system [:web-app :app-handler])
         creds   {:username "mickey" :password "mouse"}
         test-ent-ids
-        (d/q '[:find [?eid ...] :in $ :where [?eid :thunk/label _]]
+        (d/q '[:find [?eid ...] :in $ :where [?eid :datum/label _]]
              (d/db (get-in system [:datomic-peer :connection])))
         ]
 
@@ -208,13 +208,13 @@
         _       (-> (mock/request :post "/register" creds)
                     (mock/header :accept "application/transit+json")
                     (handler))
-        thunk-ent-ids
-        (d/q '[:find [?eid ...] :in $ :where [?eid :thunk/label _]]
+        datum-ent-ids
+        (d/q '[:find [?eid ...] :in $ :where [?eid :datum/label _]]
              (d/db (get-in system [:datomic-peer :connection])))]
 
-    (testing "get-thunk-failure"
+    (testing "get-datum-failure"
       (let [message {:noun -1000
-                     :verb :get-thunk
+                     :verb :get-datum
                      :context {}}
             req (-> (mock/request :post "/api" message)
                     (test-util/assoc-basic-auth creds))
@@ -222,44 +222,44 @@
             body (util/transit-read (:body resp))
             ]
         (is (= 200 (:status resp)))
-        (is (= :get-thunk-failure (get body :verb)))
-        (is (nil? (get-in body [:noun :thunk])))
+        (is (= :get-datum-failure (get body :verb)))
+        (is (nil? (get-in body [:noun :datum])))
         ))
 
-    (testing "get-thunk-success"
-      (let [test-ent-id (first thunk-ent-ids)
+    (testing "get-datum-success"
+      (let [test-ent-id (first datum-ent-ids)
             message {:noun test-ent-id
-                     :verb :get-thunk
+                     :verb :get-datum
                      :context {}}
             req (-> (mock/request :post "/api" message)
                     (test-util/assoc-basic-auth creds))
             resp (handler req)
             body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
-        (is (= :get-thunk-success (get body :verb)))
-        (is (= test-ent-id (-> body :noun :thunk :db/id)))
-        ;; NOTE: not testing similar-thunks and context-thunks 
+        (is (= :get-datum-success (get body :verb)))
+        (is (= test-ent-id (-> body :noun :datum :db/id)))
+        ;; NOTE: not testing similar-datums and context-datums 
         ;; contents here because their existence depends on the
         ;; particular test-ent-id
         ))
 
-    (testing "update-thunk-label"
-      (let [test-ent-id (first thunk-ent-ids)
+    (testing "update-datum-label"
+      (let [test-ent-id (first datum-ent-ids)
             lbl' "duuuude"
             message {:noun {:existing-entity test-ent-id
                             :new-label lbl'}
-                     :verb :update-thunk-label
+                     :verb :update-datum-label
                      :context {}}
             req (-> (mock/request :post "/api" message)
                     (test-util/assoc-basic-auth creds))
             resp (handler req)
             body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
-        (is (= :update-thunk-label-success (get body :verb)))
+        (is (= :update-datum-label-success (get body :verb)))
         ))
 
     (testing "update-fact"
-      (let [test-ent-id (first thunk-ent-ids)
+      (let [test-ent-id (first datum-ent-ids)
             fact' ["age" 42]
             message {:noun {}
                      :verb :update-fact

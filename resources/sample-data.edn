@@ -1,22 +1,22 @@
 [
 
  {:db/id #db/id [:db.part/user -1000]
-  :thunk/label "distinct"
-  :thunk/fact [#db/id [:db.part/user -2000]]}
+  :datum/label "distinct"
+  :datum/fact [#db/id [:db.part/user -2000]]}
 
  {:db/id #db/id [:db.part/user -1001]
-  :thunk/label "description"}
+  :datum/label "description"}
 
  {:db/id #db/id [:db.part/user -1002]
-  :thunk/label "nebula form language"
-  :thunk/fact [#db/id [:db.part/user -2001]
+  :datum/label "nebula form language"
+  :datum/fact [#db/id [:db.part/user -2001]
                #db/id [:db.part/user -2002]]}
 
  {:db/id #db/id [:db.part/user -1003]
-  :thunk/label "center"}
+  :datum/label "center"}
 
  {:db/id #db/id [:db.part/user -1004]
-  :thunk/label "lantern in the fog"}
+  :datum/label "lantern in the fog"}
 
  {:db/id #db/id [:db.part/user -2000]
   :fact/attribute #db/id [:db.part/user -1001]

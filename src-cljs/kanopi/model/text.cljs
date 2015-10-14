@@ -3,7 +3,7 @@
 
 (defn entity-value-label [ent]
   (case (schema/describe-entity ent)
-    :thunk
+    :datum
     "label"
     :literal
     "value"
