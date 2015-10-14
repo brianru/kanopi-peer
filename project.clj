@@ -35,6 +35,7 @@
                  [sablono "0.3.6"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [jamesmacaulay/zelkova "0.4.0"]
+                 [devcards "0.2.0-3"]
 
                  ;; Database
                  [com.datomic/datomic-pro "0.9.5302"
@@ -83,7 +84,24 @@
                              [org.clojure/data.csv "0.1.3"]
                              
                              ;; use client lib for testing
-                             [http-kit "2.1.19"]]
+                             [http-kit "2.1.19"]
+                             ]
+              :env {:dev true}
+              :source-paths ["dev"]
+              :repl-options {:init-ns user}}
+
+             :devcards
+             {:plugins [[lein-environ "1.0.1"]]
+              :dependencies [[org.clojure/tools.nrepl "0.2.10"]
+                             [org.clojure/tools.namespace "0.2.11"]
+                             [ring/ring-devel "1.4.0"]
+                             [ring/ring-mock "0.2.0"]
+                             [org.clojure/data.codec "0.1.0"]
+                             [org.clojure/data.csv "0.1.3"]
+                             
+                             ;; use client lib for testing
+                             [http-kit "2.1.19"]
+                             ]
               :env {:dev true}
               :source-paths ["dev"]
               :repl-options {:init-ns user}}}
@@ -92,9 +110,12 @@
              :css-dirs "resources/public/css"}
 
   :cljsbuild {:builds
-              [{:id "dev"
+              [
+               ;; lein figwheel to run with auto-reloading
+               ;; lein cljsbuild once to run otherwise
+               {:id :dev
+                :source-paths ["src-cljs" "dev-cljs"]
                 :figwheel {:on-jsload "kanopi.core/reload-om"}
-                :source-paths ["src-cljs"]
                 :compiler {:output-to "resources/public/js/main.js"
                            :output-dir "resources/public/js/out"
                            :asset-path "/js/out"
@@ -102,6 +123,17 @@
                            :optimizations :none
                            :pretty-print true
                            :source-map "resources/public/js/source_map.js"}}
-               ;; TODO: production build
+
+               ;; lein figwheel devcards to run
+               {:id :devcards
+                :source-paths ["src-cljs" "dev-cljs"]
+                :figwheel {:devcards true}
+                :compiler {:output-to "dev-resources/public/js/main.js"
+                           :output-dir "dev-resources/public/js/out"
+                           :asset-path "js/out"
+                           :main kanopi.devcards
+                           :optimizations :none
+                           :pretty-print true
+                           :source-map "dev-resources/public/js/source_map.js"}}
                ]
               })
