@@ -6,6 +6,8 @@
             [cemerick.friend :as friend]))
 
 (defn build-noun [ctx noun]
+  {:post [(or (integer? %) (instance? java.lang.Long %) (map? %))]}
+  (println "BUILD_NOUN" noun (type noun))
   noun)
 
 (defn build-verb [ctx verb]
@@ -27,11 +29,16 @@
          params      (get-in ctx [:request :params])
          parsed-body (->> (merge body params)
                           (reduce (fn [acc [k v]]
-                                    (if (clojure.string/blank? v)
-                                      (assoc acc k {})
-                                      (assoc acc k (read-string v))))
+                                    (cond
+                                     (string? v)
+                                     (if (clojure.string/blank? v)
+                                       (assoc acc k {})
+                                       (assoc acc k (read-string v))) 
+                                     
+                                     :default
+                                     (assoc acc k v)))
                                   {}))]
      (hash-map
       :noun    (build-noun ctx (:noun parsed-body))
-      :verb    (build-noun ctx (:verb parsed-body))
+      :verb    (build-verb ctx (:verb parsed-body))
       :context (build-context ctx (:context parsed-body))))))

@@ -116,7 +116,7 @@
         (is (= 200 status))
         (is (= (:username creds) (:username body')))
         (is (not-empty cookie))
-        (let [msg {:noun :fizzbuzz
+        (let [msg {:noun 42
                    :verb :fobar
                    :context {}}
               req (-> (mock/request :post "/api" msg)
@@ -144,7 +144,7 @@
         #_(is (= 303 status))
         #_(is (re-find #"welcome=true" (get-in headers ["Location"] "")))
         (is (not-empty cookie))
-        (let [msg {:noun :fizzbuzz
+        (let [msg {:noun 42
                    :verb :foobar}
               req (-> (mock/request :post "/api" msg)
                       (mock/header :accept "application/transit+json")
@@ -166,7 +166,7 @@
         (is (= 200 status))
         (is (:username creds) (:username body))
         (is (not-empty cookie))
-        (let [msg {:noun :foobar
+        (let [msg {:noun 42
                    :verb :testing123}
               req (-> (mock/request :post "/api" msg)
                       (mock/header :accept "application/transit+json")
@@ -187,7 +187,7 @@
         (is (= 303 status))
         (is (re-find #"welcome=true" (get-in headers ["Location"] "")))
         (is (not-empty cookie))
-        (let [msg {:noun :foobar
+        (let [msg {:noun 42
                    :verb :testingplay}
               req (-> (mock/request :post "/api" msg)
                       (mock/header :accept "application/transit+json")
@@ -250,21 +250,27 @@
                             :new-label lbl'}
                      :verb :update-datum-label
                      :context {}}
-            req (-> (mock/request :post "/api" message)
+            req (-> (mock/request :post "/api"
+                                  (util/transit-write message))
+                    (mock/content-type "application/transit+json")
                     (test-util/assoc-basic-auth creds))
             resp (handler req)
             body (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
         (is (= :update-datum-label-success (get body :verb)))
+        (is (= lbl' (-> body :noun :datum/label)))
         ))
 
+    ;; TODO: implement update-fact handler.
     (testing "update-fact"
       (let [test-ent-id (first datum-ent-ids)
             fact' ["age" 42]
             message {:noun {}
                      :verb :update-fact
                      :context {}}
-            req   (-> (mock/request :post "/api" message)
+            req   (-> (mock/request :post "/api"
+                                    (util/transit-write message))
+                      (mock/content-type "application/transit+json")
                       (test-util/assoc-basic-auth creds))
             resp  (handler req)
             body  (util/transit-read (:body resp))]

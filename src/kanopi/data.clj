@@ -60,25 +60,39 @@
   (context-datums [this creds ent-id]
     (let []
       (->> (d/q
-            '[:find ?s ?a ?ent-id
+            '[:find ?subj ?attr ?ent-id
               :in $ ?ent-id
-              :where [?s ?a ?ent-id]]
+              :where
+              [?subj :datum/fact ?fact]
+              [?fact :fact/attribute ?attr]
+              [?fact :fact/value ?ent-id]]
             (datomic/db datomic-peer creds)
             ent-id)
            (sort-by first)
-           (partition-by first))
+           )
       ))
 
   (similar-datums [this creds ent-id]
-    (let []
+    ;; TODO: this should be more complex. sharing a fact is too
+    ;; strict. what about similar attrs in different facts? (diff vals?)
+    (let [datums-with-shared-facts []
+          datums-with-shared-attrs []]
       (->> (d/q
-            '[:find ?s ?a ?v
+            '[:find ?subj ?attr ?valu
               :in $ ?ent-id
-              :where [?ent-id ?a ?v] [?s ?a ?v]]
+              :where
+              [?ent-id :datum/fact ?fact]
+              [?subj :datum/fact ?fact]
+              [(!= ?ent-id ?subj)]
+              [?fact :fact/attribute ?attr]
+              [?fact :fact/value ?valu]
+
+              ]
             (datomic/db datomic-peer creds)
             ent-id)
            (sort-by first)
-           (partition-by first)) 
+           )
+
       ))
 
   (user-datum [this creds datum-id]
@@ -99,16 +113,16 @@
       ))
 
   (recent-datums [this creds]
-    (let [user-id (-> creds :role)]
-      (d/q '[:find [?e ?time]
-             :in $ ?user-role
+    (let [user-roles (->> creds :role (mapv :db/id))]
+      (d/q '[:find ?e ?time ?tx
+             :in $ [?user-role ...]
              :where
              [?e :datum/role ?user-role]
              [?e _ _ ?tx]
-             [?tx :db/txinstant ?time]
+             [?tx :db/txInstant ?time]
              ]
            (datomic/db datomic-peer creds)
-           user-id)))
+           user-roles)))
 
   (add-fact [this creds ent-id attribute value]
     (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)

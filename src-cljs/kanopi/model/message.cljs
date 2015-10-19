@@ -28,7 +28,6 @@
    :context {}))
 
 (defn initialize-client-state [user]
-  {:pre []}
   (hash-map
    :noun user
    :verb :initialize-client-state
@@ -267,6 +266,11 @@
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
-   :noun {}
+   :noun {:uri (history/get-route-for history :api)
+          :body msg
+          :method :post
+          :response-format :transit
+          :response-method :aether
+          :error-method :aether}
    :verb :request
    :context {}))

@@ -12,29 +12,105 @@
   :datum/label "Infinite Jest"
   :datum/role #db/id [:db.part/users -1000]
   :datum/fact [#db/id [:db.part/structure -3001]
-               #db/id [:db.part/structure -3004]]}
+               #db/id [:db.part/structure -3004]
+               #db/id [:db.part/structure -3007]]}
 
+ ;; Author: David Foster Wallace
  {:db/id #db/id [:db.part/structure -3001]
   :fact/attribute #db/id [:db.part/structure -3002]
   :fact/value #db/id [:db.part/structure -3003]}
-
  {:db/id #db/id [:db.part/structure -3002]
   :datum/label "Author"
   :datum/role #db/id [:db.part/users -1000]}
-
  {:db/id #db/id [:db.part/structure -3003]
-  :literal/text "David Foster Wallace"}
+  :datum/label "David Foster Wallace"
+  :datum/role #db/id [:db.part/users -1000]}
 
+ ;; Title: Infinite Jest
  {:db/id #db/id [:db.part/structure -3004]
   :fact/attribute #db/id [:db.part/structure -3005]
   :fact/value #db/id [:db.part/structure -3006]}
-
  {:db/id #db/id [:db.part/structure -3005]
   :datum/label "Title"
   :datum/role #db/id [:db.part/users -1000]}
-
  {:db/id #db/id [:db.part/structure -3006]
   :literal/text "Infinite Jest"}
 
- ]
+ ;; Date read: 10 October 2015
+ {:db/id #db/id [:db.part/structure -3007]
+  :fact/attribute #db/id [:db.part/structure -3008]
+  :fact/value #db/id [:db.part/structure -3009]}
+ {:db/id #db/id [:db.part/structure -3008]
+  :datum/label "Date read"
+  :datum/role #db/id [:db.part/users -1000]}
+ {:db/id #db/id [:db.part/structure -3009]
+  :literal/text "10 October 2015"}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ ;; 
+ {:db/id #db/id [:db.part/structure -3010]
+  :datum/label "The Pale King"
+  :datum/role #db/id [:db.part/users -1000]
+  :datum/fact [#db/id [:db.part/structure -3001]
+               #db/id [:db.part/structure -3011]
+               #db/id [:db.part/structure -3013]
+               ]}
+
+ ;; Title: The Pale King
+ {:db/id #db/id [:db.part/structure -3011]
+  :fact/attribute #db/id [:db.part/structure -3005]
+  :fact/value #db/id [:db.part/structure -3012]}
+ {:db/id #db/id [:db.part/structure -3012]
+  :literal/text "The Pale King"}
+
+ ;; Date read: 15 October 2015
+ {:db/id #db/id [:db.part/structure -3013]
+  :fact/attribute #db/id [:db.part/structure -3008]
+  :fact/value #db/id [:db.part/structure -3014]}
+ {:db/id #db/id [:db.part/structure -3014]
+  :literal/text "15 October 2015"}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ ;;
+ {:db/id #db/id [:db.part/structure -3015]
+  :datum/label "Consider the Lobster"
+  :datum/role #db/id [:db.part/users -1000]
+  :datum/fact [#db/id [:db.part/structure -3001]
+               #db/id [:db.part/structure -3016]
+               ]}
+
+ ;; Title: Consider the Lobster
+ {:db/id #db/id [:db.part/structure -3016]
+  :fact/attribute #db/id [:db.part/structure -3005]
+  :fact/value #db/id [:db.part/structure -3017]}
+ {:db/id #db/id [:db.part/structure -3017]
+  :literal/text "Consider the Lobster"}
+
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+ ;;
+ {:db/id #db/id [:db.part/structure -3018]
+  :datum/label "The End of the Tour"
+  :datum/role #db/id [:db.part/users -1000]
+  :datum/fact [#db/id [:db.part/structure -3019]
+               #db/id [:db.part/structure -3021]
+               ]}
+
+ ;; Title: The End of the Tour
+ {:db/id #db/id [:db.part/structure -3019]
+  :fact/attribute #db/id [:db.part/structure -3005]
+  :fact/value #db/id [:db.part/structure -3020]}
+ {:db/id #db/id [:db.part/structure -3020]
+  :literal/text "The End of the Tour"}
+
+ ;; Protagonist: David Foster Wallace
+ {:db/id #db/id [:db.part/structure -3021]
+  :fact/attribute #db/id [:db.part/structure -3022]
+  :fact/value #db/id [:db.part/structure -3003]}
+ {:db/id #db/id [:db.part/structure -3022]
+  :literal/text "Protagonist"}
+
+]
 

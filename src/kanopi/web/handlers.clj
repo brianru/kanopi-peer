@@ -48,6 +48,7 @@
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
+        _ (println "UPDATE DATUM LABEL" message)
         data     (data/update-datum-label
                   data-svc creds
                   (get-in message [:noun :existing-entity])
@@ -63,7 +64,11 @@
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
-        ;;data     (data/update-fact
-        ;;          data-svc creds
-        ;;          (get message :noun))
-        ]))
+        data     nil ;(data/update-fact data-svc creds (get message :noun))
+        ]
+    (hash-map
+     :noun nil
+     :verb (if data
+             :update-fact-success
+             :update-fact-failure)
+     :context {})))

@@ -139,22 +139,79 @@
 
     (testing "tagged uri literal")
     (testing "tagged email-address literal")
+
+    (component/stop system)
     ))
 
-;; TODO: test user-datum input fns
+(defn- datums-with-titles [db]
+  (d/q '[:find [?datum ...]
+         :where
+         [?datum :datum/fact ?fact]
+         [?fact :fact/attribute ?attr]
+         [?attr :datum/label "Title"]
+         ]
+       db))
+
+(defn- get-db [sys]
+  (d/db (get-in sys [:datomic-peer :connection])))
+
 (deftest context-datums
-  (let []
-    (is false)
+  (let [{data-svc :data-service :as system}
+        (component/start (test-util/system-excl-web))
+
+        creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
+                   (auth/credentials (:authenticator system) "brian"))
+        db     (get-db system)
+        datum-id (d/q '[:find ?s . :where [?s :datum/label "David Foster Wallace"]] db)
+        results (data/context-datums data-svc creds datum-id)
+        ]
+    (is (not-empty results))
+
+    (testing "context-datums are all datums"
+      (is (->> results
+               (map first)
+               (map (comp :datum/label (partial d/entity db)))
+               (every? identity))))
+
+    (testing "one step removed")
+
     ))
 
 (deftest similar-datums
-  (let []
-    (is false)
+  (let [
+        {data-svc :data-service :as system}
+        (component/start (test-util/system-excl-web))
+        creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
+                   (auth/credentials (:authenticator system) "brian"))
+        db     (get-db system)
+        datum-ids (datums-with-titles db)
+        results (data/similar-datums data-svc creds (first datum-ids))
+        ]
+    (is (not-empty results))
+    (testing "all books with titles are similar to each other"
+      (let []
+        (clojure.set/subset? (set datum-ids)
+                             (set (cons (first datum-ids) (map first results))))
+        ))
+
+    (testing "similar datums are all datums"
+      (is (->> results
+               (map first)
+               (map (comp :datum/label (partial d/entity db)))
+               (every? identity)
+               )))
+
+    (component/stop system)
     ))
 
 (deftest most-edited-datums
-  (let []
+  (let [
+        system (component/start (test-util/system-excl-web))
+        creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
+                   (auth/credentials (:authenticator system) "brian"))
+        ]
     (is false)
+    (component/stop system)
     ))
 
 (deftest most-viewed-datums
@@ -163,8 +220,14 @@
     ))
 
 (deftest recent-datums
-  (let []
-    (is false)
+  (let [{data-svc :data-service :as system}
+        (component/start (test-util/system-excl-web))
+        creds (auth/credentials (:authenticator system) "hannah")
+        results (data/recent-datums data-svc creds)
+        db (get-db system)
+        ]
+    (is (not-empty results))
+    (println "HERE" results)
     ))
 
 ;;(deftest authorization-controls

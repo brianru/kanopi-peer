@@ -1,6 +1,4 @@
-(ns kanopi.model.schema
-  (:require [cljs-uuid-utils.core :refer (make-random-uuid)]
-            ))
+(ns kanopi.model.schema)
 
 (defn describe-entity [m]
   (cond

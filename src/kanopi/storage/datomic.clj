@@ -3,6 +3,8 @@
   (:require [datomic.api :as d]
             [com.stuartsierra.component :as component]))
 
+;; FIXME: add tx datums including txInstant, set to last modified for
+;; file
 (defn- load-files! [conn files]
   (doseq [file-path files]
     (println "loading " file-path)
