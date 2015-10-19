@@ -340,3 +340,15 @@
   [aether history app-state msg]
   (let []
     ))
+
+(defmethod local-event-handler :initialize-client-state-success
+  [aether history app-state msg]
+  (let []
+    (om/transact! app-state
+                  (fn [app-state]
+                    (merge app-state (get msg :noun))))))
+
+;; TODO: implement.
+(defmethod local-event-handler :initialize-client-state-success
+  [aether history app-state msg]
+  )

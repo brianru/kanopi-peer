@@ -17,15 +17,17 @@
   [request-context message]
   (identity message))
 
-;; TODO: implement this.
 (defmethod request-handler :initialize-client-state
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
-        data     nil]
+        data     (hash-map
+                  :most-edited-datums (data/most-edited-datums data-svc creds)
+                  :most-viewed-datums (data/most-viewed-datums data-svc creds)
+                  :recent-datums      (data/recent-datums data-svc creds))]
     (hash-map
      :noun    data
-     :verb    (if data
+     :verb    (if (->> data (vals) (apply concat) (not-empty))
                 :initialize-client-state-success
                 :initialize-client-state-failure)
      :context {})))

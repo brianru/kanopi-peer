@@ -144,11 +144,27 @@
 ;; TODO: test user-datum input fns
 (deftest context-datums
   (let []
-    
+    (is false)
     ))
 
 (deftest similar-datums
   (let []
+    (is false)
+    ))
+
+(deftest most-edited-datums
+  (let []
+    (is false)
+    ))
+
+(deftest most-viewed-datums
+  (let []
+    (is false)
+    ))
+
+(deftest recent-datums
+  (let []
+    (is false)
     ))
 
 ;;(deftest authorization-controls

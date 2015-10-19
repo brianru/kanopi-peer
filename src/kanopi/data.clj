@@ -21,9 +21,10 @@
 
   (context-datums [this creds datum-id])
   (similar-datums [this creds datum-id])
-  (user-datum [this creds datum-id]
-              [this creds as-of datum-id])
+  (user-datum [this creds datum-id])
 
+  (most-edited-datums [this creds])
+  (most-viewed-datums [this creds])
   (recent-datums [this creds])
 
   (add-fact      [this creds datum-id attribute value])
@@ -88,14 +89,14 @@
               :similar-datums
               (similar-datums this creds datum-id)
               ))
-  (user-datum [this creds as-of datum-id]
-    (hash-map :context-datums
-              (context-datums this creds datum-id)
-              :datum
-              (get-datum this creds as-of datum-id)
-              :similar-datums
-              (similar-datums this creds datum-id)
-              ))
+
+  (most-edited-datums [this creds]
+    (let []
+      ))
+
+  (most-viewed-datums [this creds]
+    (let []
+      ))
 
   (recent-datums [this creds]
     (let [user-id (-> creds :role)]

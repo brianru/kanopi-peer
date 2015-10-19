@@ -46,19 +46,8 @@
            (:login :logout :register)
            (om/build user/authentication props)
 
-           ;; TODO: welcome datum
+           ;; default
            (om/build datum-search/suggestions props)
-;;           [:div.home-page
-;;            (let [datums (->> (get props :cache)
-;;                              (vals))]
-;;              [:ul
-;;              (for [t datums
-;;                    :when (:datum/label t)]
-;;                [:li
-;;                 [:a {:href (browser/route-for owner :datum :id (:db/id t))}
-;;                  [:span (:datum/label t)]] ]
-;;                )])
-;;            ]
            )
          ]
         [:div.footer-container
