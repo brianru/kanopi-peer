@@ -45,15 +45,21 @@
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
                  :page  {}
+                 ;; TODO: rename to current-datum
                  :datum {:context-datums []
                          :datum {}
                          :similar-datums []
                          }
+                 :most-viewed-datums []
+                 :most-edited-datums []
+                 :recent-datums []
                  ;; TODO: this map grows too fast.
                  ;; implement a map that only stores the last n
                  ;; entries, everything else gets dropped off the
                  ;; back
                  :search-results {"foo" [[0.75 "food"] [0.42 "baffoon"]]}
+
+                 :error-messages []
 
                  ;; local cache
                  ;; {<ent-id> <entity>}

@@ -17,6 +17,19 @@
   [request-context message]
   (identity message))
 
+;; TODO: implement this.
+(defmethod request-handler :initialize-client-state
+  [request-context message]
+  (let [data-svc (util/get-data-service request-context)
+        creds    (get-in message [:context :creds])
+        data     nil]
+    (hash-map
+     :noun    data
+     :verb    (if data
+                :initialize-client-state-success
+                :initialize-client-state-failure)
+     :context {})))
+
 (defmethod request-handler :get-datum
   [request-context message]
   (let [data-svc (util/get-data-service request-context)

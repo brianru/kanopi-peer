@@ -41,7 +41,6 @@
 
 (defn dequeue-set! [s]
   (let [itm (first @s)]
-    (println "dequeue-set" (type @s))
     (swap! s #(disj % itm))
     itm))
 
@@ -63,7 +62,7 @@
    (assoc req :handler (constantly nil))
 
    (= response-method :log)
-   (assoc req :handler (comp println response-xform))
+   (assoc req :handler (comp #(info %) response-xform))
 
    (= response-method :aether)
    (assoc req :handler (comp (partial aether/send! aether) response-xform))
@@ -186,7 +185,6 @@
   ([a ch]
    (add-watch a nil (fn [key atom old-state new-state]
                       (when-let [diff (not-empty (clojure.set/difference new-state old-state))]
-                        (println "here" diff)
                         (async/put! ch diff))))
    ch))
 
@@ -213,7 +211,7 @@
                   priority-fn (constantly 0)
                   n           3}}
           config
-          _         (info "start spout" dimension value)
+          ;_         (info "start spout" dimension value)
           q         (new-request-queue priority-fn)
           notify-ch (watch-and-notify q)
           workers   (doall (repeatedly n-parallelism
@@ -234,7 +232,7 @@
              :kill-ch kill-ch)))
 
   (stop [this]
-    (info "stop spout" (get config :dimension) (get config :value))
+    #_(info "stop spout" (get config :dimension) (get config :value))
     (assoc this
            :queue     (swap! queue (constantly {}))
            :notify-ch (async/close! notify-ch)

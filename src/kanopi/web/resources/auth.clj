@@ -155,7 +155,7 @@
                           "application/json"]
   :new? false
   :respond-with-entity? true
-  ;; FIXME: media-type is always text/html?
+  ;; FIXME: media-type is always text/html? what is friend doing?
   :post-redirect? (fn [ctx]
                     (let [media-type (get-in ctx [:representation :media-type])]
                       (cond
@@ -181,8 +181,7 @@
                   (not= media-type "text/html")
                   (-> (friend/current-authentication (get-in ctx [:request]))
                       (rep/as-response ctx)
-                      (rep/ring-response)
-                      )
+                      (rep/ring-response))
                   
                   (= media-type "text/html")
                   (-> "<h1>\"Success\"</h1>"

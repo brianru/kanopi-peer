@@ -42,7 +42,12 @@
                [:label "Other stuff"]]])
            [:div.row
             [:div.col-md-offset-2.col-md-2
-             [:label "About us"]]]
+             [:label "About"]]
+            [:div.col-md-2
+             [:label "Help"]]
+            [:div.col-md-2
+             [:label "Contact"]]
+            ]
            ]
           ])))))
 

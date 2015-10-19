@@ -276,37 +276,48 @@
              (aether/send! aether))))))
 
 (defmethod local-event-handler :register-success
-  [aether history app-state msg]
+  [aether history app-state {:keys [noun] :as msg}]
   (let []
     (om/transact! app-state
                   (fn [app-state]
                     (assoc app-state
-                           :user (get msg :noun)
-                           :mode :authenticated)))
-    (history/navigate-to! history :home)))
-
-;; TODO: implement.
-(defmethod local-event-handler :register-failure
-  [aether history app-state msg]
-  (let []
-    ))
-
-;; TODO: this must get a lot more data. we must re-initialize
-;; app-state with this users' data.
-(defmethod local-event-handler :login-success
-  [aether history app-state msg]
-  (let []
-    (om/transact! app-state
-                  (fn [app-state]
-                    (assoc app-state
-                           :user (get msg :noun)
+                           :user noun
                            :mode :authenticated
                            :datum {:context-datums []
                                    :datum {}
                                    :similar-datums []}
                            :cache {})))
     (history/navigate-to! history :home)
-    ))
+    (->> (msg/initialize-client-state noun)
+         (aether/send! aether))))
+
+;; TODO: implement.
+;; NOTE: example implementation. think about it more.
+(defmethod local-event-handler :register-failure
+  [aether history app-state msg]
+  (let []
+    (om/transact! app-state :error-messages
+                  (fn [msgs]
+                    (conj msgs {:type :register-failure
+                                :msg  msg})))))
+
+;; TODO: this must get a lot more data. we must re-initialize
+;; app-state with this users' data.
+(defmethod local-event-handler :login-success
+  [aether history app-state {:keys [noun] :as msg}]
+  (let []
+    (om/transact! app-state
+                  (fn [app-state]
+                    (assoc app-state
+                           :user noun
+                           :mode :authenticated
+                           :datum {:context-datums []
+                                   :datum {}
+                                   :similar-datums []}
+                           :cache {})))
+    (history/navigate-to! history :home)
+    (->> (msg/initialize-client-state noun)
+         (aether/send! aether))))
 
 ;; TODO: implement.
 (defmethod local-event-handler :login-failure

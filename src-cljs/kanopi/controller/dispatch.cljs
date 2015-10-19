@@ -39,10 +39,13 @@
               :logout-success   :logout-failure
               :register-success :register-failure
 
+              :initialize-client-state-success :initialize-client-state-failure
               :get-datum-success :get-datum-failure
               } 
     :remote #{
               :login :logout :register
+
+              :initialize-client-state
 
               :get-datum
               :update-fact
