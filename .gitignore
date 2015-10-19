@@ -1,8 +1,8 @@
 /target
 /classes
 /checkouts
-/resources/public/js/out
-/resources/public/js/main.js
+/resources/public/js/out*
+/resources/public/js/main*.js
 /dev-resources/public/js/out
 /dev-resources/public/js/main.js
 pom.xml
