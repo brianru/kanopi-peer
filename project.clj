@@ -114,7 +114,7 @@
                ;; lein figwheel to run with auto-reloading
                ;; lein cljsbuild once to run otherwise
                {:id :dev
-                :source-paths ["src-cljs" "dev-cljs"]
+                :source-paths ["src-cljs"]
                 :figwheel {:on-jsload "kanopi.core/reload-om"}
                 :compiler {:output-to "resources/public/js/main.js"
                            :output-dir "resources/public/js/out"
@@ -128,12 +128,12 @@
                {:id :devcards
                 :source-paths ["src-cljs" "dev-cljs"]
                 :figwheel {:devcards true}
-                :compiler {:output-to "dev-resources/public/js/main.js"
-                           :output-dir "dev-resources/public/js/out"
-                           :asset-path "js/out"
+                :compiler {:output-to "resources/public/js/main_devcards.js"
+                           :output-dir "resources/public/js/out_devcards"
+                           :asset-path "js/out_devcards"
                            :main kanopi.devcards
                            :optimizations :none
                            :pretty-print true
-                           :source-map "dev-resources/public/js/source_map.js"}}
+                           :source-map "resources/public/js/source_map_devcards.js"}}
                ]
               })
