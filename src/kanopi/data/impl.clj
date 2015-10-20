@@ -1,9 +1,22 @@
 (ns kanopi.data.impl
   (:require [datomic.api :as d]
             [kanopi.util.core :as util]
+            [kanopi.model.schema :as schema]
             [kanopi.storage.datomic :as datomic]))
 
 (declare describe-value-literal)
+
+(defn entity->input [ent]
+  (case (schema/describe-entity ent)
+    :datum
+    (vector :db/id (get ent :db/id))
+
+    :literal
+    (let [k (-> ent (dissoc :db/id) (keys) (first))]
+      (vector k (get ent k)))
+
+    :default
+    nil))
 
 (defn user-default-role [creds]
   (let [username (get creds :username)]
@@ -48,13 +61,14 @@
     }
    })
 
-(defn valid-tagged-literal? [[tp v :as literal]]
-  (and
-   (vector? literal)
-   (identity tp)
-   (identity v)
-   (get literal-types tp)
-   ((get-in literal-types [tp :predicate]) v)))
+(defn valid-tagged-literal? [literal]
+  (when (vector? literal)
+    (let [[tp v] literal]
+      (and
+       (identity tp)
+       (identity v)
+       (get literal-types tp)
+       ((get-in literal-types [tp :predicate]) v)))))
 
 (defn describe-value-literal [value]
   (cond

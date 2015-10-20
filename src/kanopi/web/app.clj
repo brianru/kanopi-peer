@@ -58,7 +58,7 @@
                  (assoc :security false)))
             (ring.middleware.params/wrap-params)
             (ring.middleware.keyword-params/wrap-keyword-params)
-            (ring.middleware.format/wrap-restful-format :formats [:json :edn :transit-json])
+            ;;(ring.middleware.format/wrap-restful-format :formats [:json :edn :transit-json])
             (ring.middleware.cookies/wrap-cookies)
             (cond-> (:dev config)
               (wrap-trace :header :ui))

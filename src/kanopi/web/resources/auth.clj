@@ -244,6 +244,8 @@
                      user (get ctx ::identity {})]
                  (cond
                   (not= media-type "text/html")
+                  ;; FIXME: this response does not match response from
+                  ;; successful login. roles is destructed here.
                   (-> user
                       (rep/as-response ctx)
                       (friend/merge-authentication user)

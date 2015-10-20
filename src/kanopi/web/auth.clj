@@ -70,7 +70,6 @@
                     :username (get-in creds [:user/id])
                     :password (get-in creds [:user/password])))]
       (when creds'
-        (println "HERE" creds')
         (assert (valid-credentials? creds') "Invalid credential map."))
       creds'))
 

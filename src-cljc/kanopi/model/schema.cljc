@@ -1,27 +1,30 @@
 (ns kanopi.model.schema)
 
 (defn describe-entity [m]
-  (cond
-   (contains? m :datum/label)
-   :datum
-   (contains? m :fact/attribute)
-   :fact
-   (contains? m :value/string)
-   :literal/text
+  (let [ks (keys m)]
+    (cond
+     (some #{:datum/label :datum/role} ks)
+     :datum
 
-   :default
-   :unknown))
+     (some #{:fact/attribute :fact/value} ks)
+     :fact
+
+     (some (comp #{"literal"} namespace) ks)
+     :literal
+
+     :default
+     :unknown)))
 
 (defn datum? [m]
   (= :datum (describe-entity m)))
 (defn fact? [m]
   (= :fact (describe-entity m)))
 (defn literal? [m]
-  (= :literal/text (describe-entity m)))
+  (= :literal (describe-entity m)))
 
 (def default-value-key
   {:datum :datum/label
-   :literal/text :value/string})
+   :literal :literal/text})
 
 (defn get-value
   ([m]

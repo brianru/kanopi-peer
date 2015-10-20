@@ -29,7 +29,7 @@
 
 (defn initialize-client-state [user]
   (hash-map
-   :noun user
+   :noun (update user :roles (partial into (list)))
    :verb :initialize-client-state
    :context {}))
 
@@ -209,8 +209,8 @@
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map 
-   :noun {:body msg
-          :uri  (history/get-route-for history :api)
+   :noun {:uri  (history/get-route-for history :api)
+          :body msg
           :method :post
           :response-format :transit
           :response-method :aether

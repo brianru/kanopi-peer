@@ -25,6 +25,7 @@
   "If for some reason the request is in some way logically incomplete,
   here's the place to indicate that."
   ([ctx]
+   (println "->>" (get-in ctx [:request]))
    (let [body        (util/transit-read (get-in ctx [:request :body]))
          params      (get-in ctx [:request :params])
          parsed-body (->> (merge body params)

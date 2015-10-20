@@ -9,8 +9,7 @@
   (fn [request-context message]
     (println "Request-handler")
     (pprint message)
-    (get message :verb))
-  :default
+    (get message :verb)) :default
   :echo)
 
 (defmethod request-handler :echo
@@ -48,7 +47,6 @@
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
-        _ (println "UPDATE DATUM LABEL" message)
         data     (data/update-datum-label
                   data-svc creds
                   (get-in message [:noun :existing-entity])
@@ -62,12 +60,17 @@
 
 (defmethod request-handler :update-fact
   [request-context message]
-  (let [data-svc (util/get-data-service request-context)
-        creds    (get-in message [:context :creds])
-        data     nil ;(data/update-fact data-svc creds (get message :noun))
+  (let [data-svc  (util/get-data-service request-context)
+        creds     (get-in message [:context :creds])
+        datm-id   (get-in message [:noun :datum-id])
+        fact      (get-in message [:noun :fact])
+        _ (println "UPDATE_FACT REQUEST_HANDLER" fact)
+        data      (if (:db/id fact)
+                    (data/update-fact data-svc creds fact)
+                    (data/add-fact    data-svc creds datm-id fact)) 
         ]
     (hash-map
-     :noun nil
+     :noun data
      :verb (if data
              :update-fact-success
              :update-fact-failure)

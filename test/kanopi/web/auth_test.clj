@@ -54,4 +54,3 @@
     (let []
       )))
 
-;; TODO: test registering existing username

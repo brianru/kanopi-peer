@@ -16,6 +16,7 @@
             [kanopi.util.core :as util]
             [kanopi.system :as sys]
             [kanopi.main :as main]
+            [kanopi.data :as data]
             [kanopi.web.app :as web-app]
             [kanopi.web.auth :as auth]
             ))
@@ -203,6 +204,7 @@
 
 (deftest message-passing-api
   (let [system  (component/start (test-util/system-excl-web-server))
+        data-svc (get system :data-service)
         handler (get-in system [:web-app :app-handler])
         creds   {:username "mickey", :password "mouse"}
         _       (-> (mock/request :post "/register" creds)
@@ -261,11 +263,13 @@
         (is (= lbl' (-> body :noun :datum/label)))
         ))
 
-    ;; TODO: implement update-fact handler.
-    (testing "update-fact"
+    (testing "add then update fact"
       (let [test-ent-id (first datum-ent-ids)
+            test-ent (data/get-datum data-svc creds test-ent-id)
             fact' ["age" 42]
-            message {:noun {}
+            message {:noun {:datum-id test-ent-id
+                            :fact {:fact/attribute {:literal/text "age"}
+                                   :fact/value {:literal/integer 42}}}
                      :verb :update-fact
                      :context {}}
             req   (-> (mock/request :post "/api"
@@ -273,9 +277,43 @@
                       (mock/content-type "application/transit+json")
                       (test-util/assoc-basic-auth creds))
             resp  (handler req)
-            body  (util/transit-read (:body resp))]
+            body  (util/transit-read (:body resp))
+            
+            test-ent' (data/get-datum data-svc creds test-ent-id)
+            old-facts (-> test-ent :datum/fact set)
+
+            [new-fact & _ :as new-facts]
+            (->> (clojure.set/difference (-> test-ent' :datum/fact set) old-facts)
+                 (into (list))) 
+            ]
         (is (= 200 (:status resp)))
-        (is (= :update-fact-success (get body :verb)))))
+        (is (= :update-fact-success (get body :verb)))
+        (is (not-empty new-facts))
+        (is (= 1 (count new-facts)))
+        (is (= ["age" 42] (util/fact-entity->tuple new-fact)))
+
+        (let [message {:noun {:datum-id test-ent-id
+                              :fact (assoc-in new-fact [:fact/value :literal/integer] 17)}
+                       :verb :update-fact
+                       :context {}}
+              req (-> (mock/request :post "/api" (util/transit-write message))
+                      (mock/content-type "application/transit+json")
+                      (test-util/assoc-basic-auth creds))
+              resp (handler req)
+              body (util/transit-read (:body resp))
+              test-ent'' (data/get-datum data-svc creds test-ent-id)
+              updated-facts (clojure.set/difference
+                             (-> test-ent'' :datum/fact set)
+                             (-> test-ent'  :datum/fact set)) ]
+          (is (= 200 (:status resp)))
+          (is (= :update-fact-success (get body :verb)))
+          (is (not-empty updated-facts))
+          (is (= 1 (count updated-facts)))
+          (is (= ["age" 17] (util/fact-entity->tuple (first updated-facts))))
+          (println "UPDATED FACTS")
+          (clojure.pprint/pprint message)
+          (clojure.pprint/pprint (-> test-ent'' :datum/fact)))
+        ))
 
     (component/stop system)))
 

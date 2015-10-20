@@ -27,9 +27,14 @@
   (most-viewed-datums [this creds])
   (recent-datums [this creds])
 
-  (add-fact      [this creds datum-id attribute value])
-  (update-fact   [this creds fact-id attribute value]
-                 "attribute and value can be nil.")
+  ;; TODO: add arities accepting fact as an entity map? this is how
+  ;; the client sends the facts. the extra arity would just parse the
+  ;; entity map into the attr/value input shape [_tag_ _value_]]
+  (add-fact [this creds datum-id fact]
+            [this creds datum-id attribute value])
+  (update-fact [this creds fact]
+               [this creds fact-id attribute value]
+               "attribute and value can be nil.")
 
   (retract-datum [this creds ent-id]
                  "Assumes only 1 user has access, and thus retracting totally retracts it.
@@ -124,12 +129,18 @@
            (datomic/db datomic-peer creds)
            user-roles)))
 
+  (add-fact [this creds ent-id {:keys [fact/attribute fact/value] :as fact}]
+    (add-fact this creds ent-id (entity->input attribute) (entity->input value)))
+
   (add-fact [this creds ent-id attribute value]
     (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)
           txdata (conj (:txdata fact)
                        [:db/add ent-id :datum/fact (:ent-id fact)])
           report @(datomic/transact datomic-peer creds txdata)]
       (get-datum* (:db-after report) ent-id)))
+
+  (update-fact [this creds {:keys [db/id fact/attribute fact/value] :as fact}]
+    (update-fact this creds id (entity->input attribute) (entity->input value)))
 
   (update-fact [this creds fact-id attribute value]
     (let [fact-diff (update-fact->txdata datomic-peer creds fact-id attribute value)
