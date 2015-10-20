@@ -310,9 +310,7 @@
           (is (not-empty updated-facts))
           (is (= 1 (count updated-facts)))
           (is (= ["age" 17] (util/fact-entity->tuple (first updated-facts))))
-          (println "UPDATED FACTS")
-          (clojure.pprint/pprint message)
-          (clojure.pprint/pprint (-> test-ent'' :datum/fact)))
+          )
         ))
 
     (component/stop system)))

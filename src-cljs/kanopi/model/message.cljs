@@ -224,7 +224,8 @@
   {:post [(valid-remote-message? %)]}
   (hash-map
    :noun {:uri             (history/get-route-for history :api)
-          :body            msg
+          :params          msg
+          :format          :transit
           :method          :post
           :response-format :transit
           :response-method :aether
@@ -237,7 +238,8 @@
   {:post [(valid-remote-message? %)]}
   (hash-map
    :noun {:uri             (history/get-route-for history :api)
-          :body            msg
+          :params          msg
+          :format          :transit
           :method          :post
           :response-format :transit
           :response-method :aether
@@ -246,13 +248,13 @@
    :verb :request
    :context {}))
 
-;; TODO: implement
 (defmethod local->remote :update-datum-label
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
    :noun {:uri             (history/get-route-for history :api)
-          :body            msg
+          :params          msg
+          :format          :transit
           :method          :post
           :response-format :transit
           :response-method :aether
@@ -261,16 +263,16 @@
    :verb :request
    :context {}))
 
-;; TODO: implement
 (defmethod local->remote :update-fact
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
-   :noun {:uri (history/get-route-for history :api)
-          :body msg
-          :method :post
+   :noun {:uri             (history/get-route-for history :api)
+          :params          msg
+          :method          :post
+          :format          :transit
           :response-format :transit
           :response-method :aether
-          :error-method :aether}
+          :error-method    :aether}
    :verb :request
    :context {}))
