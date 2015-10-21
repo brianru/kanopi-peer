@@ -68,7 +68,19 @@
     (component/stop sys)))
 
 (deftest change-password
-  (testing ""
-    (let []
-      )))
+  (let [sys (-> (test-util/system-excl-web)
+                (component/start))
+        username "brian"
+        password "rubinton"
+        password' "oreos"
+        _        (register! (:authenticator sys) username password)]
+    (testing "before"
+      (is (verify-creds (:authenticator sys) username password)))
+    (testing "change password"
+      (is (change-password! (:authenticator sys) username password password')))
+    (testing "after"
+      (is (verify-creds (:authenticator sys) username password')))
+
+    (component/stop sys)
+    ))
 

@@ -36,8 +36,9 @@
 
 (defprotocol IAuthenticate
   (credentials  [this username])
-  (verify-creds [this input-creds])
-  (register!    [this username password]))
+  (verify-creds [this input-creds] [this username password])
+  (register!    [this username password])
+  (change-password! [this username current-password new-password]))
 
 (defn valid-credentials? [creds]
   (and
@@ -74,6 +75,8 @@
       creds'))
 
   (verify-creds [this {:keys [username password]}]
+    (verify-creds this username password))
+  (verify-creds [this username password]
     (some->> (credentials this username)
              :password
              (creds/bcrypt-verify password)))
@@ -106,6 +109,20 @@
                   ) 
           report @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-ent-id)))
+
+  (change-password! [this username current-password new-password]
+    (assert (and (not= current-password new-password)
+                 (not-empty new-password))
+            "New password is invalid")
+    (assert (verify-creds this username current-password)
+            "Current password is incorrect")
+    (let [{user-ent-id :ent-id :as creds} (credentials this username)
+          txdata [
+                  [:db/retract user-ent-id :user/password current-password]
+                  [:db/add     user-ent-id :user/password (creds/hash-bcrypt new-password)]
+                  ]
+          report @(datomic/transact database creds txdata)]
+      (verify-creds this username new-password)))
 
   component/Lifecycle
 
