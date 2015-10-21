@@ -1,16 +1,8 @@
 [
- {:db/id #db/id [:db.part/users -1000]
-  :role/id "hannah"
-  :role/label "hannah"}
 
- {:db/id #db/id [:db.part/users -2000]
-  :user/id "hannah"
-  :user/password "rubinton"
-  :user/role #db/id [:db.part/users -1000]}
 
  {:db/id #db/id [:db.part/structure -3000]
   :datum/label "Infinite Jest"
-  :datum/role #db/id [:db.part/users -1000]
   :datum/fact [#db/id [:db.part/structure -3001]
                #db/id [:db.part/structure -3004]
                #db/id [:db.part/structure -3007]]}
@@ -21,10 +13,10 @@
   :fact/value #db/id [:db.part/structure -3003]}
  {:db/id #db/id [:db.part/structure -3002]
   :datum/label "Author"
-  :datum/role #db/id [:db.part/users -1000]}
+  }
  {:db/id #db/id [:db.part/structure -3003]
   :datum/label "David Foster Wallace"
-  :datum/role #db/id [:db.part/users -1000]}
+  }
 
  ;; Title: Infinite Jest
  {:db/id #db/id [:db.part/structure -3004]
@@ -32,7 +24,7 @@
   :fact/value #db/id [:db.part/structure -3006]}
  {:db/id #db/id [:db.part/structure -3005]
   :datum/label "Title"
-  :datum/role #db/id [:db.part/users -1000]}
+  }
  {:db/id #db/id [:db.part/structure -3006]
   :literal/text "Infinite Jest"}
 
@@ -42,16 +34,15 @@
   :fact/value #db/id [:db.part/structure -3009]}
  {:db/id #db/id [:db.part/structure -3008]
   :datum/label "Date read"
-  :datum/role #db/id [:db.part/users -1000]}
+  }
  {:db/id #db/id [:db.part/structure -3009]
   :literal/text "10 October 2015"}
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
  ;; 
  {:db/id #db/id [:db.part/structure -3010]
   :datum/label "The Pale King"
-  :datum/role #db/id [:db.part/users -1000]
   :datum/fact [#db/id [:db.part/structure -3001]
                #db/id [:db.part/structure -3011]
                #db/id [:db.part/structure -3013]
@@ -71,12 +62,11 @@
  {:db/id #db/id [:db.part/structure -3014]
   :literal/text "15 October 2015"}
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
  ;;
  {:db/id #db/id [:db.part/structure -3015]
   :datum/label "Consider the Lobster"
-  :datum/role #db/id [:db.part/users -1000]
   :datum/fact [#db/id [:db.part/structure -3001]
                #db/id [:db.part/structure -3016]
                ]}
@@ -88,29 +78,61 @@
  {:db/id #db/id [:db.part/structure -3017]
   :literal/text "Consider the Lobster"}
 
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
  ;;
  {:db/id #db/id [:db.part/structure -3018]
   :datum/label "The End of the Tour"
-  :datum/role #db/id [:db.part/users -1000]
   :datum/fact [#db/id [:db.part/structure -3019]
                #db/id [:db.part/structure -3021]
                ]}
 
  ;; Title: The End of the Tour
- {:db/id #db/id [:db.part/structure -3019]
-  :fact/attribute #db/id [:db.part/structure -3005]
-  :fact/value #db/id [:db.part/structure -3020]}
- {:db/id #db/id [:db.part/structure -3020]
-  :literal/text "The End of the Tour"}
+{:db/id #db/id [:db.part/structure -3019]
+ :fact/attribute #db/id [:db.part/structure -3005]
+ :fact/value #db/id [:db.part/structure -3020]}
+{:db/id #db/id [:db.part/structure -3020]
+ :literal/text "The End of the Tour"}
 
- ;; Protagonist: David Foster Wallace
- {:db/id #db/id [:db.part/structure -3021]
-  :fact/attribute #db/id [:db.part/structure -3022]
-  :fact/value #db/id [:db.part/structure -3003]}
- {:db/id #db/id [:db.part/structure -3022]
-  :literal/text "Protagonist"}
+;; Protagonist: David Foster Wallace
+{:db/id #db/id [:db.part/structure -3021]
+ :fact/attribute #db/id [:db.part/structure -3022]
+ :fact/value #db/id [:db.part/structure -3003]}
+{:db/id #db/id [:db.part/structure -3022]
+ :literal/text "Protagonist"}
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;
+ {:db/id #db/id [:db.part/structure -3023]
+  :datum/label "Exercise: Monday, 19 October 2015"
+  :datum/fact [#db/id [:db.part/structure -3024]
+               #db/id [:db.part/structure -3027]
+               #db/id [:db.part/structure -3029]
+               ]}
+
+;; Number of 5.5 routes completed: 3
+{:db/id #db/id [:db.part/structure -3024]
+ :fact/attribute #db/id [:db.part/structure -3025]
+ :fact/value #db/id [:db.part/structure -3026]}
+{:db/id #db/id [:db.part/structure -3025]
+ :literal/text "Number of 5.5 routes completed"}
+{:db/id #db/id [:db.part/structure -3026]
+ :literal/integer 3}
+
+;; Number of 5.6 routes completed: 3
+{:db/id #db/id [:db.part/structure -3027]
+ :fact/attribute #db/id [:db.part/structure -3028]
+ :fact/value #db/id [:db.part/structure -3026]}
+{:db/id #db/id [:db.part/structure -3028]
+ :literal/text "Number fo 3.6 routes completed"}
+
+;; Number of 5.7 routes completed: 2
+{:db/id #db/id [:db.part/structure -3029]
+ :fact/attribute #db/id [:db.part/structure -3030]
+ :fact/value #db/id [:db.part/structure -3031]}
+{:db/id #db/id [:db.part/structure -3030]
+ :literal/text "Number of 5.7 routes completed"}
+{:db/id #db/id [:db.part/structure -3031]
+ :literal/integer 2}
 ]
 

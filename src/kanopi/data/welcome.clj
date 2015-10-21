@@ -5,9 +5,12 @@
 
    {:db/id #db/id [:db.part/structure -3000]
     :datum/label "Welcome to Kanopi"
-    :datum/fact [
+    :datum/fact [#db/id [:db.part/structure -3001]
+
                  
                  ]}
+   {:db/id #db/id [:db.part/structure -3001]
+    }
    
    ])
 

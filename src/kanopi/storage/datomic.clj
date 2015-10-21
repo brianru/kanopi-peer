@@ -53,6 +53,7 @@
        (d/release connection)
        (assoc this :connection nil :db-mode nil))))
 
+  ;; TODO: implement authorization controls
   ISecureDatomic
   (db [this creds]
     (d/db connection))

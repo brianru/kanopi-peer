@@ -6,6 +6,7 @@
             [datomic.api :as d]
             [kanopi.data.impl :as data-impl]
             [kanopi.data :as data]
+            [kanopi.model.schema :as schema]
             [kanopi.storage.datomic :as datomic]
             [com.stuartsierra.component :as component]))
 
@@ -38,7 +39,7 @@
   (verify-creds [this input-creds])
   (register!    [this username password]))
 
-(defn- valid-credentials? [creds]
+(defn valid-credentials? [creds]
   (and
    (integer? (:ent-id creds))
    (coll?    (:role creds))
@@ -46,7 +47,6 @@
    (string?  (:username creds))
    (string?  (:password creds))))
 
-;; FIXME: refactor to use the data-service
 (defrecord AuthenticationService [config database user-lookup-fn]
 
   IAuthenticate
@@ -87,13 +87,23 @@
     ;; TODO: add audit datoms to the tx entity
     (let [user-ent-id  (d/tempid :db.part/user -1)
           user-role-id (d/tempid :db.part/users -1000)
-          txdata [
-                  [:db/add user-role-id :role/id username]
-                  [:db/add user-role-id :role/label username]
-                  [:db/add user-ent-id :user/id username]
-                  [:db/add user-ent-id :user/password (creds/hash-bcrypt password)]
-                  [:db/add user-ent-id :user/role user-role-id]
-                  ]
+          init-user-data (some-> (get config :init-user-data)
+                                 (slurp)
+                                 (read-string)
+                                 (->> (map (fn [ent]
+                                             (if (= :datum (schema/describe-entity ent))
+                                               (assoc ent :datum/role user-role-id)
+                                               ent)))))
+          txdata (concat
+                  [
+                   [:db/add user-role-id :role/id username]
+                   [:db/add user-role-id :role/label username]
+                   [:db/add user-ent-id :user/id username]
+                   [:db/add user-ent-id :user/password (creds/hash-bcrypt password)]
+                   [:db/add user-ent-id :user/role user-role-id]
+                   ]
+                  init-user-data
+                  ) 
           report @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-ent-id)))
 

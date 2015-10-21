@@ -18,6 +18,7 @@
                 :schema  ["resources/schema.edn"]
                 :data    ["resources/test-data.edn"
                           "resources/init-data.edn"]}
+   :auth       {:init-user-data ["resources/test-data.edn"]}
    :dev true})
 
 (defn system-config

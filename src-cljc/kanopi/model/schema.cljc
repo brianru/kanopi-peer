@@ -3,7 +3,7 @@
 (defn describe-entity [m]
   (let [ks (keys m)]
     (cond
-     (some #{:datum/label :datum/role} ks)
+     (some #{:datum/fact :datum/label :datum/role} ks)
      :datum
 
      (some #{:fact/attribute :fact/value} ks)

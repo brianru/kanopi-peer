@@ -3,6 +3,7 @@
             [clojure.pprint :refer (pprint)]
             [com.stuartsierra.component :as component]
             [cemerick.friend.credentials :as creds]
+            [datomic.api :as d]
             [kanopi.data :as data]
             [kanopi.test-util :as test-util]
             [kanopi.web.auth :refer :all]))
@@ -15,19 +16,36 @@
         res   (register! (:authenticator sys) username password)
         creds (credentials (:authenticator sys) username)]
 
+    (testing "valid credentials"
+      (clojure.pprint/pprint creds)
+      (is (valid-credentials? creds)))
+
     (testing "transaction succeeded"
       (is (not (nil? res)))
-      (is (= username (:username creds))))
+      (is (= username (get creds :username))))
 
+    ;; FIXME: don't understand why this is failing
     (testing "user stored as datum"
-      (is (data/get-datum (:data-service sys) creds (:ent-id creds))))
+      (let [user (data/get-datum (:data-service sys) creds (get creds :ent-id))]
+        (is (not-empty user))))
 
+    ;; FIXME: don't understand why this is failing
     (testing "user role created"
-      (is (data/get-datum (:data-service sys) creds (:role creds))))
+      (let [role (data/get-datum (:data-service sys) creds (-> creds :role first :db/id))]
+        (is (not-empty role))))
 
     (testing "password crypto works"
-      (is (not= password (:password creds)))
-      (is (creds/bcrypt-verify password (:password creds))))
+      (is (not= password (get creds :password)))
+      (is (creds/bcrypt-verify password (get creds :password))))
+
+    ;; FIXME: failing.
+    (testing "initial data loaded"
+      (let [user-data (d/q '[:find [?e ...]
+                             :in $ ?user-role
+                             :where [?e :datum/role ?user-role]]
+                           (d/db (get-in sys [:datomic-peer :connection]))
+                           (-> creds :role first :db/id))]
+        (is (not-empty user-data))))
 
     (component/stop sys)))
 
