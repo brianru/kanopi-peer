@@ -6,6 +6,7 @@
             [kanopi.model.ref-cursors :as ref-cursors]
             [kanopi.model.message :as msg]
             [kanopi.view.header :as header]
+            [kanopi.view.prompt :as prompt]
             [kanopi.view.footer :as footer]
             [kanopi.view.datum :as datum]
             [kanopi.view.datum-search :as datum-search]
@@ -36,6 +37,8 @@
         [:div.header-container
          (om/build header/header props)]
         [:div.page-container
+         [:div.prompt-container
+          (om/build prompt/prompt props)]
          (case (get-in props [:page :handler])
            :datum
            (om/build datum/container (get props :datum))

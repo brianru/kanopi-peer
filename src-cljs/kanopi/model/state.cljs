@@ -28,10 +28,7 @@
     (delete-cookie! id)
     c))
 
-;; FIXME: local storage must be stored per user
-;; FIXME: must wipe out localstorage when user logs out
-;; FIXME: this is accomplished simply by ensuring app-state is
-;; properly updated when user logs in and out.
+;; TODO: local storage should be stored per user
 (defrecord LocalStorageAppState [config local-storage app-state]
   component/Lifecycle
   (start [this]
@@ -39,9 +36,10 @@
           stored-app-state (local-storage/get! local-storage {})
           atm (atom
                (util/deep-merge
+                cookie
                 {
                  :mode :demo
-                 :user  (get cookie :user) 
+                 :user {}  
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
                  :page  {}

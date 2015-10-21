@@ -189,7 +189,7 @@
 ;; TODO: implement.
 (defmethod local-event-handler :update-datum-label-failure
   [aether history app-state msg]
-  )
+  (om/transact! app-state :error-messages #(conj % msg)))
 
 (defn- fuzzy-search-entity [q ent]
   (let [base-string (->> ent
@@ -257,6 +257,10 @@
                        (build-datum-data app-state)
                        (assoc app-state :datum)))))
 
+(defmethod local-event-handler :get-datum-failure
+  [aether history app-state msg]
+  (om/transact! app-state :error-messages #(conj % msg)))
+
 (defmethod local-event-handler :navigate
   [aether history app-state msg]
   (let [handler (get-in msg [:noun :handler])]
@@ -291,15 +295,9 @@
     (->> (msg/initialize-client-state noun)
          (aether/send! aether))))
 
-;; TODO: implement.
-;; NOTE: example implementation. think about it more.
 (defmethod local-event-handler :register-failure
   [aether history app-state msg]
-  (let []
-    (om/transact! app-state :error-messages
-                  (fn [msgs]
-                    (conj msgs {:type :register-failure
-                                :msg  msg})))))
+  (om/transact! app-state :error-messages #(conj % msg)))
 
 ;; TODO: this must get a lot more data. we must re-initialize
 ;; app-state with this users' data.
@@ -319,11 +317,10 @@
     (->> (msg/initialize-client-state noun)
          (aether/send! aether))))
 
-;; TODO: implement.
 (defmethod local-event-handler :login-failure
   [aether history app-state msg]
   (let []
-    ))
+    (om/transact! app-state :error-messages #(conj % msg))))
 
 (defmethod local-event-handler :logout-success
   [aether history app-state msg]
@@ -335,11 +332,10 @@
                            :mode :demo)))
     (history/navigate-to! history :home)))
 
-;; TODO: implement.
 (defmethod local-event-handler :logout-failure
   [aether history app-state msg]
   (let []
-    ))
+    (om/transact! app-state :error-messages #(conj % msg))))
 
 (defmethod local-event-handler :initialize-client-state-success
   [aether history app-state msg]
@@ -348,7 +344,6 @@
                   (fn [app-state]
                     (merge app-state (get msg :noun))))))
 
-;; TODO: implement.
-(defmethod local-event-handler :initialize-client-state-success
+(defmethod local-event-handler :initialize-client-state-failure
   [aether history app-state msg]
-  )
+  (om/transact! app-state :error-messages #(conj % msg)))

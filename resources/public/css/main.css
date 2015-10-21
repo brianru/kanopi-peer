@@ -136,6 +136,12 @@ a.navbar-brand:focus {
 .dropdown-menu-item {
     cursor: pointer;
 }
+
+.prompt {
+    margin-bottom: 20px;
+    text-align: center;
+    font-size: 18px;
+}
 /* Thunks */
 .datum-container {
     padding-top: 20px;
