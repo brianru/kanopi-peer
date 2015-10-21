@@ -42,6 +42,13 @@
                  role(s) from the entity.")
   )
 
+(defn annotate-transaction
+  "TODO: add tx datums
+  - who did it
+  - action performed"
+  [txdata action creds]
+  txdata)
+
 (defrecord DatomicDataService [config datomic-peer]
   IDataService
   (init-datum [this creds]
@@ -110,14 +117,21 @@
               ))
 
   (most-edited-datums [this creds]
-    (let []
-      ))
+    (let [user-roles (->> creds :role (mapv :db/id))]
+      (d/q '[:find ?e (count-distinct ?tx)
+             :in $ [?user-role ...]
+             :where
+             [?e :datum/role ?user-role]
+             [?e _ _ ?tx]]
+           (datomic/db datomic-peer creds)
+           user-roles)))
 
   (most-viewed-datums [this creds]
     (let []
-      ))
+      []))
 
   (recent-datums [this creds]
+    ;; TODO: filter by recency
     (let [user-roles (->> creds :role (mapv :db/id))]
       (d/q '[:find ?e ?time ?tx
              :in $ [?user-role ...]

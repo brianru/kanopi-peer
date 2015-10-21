@@ -20,13 +20,32 @@
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
+
+        most-edited-datums (data/most-edited-datums data-svc creds)
+        most-viewed-datums (data/most-viewed-datums data-svc creds)
+        recent-datums      (data/recent-datums data-svc creds)
+
+        ;; NOTE: map then concat because i have not settled on the
+        ;; shape of each collections' contents
+        all-datum-ids (concat
+                       (map first most-edited-datums)
+                       (map first most-viewed-datums)
+                       (map first recent-datums)) 
+        all-datums    (->> all-datum-ids
+                           (map (partial data/get-datum creds))
+                           (reduce (fn [acc datum]
+                                     (assoc acc (:db/id datum) datum))
+                                   {}))
+
         data     (hash-map
-                  :most-edited-datums (data/most-edited-datums data-svc creds)
-                  :most-viewed-datums (data/most-viewed-datums data-svc creds)
-                  :recent-datums      (data/recent-datums data-svc creds))]
+                  :most-edited-datums most-edited-datums
+                  :most-viewed-datums most-viewed-datums
+                  :recent-datums      recent-datums
+                  :cache              all-datums)
+        ]
     (hash-map
      :noun    data
-     :verb    (if (->> data (vals) (apply concat) (not-empty))
+     :verb    (if (-> data :cache not-empty)
                 :initialize-client-state-success
                 :initialize-client-state-failure)
      :context {})))

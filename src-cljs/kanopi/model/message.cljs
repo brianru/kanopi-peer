@@ -1,4 +1,7 @@
 (ns kanopi.model.message
+  "TODO: split namespaces. GOAL: one cljc namespace with core message
+  fns, separate namespaces for client-local messages, local->remote
+  messages, server-local messages, etc."
   (:require [om.core :as om]
             [kanopi.controller.history :as history]
             [cljs.core.async :as async]))
@@ -29,7 +32,7 @@
 
 (defn initialize-client-state [user]
   (hash-map
-   :noun (update user :roles (partial into (list)))
+   :noun user
    :verb :initialize-client-state
    :context {}))
 
