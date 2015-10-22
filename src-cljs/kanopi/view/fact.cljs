@@ -221,9 +221,9 @@
           {:on-mouse-enter #(om/set-state! owner :hovering true)
            :on-mouse-leave #(om/set-state! owner :hovering false)}
 
-          (when true ;;; dev-mode
-            [:span (str (:fact-part state)
-                        ": " (get-in state [:matching-entity :db/id]))])
+          #_(when true ;;; dev-mode
+              [:span (str (:fact-part state)
+                          ": " (get-in state [:matching-entity :db/id]))])
 
           (case mode
             :view
@@ -305,12 +305,12 @@
            ;; BEWARE: (get props :fact/attribute) returns a set which
            ;; is not compatible with Om cursors. Maps and vectors
            ;; only.)
-           (om/build fact-part (first (get props :fact/attribute))
+           (om/build fact-part (get props :fact/attribute)
                      {:init-state {:fact (:db/id props)
                                    :fact-part :fact/attribute}
                       :state (select-keys state [:mode :fact-hovering])})
 
-           (om/build fact-part (first (get props :fact/value))
+           (om/build fact-part (get props :fact/value)
                      {:init-state {:fact (:db/id props)
                                    :fact-part :fact/value}
                       :state (select-keys state [:mode :fact-hovering])})]

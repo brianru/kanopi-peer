@@ -23,7 +23,7 @@
                  ;; Client
                  [org.clojure/clojurescript "1.7.145"]
                  [quile/component-cljs "0.2.4" :exclusions [org.clojure/clojure]]
-                 [org.omcljs/om "1.0.0-alpha1"
+                 [org.omcljs/om "1.0.0-alpha3"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [cljsjs/react-with-addons "0.14.0-0"]
                  [bidi "1.21.0"]
@@ -56,8 +56,10 @@
                  [clj-time "0.11.0"]
 
                  [ring/ring-devel "1.4.0"]
+
+                 [prismatic/schema "1.0.1"]
                  ;; Test
-                 [org.clojure/test.check "0.7.0"]
+                 [org.clojure/test.check "0.8.2"]
                  ]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"

@@ -150,7 +150,7 @@
 
     om/IWillMount
     (will-mount [_]
-      (info "mounting typeahead"))
+      #_(info "mounting typeahead"))
 
     om/IRenderState
     (render-state [_ {:keys [focused input-ch input-value display-fn on-change]

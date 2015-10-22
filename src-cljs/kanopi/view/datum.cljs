@@ -79,6 +79,14 @@
                [:span (:datum/label datum)]]])
           ])))))
 
+(defn- datum-type-line [props]
+  [:div.datum-type-line
+   [:span.horizontal-line]
+   [:span.datum-type-label "TYPE: "]
+   [:span.datum-type (name (schema/describe-entity props))]
+   [:span.horizontal-line]
+   ])
+
 (defn body
   [props owner opts]
   (reify
@@ -101,12 +109,7 @@
                                            (msg/update-datum-label (om/get-props owner))
                                            (msg/send! owner)))}})
             ]
-           [:div.datum-type-line
-            ;[:span.horizontal-line]
-            ;[:span.datum-type-label "TYPE: "]
-            ;[:span.datum-type (name (schema/describe-entity props))]
-            ;[:span.horizontal-line]
-            ]
+           (datum-type-line props)
            [:div.datum-facts
             ;; NOTE: one of the facts is a placeholder for creating a
             ;; new one

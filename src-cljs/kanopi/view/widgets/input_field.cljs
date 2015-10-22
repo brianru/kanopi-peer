@@ -29,7 +29,8 @@
     (init-state [_]
       {:editing false
        :edit-icon-enabled true
-       :hovering false})
+       :hovering false
+       :default-value "Input field default value"})
 
     om/IDidUpdate
     (did-update [_ prev-props prev-state]
@@ -39,7 +40,7 @@
        (. (om/get-node owner "text-field") (focus))))
 
     om/IRenderState
-    (render-state [_ {:keys [editing edit-key submit-value hovering]
+    (render-state [_ {:keys [editing edit-key submit-value hovering default-value]
                       :as state}]
       (let []
         (html
@@ -48,12 +49,12 @@
              {:style {:display (when editing "none")}
               :class [(when hovering "bold-text")]
               :on-click #(start-edit % owner :editing)}
-             (get props edit-key)]
+             (get props edit-key default-value)]
           [:input.edit-editable-text
            {:style       {:display (when-not editing "none")}
             :ref         "text-field"
             :type        "text"
-            :value       (or (get state :new-value) (get props edit-key))
+            :value       (or (get state :new-value) (get props edit-key) default-value)
             :placeholder (get state :placeholder)
             :on-change   #(handle-change % owner :new-value)
             :on-key-down #(when (= (.-key %) "Enter")
