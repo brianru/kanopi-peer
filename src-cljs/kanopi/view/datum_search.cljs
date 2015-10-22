@@ -7,10 +7,11 @@
             [kanopi.util.browser :as browser]
             ))
 
-(defn datum-list-entry [owner datum]
+(defn datum-list-entry [owner [db/id lbl _ _]]
   [:div
-   [:a {:href (browser/route-for owner :datum :id (:db/id datum))}
-    [:span (get datum :datum/label)]]])
+   [:a {:href (when id
+                (browser/route-for owner :datum :id id))}
+    [:span lbl]]])
 
 (defn most-viewed-datums [owner datums]
   [:div.panel.panel-default
@@ -44,7 +45,12 @@
       "datum-search-suggestions")
     om/IRender
     (render [_]
-      (let []
+      (let [recent-datums (if (> (count (get props :recent-datums)) 3)
+                            (get props :recent-datums)
+                            (concat (get props :recent-datums)
+                                    (map #(vector (:db/id %) (:datum/label %) nil nil)
+                                         (:cache props))))
+            ]
         (html
          [:div.container-fluid
           [:div.row
@@ -53,7 +59,7 @@
            [:div.col-md-4
             (most-edited-datums owner (get props :most-edited-datums))]
            [:div.col-md-4
-            (recently-touched-datums owner (get props :recent-datums))]]
+            (recently-touched-datums owner recent-datums)]]
           [:div.row
            [:h3 "Datum finder"]
            [:span "TODO"]

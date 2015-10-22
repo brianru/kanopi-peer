@@ -3,6 +3,7 @@
             [cemerick.friend.workflows :as workflows]
             [cemerick.friend.credentials :as creds]
             [clojure.set :as set]
+            [schema.core :as s]
             [datomic.api :as d]
             [kanopi.data.impl :as data-impl]
             [kanopi.data :as data]
@@ -41,12 +42,7 @@
   (change-password! [this username current-password new-password]))
 
 (defn valid-credentials? [creds]
-  (and
-   (integer? (:ent-id creds))
-   (coll?    (:role creds))
-   (every? (comp integer? :db/id) (:role creds))
-   (string?  (:username creds))
-   (string?  (:password creds))))
+  (s/validate schema/Credentials creds))
 
 (defrecord AuthenticationService [config database user-lookup-fn]
 
@@ -60,7 +56,7 @@
           ;; kanopi.data.impl as example
           creds  (d/pull db
                         '[:db/id
-                          {:user/role [:db/id :role/label]}
+                          {:user/role [:db/id :role/id :role/label]}
                           :user/id
                           :user/password]
                         ent-id) 
@@ -101,9 +97,9 @@
                   [
                    [:db/add user-role-id :role/id username]
                    [:db/add user-role-id :role/label username]
-                   [:db/add user-ent-id :user/id username]
-                   [:db/add user-ent-id :user/password (creds/hash-bcrypt password)]
-                   [:db/add user-ent-id :user/role user-role-id]
+                   [:db/add user-ent-id  :user/id username]
+                   [:db/add user-ent-id  :user/password (creds/hash-bcrypt password)]
+                   [:db/add user-ent-id  :user/role user-role-id]
                    ]
                   init-user-data
                   ) 

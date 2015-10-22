@@ -6,7 +6,8 @@
             [kanopi.model.intro-data :as intro-data]
             [om.core :as om]
             [om.dom :as dom]
-            [kanopi.view.fact :as fact]))
+            [kanopi.view.fact :as fact]
+            ))
 
 (defonce system
   (component/start (dev-util/new-system)))

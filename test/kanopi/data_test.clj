@@ -222,6 +222,7 @@
 (deftest recent-datums
   (let [{data-svc :data-service :as system}
         (component/start (test-util/system-excl-web))
+
         creds (auth/credentials (:authenticator system) "hannah")
         results (data/recent-datums data-svc creds)
         db (get-db system)

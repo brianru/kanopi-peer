@@ -118,10 +118,11 @@
 
   (most-edited-datums [this creds]
     (let [user-roles (->> creds :role (mapv :db/id))]
-      (d/q '[:find ?e (count-distinct ?tx)
+      (d/q '[:find ?e ?lbl (count-distinct ?tx)
              :in $ [?user-role ...]
              :where
              [?e :datum/role ?user-role]
+             [?e :datum/label ?lbl]
              [?e _ _ ?tx]]
            (datomic/db datomic-peer creds)
            user-roles)))
@@ -133,10 +134,11 @@
   (recent-datums [this creds]
     ;; TODO: filter by recency
     (let [user-roles (->> creds :role (mapv :db/id))]
-      (d/q '[:find ?e ?time ?tx
+      (d/q '[:find ?e ?lbl ?time ?tx
              :in $ [?user-role ...]
              :where
              [?e :datum/role ?user-role]
+             [?e :datum/label ?lbl]
              [?e _ _ ?tx]
              [?tx :db/txInstant ?time]
              ]

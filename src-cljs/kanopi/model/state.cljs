@@ -32,36 +32,36 @@
 (defrecord LocalStorageAppState [config local-storage app-state]
   component/Lifecycle
   (start [this]
-    (let [cookie (get-and-remove-cookie "kanopi-init")
+    (let [cookie           (get-and-remove-cookie "kanopi-init")
           stored-app-state (local-storage/get! local-storage {})
           atm (atom
                (util/deep-merge
-                cookie
                 {
                  :mode :demo
-                 :user {}  
+                 :user (get cookie :user {})  
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
-                 :page  {}
+                 :page {}
+
                  ;; TODO: rename to current-datum
                  :datum {:context-datums []
-                         :datum {}
                          :similar-datums []
-                         }
+                         :datum          {}}
+
                  :most-viewed-datums []
                  :most-edited-datums []
-                 :recent-datums []
+                 :recent-datums      []
+
+                 ;; local cache
+                 ;; {<ent-id> <entity>}
+                 :cache (get cookie :cache {})
+
                  ;; TODO: this map grows too fast.
                  ;; implement a map that only stores the last n
                  ;; entries, everything else gets dropped off the
                  ;; back
                  :search-results {"foo" [[0.75 "food"] [0.42 "baffoon"]]}
-
                  :error-messages []
-
-                 ;; local cache
-                 ;; {<ent-id> <entity>}
-                 :cache (merge {} intro-data)
                  }
                 stored-app-state
                 ))]
@@ -70,7 +70,7 @@
 
   (stop [this]
     (info "save app state to local storage")
-    (local-storage/commit! local-storage @app-state)
+    #_(local-storage/commit! local-storage (dissoc @app-state :error-messages :search-results))
     (info "destroy ephemeral app state")
     (assoc this :app-state nil)))
 

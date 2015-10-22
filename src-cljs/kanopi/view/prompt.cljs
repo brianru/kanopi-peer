@@ -7,6 +7,16 @@
    )
   )
 
+(defn compute-prompt
+  ""
+  [{:keys [error-messages] :as app-state}]
+  (cond
+   (not-empty error-messages)
+   (hash-map
+    :message (-> error-messages last :verb name)
+    :type :error)
+   ))
+
 (defn render-prompt [p]
   [:a {}
    [:span (str p)]])
@@ -20,11 +30,11 @@
     
     om/IRender
     (render [_]
-      (let [current-prompt "Welcome to Kanopi!"]
+      (let [{tp :type, msg :message} (compute-prompt props)]
         (html
          [:div.prompt.container-fluid
           [:div.row
            [:div.col-md-offset-4.col-md-4
-            (render-prompt current-prompt)] ]
+            (render-prompt msg)] ]
           ]))
       )))

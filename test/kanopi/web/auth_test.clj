@@ -4,8 +4,10 @@
             [com.stuartsierra.component :as component]
             [cemerick.friend.credentials :as creds]
             [datomic.api :as d]
+            [schema.core :as s]
             [kanopi.data :as data]
             [kanopi.test-util :as test-util]
+            [kanopi.model.schema :as schema]
             [kanopi.web.auth :refer :all]))
 
 (deftest register
@@ -13,36 +15,35 @@
                 (component/start))
         username "brian"
         password "rubinton"
-        res   (register! (:authenticator sys) username password)
+        res   (register!   (:authenticator sys) username password)
         creds (credentials (:authenticator sys) username)]
 
-    (testing "valid credentials"
-      (clojure.pprint/pprint creds)
-      (is (valid-credentials? creds)))
+    (testing "schema"
+      (s/validate schema/Credentials creds))
 
     (testing "transaction succeeded"
       (is (not (nil? res)))
       (is (= username (get creds :username))))
 
-    ;; FIXME: don't understand why this is failing
     (testing "user stored as datum"
-      (let [user (data/get-datum (:data-service sys) creds (get creds :ent-id))]
+      (let [user (d/entity (d/db (get-in sys [:datomic-peer :connection]))
+                           (get creds :ent-id))]
         (is (not-empty user))))
 
-    ;; FIXME: don't understand why this is failing
     (testing "user role created"
-      (let [role (data/get-datum (:data-service sys) creds (-> creds :role first :db/id))]
+      (let [role (d/entity (d/db (get-in sys [:datomic-peer :connection]))
+                           (-> creds :role first :db/id))]
         (is (not-empty role))))
 
     (testing "password crypto works"
       (is (not= password (get creds :password)))
       (is (creds/bcrypt-verify password (get creds :password))))
 
-    ;; FIXME: failing.
     (testing "initial data loaded"
       (let [user-data (d/q '[:find [?e ...]
                              :in $ ?user-role
-                             :where [?e :datum/role ?user-role]]
+                             :where
+                             [?e :datum/role ?user-role]]
                            (d/db (get-in sys [:datomic-peer :connection]))
                            (-> creds :role first :db/id))]
         (is (not-empty user-data))))
@@ -82,4 +83,3 @@
       (is (verify-creds (:authenticator sys) username password')))
 
     (component/stop sys)))
-

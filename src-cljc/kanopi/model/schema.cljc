@@ -7,20 +7,22 @@
                  )
             ))
 
-(defn describe-entity [m]
-  (let [ks (keys m)]
-    (cond
-     (some #{:datum/fact :datum/label :datum/role} ks)
-     :datum
+(defn describe-entity
+  [m]
+  (when (map? m)
+    (let [ks (keys m)]
+      (cond
+       (some #{:datum/fact :datum/label :datum/role} ks)
+       :datum
 
-     (some #{:fact/attribute :fact/value} ks)
-     :fact
+       (some #{:fact/attribute :fact/value} ks)
+       :fact
 
-     (some (comp #{"literal"} namespace) ks)
-     :literal
+       (some (comp #{"literal"} namespace) ks)
+       :literal
 
-     :default
-     :unknown)))
+       :default
+       :unknown))))
 
 (defn datum? [m]
   (= :datum (describe-entity m)))
@@ -55,14 +57,21 @@
 (s/defschema UserPassword
   (s/conditional #(> (count %) 8) s/Str))
 
-(s/defschema UserCredentials
+(s/defschema InputCredentials
   [(s/one UserId "id") (s/one UserPassword "pw")])
 
 (s/defschema UserRole
   {
    :db/id     (s/maybe DatomicId)
    :role/id    UserId
-   :role/label UserId
+   (s/optional-key :role/label) UserId
+   })
+
+(s/defschema Credentials
+  {:ent-id   DatomicId
+   :role     [UserRole]
+   :username UserId
+   :password UserPassword
    })
 
 (s/defschema User

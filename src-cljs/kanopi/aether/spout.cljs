@@ -16,6 +16,7 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
             [ajax.core :as http]
+            [clojure.set]
             [cljs-uuid-utils.core :refer (make-random-uuid)]
             [cljs-time.core :as time]
             [cljs-time.coerce :as time-coerce]
@@ -41,6 +42,8 @@
 
 (defn dequeue-set! [s]
   (let [itm (first @s)]
+    ;; NOTE: i have no idea how/why this becomes a map when shutting
+    ;; down the spout
     (swap! s #(disj % itm))
     itm))
 
@@ -48,10 +51,10 @@
   ([s itm]
    (enqueue-set! s itm (constantly nil)))
   ([s itm dupe-fn]
-   (swap! s (fn [s]
-              (if (some dupe-fn s)
-                s
-                (conj s itm))))))
+   (swap! s (fn [the-set]
+              (if (some dupe-fn the-set)
+                the-set
+                (conj the-set itm))))))
 
 (defn- parse-response-handler
   [{:keys [response-method response-xform]

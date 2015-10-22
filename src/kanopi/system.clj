@@ -27,12 +27,12 @@
 
      :authenticator
      (component/using
-      (auth/new-authentication-service)
+      (auth/new-authentication-service (with-dev :auth))
       {:database :datomic-peer})
 
      :authorizer
      (component/using
-      (auth/new-authorization-service)
+      (auth/new-authorization-service (with-dev :auth))
       {:database :datomic-peer})
 
      :web-app
