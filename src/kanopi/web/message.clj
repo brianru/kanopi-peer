@@ -21,7 +21,7 @@
     (assoc message-context
            :creds (friend/current-authentication (:request request-context)))))
 
-(defn request-context->action-message
+(defn remote->local
   "If for some reason the request is in some way logically incomplete,
   here's the place to indicate that."
   ([ctx]
