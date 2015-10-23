@@ -15,14 +15,13 @@
                 (component/start))
         username "brian"
         password "rubinton"
-        res   (register!   (:authenticator sys) username password)
-        creds (credentials (:authenticator sys) username)]
+        res      (register!   (:authenticator sys) username password)
+        creds    (credentials (:authenticator sys) username)]
 
     (testing "schema"
       (s/validate schema/Credentials creds))
 
     (testing "transaction succeeded"
-      (is (not (nil? res)))
       (is (= username (get creds :username))))
 
     (testing "user stored as datum"
@@ -73,7 +72,7 @@
                 (component/start))
         username  "brian"
         password  "rubinton"
-        password' "oreos"
+        password' "oreos123"
         _         (register! (:authenticator sys) username password)]
     (testing "before"
       (is (verify-creds (:authenticator sys) username password)))

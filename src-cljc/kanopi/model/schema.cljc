@@ -52,10 +52,10 @@
 (s/defschema DatomicId s/Int)
 
 (s/defschema UserId
-  (s/conditional #(> (count %) 3) s/Str))
+  (s/conditional #(>= (count %) 3) s/Str))
 
 (s/defschema UserPassword
-  (s/conditional #(> (count %) 8) s/Str))
+  (s/conditional #(>= (count %) 8) s/Str))
 
 (s/defschema InputCredentials
   [(s/one UserId "id") (s/one UserPassword "pw")])
@@ -68,7 +68,8 @@
    })
 
 (s/defschema Credentials
-  {:ent-id   DatomicId
+  {
+   :ent-id   DatomicId
    :role     [UserRole]
    :username UserId
    :password UserPassword
@@ -86,12 +87,13 @@
 
 (s/defschema Fact
   ""
-  {:db/id          (s/maybe DatomicId)
+  {
+   :db/id          (s/maybe DatomicId)
    :fact/attribute (s/cond-pre (s/recursive #'Datum)
                                Literal)
    :fact/value     (s/cond-pre (s/recursive #'Datum)
-                               Literal)}
-  )
+                               Literal)
+   })
 
 (s/defschema Datum
   ""
@@ -101,12 +103,16 @@
    :datum/fact  [(s/recursive #'Fact)]
    })
 
-(s/defschema TextLiteral
-  {:literal/text s/Str})
-
+;; TODO: ABSTRACT MAP SCHEMA!
 (s/defschema Literal
   ""
   {:db/id      (s/maybe DatomicId)
-   }
-
+   :literal/role UserRole}
    )
+
+(s/defschema TextLiteral
+  {:literal/text s/Str})
+
+(s/defschema IntegerLiteral
+  {:literal/integer s/Int})
+

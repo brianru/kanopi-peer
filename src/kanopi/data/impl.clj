@@ -163,12 +163,13 @@
   [db ent-id]
   (let [ent (d/pull db
                     '[:db/id
+                      ;; TODO: specify default value for datum/label
                       :datum/label
-                      :datum/role
+                      {:datum/role [:db/id :role/id]}
                       {:datum/fact [:db/id
                                     {:fact/attribute [*]}
                                     {:fact/value [*]}
-                                    :fact/role]}]
+                                    ]}]
                     ent-id)]
     (if (empty? (dissoc ent :db/id))
       nil
@@ -202,19 +203,25 @@
   ([datomic-peer creds label]
    (let [datum-id (d/tempid :db.part/structure)]
      (hash-map
-      :ent-id datum-id
-      :txdata [[:db/add datum-id :datum/role (user-default-role creds)]
-               [:db/add datum-id :datum/label label]])))
+      :ent-id  datum-id
+      :txdata  [[:db/add datum-id :datum/role (user-default-role creds)]
+                [:db/add datum-id :datum/label label]])))
 
   ([datomic-peer creds label & facts]
-   (let [datum-id  (d/tempid :db.part/structure)
+   ;; NOTE: switching between maps with :ent-id and :ent-ids is
+   ;; confusing. should I name this structure and use a record with
+   ;; some protocols to make this clearer and factor out a lot of
+   ;; implementation details with composing them???
+   (let [datum-excl-facts (mk-datum datomic-peer creds label)
+         datum-id  (get datum-excl-facts :ent-id)
+
          facts     (map (partial apply add-fact->txdata datomic-peer creds datum-id) facts)
          fact-coll (reduce
                     (fn [{:keys [ent-ids txdata] :as acc} fact]
                       (hash-map :ent-ids (conj ent-ids (:ent-id fact))
                                 :txdata (concat txdata (:txdata fact))))
-                    {:ent-ids []
-                     :txdata  []}
+                    {:ent-ids [datum-id]
+                     :txdata  (get datum-excl-facts :txdata)}
                     facts)]
      (hash-map
       :ent-id datum-id
@@ -274,12 +281,13 @@
 
 (defn update-fact-part->txdata
   [datomic-peer creds fact-id part input]
+  (println "update-fact-part" part input)
   (case (describe-input datomic-peer creds input)
     ::entity-id
     (let [[_ input-ent-arg] input
           input-ent
           (if (d/entity (datomic/db datomic-peer creds) input-ent-arg)
-            (hash-map :ent-id input-ent-arg, :txdata [])
+            (hash-map :ent-ids [input-ent-arg], :txdata [])
             (mk-datum datomic-peer creds input-ent-arg))]
       (hash-map
        :ent-id fact-id

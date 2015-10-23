@@ -80,7 +80,8 @@
   (register! [this username password]
     ;; TODO: should this return nil when user already exists or throw
     ;; an exception? Currently it throws an exception.
-    (assert (every? identity [username password]) "Missing username or password.")
+    (assert (s/validate schema/InputCredentials [username password])
+            "Invalid username or password")
     (assert (nil? (d/entid (datomic/db database nil) [:user/id username]))
             "This username is already taken. Please choose another.")
     ;; TODO: add audit datoms to the tx entity
@@ -108,7 +109,7 @@
 
   (change-password! [this username current-password new-password]
     (assert (and (not= current-password new-password)
-                 (not-empty new-password))
+                 (s/validate schema/UserPassword new-password))
             "New password is invalid")
     (assert (verify-creds this username current-password)
             "Current password is incorrect")
