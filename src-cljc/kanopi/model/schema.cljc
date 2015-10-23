@@ -92,10 +92,10 @@
   {
    :db/id          (s/maybe DatomicId)
    :fact/attribute
-   (s/conditional #(= :datum (describe-entity %))   (s/recursive #'Datum)
+   (s/conditional #(= :datum   (describe-entity %)) (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
    :fact/value    
-   (s/conditional #(= :datum (describe-entity %))   (s/recursive #'Datum)
+   (s/conditional #(= :datum   (describe-entity %)) (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
    })
 
@@ -104,7 +104,7 @@
   {:db/id       (s/maybe DatomicId)
    :datum/role  UserRole
    :datum/label (s/maybe s/Str)
-   :datum/fact  [(s/recursive #'Fact)]
+   (s/optional-key :datum/fact) [(s/recursive #'Fact)]
    })
 
 ;; NOTE: my expression of Literal types is not pretty, abstract-maps

@@ -71,6 +71,7 @@
  {:db/ident :user/role
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
+  :db/isComponent true
   :db/index true
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
@@ -116,6 +117,7 @@
  {:db/ident :datum/role
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
+  :db/isComponent true
   :db/index true
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}

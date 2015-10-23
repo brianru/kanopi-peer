@@ -162,13 +162,13 @@
   [db ent-id]
   (let [ent (d/pull db
                     '[:db/id
-                      ;; TODO: specify default value for datum/label
                       :datum/label
                       {:datum/role [:db/id :role/id]}
-                      {:datum/fact [:db/id
-                                    {:fact/attribute [*]}
-                                    {:fact/value [*]}
-                                    ]}]
+                      {:datum/fact
+                       [:db/id
+                        {:fact/attribute [*]}
+                        {:fact/value [*]}
+                        ]}]
                     ent-id)]
     (if (empty? (dissoc ent :db/id))
       nil

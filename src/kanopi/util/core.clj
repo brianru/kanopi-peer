@@ -63,16 +63,18 @@
     (vector attr valu)))
 
 (defn transit-write [data]
-  (let [out (ByteArrayOutputStream. 4096)
-        writer (transit/writer out :json)]
-    (transit/write writer data)
-    (.toString out)))
+  (when data
+    (let [out (ByteArrayOutputStream. 4096)
+          writer (transit/writer out :json)]
+      (transit/write writer data)
+      (.toString out))))
 
 (defn transit-read [stream]
   ;; NOTE: type hint avoids warning when calling .getBytes below
-  (let [^java.lang.String string (slurp stream)]
-    (if (or (nil? string) (clojure.string/blank? string))
-      {}
-      (let [in (ByteArrayInputStream. (.getBytes string))
-            reader (transit/reader in :json)]
-        (transit/read reader)))))
+  (when stream
+    (let [^java.lang.String string (slurp stream)]
+      (if (or (nil? string) (clojure.string/blank? string))
+        {}
+        (let [in (ByteArrayInputStream. (.getBytes string))
+              reader (transit/reader in :json)]
+          (transit/read reader))))))

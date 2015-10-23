@@ -4,6 +4,7 @@
 
             [com.stuartsierra.component :as component]
             [datomic.api :as d]
+            [schema.core :as s]
 
             [ring.mock.request :as mock]
 
@@ -11,6 +12,7 @@
             [kanopi.system :as sys]
             [kanopi.data :as data]
 
+            [kanopi.model.schema :as schema]
             [kanopi.web.app :as web-app]
 
             [kanopi.util.core :as util]
@@ -149,6 +151,17 @@
         creds    {:username "mickey", :password "mouse132"}
         resp     (test-util/mock-register system creds)]
     (testing "success"
-      (let []
+      (let [message {:noun creds
+                     :verb :initialize-client-state
+                     :context {}}
+            {:keys [body] :as resp}
+            (test-util/mock-request! system :post "/api" (util/transit-write message)
+                                     :creds creds
+                                     :content-type "application/transit+json")
+            ]
+        (is (= 200 (:status resp)))
+        (is (= :initialize-client-state-success (:verb body)))
+        (is (every? (partial s/validate schema/Datum)
+                    (vals (get-in body [:noun :cache]))))
         ))
     ))

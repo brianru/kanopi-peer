@@ -32,7 +32,7 @@
                        (map first most-viewed-datums)
                        (map first recent-datums)) 
         all-datums    (->> all-datum-ids
-                           (map (partial data/get-datum creds))
+                           (map (partial data/get-datum data-svc creds))
                            (reduce (fn [acc datum]
                                      (assoc acc (:db/id datum) datum))
                                    {}))

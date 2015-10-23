@@ -32,8 +32,7 @@
 
 (defn mock-request! [system method route params & opts]
   (let [handler (get-in system [:web-app :app-handler])
-        opts (apply hash-map opts)
-        _ (clojure.pprint/pprint opts)
+        opts    (apply hash-map opts)
         req     (cond-> (mock/request method route params)
                   (find opts :creds)
                   (assoc-basic-auth (get opts :creds))
@@ -44,10 +43,8 @@
                   )]
     (-> req
         (handler)
-        (update :body (fn [x]
-                        (when x (util/transit-read x))))
-        ))
-  )
+        (update :body util/transit-read)
+        )))
 
 (defn mock-register [system creds]
   (mock-request! system :post "/register" creds
