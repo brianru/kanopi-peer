@@ -141,7 +141,6 @@
           (is (= ["age" 17] (util/fact-entity->tuple (first updated-facts))))
           )
         ))
-
     ))
 
 (deftest initialize-client-state

@@ -164,11 +164,10 @@
                     '[:db/id
                       :datum/label
                       {:datum/role [:db/id :role/id]}
-                      {:datum/fact
-                       [:db/id
-                        {:fact/attribute [*]}
-                        {:fact/value [*]}
-                        ]}]
+                      {:datum/fact [:db/id
+                                    {:fact/attribute [*]}
+                                    {:fact/value     [*]}
+                                    ]}]
                     ent-id)]
     (if (empty? (dissoc ent :db/id))
       nil

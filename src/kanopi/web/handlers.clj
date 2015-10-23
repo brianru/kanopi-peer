@@ -18,6 +18,8 @@
 
 (defmethod request-handler :initialize-client-state
   [request-context message]
+  (println "INITIALIZE CLIENT STATE")
+  (clojure.pprint/pprint message)
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
 

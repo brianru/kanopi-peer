@@ -29,6 +29,7 @@
   (let [system (component/start (test-util/system-excl-web-server))
         handler (get-in system [:web-app :app-handler])
         creds   {:username "mickey" :password "mouse123"}
+        creds1  {:username "mickeymouse" :password "minneymouse"}
         test-ent-ids
         (d/q '[:find [?eid ...] :in $ :where [?eid :datum/label _]]
              (d/db (get-in system [:datomic-peer :connection])))
@@ -62,6 +63,13 @@
         (is (= (:username creds) (:username body)))
         #_(is (re-find #"welcome=true" (get-in resp [:headers "Location"] "")))
         (is (auth/verify-creds (:authenticator system) creds))))
+
+    (testing "register-redirect"
+      (let [req  (-> (mock/request :post "/register" creds1)
+                     (mock/header :accept "text/html"))
+            resp (handler req)
+            ]
+        (is (= 301 (:status resp)))))
 
     (testing "login-success"
       (let [req (-> (mock/request :post "/login" creds)

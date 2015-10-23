@@ -15,19 +15,19 @@
   [handler credential-fn]
   (let [friend-m
         {
-         :allow-anon? true
+         :allow-anon?       true
          :redirect-on-auth? false
+         :credential-fn     (partial creds/bcrypt-credential-fn credential-fn)
 
-         :credential-fn (partial creds/bcrypt-credential-fn credential-fn)
+         :default-landing-uri "/"
+         :login-uri "/login"
+
          ;; TODO: make better error handlers which return errors
          ;; described as data
-         :login-failure-handler (fn [e]
-                                  {:status 401})
+         :login-failure-handler   (constantly {:status 401})
          :unauthenticated-handler (constantly {:status 401})
-         :unauthorized-handler    (fn [e]
-                                    {:status 401})
-         :login-uri "/login"
-         :default-landing-uri "/"
+         :unauthorized-handler    (constantly {:status 401})
+
          :workflows [
                      (workflows/interactive-form :redirect-on-auth? false :allow-anon? true)
                      (workflows/http-basic :realm "/")
@@ -60,6 +60,7 @@
                           :user/id
                           :user/password]
                         ent-id) 
+          ;; NOTE: the shape of creds' is largely dictated by friend
           creds' (when (not-empty (dissoc creds :db/id))
                    (hash-map
                     :ent-id   (get-in creds [:db/id])
@@ -67,7 +68,7 @@
                     :username (get-in creds [:user/id])
                     :password (get-in creds [:user/password])))]
       (when creds'
-        (assert (valid-credentials? creds') "Invalid credential map."))
+        (assert (s/validate schema/Credentials creds') "Invalid credential map."))
       creds'))
 
   (verify-creds [this {:keys [username password]}]
@@ -85,8 +86,8 @@
     (assert (nil? (d/entid (datomic/db database nil) [:user/id username]))
             "This username is already taken. Please choose another.")
     ;; TODO: add audit datoms to the tx entity
-    (let [user-ent-id  (d/tempid :db.part/user -1)
-          user-role-id (d/tempid :db.part/users -1000)
+    (let [user-ent-id    (d/tempid :db.part/user -1)
+          user-role-id   (d/tempid :db.part/users -1000)
           init-user-data (some-> (get config :init-user-data)
                                  (slurp)
                                  (read-string)

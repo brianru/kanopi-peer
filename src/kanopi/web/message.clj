@@ -3,11 +3,13 @@
   "
   (:require [kanopi.util.core :as util]
             [clojure.string]
-            [cemerick.friend :as friend]))
+            [cemerick.friend :as friend]
+            [schema.core :as s]
+            [kanopi.model.schema :as schema]
+            ))
 
 (defn build-noun [ctx noun]
   {:post [(or (integer? %) (instance? java.lang.Long %) (map? %))]}
-  (println "BUILD_NOUN" noun (type noun))
   noun)
 
 (defn build-verb [ctx verb]
@@ -17,15 +19,17 @@
 (defn build-context
   [request-context message-context]
   {:post [(map? %)]}
-  (let []
-    (assoc message-context
-           :creds (friend/current-authentication (:request request-context)))))
+  (let [creds (-> (friend/current-authentication (:request request-context))
+                  :identity
+                  ((util/get-auth-fn request-context))
+                  )]
+    (s/validate schema/Credentials creds)
+    (assoc message-context :creds creds)))
 
 (defn remote->local
   "If for some reason the request is in some way logically incomplete,
   here's the place to indicate that."
   ([ctx]
-   (println "->>" (get-in ctx [:request]))
    (let [body        (util/transit-read (get-in ctx [:request :body]))
          params      (get-in ctx [:request :params])
          parsed-body (->> (merge body params)

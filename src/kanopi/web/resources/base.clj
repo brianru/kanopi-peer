@@ -117,7 +117,6 @@
      ;; FIXME: perform real authorization.
      (fn [ctx]
        (println "authorized?")
-       (clojure.pprint/pprint (-> ctx :request :session))
        (-> ctx :request friend/current-authentication))
 
      :handle-unauthorized

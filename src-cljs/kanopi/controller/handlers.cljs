@@ -290,7 +290,8 @@
                            :datum {:context-datums []
                                    :datum {}
                                    :similar-datums []}
-                           :cache {})))
+                           :cache {}
+                           :error-messages [])))
     (history/navigate-to! history :home)
     (->> (msg/initialize-client-state noun)
          (aether/send! aether))))
@@ -312,7 +313,8 @@
                            :datum {:context-datums []
                                    :datum {}
                                    :similar-datums []}
-                           :cache {})))
+                           :cache {}
+                           :error-messages [])))
     (history/navigate-to! history :home)
     (->> (msg/initialize-client-state noun)
          (aether/send! aether))))
@@ -329,7 +331,12 @@
                   (fn [app-state]
                     (assoc app-state
                            :user nil
-                           :mode :demo)))
+                           :mode :demo
+                           :datum {:context-datums []
+                                   :datum []
+                                   :similar-datums []}
+                           :error-messages []
+                           :cache {})))
     (history/navigate-to! history :home)))
 
 (defmethod local-event-handler :logout-failure
@@ -347,3 +354,5 @@
 (defmethod local-event-handler :initialize-client-state-failure
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
+
+
