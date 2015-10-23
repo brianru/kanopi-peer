@@ -19,7 +19,7 @@
         creds    (credentials (:authenticator sys) username)]
 
     (testing "schema"
-      (s/validate schema/Credentials creds))
+      (is (s/validate schema/Credentials creds)))
 
     (testing "transaction succeeded"
       (is (= username (get creds :username))))

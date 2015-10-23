@@ -33,28 +33,7 @@
       (is (= (impl/user-default-role creds) (-> ent :datum/role :db/id))))
 
     (testing "datum shape as given by data service"
-      (is (s/validate schema/Datum ent))
-      
-      (is (->> (get ent :datum/role)
-               (coll?)))
-      (is (->> (get ent :datum/role)
-               (map?)))
-      (is (->> (get ent :datum/role)
-               :db/id
-               (integer?)))
-      (is (->> (get ent :datum/label)
-               (string?)))
-      (is (= "banana boat" (get ent :datum/label)))
-
-      (when (get ent :datum/fact)
-        (is (->> (get ent :datum/fact)
-                 (coll?)))
-        (is (->> (get ent :datum/fact)
-                 (every? map?)))
-        (is (->> (get ent :datum/fact)
-                 (map :db/id)
-                 (every? integer?)))
-        ))
+      (is (s/validate schema/Datum ent)))
 
     (testing "retract new datum"
       (let [report (data/retract-datum (:data-service system) creds ent-id)]
@@ -113,7 +92,10 @@
     (testing "update datum label"
       (let [lbl' "new label dude!"
             datum' (data/update-datum-label (:data-service system) creds ent-id lbl')]
-        (is (= lbl' (get datum' :datum/label)))))))
+        (is (= lbl' (get datum' :datum/label)))))
+    
+    (is (s/validate schema/Datum (data/get-datum (:data-service system) creds ent-id))
+        "No longer valid!")))
 
 (deftest literal-types
   (let [system  (component/start (test-util/system-excl-web))

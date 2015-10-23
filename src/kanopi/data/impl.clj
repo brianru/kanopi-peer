@@ -125,7 +125,6 @@
        (apply hash-map)))
 
 (defn- make-datomic-kv-consistent [[k v]]
-  (println "make-consistent:" k v)
   (let [v' (cond
             (instance? datomic.query.EntityMap v)
             (list (to-regular-map v))
@@ -220,8 +219,8 @@
                     (fn [{:keys [ent-ids txdata] :as acc} fact]
                       (hash-map :ent-ids (conj ent-ids (:ent-id fact))
                                 :txdata (concat txdata (:txdata fact))))
-                    {:ent-ids [datum-id]
-                     :txdata  (get datum-excl-facts :txdata)}
+                    {:ent-ids []
+                     :txdata  []}
                     facts)]
      (hash-map
       :ent-id datum-id
@@ -281,7 +280,6 @@
 
 (defn update-fact-part->txdata
   [datomic-peer creds fact-id part input]
-  (println "update-fact-part" part input)
   (case (describe-input datomic-peer creds input)
     ::entity-id
     (let [[_ input-ent-arg] input

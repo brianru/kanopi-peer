@@ -2,8 +2,10 @@
   (:require 
              #?@(:clj  [[schema.core :as s]
                         [schema.experimental.complete :as c]
-                        [schema.experimental.generators :as g]]
-                 :cljs [[schema.core :as s :include-macros true]]
+                        [schema.experimental.generators :as g]
+                        [schema.experimental.abstract-map :as m]]
+                 :cljs [[schema.core :as s :include-macros true]
+                        [schema.experimental.abstract-map :as m :include-macros true]]
                  )
             ))
 
@@ -89,10 +91,16 @@
   ""
   {
    :db/id          (s/maybe DatomicId)
-   :fact/attribute (s/cond-pre (s/recursive #'Datum)
-                               Literal)
-   :fact/value     (s/cond-pre (s/recursive #'Datum)
-                               Literal)
+   ;; FIXME: cond-pre is too greedy. use describe-entity to clear this
+   ;; up.
+   :fact/attribute
+   (s/conditional #(= :datum (describe-entity %))   (s/recursive #'Datum)
+                  #(= :literal (describe-entity %)) Literal)
+   ;(s/cond-pre (s/recursive #'Datum) Literal)
+   :fact/value    
+   (s/conditional #(= :datum (describe-entity %))   (s/recursive #'Datum)
+                  #(= :literal (describe-entity %)) Literal)
+   ;(s/cond-pre (s/recursive #'Datum) Literal)
    })
 
 (s/defschema Datum
@@ -103,16 +111,22 @@
    :datum/fact  [(s/recursive #'Fact)]
    })
 
-;; TODO: ABSTRACT MAP SCHEMA!
-(s/defschema Literal
-  ""
-  {:db/id      (s/maybe DatomicId)
-   :literal/role UserRole}
-   )
-
+;; NOTE: my expression of Literal types is not pretty, abstract-maps
+;; look helpful, but I do not want an explcit type encoded in the map
+;; besides the presence of the literal/<tp> key. there's no reason to
+;; encode this information twice. it only confuses things as datomic
+;; requires typed attributes.
 (s/defschema TextLiteral
-  {:literal/text s/Str})
+  {:db/id (s/maybe DatomicId)
+   :literal/text s/Str})
 
 (s/defschema IntegerLiteral
-  {:literal/integer s/Int})
+  {:db/id (s/maybe DatomicId)
+   :literal/integer s/Int})
+
+(s/defschema Literal
+  (s/conditional
+   #(find % :literal/text)    TextLiteral
+   #(find % :literal/integer) IntegerLiteral)
+   )
 
