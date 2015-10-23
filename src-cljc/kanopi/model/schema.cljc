@@ -91,16 +91,12 @@
   ""
   {
    :db/id          (s/maybe DatomicId)
-   ;; FIXME: cond-pre is too greedy. use describe-entity to clear this
-   ;; up.
    :fact/attribute
    (s/conditional #(= :datum (describe-entity %))   (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
-   ;(s/cond-pre (s/recursive #'Datum) Literal)
    :fact/value    
    (s/conditional #(= :datum (describe-entity %))   (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
-   ;(s/cond-pre (s/recursive #'Datum) Literal)
    })
 
 (s/defschema Datum

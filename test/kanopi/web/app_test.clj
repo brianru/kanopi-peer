@@ -19,13 +19,16 @@
             [kanopi.data :as data]
             [kanopi.web.app :as web-app]
             [kanopi.web.auth :as auth]
+
+            [schema.experimental.generators :as generators]
+            [kanopi.model.schema :as schema]
             ))
 
 ;; Test JSON/EDN/Transit auth API
 (deftest authentication
   (let [system (component/start (test-util/system-excl-web-server))
         handler (get-in system [:web-app :app-handler])
-        creds   {:username "mickey" :password "mouse"}
+        creds   {:username "mickey" :password "mouse123"}
         test-ent-ids
         (d/q '[:find [?eid ...] :in $ :where [?eid :datum/label _]]
              (d/db (get-in system [:datomic-peer :connection])))
@@ -90,11 +93,15 @@
         handler (get-in system [:web-app :app-handler]) ]
 
     (testing "new session each time"
-      (let [register (fn [username password]
+      (let [register (fn [[username password]]
                        (-> (mock/request :post "/register"
                                          {:username username, :password password})
                            (mock/header :accept "text/html")))
-            responses (map (comp handler register) (range 400 410) (range 300 310))
+            sample-creds (map vector
+                              (map str (range 10000000 10000010))
+                              (map str (range 20000000 20000010)))
+            _ (println "HERe" sample-creds)
+            responses (map (comp handler register) sample-creds)
             response-cookies
             (->> responses
                  (mapcat (comp
@@ -107,7 +114,7 @@
         (is (= 10 (count cookie-values)))))
 
     (testing "register: transit+json response"
-      (let [creds  {:username "minney" :password "mouse"}
+      (let [creds  {:username "minney" :password "mouse123"}
             req (-> (mock/request :post "/register" creds)
                     (mock/header :accept "application/transit+json"))
             {:keys [status headers body] :as resp} (handler req)
@@ -134,7 +141,7 @@
       (let [cookie-zero (-> (mock/request :get "/register")
                             (handler)
                             (get-in [:headers "Set-Cookie"]))
-            creds  {:username "homer" :password "simpson"}
+            creds  {:username "homer" :password "simpsondude"}
             req (-> (mock/request :post "/register" creds)
                     (mock/header :accept "text/html"))
             {:keys [status headers body] :as resp} (handler req)
@@ -157,7 +164,7 @@
                  (select-keys body' [:noun :verb]))))))
 
     (testing "login: transit+json and post a message to api"
-      (let [creds {:username "minney" :password "mouse"}
+      (let [creds {:username "minney" :password "mouse123"}
             req   (-> (mock/request :post "/login" creds)
                       (mock/header :accept "application/transit+json"))
             {:keys [status headers body] :as resp} (handler req)
@@ -179,7 +186,7 @@
                  (select-keys body' [:noun :verb]))))))
 
     (testing "login: text/html and post a message to api"
-      (let [creds {:username "homer" :password "simpson"}
+      (let [creds {:username "homer" :password "simpsondude"}
             req   (-> (mock/request :post "/login" creds)
                       (mock/header :accept "text/html"))
             {:keys [status headers body] :as resp} (handler req)
@@ -201,117 +208,3 @@
                  )))))
 
     (component/stop system)))
-
-(deftest message-passing-api
-  (let [system  (component/start (test-util/system-excl-web-server))
-        data-svc (get system :data-service)
-        handler (get-in system [:web-app :app-handler])
-        creds   {:username "mickey", :password "mouse"}
-        _       (-> (mock/request :post "/register" creds)
-                    (mock/header :accept "application/transit+json")
-                    (handler))
-        datum-ent-ids
-        (d/q '[:find [?eid ...] :in $ :where [?eid :datum/label _]]
-             (d/db (get-in system [:datomic-peer :connection])))]
-
-    (testing "get-datum-failure"
-      (let [message {:noun -1000
-                     :verb :get-datum
-                     :context {}}
-            req (-> (mock/request :post "/api" message)
-                    (test-util/assoc-basic-auth creds))
-            resp (handler req)
-            body (util/transit-read (:body resp))
-            ]
-        (is (= 200 (:status resp)))
-        (is (= :get-datum-failure (get body :verb)))
-        (is (nil? (get-in body [:noun :datum])))
-        ))
-
-    (testing "get-datum-success"
-      (let [test-ent-id (first datum-ent-ids)
-            message {:noun test-ent-id
-                     :verb :get-datum
-                     :context {}}
-            req (-> (mock/request :post "/api" message)
-                    (test-util/assoc-basic-auth creds))
-            resp (handler req)
-            body (util/transit-read (:body resp))]
-        (is (= 200 (:status resp)))
-        (is (= :get-datum-success (get body :verb)))
-        (is (= test-ent-id (-> body :noun :datum :db/id)))
-        ;; NOTE: not testing similar-datums and context-datums 
-        ;; contents here because their existence depends on the
-        ;; particular test-ent-id
-        ))
-
-    (testing "update-datum-label"
-      (let [test-ent-id (first datum-ent-ids)
-            lbl' "duuuude"
-            message {:noun {:existing-entity test-ent-id
-                            :new-label lbl'}
-                     :verb :update-datum-label
-                     :context {}}
-            req (-> (mock/request :post "/api"
-                                  (util/transit-write message))
-                    (mock/content-type "application/transit+json")
-                    (test-util/assoc-basic-auth creds))
-            resp (handler req)
-            body (util/transit-read (:body resp))]
-        (is (= 200 (:status resp)))
-        (is (= :update-datum-label-success (get body :verb)))
-        (is (= lbl' (-> body :noun :datum/label)))
-        ))
-
-    (testing "add then update fact"
-      (let [test-ent-id (first datum-ent-ids)
-            test-ent (data/get-datum data-svc creds test-ent-id)
-            fact' ["age" 42]
-            message {:noun {:datum-id test-ent-id
-                            :fact {:fact/attribute {:literal/text "age"}
-                                   :fact/value {:literal/integer 42}}}
-                     :verb :update-fact
-                     :context {}}
-            req   (-> (mock/request :post "/api"
-                                    (util/transit-write message))
-                      (mock/content-type "application/transit+json")
-                      (test-util/assoc-basic-auth creds))
-            resp  (handler req)
-            body  (util/transit-read (:body resp))
-            
-            test-ent' (data/get-datum data-svc creds test-ent-id)
-            old-facts (-> test-ent :datum/fact set)
-
-            [new-fact & _ :as new-facts]
-            (->> (clojure.set/difference (-> test-ent' :datum/fact set) old-facts)
-                 (into (list))) 
-            ]
-        (is (= 200 (:status resp)))
-        (is (= :update-fact-success (get body :verb)))
-        (is (not-empty new-facts))
-        (is (= 1 (count new-facts)))
-        (is (= ["age" 42] (util/fact-entity->tuple new-fact)))
-
-        (let [message {:noun {:datum-id test-ent-id
-                              :fact (assoc-in new-fact [:fact/value :literal/integer] 17)}
-                       :verb :update-fact
-                       :context {}}
-              req (-> (mock/request :post "/api" (util/transit-write message))
-                      (mock/content-type "application/transit+json")
-                      (test-util/assoc-basic-auth creds))
-              resp (handler req)
-              body (util/transit-read (:body resp))
-              test-ent'' (data/get-datum data-svc creds test-ent-id)
-              updated-facts (clojure.set/difference
-                             (-> test-ent'' :datum/fact set)
-                             (-> test-ent'  :datum/fact set)) ]
-          (is (= 200 (:status resp)))
-          (is (= :update-fact-success (get body :verb)))
-          (is (not-empty updated-facts))
-          (is (= 1 (count updated-facts)))
-          (is (= ["age" 17] (util/fact-entity->tuple (first updated-facts))))
-          )
-        ))
-
-    (component/stop system)))
-
