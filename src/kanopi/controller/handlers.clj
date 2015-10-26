@@ -1,4 +1,4 @@
-(ns kanopi.web.handlers
+(ns kanopi.controller.handlers
   (:require [kanopi.web.message :as msg]
             [kanopi.model.data :as data]
             [kanopi.util.core :as util]
@@ -7,10 +7,8 @@
 
 (defmulti request-handler
   (fn [request-context message]
-    (println "Request-handler")
-    (pprint message)
-    (get message :verb)) :default
-  :echo)
+    (get message :verb))
+  :default :echo)
 
 (defmethod request-handler :echo
   [request-context message]

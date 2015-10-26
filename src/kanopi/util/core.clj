@@ -48,6 +48,9 @@
 (defn get-authenticator [ctx]
   (get-in ctx [:request :authenticator]))
 
+(defn get-auth-fn [ctx]
+  (get-in ctx [:request :authenticator :user-lookup-fn]))
+
 (defn get-data-service [ctx]
   (get-in ctx [:request :data-service]))
 
