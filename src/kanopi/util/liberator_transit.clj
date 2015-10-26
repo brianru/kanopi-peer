@@ -1,4 +1,4 @@
-(ns kanopi.web.util.liberator-transit
+(ns kanopi.util.liberator-transit
   "Main namespace for liberator-transit.  Just adds new methods to the
   multimethods that liberator uses to render maps and sequences."
   {:author "Daniel Solano Gómez"}
