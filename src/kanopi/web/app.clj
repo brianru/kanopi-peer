@@ -70,8 +70,5 @@
     (if-not app-handler this
             (assoc this :app-handler nil))))
 
-(defn get-handler [web-app]
-  (:app-handler web-app))
-
 (defn new-web-app [config]
   (map->WebApp {:config config}))

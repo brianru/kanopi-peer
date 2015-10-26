@@ -4,7 +4,8 @@
             [immutant.web :as web]
             [immutant.web.middleware :as middleware]
             [kanopi.web.routes :as routes]
-            [kanopi.web.app :as web-app]))
+            [kanopi.util.core :as util]
+            ))
 
 (defrecord WebServer
     [config web-app server-handle]
@@ -12,7 +13,7 @@
   (start [this]
     (if server-handle this
         (let [options       (select-keys config [:port :host])
-              handler       (web-app/get-handler web-app)
+              handler       (util/get-web-handler web-app)
               server-handle (if (:dev config)
                               ;; NOTE: not using web/run-dmc because
                               ;; it opens a web browser. sometimes dev

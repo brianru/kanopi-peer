@@ -48,11 +48,11 @@
 (defn get-authenticator [ctx]
   (get-in ctx [:request :authenticator]))
 
-(defn get-auth-fn [ctx]
-  (get-in ctx [:request :authenticator :user-lookup-fn]))
-
 (defn get-data-service [ctx]
   (get-in ctx [:request :data-service]))
+
+(defn get-web-handler [web-app]
+  (get web-app :app-handler))
 
 ;; ### Datomic EntityMap helper fns for navigating the schema
 ;; TODO: refactor to support values of any type
