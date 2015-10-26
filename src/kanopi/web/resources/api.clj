@@ -1,4 +1,4 @@
-(ns kanopi.web.controller.resources.api
+(ns kanopi.web.resources.api
   "Synchronous message passing api.
   TODO: send all messages to Kafka then let Onyx handle them."
   (:require [liberator.core :refer (defresource)]
@@ -7,7 +7,7 @@
             [cemerick.friend :as friend]
             [kanopi.model.data :as data]
             [kanopi.util.core :as util]
-            [kanopi.web.message :as msg]
+            [kanopi.model.message :as msg]
             [kanopi.controller.handlers :as handlers]
             ))
 

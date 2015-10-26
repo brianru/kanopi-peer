@@ -1,4 +1,4 @@
-(ns kanopi.web.message
+(ns kanopi.model.message
   "TODO: be very careful about types here. Use lots of pre and post contracts.
   "
   (:require [kanopi.util.core :as util]
@@ -8,16 +8,15 @@
             [kanopi.model.schema :as schema]
             ))
 
-(defn build-noun [ctx noun]
+(defn- request->noun [ctx noun]
   {:post [(or (integer? %) (instance? java.lang.Long %) (map? %))]}
   noun)
 
-(defn build-verb [ctx verb]
+(defn- request->verb [ctx verb]
   {:post [(keyword? %)]}
   verb)
 
-(defn build-context
-  [request-context message-context]
+(defn- request->context [request-context message-context]
   {:post [(map? %)]}
   (let [creds (-> (friend/current-authentication (:request request-context))
                   :identity
@@ -44,6 +43,6 @@
                                      (assoc acc k v)))
                                   {}))]
      (hash-map
-      :noun    (build-noun ctx (:noun parsed-body))
-      :verb    (build-verb ctx (:verb parsed-body))
-      :context (build-context ctx (:context parsed-body))))))
+      :noun    (request->noun    ctx (:noun    parsed-body))
+      :verb    (request->verb    ctx (:verb    parsed-body))
+      :context (request->context ctx (:context parsed-body))))))
