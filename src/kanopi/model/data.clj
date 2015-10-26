@@ -7,7 +7,7 @@
   (:require [datomic.api :as d]
             [clojure.pprint :refer (pprint)]
             [kanopi.util.core :as util]
-            [kanopi.storage.datomic :as datomic]
+            [kanopi.model.storage.datomic :as datomic]
             [kanopi.model.data.impl :refer :all]))
 
 ;; TODO: implement remove-fact

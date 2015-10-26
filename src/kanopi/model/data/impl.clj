@@ -2,7 +2,7 @@
   (:require [datomic.api :as d]
             [kanopi.util.core :as util]
             [kanopi.model.schema :as schema]
-            [kanopi.storage.datomic :as datomic]))
+            [kanopi.model.storage.datomic :as datomic]))
 
 (declare describe-value-literal)
 

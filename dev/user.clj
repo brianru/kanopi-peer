@@ -8,16 +8,7 @@
             [environ.core :refer [env]]
             [kanopi.system :as sys]
             [kanopi.main]
-
-            ;[kanopi.generators :as ngen]
-            [clojure.test.check.generators :as gen]
-            [clojure.test.check.properties :as prop]
-            
-            [kanopi.web.auth :as auth]
-            [kanopi.model.data :as data]
-            [kanopi.storage.datomic :as datomic]
-            
-            [kanopi.csv-import :as csv-import]))
+            ))
 
 (defonce system nil)
 

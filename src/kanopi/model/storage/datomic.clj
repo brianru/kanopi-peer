@@ -1,4 +1,4 @@
-(ns kanopi.storage.datomic
+(ns kanopi.model.storage.datomic
   "Datomic database component and datomic-specific helper functions."
   (:require [datomic.api :as d]
             [com.stuartsierra.component :as component]))
