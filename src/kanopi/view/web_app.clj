@@ -8,7 +8,7 @@
             [ring.middleware.keyword-params]
             [ring.middleware.cookies]
             [ring.middleware.format]
-            [kanopi.web.auth :refer (authentication-middleware)]
+            [kanopi.view.auth :refer (authentication-middleware)]
             [kanopi.util.core :as util]))
 
 (defn wrap-ensure-session

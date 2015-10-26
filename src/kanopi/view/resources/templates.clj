@@ -1,4 +1,4 @@
-(ns kanopi.web.resources.templates
+(ns kanopi.view.resources.templates
   (:require [hiccup.page :refer (html5 include-js include-css)]
             [liberator.representation :as rep]
             [cheshire.core :as json]

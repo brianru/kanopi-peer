@@ -1,9 +1,9 @@
-(ns kanopi.web.resources.spa
+(ns kanopi.view.resources.spa
   (:require [liberator.core :refer [defresource]]
             [liberator.representation :as rep]
             [cemerick.friend :as friend]
-            [kanopi.web.resources.base :as base]
-            [kanopi.web.resources.templates :as html]))
+            [kanopi.view.resources.base :as base]
+            [kanopi.view.resources.templates :as html]))
 
 (defn spa [ctx]
   (let [user-data (friend/current-authentication (:request ctx))

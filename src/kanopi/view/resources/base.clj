@@ -1,4 +1,4 @@
-(ns kanopi.web.resources.base
+(ns kanopi.view.resources.base
   (:require [cemerick.friend :as friend]
             [clojure.string :as s]
             [clojure.data.json :as json]

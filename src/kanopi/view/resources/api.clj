@@ -1,9 +1,9 @@
-(ns kanopi.web.resources.api
+(ns kanopi.view.resources.api
   "Synchronous message passing api.
   TODO: send all messages to Kafka then let Onyx handle them."
   (:require [liberator.core :refer (defresource)]
             [liberator.representation :refer (ring-response)]
-            [kanopi.web.resources.base :as base]
+            [kanopi.view.resources.base :as base]
             [cemerick.friend :as friend]
             [kanopi.model.data :as data]
             [kanopi.util.core :as util]

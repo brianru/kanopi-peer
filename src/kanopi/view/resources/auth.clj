@@ -1,12 +1,12 @@
-(ns kanopi.web.resources.auth
+(ns kanopi.view.resources.auth
   "BEWARE: this used to be an html/redirect-based auth flow. I then
   refactored it into a pure transit+json flow but I left the bones of
   the old flow because at some point I'll want both to work."
   (:require [liberator.core :refer [defresource]]
             [kanopi.web.util.liberator-transit]
             [cemerick.friend :as friend]
-            [kanopi.web.resources.templates :as html]
-            [kanopi.web.auth :as auth]
+            [kanopi.view.resources.templates :as html]
+            [kanopi.view.auth :as auth]
             [kanopi.util.core :as util]
             [liberator.representation :as rep]
             [ring.util.response :as r]

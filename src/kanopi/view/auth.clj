@@ -1,4 +1,4 @@
-(ns kanopi.web.auth
+(ns kanopi.view.auth
   (:require [cemerick.friend :as friend]
             [cemerick.friend.workflows :as workflows]
             [cemerick.friend.credentials :as creds]
