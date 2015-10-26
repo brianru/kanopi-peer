@@ -1,4 +1,4 @@
-(ns kanopi.web.routes
+(ns kanopi.view.routes
   (:require [compojure.core  :refer (routes GET POST PUT ANY)]
             [compojure.route :as route]
             [kanopi.web.resources.auth :as auth]

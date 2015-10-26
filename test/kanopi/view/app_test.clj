@@ -1,4 +1,4 @@
-(ns kanopi.web.app-test
+(ns kanopi.view.app-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
 
@@ -17,7 +17,7 @@
             [kanopi.system :as sys]
             [kanopi.main :as main]
             [kanopi.model.data :as data]
-            [kanopi.web.app :as web-app]
+            [kanopi.view.web-app :as web-app]
             [kanopi.web.auth :as auth]
 
             [schema.experimental.generators :as generators]

@@ -1,4 +1,4 @@
-(ns kanopi.web.app
+(ns kanopi.view.web-app
   (:require [com.stuartsierra.component :as component]
             [immutant.web.middleware :as immutant-session]
             [liberator.dev :refer [wrap-trace]]

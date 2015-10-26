@@ -1,4 +1,4 @@
-(ns kanopi.web.auth-test
+(ns kanopi.view.auth-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
             [com.stuartsierra.component :as component]

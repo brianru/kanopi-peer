@@ -1,4 +1,4 @@
-(ns kanopi.web.api-test
+(ns kanopi.view.api-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
 
@@ -13,7 +13,7 @@
             [kanopi.model.data :as data]
 
             [kanopi.model.schema :as schema]
-            [kanopi.web.app :as web-app]
+            [kanopi.view.web-app :as web-app]
 
             [kanopi.util.core :as util]
             [kanopi.test-util :as test-util]

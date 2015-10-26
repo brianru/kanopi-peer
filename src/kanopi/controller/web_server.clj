@@ -3,7 +3,7 @@
             [environ.core :refer [env]]
             [immutant.web :as web]
             [immutant.web.middleware :as middleware]
-            [kanopi.web.routes :as routes]
+            [kanopi.view.routes :as routes]
             [kanopi.util.core :as util]
             ))
 

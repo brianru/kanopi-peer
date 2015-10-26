@@ -2,7 +2,7 @@
   (:gen-class)
   (:require [com.stuartsierra.component :as component]
             [kanopi.controller.system :refer [new-system]]
-            [kanopi.web.routes :as routes]
+            [kanopi.view.routes :as routes]
             [environ.core :refer [env]]))
 
 (def default-config

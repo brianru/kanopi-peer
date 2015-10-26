@@ -4,7 +4,7 @@
             [kanopi.model.data :refer (data-service)]
             [kanopi.web.auth :as auth]
             [kanopi.controller.web-server :as server]
-            [kanopi.web.app :as app]
+            [kanopi.view.web-app :as app]
             [environ.core :refer [env]]
             [kanopi.util.core :as util]
             ))
