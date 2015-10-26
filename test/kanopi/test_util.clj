@@ -2,7 +2,7 @@
   (:require [com.stuartsierra.component :as component]
             [clojure.data.codec.base64 :as base64]
             [kanopi.main :refer (default-config)]
-            [kanopi.system :refer (new-system)]
+            [kanopi.controller.system :refer (new-system)]
             [datomic.api :as d]
             [kanopi.util.core :as util]
             [ring.mock.request :as mock]))

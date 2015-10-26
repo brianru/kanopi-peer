@@ -14,11 +14,10 @@
 
             [kanopi.test-util :as test-util]
             [kanopi.util.core :as util]
-            [kanopi.system :as sys]
             [kanopi.main :as main]
             [kanopi.model.data :as data]
             [kanopi.view.web-app :as web-app]
-            [kanopi.web.auth :as auth]
+            [kanopi.view.auth :as auth]
 
             [schema.experimental.generators :as generators]
             [kanopi.model.schema :as schema]

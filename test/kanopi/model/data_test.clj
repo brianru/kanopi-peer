@@ -7,14 +7,12 @@
             [clojure.set]
             [schema.core :as s]
             [datomic.api :as d]
-            [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
-            [kanopi.system :as sys]
+            [kanopi.model.schema :as schema]
             [kanopi.model.data :as data]
             [kanopi.model.data.impl :as impl]
-            [kanopi.storage.datomic :as datomic]
-            [kanopi.web.auth :as auth]
-            [kanopi.generators :refer :all]
+            [kanopi.model.storage.datomic :as datomic]
+            [kanopi.view.auth :as auth]
             [kanopi.test-util :as test-util]
             [com.stuartsierra.component :as component]))
 

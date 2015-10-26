@@ -9,7 +9,6 @@
             [ring.mock.request :as mock]
 
             [kanopi.main :as main]
-            [kanopi.system :as sys]
             [kanopi.model.data :as data]
 
             [kanopi.model.schema :as schema]

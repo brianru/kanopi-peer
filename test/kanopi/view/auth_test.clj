@@ -8,7 +8,7 @@
             [kanopi.model.data :as data]
             [kanopi.test-util :as test-util]
             [kanopi.model.schema :as schema]
-            [kanopi.web.auth :refer :all]))
+            [kanopi.view.auth :refer :all]))
 
 (deftest register
   (let [sys (-> (test-util/system-excl-web)
