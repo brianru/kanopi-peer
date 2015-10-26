@@ -11,6 +11,7 @@
             [kanopi.main :as main]
             [kanopi.model.data :as data]
 
+            [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
             [kanopi.view.web-app :as web-app]
 
@@ -29,9 +30,7 @@
         ]
 
     (testing "get-datum-failure"
-      (let [message {:noun -1000
-                     :verb :get-datum
-                     :context {}}
+      (let [message (msg/get-datum -1000)
             {:keys [body] :as resp}
             (test-util/mock-request! system :post "/api" message :creds creds)
             ]
@@ -41,9 +40,7 @@
         ))
 
     (testing "get-datum-success"
-      (let [message {:noun test-datum-ent-id
-                     :verb :get-datum
-                     :context {}}
+      (let [message (msg/get-datum test-datum-ent-id)
             {:keys [body] :as resp}
             (test-util/mock-request! system :post "/api" message :creds creds)
             ]
@@ -68,10 +65,7 @@
 
     (testing "update-datum-label"
       (let [lbl' "duuuude"
-            message {:noun {:existing-entity test-ent-id
-                            :new-label lbl'}
-                     :verb :update-datum-label
-                     :context {}}
+            message (msg/update-datum-label test-ent-id lbl')
             {:keys [body] :as resp}
             (test-util/mock-request! system :post "/api" (util/transit-write message)
                                      :content-type "application/transit+json"
@@ -99,12 +93,9 @@
 
     (testing "add then update fact"
       (let [test-ent (data/get-datum data-svc creds test-ent-id)
-            fact' ["age" 42]
-            message {:noun {:datum-id test-ent-id
-                            :fact {:fact/attribute {:literal/text "age"}
-                                   :fact/value {:literal/integer 42}}}
-                     :verb :update-fact
-                     :context {}}
+            fact' {:fact/attribtue {:literal/text "age"}
+                   :fact/value     {:literal/integer 42}}
+            message (msg/update-fact test-ent-id fact')
             {:keys [body] :as resp}
             (test-util/mock-request! system :post "/api" (util/transit-write message)
                                      :creds creds
@@ -122,10 +113,8 @@
         (is (= 1 (count new-facts)))
         (is (= ["age" 42] (util/fact-entity->tuple new-fact)))
 
-        (let [message {:noun {:datum-id test-ent-id
-                              :fact (assoc-in new-fact [:fact/value :literal/integer] 17)}
-                       :verb :update-fact
-                       :context {}}
+        (let [fact'' (assoc-in new-fact [:fact/value :literal/integer] 17)
+              message (msg/update-fact test-ent-id fact'')
               {:keys [body] :as resp}
               (test-util/mock-request! system :post "/api" (util/transit-write message)
                                        :creds creds
@@ -150,9 +139,7 @@
         creds    {:username "mickey", :password "mouse132"}
         resp     (test-util/mock-register system creds)]
     (testing "success"
-      (let [message {:noun creds
-                     :verb :initialize-client-state
-                     :context {}}
+      (let [message (msg/initialize-client-state creds)
             {:keys [body] :as resp}
             (test-util/mock-request! system :post "/api" (util/transit-write message)
                                      :creds creds
