@@ -128,6 +128,22 @@
     (component/stop system)
     ))
 
+(deftest search-datums
+  (let [system  (component/start (test-util/system-excl-web))
+        data-svc (get system :data-service)
+        creds   (do (auth/register!   (:authenticator system) "brian" "rubinton")
+                    (auth/credentials (:authenticator system) "brian"))
+        ]
+    (testing "nothing"
+      (let [results (data/search-datums data-svc creds "foojahBOOHJAH")]
+        (is (empty? results))))
+
+    (testing "pale"
+      (let [results (data/search-datums data-svc creds "pale")]
+        (is (not-empty results))))
+
+    (component/stop system)))
+
 (defn- datums-with-titles [db]
   (d/q '[:find [?datum ...]
          :where
@@ -160,7 +176,7 @@
 
     (testing "one step removed")
 
-    ))
+    (component/stop system)))
 
 (deftest similar-datums
   (let [
@@ -214,7 +230,7 @@
           ]
       ;(is (not-empty results))
       (println "HERE" results)
-      ))
+      (component/stop system)))
 
 ;;(deftest authorization-controls
 ;;  (let [creds-a nil

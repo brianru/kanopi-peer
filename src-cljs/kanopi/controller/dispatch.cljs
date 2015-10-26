@@ -32,24 +32,27 @@
 
    :authenticated
    {:local  #{
-              :search
               :navigate
 
-              :login-success    :login-failure
-              :logout-success   :logout-failure
-              :register-success :register-failure
+              :login-success                   :login-failure
+              :logout-success                  :logout-failure
+              :register-success                :register-failure
 
+              :search-success                  :search-failure
+              :get-datum-success               :get-datum-failure
               :initialize-client-state-success :initialize-client-state-failure
-              :get-datum-success :get-datum-failure
+              :update-datum-label-success      :update-datum-label-failure
+              :update-fact-success             :update-fact-failure
               } 
     :remote #{
               :login :logout :register
 
-              :initialize-client-state
 
+              :search
               :get-datum
-              :update-fact
+              :initialize-client-state
               :update-datum-label
+              :update-fact
 
               }}})
 

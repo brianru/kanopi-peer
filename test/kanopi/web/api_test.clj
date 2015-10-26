@@ -52,7 +52,8 @@
         (is (= :get-datum-success (get body :verb)))
         (is (= test-datum-ent-id (-> body :noun :datum :db/id)))
         ))
-    ))
+
+    (component/stop system)))
 
 (deftest update-datum
   (let [system   (component/start (test-util/system-excl-web-server))
@@ -82,7 +83,7 @@
         (is (= lbl' (-> body :noun :datum/label)))
         ))
 
-    ))
+    (component/stop system)))
 
 
 (deftest app-and-update-facts
@@ -141,7 +142,7 @@
           (is (= ["age" 17] (util/fact-entity->tuple (first updated-facts))))
           )
         ))
-    ))
+   (component/stop system)))
 
 (deftest initialize-client-state
   (let [system   (component/start (test-util/system-excl-web-server))
@@ -163,4 +164,4 @@
         (is (every? (partial s/validate schema/Datum)
                     (vals (get-in body [:noun :cache]))))
         ))
-    ))
+    (component/stop system)))

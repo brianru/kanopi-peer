@@ -18,8 +18,6 @@
 
 (defmethod request-handler :initialize-client-state
   [request-context message]
-  (println "INITIALIZE CLIENT STATE")
-  (clojure.pprint/pprint message)
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
 
@@ -33,23 +31,48 @@
                        (map first most-edited-datums)
                        (map first most-viewed-datums)
                        (map first recent-datums)) 
-        all-datums    (->> all-datum-ids
-                           (map (partial data/get-datum data-svc creds))
-                           (reduce (fn [acc datum]
-                                     (assoc acc (:db/id datum) datum))
-                                   {}))
+        ;; NOTE: cache is here to ensure the above datums show up in
+        ;; search results -- right now search results are only local.
+        ;; really that's wrong, searches should be executed on the
+        ;; server. AH.
+        ;; TODO: implement server-side search.
+        ;;all-datums    (->> all-datum-ids
+        ;;                   (map (partial data/get-datum data-svc creds))
+        ;;                   (reduce (fn [acc datum]
+        ;;                             (assoc acc (:db/id datum) datum))
+        ;;                           {}))
 
         data     (hash-map
                   :most-edited-datums most-edited-datums
                   :most-viewed-datums most-viewed-datums
                   :recent-datums      recent-datums
-                  :cache              all-datums)
+                  ;;:cache              all-datums
+                  )
         ]
     (hash-map
      :noun    data
-     :verb    (if (-> data :cache not-empty)
+     :verb    (if (-> all-datum-ids not-empty)
                 :initialize-client-state-success
                 :initialize-client-state-failure)
+     :context {})))
+
+(defmethod request-handler :search
+  [request-context message]
+  (let [data-svc (util/get-data-service request-context)
+        creds    (get-in message [:context :creds])
+        data     (hash-map :search-results
+                           (data/search-datums data-svc creds (get message :noun)))
+        ]
+    (hash-map
+     :noun    data
+     ;; NOTE: really, I don't care if there are no search results.
+     ;; that does not determine failure as in the other handlers. in
+     ;; this case as long as the search ran let's return success.
+     ;; I think it makes sense to indicate that by checking for the
+     ;; search-results key in the response.
+     :verb    (if (find data :search-results)
+                :search-success
+                :search-failure)
      :context {})))
 
 (defmethod request-handler :get-datum

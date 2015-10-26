@@ -76,8 +76,7 @@
    :fact/value     [{:db/id nil}]})
 
 (defn- build-datum-data
-  "
-  Data is stored as flat maps locally and on server, but to simplify
+  "Data is stored as flat maps locally and on server, but to simplify
   datum component model we must nest entities as follows:
   datum -> facts -> attributes (literals or datums)
   -> values     (literals or datums)"
@@ -236,6 +235,16 @@
                     ;; not using this data structure very well
                     (assoc-in app-state [:search-results] {query-string results})))))
 
+(defmethod local-event-handler :search-success
+  [aether history app-state msg]
+  (om/transact! app-state
+                (fn [app-state]
+                  (merge app-state msg))))
+
+(defmethod local-event-handler :search-failure
+  [aether history app-state msg]
+  (om/transact! app-state :error-messages #(conj % msg)))
+
 ;; TODO: when handled locally, shouldn't I follow the same code path
 ;; as performing action remotely? eg. send success/failure msgs?
 ;; OR, should I purposely not do this and have a clear distinction b/w
@@ -249,13 +258,16 @@
                        (assoc app-state :datum)))))
 
 ;; TODO: don't I also have to put this stuff in the cache?
+;; TODO: passing whole entity to build-datum-date, only supposed to
+;; send db/id (assumes it's already in the cache)
 (defmethod local-event-handler :get-datum-success
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
-                  (->> (get msg :noun)
-                       (build-datum-data app-state)
-                       (assoc app-state :datum)))))
+                  (let [datum-id (get-in msg [:noun :datum :db/id])]
+                    (-> app-state
+                        (assoc :datum (get-in msg [:noun]))
+                        (assoc-in [:cache datum-id] (get-in msg [:noun :datum])))))))
 
 (defmethod local-event-handler :get-datum-failure
   [aether history app-state msg]

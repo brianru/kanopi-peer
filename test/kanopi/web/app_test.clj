@@ -52,40 +52,44 @@
             resp (handler req)
             ]
         (is (= 401 (:status resp)))
-        #_(is (re-find #"login_failed" (get-in resp [:headers "Location"] "")))))
+        #_(is (re-find #"login?fail=true" (get-in resp [:headers "Location"] "")))))
 
-    (testing "register"
+    (testing "register-transit"
       (let [req   (-> (mock/request :post "/register" creds)
                       (mock/header :accept "application/transit+json"))
             resp  (handler req)
             body  (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
         (is (= (:username creds) (:username body)))
-        #_(is (re-find #"welcome=true" (get-in resp [:headers "Location"] "")))
-        (is (auth/verify-creds (:authenticator system) creds))))
+        (is (auth/verify-creds (:authenticator system) creds))
+        ))
 
-    (testing "register-redirect"
+    (testing "register-html"
       (let [req  (-> (mock/request :post "/register" creds1)
                      (mock/header :accept "text/html"))
             resp (handler req)
             ]
-        (is (= 301 (:status resp)))))
+        (is (= 301 (:status resp)))
+        (is (re-find #"welcome=true" (get-in resp [:headers "Location"] "")))
+        (is (auth/verify-creds (:authenticator system) creds1))
+        ))
 
-    (testing "login-success"
+    (testing "login-transit"
       (let [req (-> (mock/request :post "/login" creds)
                     (mock/header :accept "application/transit+json"))
-            resp (handler req)
+            resp  (handler req)
             body' (util/transit-read (:body resp))]
         (is (= 200 (:status resp)))
         (is (= (:username creds) (:username body')))
         ))
 
-    (testing "login-redirect"
+    (testing "login-html"
       (let [req (-> (mock/request :post "/login" creds)
                     (mock/header :accept "text/html"))
             resp (handler req)]
         (is (= 303 (:status resp)))
-        (is (= "http://localhost/?welcome=true" (get-in resp [:headers "Location"] "")))))
+        (is (= "http://localhost/?welcome=true" (get-in resp [:headers "Location"] "")))
+        ))
 
     (testing "access-spa-creds"
       (let [req  (-> (mock/request :get "/")

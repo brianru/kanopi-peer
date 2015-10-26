@@ -11,7 +11,7 @@
 
 (defn describe-entity
   [m]
-  (when (map? m)
+  (if-not (map? m) :unknown
     (let [ks (keys m)]
       (cond
        (some #{:datum/fact :datum/label :datum/role} ks)
@@ -89,8 +89,8 @@
 
 (s/defschema Fact
   ""
-  {
-   :db/id          (s/maybe DatomicId)
+  {:db/id (s/maybe DatomicId)
+
    :fact/attribute
    (s/conditional #(= :datum   (describe-entity %)) (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
