@@ -6,7 +6,7 @@
             [com.stuartsierra.component :as component]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [environ.core :refer [env]]
-            [kanopi.system :as sys]
+            [kanopi.controller.system :as sys]
             [kanopi.main]
             ))
 

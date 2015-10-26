@@ -1,7 +1,7 @@
 (ns kanopi.main
   (:gen-class)
   (:require [com.stuartsierra.component :as component]
-            [kanopi.system :refer [new-system]]
+            [kanopi.controller.system :refer [new-system]]
             [kanopi.web.routes :as routes]
             [environ.core :refer [env]]))
 
