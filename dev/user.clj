@@ -14,7 +14,7 @@
             [clojure.test.check.properties :as prop]
             
             [kanopi.web.auth :as auth]
-            [kanopi.data :as data]
+            [kanopi.model.data :as data]
             [kanopi.storage.datomic :as datomic]
             
             [kanopi.csv-import :as csv-import]))

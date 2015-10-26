@@ -1,4 +1,4 @@
-(ns kanopi.data.welcome)
+(ns kanopi.model.data.welcome)
 
 (def data
   [

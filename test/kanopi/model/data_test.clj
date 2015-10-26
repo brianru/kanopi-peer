@@ -1,4 +1,4 @@
-(ns kanopi.data-test
+(ns kanopi.model.data-test
   (:require [clojure.test :refer :all]
             [clojure.test.check.generators :as tc]
             [clojure.test.check.generators :as gen]
@@ -10,8 +10,8 @@
             [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
             [kanopi.system :as sys]
-            [kanopi.data :as data]
-            [kanopi.data.impl :as impl]
+            [kanopi.model.data :as data]
+            [kanopi.model.data.impl :as impl]
             [kanopi.storage.datomic :as datomic]
             [kanopi.web.auth :as auth]
             [kanopi.generators :refer :all]

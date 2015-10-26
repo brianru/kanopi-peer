@@ -1,4 +1,4 @@
-(ns kanopi.data
+(ns kanopi.model.data
   "Generic API to a Database component.
 
   TODO: consistent naming convention for sync vs async requests. check
@@ -8,7 +8,7 @@
             [clojure.pprint :refer (pprint)]
             [kanopi.util.core :as util]
             [kanopi.storage.datomic :as datomic]
-            [kanopi.data.impl :refer :all]))
+            [kanopi.model.data.impl :refer :all]))
 
 ;; TODO: implement remove-fact
 ;;(remove-fact   [this creds ent-id fact-id])

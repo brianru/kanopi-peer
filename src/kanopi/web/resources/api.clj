@@ -5,7 +5,7 @@
             [liberator.representation :refer (ring-response)]
             [kanopi.web.resources.base :as base]
             [cemerick.friend :as friend]
-            [kanopi.data :as data]
+            [kanopi.model.data :as data]
             [kanopi.util.core :as util]
             [kanopi.web.message :as msg]
             [kanopi.web.handlers :as handlers]

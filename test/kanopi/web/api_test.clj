@@ -10,7 +10,7 @@
 
             [kanopi.main :as main]
             [kanopi.system :as sys]
-            [kanopi.data :as data]
+            [kanopi.model.data :as data]
 
             [kanopi.model.schema :as schema]
             [kanopi.web.app :as web-app]

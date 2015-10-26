@@ -5,7 +5,7 @@
             [cemerick.friend.credentials :as creds]
             [datomic.api :as d]
             [schema.core :as s]
-            [kanopi.data :as data]
+            [kanopi.model.data :as data]
             [kanopi.test-util :as test-util]
             [kanopi.model.schema :as schema]
             [kanopi.web.auth :refer :all]))

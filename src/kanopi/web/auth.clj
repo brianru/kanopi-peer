@@ -5,8 +5,8 @@
             [clojure.set :as set]
             [schema.core :as s]
             [datomic.api :as d]
-            [kanopi.data.impl :as data-impl]
-            [kanopi.data :as data]
+            [kanopi.model.data.impl :as data-impl]
+            [kanopi.model.data :as data]
             [kanopi.model.schema :as schema]
             [kanopi.storage.datomic :as datomic]
             [com.stuartsierra.component :as component]))

@@ -1,4 +1,4 @@
-(ns kanopi.data.impl
+(ns kanopi.model.data.impl
   (:require [datomic.api :as d]
             [kanopi.util.core :as util]
             [kanopi.model.schema :as schema]

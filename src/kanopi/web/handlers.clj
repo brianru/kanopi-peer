@@ -1,6 +1,6 @@
 (ns kanopi.web.handlers
   (:require [kanopi.web.message :as msg]
-            [kanopi.data :as data]
+            [kanopi.model.data :as data]
             [kanopi.util.core :as util]
             [clojure.pprint :refer (pprint)]
             ))

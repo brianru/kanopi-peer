@@ -16,7 +16,7 @@
             [kanopi.util.core :as util]
             [kanopi.system :as sys]
             [kanopi.main :as main]
-            [kanopi.data :as data]
+            [kanopi.model.data :as data]
             [kanopi.web.app :as web-app]
             [kanopi.web.auth :as auth]
 
