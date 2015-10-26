@@ -14,7 +14,7 @@
   (if-not (map? m) :unknown
     (let [ks (keys m)]
       (cond
-       (some #{:datum/fact :datum/label :datum/role} ks)
+       (some #{:datum/fact :datum/label :datum/team} ks)
        :datum
 
        (some #{:fact/attribute :fact/value} ks)
@@ -62,17 +62,16 @@
 (s/defschema InputCredentials
   [(s/one UserId "id") (s/one UserPassword "pw")])
 
-(s/defschema UserRole
+(s/defschema UserTeam
   {
    :db/id     (s/maybe DatomicId)
-   :role/id    UserId
-   (s/optional-key :role/label) UserId
+   :team/id    UserId
    })
 
 (s/defschema Credentials
   {
    :ent-id   DatomicId
-   :role     [UserRole]
+   :team     [UserTeam]
    :username UserId
    :password UserPassword
    })
@@ -82,7 +81,7 @@
    :db/id         (s/maybe DatomicId)
    :user/id       UserId
    :user/password UserPassword
-   :user/role     UserRole
+   :user/team     UserTeam
    })
 
 (declare Datum Literal)
@@ -102,7 +101,7 @@
 (s/defschema Datum
   ""
   {:db/id       (s/maybe DatomicId)
-   :datum/role  UserRole
+   :datum/team  UserTeam
    :datum/label (s/maybe s/Str)
    (s/optional-key :datum/fact) [(s/recursive #'Fact)]
    })

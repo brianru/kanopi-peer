@@ -56,7 +56,7 @@
           ;; kanopi.data.impl as example
           creds  (d/pull db
                         '[:db/id
-                          {:user/role [:db/id :role/id :role/label]}
+                          {:user/team [:db/id :team/id]}
                           :user/id
                           :user/password]
                         ent-id) 
@@ -64,7 +64,7 @@
           creds' (when (not-empty (dissoc creds :db/id))
                    (hash-map
                     :ent-id   (get-in creds [:db/id])
-                    :role     (get-in creds [:user/role])
+                    :team     (get-in creds [:user/team])
                     :username (get-in creds [:user/id])
                     :password (get-in creds [:user/password])))]
       (when creds'
@@ -87,21 +87,20 @@
             "This username is already taken. Please choose another.")
     ;; TODO: add audit datoms to the tx entity
     (let [user-ent-id    (d/tempid :db.part/user -1)
-          user-role-id   (d/tempid :db.part/users -1000)
+          user-team-id   (d/tempid :db.part/users -1000)
           init-user-data (some-> (get config :init-user-data)
                                  (slurp)
                                  (read-string)
                                  (->> (map (fn [ent]
                                              (if (= :datum (schema/describe-entity ent))
-                                               (assoc ent :datum/role user-role-id)
+                                               (assoc ent :datum/team user-team-id)
                                                ent)))))
           txdata (concat
                   [
-                   [:db/add user-role-id :role/id username]
-                   [:db/add user-role-id :role/label username]
+                   [:db/add user-team-id :team/id username]
                    [:db/add user-ent-id  :user/id username]
                    [:db/add user-ent-id  :user/password (creds/hash-bcrypt password)]
-                   [:db/add user-ent-id  :user/role user-role-id]
+                   [:db/add user-ent-id  :user/team user-team-id]
                    ]
                   init-user-data
                   ) 

@@ -22,7 +22,7 @@
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
- {:db/ident :user/role
+ {:db/ident :user/team
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/many
   :db/isComponent true
@@ -31,21 +31,12 @@
   :db.install/_attribute :db.part/db}
 
  ;; Roles
- {:db/ident :role/id
+ {:db/ident :team/id
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
   :db/unique :db.unique/identity
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
-
- ;; TODO: do I need this? users don't have a label..yet.
- {:db/ident :role/label
-  :db/valueType :db.type/string
-  :db/cardinality :db.cardinality/one
-  :db/fulltext true
-  :db/id #db/id[:db.part/db]
-  :db.install/_attribute :db.part/db}
-
 
  ;; Thunks
  {:db/ident :datum/label
@@ -63,7 +54,7 @@
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
- {:db/ident :datum/role
+ {:db/ident :datum/team
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
   :db/isComponent true

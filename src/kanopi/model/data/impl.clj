@@ -15,15 +15,15 @@
     (let [k (-> ent (dissoc :db/id) (keys) (first))]
       (vector k (get ent k)))
 
-    :default
+    ;; default
     nil))
 
-(defn user-default-role [creds]
+(defn user-default-team [creds]
   (let [username (get creds :username)]
     (->> creds
-         :role
+         :team
          (filter (fn [rl]
-                   (= (:username creds) (:role/label rl))))
+                   (= (:username creds) (:team/id rl))))
          (first)
          :db/id)))
 
@@ -149,8 +149,7 @@
   (let [ent (d/pull db
                     '[:db/id
                       {:fact/attribute [*]}
-                      {:fact/value [*]}
-                      :fact/role]
+                      {:fact/value [*]}]
                     fact-id)]
     (if (empty? (dissoc ent :db/id))
       nil
@@ -163,7 +162,7 @@
   (let [ent (d/pull db
                     '[:db/id
                       :datum/label
-                      {:datum/role [:db/id :role/id]}
+                      {:datum/team [:db/id :team/id]}
                       {:datum/fact [:db/id
                                     {:fact/attribute [*]}
                                     {:fact/value     [*]}
@@ -202,7 +201,7 @@
    (let [datum-id (d/tempid :db.part/structure)]
      (hash-map
       :ent-id  datum-id
-      :txdata  [[:db/add datum-id :datum/role (user-default-role creds)]
+      :txdata  [[:db/add datum-id :datum/team (user-default-team creds)]
                 [:db/add datum-id :datum/label label]])))
 
   ([datomic-peer creds label & facts]
@@ -223,7 +222,7 @@
                     facts)]
      (hash-map
       :ent-id datum-id
-      :txdata (concat [[:db/add datum-id :datum/role (user-default-role creds)]
+      :txdata (concat [[:db/add datum-id :datum/team (user-default-team creds)]
                        [:db/add datum-id :datum/label label]]
                       (mapv (partial vector :db/add datum-id :datum/fact)
                             (get fact-coll :ent-ids))

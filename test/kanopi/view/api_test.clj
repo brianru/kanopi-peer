@@ -93,7 +93,7 @@
 
     (testing "add then update fact"
       (let [test-ent (data/get-datum data-svc creds test-ent-id)
-            fact' {:fact/attribtue {:literal/text "age"}
+            fact' {:fact/attribute {:literal/text "age"}
                    :fact/value     {:literal/integer 42}}
             message (msg/update-fact test-ent-id fact')
             {:keys [body] :as resp}

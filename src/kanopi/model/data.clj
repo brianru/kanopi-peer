@@ -40,7 +40,7 @@
   (retract-datum [this creds ent-id]
                  "Assumes only 1 user has access, and thus retracting totally retracts it.
                  If more than 1 user has that access this must only retract the appropriate
-                 role(s) from the entity.")
+                 team(s) from the entity.")
   )
 
 (defn annotate-transaction
@@ -126,14 +126,14 @@
               ))
 
   (most-edited-datums [this creds]
-    (let [user-roles (->> creds :role (mapv :db/id))]
+    (let [user-teams (->> creds :team (mapv :db/id))]
       (d/q '[:find ?e (count-distinct ?tx)
-             :in $ [?user-role ...]
+             :in $ [?user-team ...]
              :where
-             [?e :datum/role ?user-role]
+             [?e :datum/team ?user-team]
              [?e _ _ ?tx]]
            (datomic/db datomic-peer creds)
-           user-roles)))
+           user-teams)))
 
   (most-viewed-datums [this creds]
     (let []
@@ -141,16 +141,16 @@
 
   (recent-datums [this creds]
     ;; TODO: filter by recency
-    (let [user-roles (->> creds :role (mapv :db/id))]
+    (let [user-teams (->> creds :team (mapv :db/id))]
       (d/q '[:find ?e ?time ?tx
-             :in $ [?user-role ...]
+             :in $ [?user-team ...]
              :where
-             [?e :datum/role ?user-role]
+             [?e :datum/team ?user-team]
              [?e _ _ ?tx]
              [?tx :db/txInstant ?time]
              ]
            (datomic/db datomic-peer creds)
-           user-roles)))
+           user-teams)))
 
   (add-fact [this creds ent-id {:keys [fact/attribute fact/value] :as fact}]
     (add-fact this creds ent-id (entity->input attribute) (entity->input value)))

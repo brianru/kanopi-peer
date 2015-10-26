@@ -29,10 +29,10 @@
                            (get creds :ent-id))]
         (is (not-empty user))))
 
-    (testing "user role created"
-      (let [role (d/entity (d/db (get-in sys [:datomic-peer :connection]))
-                           (-> creds :role first :db/id))]
-        (is (not-empty role))))
+    (testing "user team created"
+      (let [team (d/entity (d/db (get-in sys [:datomic-peer :connection]))
+                           (-> creds :team first :db/id))]
+        (is (not-empty team))))
 
     (testing "password crypto works"
       (is (not= password (get creds :password)))
@@ -40,11 +40,11 @@
 
     (testing "initial data loaded"
       (let [user-data (d/q '[:find [?e ...]
-                             :in $ ?user-role
+                             :in $ ?user-team
                              :where
-                             [?e :datum/role ?user-role]]
+                             [?e :datum/team ?user-team]]
                            (d/db (get-in sys [:datomic-peer :connection]))
-                           (-> creds :role first :db/id))]
+                           (-> creds :team first :db/id))]
         (is (not-empty user-data))))
 
     (component/stop sys)))

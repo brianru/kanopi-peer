@@ -27,8 +27,8 @@
     (testing "init datum returns the datum's entity id"
       (is (s/validate schema/DatomicId ent-id)))
     
-    (testing "datum has user's default role"
-      (is (= (impl/user-default-role creds) (-> ent :datum/role :db/id))))
+    (testing "datum has user's default team"
+      (is (= (impl/user-default-team creds) (-> ent :datum/team :db/id))))
 
     (testing "datum shape as given by data service"
       (is (s/validate schema/Datum ent)))

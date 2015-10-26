@@ -116,13 +116,13 @@
      ;; I don't think that's happening b/c registration does not flow
      ;; through friend.
      ::identity (-> (auth/credentials authenticator username)
-                    (select-keys [:ent-id :role :username])
+                    (select-keys [:ent-id :team :username])
                     ;; to make this match the friend
                     ;; current-authentication map
                     ((fn [x] (-> x
-                                 (dissoc :role)
+                                 (dissoc :team)
                                  (assoc :identity (:username x)
-                                        :roles (->> x :role (map :db/id) (set)))
+                                        :teams (->> x :team (map :db/id) (set)))
                                  ))))}))
 
 (defn success?
@@ -245,7 +245,7 @@
                  (cond
                   (not= media-type "text/html")
                   ;; FIXME: this response does not match response from
-                  ;; successful login. roles is destructed here.
+                  ;; successful login. teams is destructed here.
                   (-> user
                       (rep/as-response ctx)
                       (friend/merge-authentication user)

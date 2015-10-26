@@ -150,6 +150,12 @@
                 :selection selection}))
    )
 #?(:cljs
+   (defn register [creds]
+     (hash-map 
+      :noun creds
+      :verb :register
+      :context {})))
+#?(:cljs
    (defn register-success [creds]
      (hash-map
       :noun creds

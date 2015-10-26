@@ -3,7 +3,6 @@
   (:require [sablono.core :as sab]
             [quile.component :as component]
             [kanopi.dev.util :as dev-util]
-            [kanopi.model.intro-data :as intro-data]
             [om.core :as om]
             [om.dom :as dom]
             [kanopi.view.fact :as fact]
