@@ -74,7 +74,7 @@
             [lein-figwheel "0.3.7"
              :exclusions [org.clojure/core.async]]]
 
-  :clean-targets ^{:protect false} [:target-path "resources/public/js/out"]
+  :clean-targets ^{:protect false} [:target-path "resources/public/js/out" "resources/public/js/out_devcards"]
 
   :profiles {:dev
              {:jvm-opts ["-XX:MaxPermSize=128M"]
