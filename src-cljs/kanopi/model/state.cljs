@@ -5,7 +5,6 @@
             [goog.net.cookies :as cookies]
             [cemerick.url :as url]
             [cognitect.transit :as transit]
-            [kanopi.model.intro-data :refer (intro-data)]
             [kanopi.util.core :as util]
             [kanopi.util.local-storage :as local-storage]
             ))
