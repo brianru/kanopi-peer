@@ -3,7 +3,7 @@
             [kanopi.model.storage.datomic :refer (datomic-peer)]
             [kanopi.model.data :refer (data-service)]
             [kanopi.web.auth :as auth]
-            [kanopi.web.server :as server]
+            [kanopi.controller.web-server :as server]
             [kanopi.web.app :as app]
             [environ.core :refer [env]]
             [kanopi.util.core :as util]

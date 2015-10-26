@@ -1,4 +1,4 @@
-(ns kanopi.web.server
+(ns kanopi.controller.web-server
   (:require [com.stuartsierra.component :as component]
             [environ.core :refer [env]]
             [immutant.web :as web]
