@@ -4,6 +4,7 @@
   messages, server-local messages, etc."
   (:require [om.core :as om]
             [kanopi.controller.history :as history]
+            [ajax.core :as ajax]
             [cljs.core.async :as async]))
 
 (defn publisher [owner]
@@ -181,8 +182,13 @@
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
-   :noun {:uri             (history/get-route-for history :login)
-          :params          (get msg :noun)
+   :noun {
+          ;; NOTE: cljs-ajax parses params to req body for POST
+          ;; requests. friend auth lib requires username and password
+          ;; to appear in params or form-params, not body.
+          :uri             (ajax/uri-with-params
+                            (history/get-route-for history :login)
+                            (get msg :noun))
           :method          :post
           :response-format :transit
           :response-method :aether
@@ -223,6 +229,20 @@
    :context {}))
 
 (defmethod local->remote :initialize-client-state
+  [history app-state msg]
+  {:post [(valid-remote-message? %)]}
+  (hash-map
+   :noun {:uri             (history/get-route-for history :api)
+          :params          msg
+          :format          :transit
+          :method          :post
+          :response-format :transit
+          :response-method :aether
+          :error-method    :aether}
+   :verb :request
+   :context {}))
+
+(defmethod local->remote :search
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
