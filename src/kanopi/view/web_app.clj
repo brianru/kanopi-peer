@@ -3,13 +3,39 @@
             [immutant.web.middleware :as immutant-session]
             [liberator.dev :refer [wrap-trace]]
             [liberator.representation :as rep]
+            [cemerick.friend :as friend]
+            [cemerick.friend.workflows :as workflows]
+            [cemerick.friend.credentials :as creds]
             [ring.middleware.defaults]
             [ring.middleware.params]
             [ring.middleware.keyword-params]
             [ring.middleware.cookies]
             [ring.middleware.format]
-            [kanopi.view.auth :refer (authentication-middleware)]
             [kanopi.util.core :as util]))
+
+(defn authentication-middleware
+  [handler credential-fn]
+  (let [friend-m
+        {
+         :allow-anon?       true
+         :redirect-on-auth? false
+         :credential-fn     (partial creds/bcrypt-credential-fn credential-fn)
+
+         :default-landing-uri "/"
+         :login-uri "/login"
+
+         ;; TODO: make better error handlers which return errors
+         ;; described as data
+         :login-failure-handler   (constantly {:status 401})
+         :unauthenticated-handler (constantly {:status 401})
+         :unauthorized-handler    (constantly {:status 401})
+
+         :workflows [
+                     (workflows/interactive-form :redirect-on-auth? false :allow-anon? true)
+                     (workflows/http-basic :realm "/")
+                     ]}]
+    (-> handler
+        (friend/authenticate friend-m))))
 
 (defn wrap-ensure-session
   "Ensures that a session exists and has a key set. Also ensures that it's added
@@ -24,16 +50,16 @@
                         (assoc-in [:session :key] key)))]
       (cond
 
-        (or has-key?
-            (= key (get-in response [:session :key]))
-            (and (contains? response :session) (nil? (:session response))))
-        response
+       (or has-key?
+           (= key (get-in response [:session :key]))
+           (and (contains? response :session) (nil? (:session response))))
+       response
 
-        (:session response)
-        (assoc-in response [:session :key] key)
+       (:session response)
+       (assoc-in response [:session :key] key)
 
-        :else
-        (assoc response :session (assoc session :key key))))))
+       :else
+       (assoc response :session (assoc session :key key))))))
 
 (defn wrap-add-to-req [handler k payload]
   (fn [req]
@@ -68,7 +94,7 @@
 
   (stop [this]
     (if-not app-handler this
-            (assoc this :app-handler nil))))
+      (assoc this :app-handler nil))))
 
 (defn new-web-app [config]
   (map->WebApp {:config config}))

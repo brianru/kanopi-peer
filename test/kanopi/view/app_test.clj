@@ -16,8 +16,8 @@
             [kanopi.util.core :as util]
             [kanopi.main :as main]
             [kanopi.model.data :as data]
+            [kanopi.controller.auth :as auth]
             [kanopi.view.web-app :as web-app]
-            [kanopi.view.auth :as auth]
 
             [schema.experimental.generators :as generators]
             [kanopi.model.schema :as schema]

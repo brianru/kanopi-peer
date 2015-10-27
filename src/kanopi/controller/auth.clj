@@ -1,39 +1,13 @@
-(ns kanopi.view.auth
-  (:require [cemerick.friend :as friend]
-            [cemerick.friend.workflows :as workflows]
-            [cemerick.friend.credentials :as creds]
-            [clojure.set :as set]
+(ns kanopi.controller.auth
+  (:require [clojure.set :as set]
             [schema.core :as s]
             [datomic.api :as d]
+            [cemerick.friend.credentials :as creds]
             [kanopi.model.data.impl :as data-impl]
             [kanopi.model.data :as data]
             [kanopi.model.schema :as schema]
             [kanopi.model.storage.datomic :as datomic]
             [com.stuartsierra.component :as component]))
-
-(defn authentication-middleware
-  [handler credential-fn]
-  (let [friend-m
-        {
-         :allow-anon?       true
-         :redirect-on-auth? false
-         :credential-fn     (partial creds/bcrypt-credential-fn credential-fn)
-
-         :default-landing-uri "/"
-         :login-uri "/login"
-
-         ;; TODO: make better error handlers which return errors
-         ;; described as data
-         :login-failure-handler   (constantly {:status 401})
-         :unauthenticated-handler (constantly {:status 401})
-         :unauthorized-handler    (constantly {:status 401})
-
-         :workflows [
-                     (workflows/interactive-form :redirect-on-auth? false :allow-anon? true)
-                     (workflows/http-basic :realm "/")
-                     ]}]
-    (-> handler
-        (friend/authenticate friend-m))))
 
 (defprotocol IAuthenticate
   (credentials  [this username])

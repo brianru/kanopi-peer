@@ -12,7 +12,7 @@
             [kanopi.model.data :as data]
             [kanopi.model.data.impl :as impl]
             [kanopi.model.storage.datomic :as datomic]
-            [kanopi.view.auth :as auth]
+            [kanopi.controller.auth :as auth]
             [kanopi.test-util :as test-util]
             [com.stuartsierra.component :as component]))
 

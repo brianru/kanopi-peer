@@ -2,7 +2,7 @@
   (:require [com.stuartsierra.component :as component]
             [kanopi.model.storage.datomic :refer (datomic-peer)]
             [kanopi.model.data :refer (data-service)]
-            [kanopi.view.auth :as auth]
+            [kanopi.controller.auth :as auth]
             [kanopi.controller.web-server :as server]
             [kanopi.view.web-app :as app]
             [environ.core :refer [env]]

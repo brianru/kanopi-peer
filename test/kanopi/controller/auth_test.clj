@@ -1,4 +1,4 @@
-(ns kanopi.view.auth-test
+(ns kanopi.controller.auth-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
             [com.stuartsierra.component :as component]
@@ -8,7 +8,7 @@
             [kanopi.model.data :as data]
             [kanopi.test-util :as test-util]
             [kanopi.model.schema :as schema]
-            [kanopi.view.auth :refer :all]))
+            [kanopi.controller.auth :refer :all]))
 
 (deftest register
   (let [sys (-> (test-util/system-excl-web)
