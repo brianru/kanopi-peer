@@ -66,7 +66,8 @@
                                    :username "brian@kanopi.io"
                                    :password "04fd123f-c4c5-4bb5-939b-18f41be8a18f"
                                    }}
-  :source-paths ["src" "src-cljc"]
+  :source-paths ["src-cljc" "src"]
+  :test-paths ["src-cljc" "src" "test-cljc" "test"]
   :main kanopi.main
 
   :plugins [[lein-marginalia "0.8.0"]
@@ -118,7 +119,7 @@
                ;; lein figwheel to run with auto-reloading
                ;; lein cljsbuild once to run otherwise
                {:id :dev
-                :source-paths ["src-cljs" "src-cljc"]
+                :source-paths ["src-cljc" "src-cljs"]
                 :figwheel {:on-jsload "kanopi.core/reload-om"}
                 :compiler {:output-to "resources/public/js/main.js"
                            :output-dir "resources/public/js/out"
@@ -130,7 +131,7 @@
 
                ;; lein figwheel devcards to run
                {:id :devcards
-                :source-paths ["src-cljs" "src-cljc" "dev-cljs"]
+                :source-paths ["src-cljc" "src-cljs" "dev-cljs"]
                 :figwheel {:devcards true}
                 :compiler {:output-to "resources/public/js/main_devcards.js"
                            :output-dir "resources/public/js/out_devcards"

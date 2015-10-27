@@ -111,7 +111,6 @@
             sample-creds (map vector
                               (map str (range 10000000 10000010))
                               (map str (range 20000000 20000010)))
-            _ (println "HERe" sample-creds)
             responses (map (comp handler register) sample-creds)
             response-cookies
             (->> responses
