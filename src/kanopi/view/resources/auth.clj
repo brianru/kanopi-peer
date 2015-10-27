@@ -6,7 +6,7 @@
             [kanopi.util.liberator-transit]
             [cemerick.friend :as friend]
             [kanopi.view.resources.templates :as html]
-            [kanopi.controller.auth :as auth]
+            [kanopi.controller.authenticator :as auth]
             [kanopi.util.core :as util]
             [liberator.representation :as rep]
             [ring.util.response :as r]

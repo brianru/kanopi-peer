@@ -8,8 +8,6 @@
             [kanopi.view.fact :as fact]
             ))
 
-(js/alert 40)
-
 (defonce system
   (component/start (dev-util/new-system)))
 

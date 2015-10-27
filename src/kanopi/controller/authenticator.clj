@@ -1,18 +1,16 @@
-(ns kanopi.controller.auth
-  (:require [clojure.set :as set]
-            [schema.core :as s]
+(ns kanopi.controller.authenticator
+  (:require [com.stuartsierra.component :as component]
             [datomic.api :as d]
+            [schema.core :as s]
             [cemerick.friend.credentials :as creds]
-            [kanopi.model.data.impl :as data-impl]
-            [kanopi.model.data :as data]
             [kanopi.model.schema :as schema]
-            [kanopi.model.storage.datomic :as datomic]
-            [com.stuartsierra.component :as component]))
+            [kanopi.model.storage.datomic :as datomic]))
 
 (defprotocol IAuthenticate
-  (credentials  [this username])
-  (verify-creds [this input-creds] [this username password])
   (register!    [this username password])
+  (credentials  [this username])
+  (verify-creds [this input-creds]
+                [this username password])
   (change-password! [this username current-password new-password]))
 
 (defn valid-credentials? [creds]
@@ -109,31 +107,3 @@
    (new-authentication-service {}))
   ([config]
    (map->AuthenticationService {:config config})))
-
-(defprotocol IAuthorize
-  (authorized-methods [this creds ent-id])
-  (authorized? [this creds request])
-  (enforce-entitlements [this ]))
-
-;; TODO: implement this.
-(defrecord AuthorizationService [config database]
-
-  IAuthorize
-  (authorized-methods [this creds ent-id]
-    #{:get :put :post :delete})
-
-  (authorized? [this creds request]
-    (let [ent-id nil]
-      (contains?
-       (authorized-methods this creds ent-id)
-       (:request-method request))))
-
-  ;;(enforce-entitlements [this creds ])
-  )
-
-(defn new-authorization-service
-  "Helper fn."
-  ([]
-   (new-authorization-service {}))
-  ([config]
-   (map->AuthorizationService {:config config})))

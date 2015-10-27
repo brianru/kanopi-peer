@@ -8,7 +8,7 @@
             [kanopi.model.data :as data]
             [kanopi.test-util :as test-util]
             [kanopi.model.schema :as schema]
-            [kanopi.controller.auth :refer :all]))
+            [kanopi.controller.authenticator :refer :all]))
 
 (deftest register
   (let [sys (-> (test-util/system-excl-web)
@@ -82,3 +82,7 @@
       (is (verify-creds (:authenticator sys) username password')))
 
     (component/stop sys)))
+
+(deftest register-team!
+  (let []
+    ))
