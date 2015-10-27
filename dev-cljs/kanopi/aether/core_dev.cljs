@@ -1,8 +1,8 @@
-(ns kanopi.dev.aether.core
+(ns kanopi.aether.core-dev
   (:require-macros [devcards.core :as dc :refer (defcard deftest)]
                    [cljs.test :refer (testing is)])
   (:require [quile.component :as component]
-            [kanopi.dev.util :as dev-util]))
+            [kanopi.util-dev :as dev-util]))
 
 (defonce system
   (component/start (dev-util/new-system)))

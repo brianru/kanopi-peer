@@ -1,11 +1,11 @@
 (ns kanopi.devcards
   (:require [sablono.core :as sab]
-            [kanopi.dev.om-next]
-            [kanopi.dev.aether.core]
-            [kanopi.dev.view.fact]
-            [kanopi.dev.view.datum]
-            [kanopi.dev.view.widgets.typeahead]
-            [kanopi.dev.view.widgets.dropdown]
-            [kanopi.dev.view.widgets.input-field]
+            [kanopi.om-next]
+            [kanopi.aether.core-dev]
+            [kanopi.view.fact-dev]
+            [kanopi.view.datum-dev]
+            [kanopi.view.widgets.typeahead-dev]
+            [kanopi.view.widgets.dropdown-dev]
+            [kanopi.view.widgets.input-field-dev]
             )
   (:require-macros [devcards.core :refer (defcard)]))

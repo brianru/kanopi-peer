@@ -35,7 +35,7 @@
                  [sablono "0.3.6"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [jamesmacaulay/zelkova "0.4.0"]
-                 [devcards "0.2.0-3"]
+                 [devcards "0.2.0-8"]
 
                  ;; Database
                  [com.datomic/datomic-pro "0.9.5302"
@@ -72,7 +72,7 @@
 
   :plugins [[lein-marginalia "0.8.0"]
             [lein-cljsbuild "1.1.0"]
-            [lein-figwheel "0.3.7"
+            [lein-figwheel "0.4.1"
              :exclusions [org.clojure/core.async]]]
 
   :clean-targets ^{:protect false} [:target-path "resources/public/js/out" "resources/public/js/out_devcards"]
@@ -118,7 +118,7 @@
               [
                ;; lein figwheel to run with auto-reloading
                ;; lein cljsbuild once to run otherwise
-               {:id :dev
+               {:id "dev"
                 :source-paths ["src-cljc" "src-cljs"]
                 :figwheel {:on-jsload "kanopi.core/reload-om"}
                 :compiler {:output-to "resources/public/js/main.js"
@@ -130,7 +130,7 @@
                            :source-map "resources/public/js/source_map.js"}}
 
                ;; lein figwheel devcards to run
-               {:id :devcards
+               {:id "devcards"
                 :source-paths ["src-cljc" "src-cljs" "dev-cljs"]
                 :figwheel {:devcards true}
                 :compiler {:output-to "resources/public/js/main_devcards.js"

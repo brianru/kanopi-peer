@@ -1,8 +1,8 @@
-(ns kanopi.dev.view.datum
+(ns kanopi.view.datum-dev
   (:require-macros [devcards.core :as dc :refer (defcard deftest)])
   (:require [sablono.core :as sab]
             [quile.component :as component]
-            [kanopi.dev.util :as dev-util]
+            [kanopi.util-dev :as dev-util]
             [om.core :as om]
             [kanopi.view.datum :as datum]))
 

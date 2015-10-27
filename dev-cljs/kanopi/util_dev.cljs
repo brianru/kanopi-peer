@@ -1,4 +1,4 @@
-(ns kanopi.dev.util
+(ns kanopi.util-dev
   (:require [quile.component :as component]
             [kanopi.aether.core :as aether]
             [kanopi.controller.history :as history]

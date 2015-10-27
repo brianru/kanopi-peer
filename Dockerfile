@@ -8,4 +8,6 @@ EXPOSE 8080
 
 RUN ["lein", "cljsbuild", "once"]
 
+# TODO build uberjar and run via java directly
+
 CMD ["lein", "run"]

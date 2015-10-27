@@ -1,4 +1,4 @@
-(ns kanopi.dev.om-next
+(ns kanopi.om-next
   (:require-macros [devcards.core :refer (defcard deftest)])
   (:require [goog.dom :as gdom]
             [sablono.core :as sab]
