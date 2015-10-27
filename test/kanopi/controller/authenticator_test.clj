@@ -1,4 +1,4 @@
-(ns kanopi.controller.auth-test
+(ns kanopi.controller.authenticator-test
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
             [com.stuartsierra.component :as component]
