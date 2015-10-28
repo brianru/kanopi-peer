@@ -59,7 +59,7 @@
     (d/db connection))
 
   (db [this creds as-of]
-    (d/db connection as-of))
+    (d/as-of (db this creds)))
 
   (transact [this creds txdata]
     (d/transact connection txdata))

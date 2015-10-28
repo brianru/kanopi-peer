@@ -21,7 +21,7 @@
 (defn user-default-team [creds]
   (let [username (get creds :username)]
     (->> creds
-         :team
+         :teams
          (filter (fn [rl]
                    (= (:username creds) (:team/id rl))))
          (first)

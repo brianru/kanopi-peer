@@ -31,7 +31,7 @@
 
     (testing "user team created"
       (let [team (d/entity (d/db (get-in sys [:datomic-peer :connection]))
-                           (-> creds :team first :db/id))]
+                           (-> creds :teams first :db/id))]
         (is (not-empty team))))
 
     (testing "password crypto works"
@@ -44,7 +44,7 @@
                              :where
                              [?e :datum/team ?user-team]]
                            (d/db (get-in sys [:datomic-peer :connection]))
-                           (-> creds :team first :db/id))]
+                           (-> creds :teams first :db/id))]
         (is (not-empty user-data))))
 
     (component/stop sys)))

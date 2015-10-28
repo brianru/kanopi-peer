@@ -126,7 +126,7 @@
               ))
 
   (most-edited-datums [this creds]
-    (let [user-teams (->> creds :team (mapv :db/id))]
+    (let [user-teams (->> creds :teams (mapv :db/id))]
       (d/q '[:find ?e (count-distinct ?tx)
              :in $ [?user-team ...]
              :where
@@ -141,7 +141,7 @@
 
   (recent-datums [this creds]
     ;; TODO: filter by recency
-    (let [user-teams (->> creds :team (mapv :db/id))]
+    (let [user-teams (->> creds :teams (mapv :db/id))]
       (d/q '[:find ?e ?time ?tx
              :in $ [?user-team ...]
              :where

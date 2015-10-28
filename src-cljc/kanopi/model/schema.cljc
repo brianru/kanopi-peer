@@ -71,9 +71,10 @@
 (s/defschema Credentials
   {
    :ent-id   DatomicId
-   :team     [UserTeam]
    :username UserId
    :password UserPassword
+   :teams    [UserTeam]
+   :current-team UserTeam
    })
 
 (s/defschema User

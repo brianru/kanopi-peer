@@ -36,9 +36,14 @@
           creds' (when (not-empty (dissoc creds :db/id))
                    (hash-map
                     :ent-id   (get-in creds [:db/id])
-                    :team     (get-in creds [:user/team])
                     :username (get-in creds [:user/id])
-                    :password (get-in creds [:user/password])))]
+                    :password (get-in creds [:user/password])
+                    :teams    (get-in creds [:user/team])
+                    :current-team (->> (get-in creds [:user/team])
+                                       (filter #(= (:user/id creds)
+                                                   (:team/id %)))
+                                       (first))
+                    ))]
       (when creds'
         (assert (s/validate schema/Credentials creds') "Invalid credential map."))
       creds'))
