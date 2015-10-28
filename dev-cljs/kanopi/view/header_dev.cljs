@@ -24,13 +24,9 @@
 
 (defcard team-selector-three-teams
   (dc/om-root header/left-team-dropdown {:shared (dev-util/shared-state system)})
-  (let [teams [{:db/id 20 :team/id "brian"}
-               {:db/id 21 :team/id "hannah"}
-               {:db/id 22 :team/id "applebottom"}]]
-    {:user {:ent-id 42
-            :username "brian"
-            :current-team (first teams)
-            :teams teams}}))
+  (get-in system [:app-state :app-state])
+  {:inspect-data true, :history true}
+  )
 
 (defcard controls-anonymous
   (dc/om-root header/right-controls {:shared (dev-util/shared-state system)})

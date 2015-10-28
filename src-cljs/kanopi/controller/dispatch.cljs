@@ -40,6 +40,8 @@
               :logout-success                  :logout-failure
               :register-success                :register-failure
 
+              :switch-team
+
               :search-success                  :search-failure
               :get-datum-success               :get-datum-failure
               :initialize-client-state-success :initialize-client-state-failure
@@ -61,7 +63,7 @@
 (defrecord Dispatcher [config aether history app-state kill-channel]
   component/Lifecycle
   (start [this]
-    (info "start dispatcher")
+    (info "start dispatcher" (get config :mode))
     (let [kill-ch  (async/chan 1)
           listener (aether/replicate! aether)]
       (asyncm/go (loop [[v ch] nil]

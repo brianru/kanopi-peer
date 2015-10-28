@@ -258,7 +258,7 @@
   ;; reinitialize => could have a current-datum which is not
   ;; accessible from the new creds
   (->> (msg/initialize-client-state (get @app-state :user))
-       (aether/send! history)))
+       (aether/send! aether)))
 
 ;; TODO: when handled locally, shouldn't I follow the same code path
 ;; as performing action remotely? eg. send success/failure msgs?

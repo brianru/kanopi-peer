@@ -112,7 +112,7 @@
      which is what this fn is trying to avoid. layered abstractions.
      TODO: make work with different first args eg. a core.async channel,
      an aether map, an aether record, etc"
-     ([owner msg & args]
+     ([owner msg]
       (async/put! (publisher owner) msg)
       ;; NOTE: js evt handlers don't like `false` as a return value, which
       ;; async/put! often returns. So we add a nil.
