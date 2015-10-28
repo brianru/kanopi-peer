@@ -245,6 +245,16 @@
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
 
+(defmethod local-event-handler :switch-team
+  [aether history app-state {team-id :noun :as msg}]
+  (om/transact! app-state :user
+                (fn [user]
+                  (if-let [team' (->> (get user :teams)
+                                      (filter #(= (:team/id %) team-id))
+                                      (first))]
+                    (assoc user :current-team team')
+                    user))))
+
 ;; TODO: when handled locally, shouldn't I follow the same code path
 ;; as performing action remotely? eg. send success/failure msgs?
 ;; OR, should I purposely not do this and have a clear distinction b/w

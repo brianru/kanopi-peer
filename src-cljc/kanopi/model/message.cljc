@@ -118,6 +118,14 @@
       ;; async/put! often returns. So we add a nil.
       nil))
    )
+
+#?(:cljs
+   (defn switch-team [team-id]
+     (hash-map
+      :noun team-id
+      :verb :switch-team
+      :context {})))
+
 #?(:cljs
    (defn toggle-fact-mode [ent]
      (hash-map

@@ -39,6 +39,8 @@
                     :username (get-in creds [:user/id])
                     :password (get-in creds [:user/password])
                     :teams    (get-in creds [:user/team])
+                    ;; NOTE: DEFAULT CURRENT TEAM is the user's
+                    ;; personal team. this should be changeable.
                     :current-team (->> (get-in creds [:user/team])
                                        (filter #(= (:user/id creds)
                                                    (:team/id %)))

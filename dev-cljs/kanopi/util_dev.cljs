@@ -6,8 +6,10 @@
             ))
 
 (def aether-config
-  {:dimensions [:noun :verb]})
+  {:dimensions [:noun :verb]
+   :aether-log true})
 
+;; TODO: incorporate app state and dispatcher!
 (defn new-system
   ([]
    (new-system aether-config))

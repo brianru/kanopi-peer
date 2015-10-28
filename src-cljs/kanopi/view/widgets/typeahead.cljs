@@ -115,7 +115,7 @@
     om/IInitState
     (init-state [_]
       {:element-type :input ;; supported values are #{:input :textarea}
-       :tabindex 0 ;; decided by platform convention by default
+       :tab-index 0 ;; decided by platform convention by default
 
        ;; TODO: document the required arity for each of these
        ;; functions
@@ -168,7 +168,7 @@
            (merge (element-specific-attrs state)
                   {:on-focus    #(om/set-state! owner :focused true)
                   ; :on-blur     #(om/set-state! owner :focused false)
-                   :tab-index (get state :tabindex)
+                   :tab-index (get state :tab-index)
                    :value       (get state :input-value)
                    ;; NOTE: debugging
                    :style {:color (when-not focused "red")}

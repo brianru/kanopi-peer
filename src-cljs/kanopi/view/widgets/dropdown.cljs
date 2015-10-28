@@ -56,7 +56,7 @@
       ;; defaults
       {:toggle-label "Toggle label"
        :selection-handler (constantly nil)
-       :tabindex 0
+       :tab-index 0
        :menu-items [{:type :link
                      :href ""
                      :label "Item 1"}
@@ -76,13 +76,14 @@
           [:a.dropdown-toggle
            {:on-click       #(toggle-dropdown! owner)
             :data-toggle    "dropdown"
-            :tab-index      (get state :tabindex)
+            :tab-index      (get state :tab-index)
             :role           "button"
             :aria-haspopup  "true"
             :aria-expanded  expanded
             :on-mouse-enter #(start-hover! owner)
             :on-mouse-leave #(stop-hover! owner)}
-           (str (get state :toggle-label) " ") [:span.caret]]
+           [:span (str (om/get-state owner :toggle-label) " ")] [:span.caret]
+           ]
           (into
            [:ul.dropdown-menu
             {:style          {:display (when expanded "inherit")}

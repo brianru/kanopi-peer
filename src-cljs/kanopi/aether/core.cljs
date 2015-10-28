@@ -206,6 +206,11 @@
       this
       (let [aethr (apply mk-aether (:dimensions config))]
         (info "start aether" (:dimensions config))
+        (when (get config :aether-log)
+          (go (loop [v (async/<! (get aethr :log))]
+                (when v
+                  (info v)
+                  (recur (async/<! (get aethr :log))))))) 
         (assoc this :aether aethr))))
 
   (stop [this]
