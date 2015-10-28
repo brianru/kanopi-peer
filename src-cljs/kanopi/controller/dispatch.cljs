@@ -25,6 +25,8 @@
               :get-datum
               :update-fact
               :update-datum-label
+
+              ;; NOTE: initialize-client-state* is not here
               }
     :remote #{
               :login :logout :register

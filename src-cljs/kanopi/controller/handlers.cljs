@@ -253,7 +253,12 @@
                                       (filter #(= (:team/id %) team-id))
                                       (first))]
                     (assoc user :current-team team')
-                    user))))
+                    user)))
+  ;; NOTE: user changed, therefore creds changed, therefore must
+  ;; reinitialize => could have a current-datum which is not
+  ;; accessible from the new creds
+  (->> (msg/initialize-client-state (get @app-state :user))
+       (aether/send! history)))
 
 ;; TODO: when handled locally, shouldn't I follow the same code path
 ;; as performing action remotely? eg. send success/failure msgs?
@@ -267,9 +272,6 @@
                        (build-datum-data app-state)
                        (assoc app-state :datum)))))
 
-;; TODO: don't I also have to put this stuff in the cache?
-;; TODO: passing whole entity to build-datum-date, only supposed to
-;; send db/id (assumes it's already in the cache)
 (defmethod local-event-handler :get-datum-success
   [aether history app-state msg]
   (om/transact! app-state
