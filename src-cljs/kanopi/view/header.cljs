@@ -70,10 +70,14 @@
     (render [_]
       (html
        [:ul.nav.navbar-nav.navbar-right
+        #_(->> (icons/create {})
+               (icons/on-click (constantly nil) {:class "navbar-brand"}))
+        (->> (icons/insights {})
+             (icons/on-click (constantly nil) {:class "navbar-brand"}))
         (if (get-in props [:user :identity])
           (om/build dropdown/dropdown props
                     {:init-state
-                     {:toggle-label (get-in props [:user :current-team])
+                     {:toggle-label (get-in props [:user :current-team :team/id])
                       :tab-index -1
                       :menu-items [{:type  :link
                                     :href  (browser/route-for owner :settings)
@@ -85,7 +89,7 @@
                       }})
           (->> (icons/log-in {})
                (icons/link-to owner :login {:class "navbar-brand", :tab-index -1})))
-        ])  )
+        ]))
     ))
 
 (defn header

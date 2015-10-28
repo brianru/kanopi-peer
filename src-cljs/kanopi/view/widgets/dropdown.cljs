@@ -82,7 +82,14 @@
             :aria-expanded  expanded
             :on-mouse-enter #(start-hover! owner)
             :on-mouse-leave #(stop-hover! owner)}
-           [:span (str (om/get-state owner :toggle-label) " ")] [:span.caret]
+           (cond
+            (om/get-state owner :icon)
+            [:span "TODO: render icon"]
+
+            (om/get-state owner :toggle-label)
+            [:span (str (om/get-state owner :toggle-label) " ") [:span.caret]]
+            
+            ) 
            ]
           (into
            [:ul.dropdown-menu

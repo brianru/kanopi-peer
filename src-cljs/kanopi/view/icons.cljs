@@ -1,7 +1,6 @@
 (ns kanopi.view.icons
   (:require [kanopi.util.browser :as browser]))
 
-
 (defn open [m]
   [:div.glyphicon.glyphicon-new-window
    (merge {} m)])
@@ -18,6 +17,15 @@
   [:div.glyphicon.glyphicon-log-in
    (merge {} m)])
 
+(defn create [m]
+  [:div.glyphicon.glyphicon-plus
+   (merge {} m)])
+
+;; FIXME: should be a light bulb
+(defn insights [m]
+  [:div.glyphicon.glyphicon-lamp
+   (merge {} m)])
+
 (defn link-to
   "Example usage:
   (->> (icons/open {})
@@ -30,6 +38,14 @@
    (let [route (if (sequential? route) route (vector route))]
     [:a (merge m {:href (apply browser/route-for owner route)}) 
      icon-markup])))
+
+(defn on-click
+  ([click-fn icon-markup]
+   (on-click click-fn {} icon-markup))
+
+  ([click-fn m icon-markup]
+   [:a (merge m {:on-click click-fn})
+    icon-markup]))
 
 (defn transform-scale
   ([& args]

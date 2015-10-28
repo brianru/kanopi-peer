@@ -1,4 +1,6 @@
 /* for rendering navbar components in devcards */
-.com-rigsomelight-devcard .navbar-header {
-    float: none;
+.com-rigsomelight-devcard .navbar-header,
+.com-rigsomelight-devcard .navbar-nav,
+.com-rigsomelight-devcard .navbar-right {
+    float: none !important;
 }

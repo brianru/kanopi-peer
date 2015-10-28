@@ -32,3 +32,15 @@
             :current-team (first teams)
             :teams teams}}))
 
+(defcard controls-anonymous
+  (dc/om-root header/right-controls {:shared (dev-util/shared-state system)})
+  {:user {}})
+
+(defcard controls-authenticated
+  (dc/om-root header/right-controls {:shared (dev-util/shared-state system)})
+  (let [team {:db/id 22 :team/id "brian"}]
+    {:user {:ent-id 42
+            :identity "brian"
+            :username "brian"
+            :current-team team
+            :teams [team]}}))
