@@ -12,41 +12,6 @@
             [kanopi.view.widgets.input-field :as input]
             ))
 
-(defn- corner?
-  ([w h n]
-   (case [(mod n w) (mod n h) (= (* w h) n)]
-     [1 1 false] :top-left
-     [0 0 false] :top-right
-     [1 0 false] :bottom-left
-     [0 0 true]  :bottom-right
-     ;; default 
-     nil))
-  ([size n]
-   (let [x (js/Math.sqrt size)]
-     (corner? x x n))))
-
-(defn- corner-styling [size n]
-  (let [corner (corner? size n)]
-    (case false ;;corner
-      :top-left
-      {:border-top "1px solid black"
-       :border-left "1px solid black"}
-
-      :top-right
-      {:border-top "1px solid black"
-       :border-right "1px solid black"}
-
-      :bottom-left
-      {:border-bottom "1px solid black"
-       :border-left "1px solid black"}
-
-      :bottom-right
-      {:border-bottom "1px solid black"
-       :border-right "1px solid black"}
-
-      ;;default
-      {})))
-
 (defn context-datums
   [props owner opts]
   (reify
@@ -71,21 +36,11 @@
                  :when (:db/id datum)]
              [:div.context-datum-cell.col-xs-3.col-md-3.vcenter
               {:style (cond-> {}
-                        true
-                        (merge (corner-styling size (inc idx)))
                         (= 0 idx)
                         (merge {:margin-left "11%"}))}
               [:a {:href (browser/route-for owner :datum :id (:db/id datum))}
                [:span (:datum/label datum)]]])
           ])))))
-
-(defn- datum-type-line [props]
-  [:div.datum-type-line
-   [:span.horizontal-line]
-   [:span.datum-type-label "TYPE: "]
-   [:span.datum-type (name (schema/describe-entity props))]
-   [:span.horizontal-line]
-   ])
 
 (defn body
   [props owner opts]
@@ -100,7 +55,7 @@
         (html
          [:div.row
           [:div.datum-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
-           [:div.datum-title
+           [:div.datum-label
             (om/build input/editable-value props
                       {:init-state {:edit-key :datum/label
                                     :submit-value
@@ -109,7 +64,6 @@
                                            (msg/update-datum-label (om/get-props owner))
                                            (msg/send! owner)))}})
             ]
-           (datum-type-line props)
            [:div.datum-facts
             ;; NOTE: one of the facts is a placeholder for creating a
             ;; new one
@@ -147,8 +101,6 @@
                 :when (:db/id datum)]
             [:div.similar-datum-cell.vcenter.col-xs-3.col-md-3
              {:style (cond-> {}
-                       true
-                       (merge (corner-styling size (inc idx)))
                        (= 0 idx)
                        (merge {:margin-left "11%"}))}
              [:a {:href (browser/route-for owner :datum :id (:db/id datum))}

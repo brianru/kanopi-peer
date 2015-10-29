@@ -43,18 +43,21 @@
            :datum
            (om/build datum/container (get props :datum))
 
+           :literal
+           (om/build datum/container (get props :literal))
+
            :settings
            (om/build settings/settings props)
 
-           (:login :logout :register)
+           (:enter :login :logout :register)
            (om/build user/authentication props)
 
            ;; default
            (om/build datum-search/suggestions props)
            )
          ]
-        [:div.footer-container
-         (om/build footer/footer props)]
+        ;;[:div.footer-container
+        ;; (om/build footer/footer props)]
         ]
        ))))
 

@@ -93,23 +93,31 @@
     ))
 
 (defn header
-  "
-  Logout.
-  Settings.
-  Home.
+  "A modal header. Contents will change based on the user's present
+  intent. By default, we assume the user is trying to navigate. UI
+  components will interpret user actions as user intentions, update
+  the app state, and thus allow the header to help the user achieve
+  her intention.
+
+  TODO: figure out how we'll provide the header with any relevant
+  state. The trick will be doing so in a relatively decoupled way so
+  the header does not need to know about every possible mode, but
+  instead categories of modes.
   "
   [props owner opts]
-  (reify
-    om/IDisplayName
-    (display-name [_]
-      "header")
+  (reify om/IDisplayName
+    (display-name [_] "header")
 
     om/IRenderState
     (render-state [_ state]
       (html
        [:div.header.navbar.navbar-default.navbar-fixed-top
-        [:div.container-fluid
-         (om/build left-team-dropdown props)
-         (om/build center-search-field props)
-         (om/build right-controls props)]]))
+        (case (get-in props [:intent :id])
+          :navigate
+          [:div.container-fluid
+           (om/build left-team-dropdown props)
+           (om/build center-search-field props)
+           (om/build right-controls props)]
+          )
+        ]))
     ))

@@ -25,8 +25,9 @@
                           "login"    :login
                           "logout"   :logout
                           "register" :register
-                          "datum/"   {[:id ""] :datum}
                           "settings" :settings
+                          "datum/"   {[:id ""] :datum}
+                          "literal/" {[:id ""] :literal}
                           
                           ;; Server
                           "api"      :api}])

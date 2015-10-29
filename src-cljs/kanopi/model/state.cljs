@@ -41,6 +41,8 @@
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
                  :page {}
+                 ;; used by header to do fancy modal stuff
+                 :intent {:id :navigate}
 
                  ;; TODO: rename to current-datum
                  :datum {:context-datums []
