@@ -16,29 +16,37 @@
 (deftest hack-the-database
   (let [sys   (-> (test-util/system-excl-web)
                   (component/start))
-        creds (register-and-get-creds! sys "brian" "rubinton")
+        creds  (register-and-get-creds! sys "brian" "rubinton")
+        creds2 (register-and-get-creds! sys "hannah" "rubinton")
 
         plain-db    (d/db (get-in sys [:datomic-peer :connection]))
         filtered-db (datomic/filtered-db* plain-db creds)
         ]
     ;; TODO: test authorized entities are available in both plain and
     ;; filtered db
-    (is (d/q '[:find ?e .
-               :in $
-               :where [?e :datum/label ?v]]
-             filtered-db))
-    (is (d/q '[:find ?e .
-               :in $ ?team
-               :where [?e :datum/team ?team]]
-             filtered-db (schema/current-team creds)))
-    (is (d/attribute filtered-db :datum/label))
-    (clojure.pprint/pprint
-     (->> (d/datoms filtered-db :eavt)
-          (map :e)
-          (set)
-          (map (partial d/entity filtered-db))
-          (map :db/ident)))
-    (is (first (d/datoms filtered-db :eavt)))
+    (testing "some data is available"
+      (is (d/q '[:find ?e .
+                 :in $
+                 :where [?e :datum/label ?v]]
+               filtered-db))
+      (is (d/q '[:find ?e .
+                 :in $ ?team
+                 :where [?e :datum/team ?team]]
+               filtered-db (schema/current-team creds)))
+      (is (d/attribute filtered-db :datum/label)))
+    (testing "other users' data is not available"
+      (is (d/q '[:find ?e .
+                 :in $ ?team
+                 :where [?e _ ?team]]
+               plain-db (schema/current-team creds2)))
+
+      (is (not (d/q '[:find ?e .
+                      :in $ ?team
+                      :where [?e _ ?team]]
+                    filtered-db (schema/current-team creds2))))
+      )
+
+
 
     (component/stop sys)))
 
@@ -66,8 +74,8 @@
         creds2 (register-and-get-creds! sys "hannah" "rubinton")
         personal-team (get creds1 :team)]
     (is (thrown? java.lang.AssertionError
-                 (add-to-team! (:authorizer sys)
-                               creds1 (get creds1 :team) (get creds2 :username))))
+                 (add-to-team! (:authorizer sys) creds1
+                               "brian" (get creds2 :username))))
     (component/stop sys)))
 
 (deftest can-create-team
@@ -95,6 +103,15 @@
     (is (thrown? java.lang.AssertionError
                  (add-to-team! (:authorizer sys) creds2 teamname (get creds2 :username))))
 
+    (component/stop sys)))
+
+(deftest cannot-leave-personal-team
+  (let [sys      (-> (test-util/system-excl-web)
+                     (component/start))
+        creds1   (register-and-get-creds! sys "brian" "rubinton")
+        ]
+    (is (thrown? java.lang.AssertionError
+                 (leave-team! (:authorizer sys) creds1 "brian")))
     (component/stop sys)))
 
 (deftest can-only-leave-current-teams

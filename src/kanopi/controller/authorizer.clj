@@ -43,16 +43,26 @@
   (add-to-team! [this {:keys [username password] :as creds} teamname new-user]
     (assert (s/validate schema/InputCredentials [username password]))
     (assert (s/validate schema/UserId new-user))
+    (assert (not= username teamname)
+            "Cannot add other users to your personal team (private).")
+    (assert (not= username new-user)
+            "Cannot ever add yourself to a team.")
     (let [db      (datomic/db database nil)
-          user-id (d/entid db [:user/id username])
+          user-id (d/entid db [:user/id new-user])
           team-id (d/entid db [:team/id teamname])
-          txdata  [[:db/add user-id :user/team team-id]
-                   ]
+          txdata  [[:db/add user-id :user/team team-id]]
           report  @(datomic/transact database creds txdata)]
       report))
 
   (leave-team! [this {:keys [username password] :as creds} teamname]
     (assert (s/validate schema/InputCredentials [username password]))
+    (assert (not= teamname username)
+            "Cannot leave personal team.")
+    (assert (contains? (->> (get creds :teams)
+                            (map :team/id)
+                            (set))
+                       teamname)
+            "Can only leave current teams.")
     (let [db      (datomic/db database creds)
           user-id (d/entid db [:user/id username])
           team-id (d/entid db [:team/id teamname])
