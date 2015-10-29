@@ -28,7 +28,7 @@
       (is (s/validate schema/DatomicId ent-id)))
     
     (testing "datum has user's default team"
-      (is (= (impl/user-default-team creds) (-> ent :datum/team :db/id))))
+      (is (= (schema/user-default-team creds) (-> ent :datum/team :db/id))))
 
     (testing "datum shape as given by data service"
       (is (s/validate schema/Datum ent)))

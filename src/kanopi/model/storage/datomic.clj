@@ -49,8 +49,7 @@
          ents   (d/q '[:find [?e ...]
                        :in $ % ?team
                        :where (readable ?team ?e)]
-                     base-db rules team-id)
-         ]
+                     base-db rules team-id)]
      (set ents))))
 
 (defn filtered-db*
@@ -59,8 +58,7 @@
   ([rules base-db creds]
    (let [authorized-entities (authorized-entities rules base-db creds)]
      (d/filter base-db (fn [db ^Datom datom]
-                         (contains? authorized-entities (.e datom))))
-     )))
+                         (contains? authorized-entities (.e datom)))))))
 
 ;; TODO: study https://www.youtube.com/watch?v=7lm3K8zVOdY
 (defprotocol ISecureDatomic
@@ -105,10 +103,12 @@
        (assoc this :connection nil :db-mode nil))))
 
   ;; TODO: implement authorization controls
+  ;; TODO: 2 ways to filter db, 1 for authenticated user, 1 for anonymous user
   ISecureDatomic
   (db [this creds]
-    ;(filtered-db* (d/db connection) creds)
-    (d/db connection)
+    (if creds
+      (filtered-db* (d/db connection) creds)
+      (d/db connection))
     )
 
   (db [this creds as-of]

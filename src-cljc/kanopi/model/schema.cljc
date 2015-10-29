@@ -126,10 +126,12 @@
 ;; requires typed attributes.
 (s/defschema TextLiteral
   {:db/id (s/maybe DatomicId)
+   :literal/team UserTeam
    :literal/text s/Str})
 
 (s/defschema IntegerLiteral
   {:db/id (s/maybe DatomicId)
+   :literal/team UserTeam
    :literal/integer s/Int})
 
 (s/defschema Literal

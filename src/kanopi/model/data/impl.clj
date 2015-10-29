@@ -154,6 +154,7 @@
                     '[:db/id
                       :datum/label
                       {:datum/team [:db/id :team/id]}
+                      {:literal/team [:db/id :team/id]}
                       {:datum/fact [:db/id
                                     {:fact/attribute [*]}
                                     {:fact/value     [*]}

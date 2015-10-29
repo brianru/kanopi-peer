@@ -58,14 +58,14 @@
   (get web-app :app-handler))
 
 ;; ### Datomic EntityMap helper fns for navigating the schema
-;; TODO: refactor to support values of any type
 (defn get-literal-or-label [ent k]
   (or (-> ent (get k) (get :datum/label))
-      (-> ent (get k) (dissoc :db/id) (vals) (first))))
+      (-> ent (get k) (dissoc :db/id :literal/team) (vals) (first))))
 
 (defn fact-entity->tuple [ent]
   (let [attr (get-literal-or-label ent :fact/attribute)
         valu (get-literal-or-label ent :fact/value)]
+    (println "fact-entity->tuple" ent [attr valu])
     (vector attr valu)))
 
 (defn transit-write [data]
