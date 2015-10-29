@@ -1,7 +1,9 @@
 (ns kanopi.controller.authorizer-test
   (:require [clojure.test :refer :all]
             [com.stuartsierra.component :as component]
+            [datomic.api :as d]
             [kanopi.test-util :as test-util]
+            [kanopi.model.schema :as schema]
             [kanopi.model.storage.datomic :as datomic]
             [kanopi.controller.authenticator :as authenticator]
             [kanopi.controller.authorizer :refer :all]))
@@ -10,6 +12,35 @@
   [{:keys [authenticator] :as sys} username password]
   (authenticator/register! authenticator username password)
   (authenticator/credentials authenticator username))
+
+(deftest hack-the-database
+  (let [sys   (-> (test-util/system-excl-web)
+                  (component/start))
+        creds (register-and-get-creds! sys "brian" "rubinton")
+
+        plain-db    (d/db (get-in sys [:datomic-peer :connection]))
+        filtered-db (datomic/filtered-db* plain-db creds)
+        ]
+    ;; TODO: test authorized entities are available in both plain and
+    ;; filtered db
+    (is (d/q '[:find ?e .
+               :in $
+               :where [?e :datum/label ?v]]
+             filtered-db))
+    (is (d/q '[:find ?e .
+               :in $ ?team
+               :where [?e :datum/team ?team]]
+             filtered-db (schema/current-team creds)))
+    (is (d/attribute filtered-db :datum/label))
+    (clojure.pprint/pprint
+     (->> (d/datoms filtered-db :eavt)
+          (map :e)
+          (set)
+          (map (partial d/entity filtered-db))
+          (map :db/ident)))
+    (is (first (d/datoms filtered-db :eavt)))
+
+    (component/stop sys)))
 
 (deftest only-see-my-data
   (let [{:keys [authorizer] :as sys}
@@ -20,9 +51,9 @@
         teamname1 "i am on the team!"
         teamname2 "whoami???"
         teamname3 "the trees!"
-        _ (authorizer/create-team! authorizer creds1 teamname1)
-        _ (authorizer/create-team! authorizer creds1 teamname2)
-        _ (authorizer/create-team! authorizer creds1 teamname3)
+        _ (create-team! authorizer creds1 teamname1)
+        _ (create-team! authorizer creds1 teamname2)
+        _ (create-team! authorizer creds1 teamname3)
         creds2 (register-and-get-creds! sys "hannah" "rubinton")
         ]
 
@@ -47,7 +78,10 @@
         res      (create-team! (:authorizer sys) creds teamname)
         creds'   (authenticator/credentials (:authenticator sys) "brian")
         ]
-    (is (contains? (get creds' :teams) teamname))
+    (is (contains? (->> (get creds' :teams)
+                        (map :team/id)
+                        (set))
+                   teamname))
     (component/stop sys)))
 
 (deftest cannot-add-self-to-team

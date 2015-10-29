@@ -2,12 +2,12 @@
   (:require [clojure.repl :refer :all]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
-            [datomic.api :as d]
             [com.stuartsierra.component :as component]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [environ.core :refer [env]]
             [kanopi.controller.system :as sys]
             [kanopi.main]
+
             ))
 
 (defonce system nil)
@@ -31,5 +31,4 @@
  (go)
  (reset)
 
- 
  )

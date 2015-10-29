@@ -51,6 +51,18 @@
    :db/id nil
    (get default-value-key tp) value))
 
+(defn user-default-team [creds]
+  (let [username (get creds :username)]
+    (->> creds
+         :teams
+         (filter (fn [rl]
+                   (= (:username creds) (:team/id rl))))
+         (first)
+         :db/id)))
+
+(defn current-team [creds]
+  (get-in creds [:current-team :db/id]))
+
 (s/defschema DatomicId s/Int)
 
 (s/defschema UserId

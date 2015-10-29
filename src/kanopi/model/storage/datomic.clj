@@ -1,7 +1,8 @@
 (ns kanopi.model.storage.datomic
   "Datomic database component and datomic-specific helper functions."
   (:require [datomic.api :as d]
-            [com.stuartsierra.component :as component]))
+            [com.stuartsierra.component :as component])
+  (:import datomic.Datom))
 
 ;; FIXME: add tx datums including txInstant, set to last modified for
 ;; file
@@ -10,6 +11,56 @@
     (println "loading " file-path)
     (when-let [txdata (not-empty (read-string (slurp file-path)))]
       @(d/transact conn txdata))))
+
+(def auth-rules
+  '[
+    ;; Datums
+    [(readable ?team ?e)
+     [?e :datum/team ?team]]
+    ;; Facts
+    [(readable ?team ?e)
+     [?datum :datum/team ?team]
+     [?datum :datum/fact ?e]]
+    ;; Fact parts
+    [(readable ?team ?e)
+     [?datum :datum/team ?team]
+     [?datum :datum/fact ?fact]
+     [?fact _ ?e]
+     (or
+      [?e :datum/team ?team]
+      [?e :literal/team ?team])
+     ]
+    ;; Transactions
+    [(readable ?team ?e)
+     (readable ?team ?ent)
+     [?ent _ _ ?e]]
+    ;; Attributes
+;;    [(readable ?team ?e)
+;;     (readable ?team ?ent)
+;;     [?ent ?e _]]
+
+    ])
+
+(defn authorized-entities 
+  ([base-db creds]
+   (authorized-entities auth-rules base-db creds))
+  ([rules base-db creds]
+   (let [team-id (get-in creds [:current-team :db/id])
+         ents   (d/q '[:find [?e ...]
+                       :in $ % ?team
+                       :where (readable ?team ?e)]
+                     base-db rules team-id)
+         ]
+     (set ents))))
+
+(defn filtered-db*
+  ([base-db creds]
+   (filtered-db* auth-rules base-db creds))
+  ([rules base-db creds]
+   (let [authorized-entities (authorized-entities rules base-db creds)]
+     (d/filter base-db (fn [db ^Datom datom]
+                         (contains? authorized-entities (.e datom))))
+     )))
 
 ;; TODO: study https://www.youtube.com/watch?v=7lm3K8zVOdY
 (defprotocol ISecureDatomic
@@ -42,7 +93,7 @@
         (when (:dev config)
           (println "load data")
           (load-files! conn (:data config)))
-        
+
         (assoc this :connection conn :db-mode db-mode))))
 
   (stop [this]
@@ -56,14 +107,16 @@
   ;; TODO: implement authorization controls
   ISecureDatomic
   (db [this creds]
-    (d/db connection))
+    ;(filtered-db* (d/db connection) creds)
+    (d/db connection)
+    )
 
   (db [this creds as-of]
     (d/as-of (db this creds)))
 
   (transact [this creds txdata]
     (d/transact connection txdata))
-  
+
   (entity [this creds ent-id]
     (d/entity (db this creds) ent-id)))
 

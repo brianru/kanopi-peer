@@ -18,15 +18,6 @@
     ;; default
     nil))
 
-(defn user-default-team [creds]
-  (let [username (get creds :username)]
-    (->> creds
-         :teams
-         (filter (fn [rl]
-                   (= (:username creds) (:team/id rl))))
-         (first)
-         :db/id)))
-
 (defn entity-id-tuple?
   "(second input) => either an integer (id) or a string (label of new datum)"
   [input]
@@ -177,19 +168,21 @@
   ([datomic-peer creds value]
    (let [value-id (d/tempid :db.part/structure)
          ;; FIXME: this breaks with tagged value literals.
+         ;; NOTE? is this still true?
          [value-attribute parsed-value] (describe-value-literal value)
          ]
      (hash-map
       :ent-id value-id
-      :txdata [[:db/add value-id value-attribute parsed-value]]))))
+      :txdata [[:db/add value-id :literal/team   (schema/current-team creds)]
+               [:db/add value-id value-attribute parsed-value]]))))
 
 (defn mk-fact
   [datomic-peer creds attribute-id value-id]
   (let [fact-id (d/tempid :db.part/structure)]
     (hash-map
      :ent-id fact-id
-     :txdata  [[:db/add fact-id :fact/attribute attribute-id]
-               [:db/add fact-id :fact/value     value-id]])))
+     :txdata [[:db/add fact-id :fact/attribute attribute-id]
+              [:db/add fact-id :fact/value     value-id]])))
 
 (defn mk-datum
   "ex: (mk-datum dp creds label [attr-id-tuple val-id-tuple]
@@ -201,7 +194,7 @@
    (let [datum-id (d/tempid :db.part/structure)]
      (hash-map
       :ent-id  datum-id
-      :txdata  [[:db/add datum-id :datum/team (user-default-team creds)]
+      :txdata  [[:db/add datum-id :datum/team (schema/current-team creds)]
                 [:db/add datum-id :datum/label label]])))
 
   ([datomic-peer creds label & facts]
@@ -222,7 +215,7 @@
                     facts)]
      (hash-map
       :ent-id datum-id
-      :txdata (concat [[:db/add datum-id :datum/team (user-default-team creds)]
+      :txdata (concat [[:db/add datum-id :datum/team (schema/current-team creds)]
                        [:db/add datum-id :datum/label label]]
                       (mapv (partial vector :db/add datum-id :datum/fact)
                             (get fact-coll :ent-ids))

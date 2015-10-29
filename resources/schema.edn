@@ -85,19 +85,27 @@
  ;; :db/doc "Function that gets called whenever the value changes."
  ;; :db/valueType :db.type/ref
  ;; :db/cardinality :db.cardinality/many
-;; :db/id #db/id[:db.part/db]
-;; :db.install/_attribute :db.part/db}
+ ;; :db/id #db/id[:db.part/db]
+ ;; :db.install/_attribute :db.part/db}
 
-;; Literals
-;; TODO: internationalization and localization via additional
-;; attributes on literal entities
+ ;; Literals
+ {:db/ident :literal/team
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/isComponent true
+  :db/index true
+  :db/id #db/id [:db.part/db]
+  :db.install/_attribute :db.part/db}
 
-;;{:db/ident :literal/uri
-;; :db/valueType :db.type/uri
-;; :db/cardinality :db.cardinality/one
-;; :db/fulltext true
-;; :db/id #db/id[:db.part/db]
-;; :db.install/_attribute :db.part/db}
+ ;; TODO: internationalization and localization via additional
+ ;; attributes on literal entities
+
+ ;;{:db/ident :literal/uri
+ ;; :db/valueType :db.type/uri
+ ;; :db/cardinality :db.cardinality/one
+ ;; :db/fulltext true
+ ;; :db/id #db/id[:db.part/db]
+ ;; :db.install/_attribute :db.part/db}
 
 ;;{:db/ident :literal/image-uri
 ;; :db/valueType :db.type/uri
@@ -154,11 +162,11 @@
 ;; :db.install/_attribute :db.part/db
 ;; }
 
- {:db/ident :literal/representation
-  :db/doc "Representation datums are used when the underlying literal is not intended to be viewed by the user. Instead, the literal is processed and the result cached as another literal in the system. The UI will then load and display the representation instead of the underlying literal, when available."
-  :db/valueType :db.type/ref
-  :db/cardinality :db.cardinality/one
-  :db/id #db/id[:db.part/db]
-  :db.install/_attribute :db.part/db}
+{:db/ident :literal/representation
+ :db/doc "Representation datums are used when the underlying literal is not intended to be viewed by the user. Instead, the literal is processed and the result cached as another literal in the system. The UI will then load and display the representation instead of the underlying literal, when available."
+ :db/valueType :db.type/ref
+ :db/cardinality :db.cardinality/one
+ :db/id #db/id[:db.part/db]
+ :db.install/_attribute :db.part/db}
 
 ]
