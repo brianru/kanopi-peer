@@ -152,3 +152,21 @@
         ))
     (component/stop system)))
 
+;; FIXME: search fails here but succeeds in data-test
+(deftest search
+  (let [system (component/start (test-util/system-excl-web-server))
+        data-svc (get system :data-service)
+        handler (get-in system [:web-app :app-handler])
+        creds {:username "brian" :password "rubinton"}
+        resp  (test-util/mock-register system creds)]
+    (testing "success"
+      (let [message (msg/search creds "lobster")
+            {:keys [body] :as resp}
+            (test-util/mock-request! system :post "/api" (util/transit-write message)
+                                     :creds creds
+                                     :content-type "application/transit+json")
+            ]
+        (is (= 200 (:status resp)))
+        (is (= :search-success (:verb body)))
+        (is (not-empty (:noun body)))))))
+

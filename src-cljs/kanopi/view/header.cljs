@@ -88,7 +88,7 @@
                                     :label "Logout"}]
                       }})
           (->> (icons/log-in {})
-               (icons/link-to owner :login {:class "navbar-brand", :tab-index -1})))
+               (icons/link-to owner :enter {:class "navbar-brand", :tab-index -1})))
         ]))
     ))
 

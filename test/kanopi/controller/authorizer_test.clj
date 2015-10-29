@@ -34,6 +34,7 @@
                  :where [?e :datum/team ?team]]
                filtered-db (schema/current-team creds)))
       (is (d/attribute filtered-db :datum/label)))
+
     (testing "other users' data is not available"
       (is (d/q '[:find ?e .
                  :in $ ?team
@@ -43,8 +44,7 @@
       (is (not (d/q '[:find ?e .
                       :in $ ?team
                       :where [?e _ ?team]]
-                    filtered-db (schema/current-team creds2))))
-      )
+                    filtered-db (schema/current-team creds2)))))
 
 
 

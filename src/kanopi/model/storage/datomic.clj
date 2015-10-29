@@ -108,8 +108,7 @@
   (db [this creds]
     (if creds
       (filtered-db* (d/db connection) creds)
-      (d/db connection))
-    )
+      (d/db connection)))
 
   (db [this creds as-of]
     (d/as-of (db this creds)))

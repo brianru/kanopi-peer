@@ -37,6 +37,24 @@
      :on-key-down (partial handle-key-down owner submit-fn submittable)
      }]])
 
+(defn login-button [submit-fn submittable]
+  [:button.btn.btn-primary.btn-block
+   {:on-click submit-fn
+    :disabled (not submittable)}
+   "Login"]
+  )
+
+(defn register-button [submit-fn submittable]
+  [:button.btn.btn-warning.btn-block
+   {:on-click submit-fn
+    :disabled (not submittable)}
+   "Register"])
+
+(defn logout-button [submit-fn submittable]
+  [:button.btn.btn-danger.btn-block
+   {:on-click submit-fn}
+   "Logout"])
+
 (defn- login! [owner creds]
   (->> creds
        (msg/login)
@@ -60,10 +78,9 @@
     om/IRenderState
     (render-state [_ {:keys [username password] :as state}]
       (let [mode (get-in props [:page :handler])
-            submit-fn (case mode
-                        :login    #(login! owner (select-keys state [:username :password]))
-                        :register #(register! owner (select-keys state [:username :password]))
-                        :logout   #(logout! owner))
+            login-fn    #(login! owner (select-keys state [:username :password]))
+            logout-fn   #(logout! owner)
+            register-fn #(register! owner (select-keys state [:username :password]))
             submittable (not (some nil? [username password]))]
         (html
          [:div.container-fluid
@@ -74,37 +91,37 @@
              [:div.panel-heading
               [:h3.panel-title
                (case mode
+                 :enter    "Welcome"
                  :register "Sign up"
                  :login    "Log in"
                  :logout   "Log out")]]
              [:div.panel-body
-
-              (when (#{:register :login} mode)
+              (when (#{:register :login :enter} mode)
                 [:div
                  (username-field owner :username submit-fn submittable)
                  (password-field owner :password submit-fn submittable)])
 
               (case mode
+                :enter
+                [:div
+                 (login-button login-fn submittable)
+                 (register-button register-fn submittable)]
+
                 :login
-                [:button.btn.btn-primary.btn-block
-                 {:on-click submit-fn
-                  :disabled (not submittable)}
-                 "Login"]
+                (login-button login-fn submittable)
 
                 :register
-                [:button.btn.btn-warning.btn-block
-                 {:on-click submit-fn
-                  :disabled (not submittable)}
-                 "Register"]
+                (register-button register-fn submittable)
 
                 :logout
-                [:button.btn.btn-danger.btn-block
-                 {:on-click submit-fn}
-                 "Logout"]
-                )
+                (logout-button logout-fn submittable))
               ]
              [:div.panel-footer
               (case mode
+                :enter
+                [:div
+                 [:span "Welcoem to Kanopi!"]]
+
                 :register
                 [:div
                  [:span "Have an account? "]

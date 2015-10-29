@@ -21,6 +21,7 @@
 (def default-routes ["/" {
                           ;; SPA
                           ""         :home
+                          "enter"    :enter
                           "login"    :login
                           "logout"   :logout
                           "register" :register
