@@ -113,11 +113,11 @@
       (html
        [:div.header.navbar.navbar-default.navbar-fixed-top
         (case (get-in props [:intent :id] :intent/navigate)
-          :intent/navigate
+          :spa/navigate
           [:div.container-fluid
            (om/build left-team-dropdown props)
            (om/build center-search-field props)
            (om/build right-controls props)]
           )
-        ]))
-    ))
+        ]))))
+

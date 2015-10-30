@@ -2,8 +2,9 @@
   (:require [kanopi.util.browser :as browser]))
 
 (defn open [m]
-  [:div.glyphicon.glyphicon-new-window
+  [:div.glyphicon.glyphicon-chevron-right
    (merge {} m)])
+
 
 (defn edit-in-place [m]
   [:div.glyphicon.glyphicon-pencil

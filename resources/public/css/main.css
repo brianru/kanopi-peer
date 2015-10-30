@@ -194,18 +194,16 @@ a.navbar-brand:focus {
     width: 100%;
     border-bottom: 1px solid #dddddd;
 }
+/* NOTE: Designed to be identical to input field so text lines up
+ * perfectly when display:none is used to swap span for input.
+ * */
 .view-editable-text {
     font-size: 16px;
-    padding-right: 0.5rem;
+    padding: 1px;
     width: 100%;
- /*   cursor: pointer; */
-    /*
-    max-width: 75%;
+    cursor: text;
     display: inline-block;
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    */
+    line-height: 2rem !important;
 }
 .edit-editable-text {
     font-size: 16px;
@@ -251,7 +249,10 @@ a.navbar-brand:focus {
     width: calc(80% - 5rem);
 }
 .view-fact-part {
-    margin-bottom: inherit;
+    margin-bottom: 12px;
+}
+.view-fact-part .typeahead input {
+    border-bottom: none;
 }
 .edit-fact-part {
     margin-bottom: 1rem;

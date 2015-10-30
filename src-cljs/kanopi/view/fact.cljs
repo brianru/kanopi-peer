@@ -3,7 +3,14 @@
   precise yet frictionless. Confirmation is not required, though
   everything can be undone. Hovering over a fact reveals all available
   functionality. Nothing is hidden behind a click. The state of a fact
-  is visible with a single glance at a single indicator."
+  is visible with a single glance at a single indicator.
+  
+  I am not sure how accurate the above statement should be. I want
+  quick actions be to be but a single click away, though I do want to
+  hide the more involved edits from the user when the user is reading.
+  Reading, writing (quick edits) and full-on constructing are
+  different things. Think outlines or storyboarding vs a text editor
+  vs a piece of paper."
   (:require [om.core :as om :include-macros true]
             [sablono.core :refer-macros [html] :include-macros true]
             [taoensso.timbre :as timbre
@@ -127,17 +134,30 @@
                                          res)
          (msg/send! owner))))
 
+(defn render-fact-part [m]
+  [:span.fact-part-representation
+   (schema/display-entity m)])
+
 (defn view-fact-part
-  "FIXME: on-click should trigger editing the fact.
-  TODO: display an icon for navigating to the fact-part's reference."
-  [owner k m]
-  [:div.view-fact-part
-   [:a {:href (when-let [id (get m :db/id)]
-                (browser/route-for owner :datum :id id))}
-    [:span.fact-part-representation
-     (schema/display-entity m)]]
-   ;; GOTO icon here.
-   ])
+  "One click away from editing in place and navigating to value.
+  "
+  [owner m k]
+  [:div.view-fact-part.row
+   [:div.inline-90-percent.col-xs-11
+    (om/build typeahead/typeahead m
+              {:state
+               {:element-type :input
+                :fact-part k}
+
+               :init-state
+               {:input-value (schema/display-entity m)
+                :on-click  (partial handle-result-selection owner)
+                :on-submit (partial handle-input-submission owner)}
+               })]
+   [:div.inline-10-percent.col-xs-1
+    (when-let [id (get m :db/id)]
+      (->> (icons/open {})
+           (icons/link-to owner [:datum :id id])))]])
 
 (defn available-input-types
   "TODO: use argument to filter and sort return value to give user the
@@ -148,8 +168,7 @@
     :label "datum"}
 
    {:value :literal/text
-    :label "text"}
-   ))
+    :label "text"}))
 
 (defn input-type->dropdown-menu-item
   [on-click-fn tp]
@@ -164,6 +183,16 @@
        (mapv (partial input-type->dropdown-menu-item on-click-fn))
        (sort-by :value (partial menu-item-comparator value))))
 
+(defn edit-fact-part
+  ""
+  [owner m k]
+  (let [{:keys [selected-type entered-value matching-entity]}
+        (om/get-state owner)]
+    [:div.edit-fact-part
+     [:div.fact-part-metadata-container
+      ]])
+  )
+
 (defn fact-part
   "Here's how this works.
 
@@ -174,15 +203,9 @@
   We are not modifying any entity besides the parent (really, the
   fact, which is referenced by the parent).
 
-  I need a typeahead that renders entities with similar values or
-  labels. This is tricky because labels can be long, values can be
-  images or latex.
-
-  First the user determines the type of the fact part. This allows the
-  typeahead on the value to be useful. This is a dropdown menu. It
-  configures the typeahead search that follows.
-
-  Then the user begins populating the value.
+  So here are the states:
+  View is actually editable, it's a typeahead input field.
+  Edit is a big textarea with buttons to do fancy things.
 
   "
   [props owner opts]
@@ -213,9 +236,10 @@
 
           (case mode
             :view
-            (view-fact-part owner fact-part props)
+            (view-fact-part owner props fact-part)
 
             :edit
+            ;(edit-fact-part owner props fact-part)
             (let [{:keys [selected-type entered-value matching-entity]}
                   state
                   ]
@@ -305,36 +329,36 @@
     om/IWillMount
     (will-mount [_]
       (aether/listen! owner :noun [:fact (:db/id props)]
-                     (fn [{:keys [noun verb context]}]
-                       (case verb
-                         :toggle-mode
-                         (let [new-mode 
-                               (if (= :view (om/get-state owner :mode))
-                                 :edit
-                                 :view)]
-                           (om/set-state! owner :mode new-mode))
+                      (fn [{:keys [noun verb context]}]
+                        (case verb
+                          :toggle-mode
+                          (let [new-mode 
+                                (if (= :view (om/get-state owner :mode))
+                                  :edit
+                                  :view)]
+                            (om/set-state! owner :mode new-mode))
 
-                         :select-fact-part-type
-                         (om/update-state!
-                          owner (get context :fact-part)
-                          #(merge % {:selected-type (get context :value)}))
+                          :select-fact-part-type
+                          (om/update-state!
+                           owner (get context :fact-part)
+                           #(merge % {:selected-type (get context :value)}))
 
-                         :select-fact-part-reference
-                         (let []
-                           (om/update-state!
-                            owner (get context :fact-part)
-                            #(merge % (get context :selection))))
+                          :select-fact-part-reference
+                          (let []
+                            (om/update-state!
+                             owner (get context :fact-part)
+                             #(merge % (get context :selection))))
 
-                         :input-fact-part-value
-                         (let []
-                           (om/update-state!
-                            owner (get context :fact-part)
-                            (partial merge {:input-value (get context :value)})))
+                          :input-fact-part-value
+                          (let []
+                            (om/update-state!
+                             owner (get context :fact-part)
+                             (partial merge {:input-value (get context :value)})))
 
-                         ;;default
-                         (debug "what?" noun verb)
-                         ))
-                     #_(partial println "here")))
+                          ;;default
+                          (debug "what?" noun verb)
+                          ))
+                      #_(partial println "here")))
     om/IWillUnmount
     (will-unmount [_]
       (aether/stop-listening! owner))
@@ -387,7 +411,7 @@
 
            [:div.inline-90-percent.col-xs-11
             [:div.fact-attribute
-             (view-fact-part owner :fact/attribute {:literal/text "Click here"})]
+             (view-fact-part owner {:literal/text "Click here"} :fact/attribute)]
             [:div.fact-attribute
-             (view-fact-part owner :fact/value     {:literal/text "to add a fact"})]]]
+             (view-fact-part owner {:literal/text "to add a fact"} :fact/value)]]]
           ])))))

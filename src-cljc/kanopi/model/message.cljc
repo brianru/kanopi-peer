@@ -1,5 +1,15 @@
 (ns kanopi.model.message
-  "TODO: schematize all message creator fns"
+  "Messages should have unique ids and be recorded in a massive k-v
+  store. The id must include the following information:
+  - user
+  - session/ip
+  - timestamp
+
+  This is what will allow us to drive all major analytics. Every
+  action the user takes stored for analysis and testing.
+  
+  TODO: schematize all message creator fns
+  "
   (:require #?@(:cljs [[om.core :as om]
                        [schema.core :as s :include-macros true]
                        [kanopi.controller.history :as history]
@@ -107,23 +117,33 @@
 ;; transformers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #?(:cljs
-   (defn publisher [owner]
-     (om/get-shared owner [:aether :publisher]))
-   )
-#?(:cljs
-   (defn send!
-     "Ex: (->> (msg/search \"foo\") (msg/send! owner))
-     TODO: allow specification of transducers or debounce msec via args
-     - otherwise user must create some extra wiring on their end,
-     which is what this fn is trying to avoid. layered abstractions.
-     TODO: make work with different first args eg. a core.async channel,
-     an aether map, an aether record, etc"
-     ([owner msg]
-      (async/put! (publisher owner) msg)
-      ;; NOTE: js evt handlers don't like `false` as a return value, which
-      ;; async/put! often returns. So we add a nil.
-      nil))
-   )
+   (do
+    (defn publisher [owner]
+      (om/get-shared owner [:aether :publisher]))
+
+    (defn send!
+      "Ex: (->> (msg/search \"foo\") (msg/send! owner))
+      TODO: allow specification of transducers or debounce msec via args
+      - otherwise user must create some extra wiring on their end,
+      which is what this fn is trying to avoid. layered abstractions.
+      TODO: make work with different first args eg. a core.async channel,
+      an aether map, an aether record, etc"
+      ([owner msg]
+       (async/put! (publisher owner) msg)
+       ;; NOTE: js evt handlers don't like `false` as a return value, which
+       ;; async/put! often returns. So we add a nil.
+       nil)
+      ([owner & msgs]
+       (async/onto-chan (publisher owner) msgs false)
+       ))
+
+    (defn register-intent!
+      "Ex: (->> (msg/update-label) (msg/register-intent! owner))"
+      [owner msg]
+      (send! owner (hash-map :noun (get msg :verb)
+                             :verb :intent/register
+                             :context (get msg :context))))
+    ))
 
 #?(:cljs
    (defn switch-team [team-id]

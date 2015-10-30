@@ -110,7 +110,6 @@
   initial state.
   "
   [props owner opts]
-  {:pre [(om/cursor? props)]}
   (reify
     om/IInitState
     (init-state [_]
