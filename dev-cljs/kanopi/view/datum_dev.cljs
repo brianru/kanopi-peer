@@ -33,8 +33,7 @@
 (defcard edit-label-init-datum
   (dc/om-root datum/body {:init-state {:editing-label true}
                           :shared (dev-util/shared-state system)})
-  (helpers/init-datum fake-creds)
-  )
+  (helpers/init-datum fake-creds))
 
 (defcard view-datum-one-fact
   (dc/om-root datum/body {:shared (dev-util/shared-state system)})

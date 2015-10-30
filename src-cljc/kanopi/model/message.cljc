@@ -3,12 +3,16 @@
   (:require #?@(:cljs [[om.core :as om]
                        [schema.core :as s :include-macros true]
                        [kanopi.controller.history :as history]
+                       [taoensso.timbre :as timbre
+                        :refer-macros (log trace debug info warn error fatal report)]
                        [ajax.core :as ajax]
                        [cljs.core.async :as async] 
                        ]
                 :clj  [[clojure.string]
                        [schema.core :as s]
                        [cemerick.friend :as friend]
+                       [taoensso.timbre :as timbre
+                        :refer (log trace debug info warn error fatal report)]
                        [kanopi.model.schema :as schema]
                        [kanopi.util.core :as util]
                        ])))
@@ -238,7 +242,7 @@
    (do
     (defmulti local->remote
       (fn [history app-state msg]
-        (println "local->remote" msg)
+        (info msg)
         (get msg :verb))
       :default :default)
 

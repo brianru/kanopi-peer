@@ -42,14 +42,17 @@
     om/IRenderState
     (render-state [_ {:keys [editing edit-key submit-value hovering default-value]
                       :as state}]
-      (let []
+      (let [current-value (get props edit-key)]
         (html
          [:span.editable-text-container
+          {:style {:border-bottom-color (when editing "green")}}
           [:span.view-editable-text
-             {:style {:display (when editing "none")}
+             {:style {:color (when (empty? current-value)
+                               "#dddddd")
+                      :display (when editing "none")}
               :class [(when hovering "bold-text")]
               :on-click #(start-edit % owner :editing)}
-             (if-let [current-value (not-empty (get props :edit-key))]
+             (if (not-empty current-value)
                current-value
                default-value)]
 
@@ -57,7 +60,7 @@
            {:style       {:display (when-not editing "none")}
             :ref         "text-field"
             :type        "text"
-            :value       (or (get state :new-value) (get props edit-key) default-value)
+            :value       (or (get state :new-value) current-value default-value)
             :placeholder (get state :placeholder)
             :on-change   #(handle-change % owner :new-value)
             :on-key-down #(when (= (.-key %) "Enter")
