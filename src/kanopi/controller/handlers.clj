@@ -14,7 +14,7 @@
   [request-context message]
   (identity message))
 
-(defmethod request-handler :initialize-client-state
+(defmethod request-handler :spa.state/initialize
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
@@ -50,11 +50,11 @@
     (hash-map
      :noun    data
      :verb    (if (-> all-datum-ids not-empty)
-                :initialize-client-state-success
-                :initialize-client-state-failure)
+                :spa.state.initialize/success
+                :spa.state.initialize/failure)
      :context {})))
 
-(defmethod request-handler :search
+(defmethod request-handler :spa.navigate/search
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
@@ -69,11 +69,11 @@
      ;; I think it makes sense to indicate that by checking for the
      ;; search-results key in the response.
      :verb    (if (find data :search-results)
-                :search-success
-                :search-failure)
+                :spa.navigate.search/success
+                :spa.navigate.search/failure)
      :context {})))
 
-(defmethod request-handler :get-datum
+(defmethod request-handler :datum/get
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
@@ -81,11 +81,11 @@
     (hash-map
      :noun    data
      :verb    (if (not-empty (get-in data [:datum]))
-                :get-datum-success
-                :get-datum-failure)
+                :datum.get/success
+                :datum.get/failure)
      :context {})))
 
-(defmethod request-handler :update-datum-label
+(defmethod request-handler :datum.label/update
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
@@ -96,11 +96,11 @@
     (hash-map
      :noun data
      :verb (if data
-             :update-datum-label-success
-             :update-datum-label-failure)
+             :datum.label.update/success
+             :datum.label.update/failure)
      :context {})))
 
-(defmethod request-handler :update-fact
+(defmethod request-handler :datum.fact/update
   [request-context message]
   (let [data-svc  (util/get-data-service request-context)
         creds     (get-in message [:context :creds])
@@ -114,6 +114,6 @@
     (hash-map
      :noun data
      :verb (if data
-             :update-fact-success
-             :update-fact-failure)
+             :datum.fact.update/success
+             :datum.fact.update/failure)
      :context {})))

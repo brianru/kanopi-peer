@@ -134,7 +134,7 @@
                 :new-referenced-value value'
                 :fact (assoc fact :fact/value [(get value' :db/id)])))))))
 
-(defmethod local-event-handler :update-fact
+(defmethod local-event-handler :datum.fact/update
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
@@ -170,7 +170,7 @@
                     app-state'
                     ))))
 
-(defmethod local-event-handler :update-datum-label
+(defmethod local-event-handler :datum.label/update
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
@@ -181,12 +181,12 @@
                         (ensure-current-datum-is-updated ent-id))))))
 
 ;; TODO: implement.
-(defmethod local-event-handler :update-datum-label-success
+(defmethod local-event-handler :datum.label.update/success
   [aether history app-state msg]
   )
 
 ;; TODO: implement.
-(defmethod local-event-handler :update-datum-label-failure
+(defmethod local-event-handler :datum.label.update/failure
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
 
@@ -225,7 +225,7 @@
          (sort-by first)
          (vec))))
 
-(defmethod local-event-handler :search
+(defmethod local-event-handler :spa.navigate/search
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
@@ -235,17 +235,17 @@
                     ;; not using this data structure very well
                     (assoc-in app-state [:search-results] {query-string results})))))
 
-(defmethod local-event-handler :search-success
+(defmethod local-event-handler :spa.navigate.search/success
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (merge app-state msg))))
 
-(defmethod local-event-handler :search-failure
+(defmethod local-event-handler :spa.navigate.search/failure
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
 
-(defmethod local-event-handler :switch-team
+(defmethod local-event-handler :spa/switch-team
   [aether history app-state {team-id :noun :as msg}]
   (om/transact! app-state :user
                 (fn [user]
@@ -264,7 +264,7 @@
 ;; as performing action remotely? eg. send success/failure msgs?
 ;; OR, should I purposely not do this and have a clear distinction b/w
 ;; actions handled transactionally vs hypothetically
-(defmethod local-event-handler :get-datum
+(defmethod local-event-handler :datum/get
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
@@ -272,7 +272,7 @@
                        (build-datum-data app-state)
                        (assoc app-state :datum)))))
 
-(defmethod local-event-handler :get-datum-success
+(defmethod local-event-handler :datum.get/success
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
@@ -281,11 +281,11 @@
                         (assoc :datum (get-in msg [:noun]))
                         (assoc-in [:cache datum-id] (get-in msg [:noun :datum])))))))
 
-(defmethod local-event-handler :get-datum-failure
+(defmethod local-event-handler :datum.get/failure
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
 
-(defmethod local-event-handler :navigate
+(defmethod local-event-handler :spa/navigate
   [aether history app-state msg]
   (let [handler (get-in msg [:noun :handler])]
     (om/transact! app-state
@@ -303,7 +303,7 @@
         (->> (msg/get-datum datum-id)
              (aether/send! aether))))))
 
-(defmethod local-event-handler :register-success
+(defmethod local-event-handler :spa.register/success
   [aether history app-state {:keys [noun] :as msg}]
   (let []
     (om/transact! app-state
@@ -320,13 +320,13 @@
     (->> (msg/initialize-client-state noun)
          (aether/send! aether))))
 
-(defmethod local-event-handler :register-failure
+(defmethod local-event-handler :spa.register/failure
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
 
 ;; TODO: this must get a lot more data. we must re-initialize
 ;; app-state with this users' data.
-(defmethod local-event-handler :login-success
+(defmethod local-event-handler :spa.login/success
   [aether history app-state {:keys [noun] :as msg}]
   (let []
     (om/transact! app-state
@@ -343,12 +343,12 @@
     (->> (msg/initialize-client-state noun)
          (aether/send! aether))))
 
-(defmethod local-event-handler :login-failure
+(defmethod local-event-handler :spa.login/failure
   [aether history app-state msg]
   (let []
     (om/transact! app-state :error-messages #(conj % msg))))
 
-(defmethod local-event-handler :logout-success
+(defmethod local-event-handler :spa.logout/success
   [aether history app-state msg]
   (let []
     (om/transact! app-state
@@ -363,19 +363,19 @@
                            :cache {})))
     (history/navigate-to! history :home)))
 
-(defmethod local-event-handler :logout-failure
+(defmethod local-event-handler :spa.logout/failure
   [aether history app-state msg]
   (let []
     (om/transact! app-state :error-messages #(conj % msg))))
 
-(defmethod local-event-handler :initialize-client-state-success
+(defmethod local-event-handler :spa.state.initialize/success
   [aether history app-state msg]
   (let []
     (om/transact! app-state
                   (fn [app-state]
                     (merge app-state (get msg :noun))))))
 
-(defmethod local-event-handler :initialize-client-state-failure
+(defmethod local-event-handler :spa.state.initialize/failure
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
 

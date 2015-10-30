@@ -42,7 +42,7 @@
                  ;; store state. All state is here.
                  :page {}
                  ;; used by header to do fancy modal stuff
-                 :intent {:id :navigate}
+                 :intent {:id :spa/navigate}
 
                  ;; TODO: rename to current-datum
                  :datum {:context-datums []

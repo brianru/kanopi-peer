@@ -51,7 +51,7 @@
             :username "brian"
             :current-team team
             :teams [team]}
-     :intent {:id :navigate}}))
+     :intent {:id :spa/navigate}}))
 
 
 ;; mode: update
@@ -65,5 +65,5 @@
             :current-team team
             :teams [team]}
      :intent {:id :update
-              :verb :update-datum-label}}))
+              :verb :datum.label/update}}))
 

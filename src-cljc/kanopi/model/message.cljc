@@ -19,27 +19,27 @@
   {:pre [(integer? datum-id)]}
   (hash-map
    :noun datum-id
-   :verb :get-datum
+   :verb :datum/get
    :context {}))
 
 (defn update-fact [datum-id fact]
   (hash-map
    :noun {:datum-id datum-id
           :fact fact}
-   :verb :update-fact
+   :verb :datum.fact/update
    :context {}))
 
 (defn update-datum-label [ent new-label]
   (hash-map
    :noun {:existing-entity ent
           :new-label new-label}
-   :verb :update-datum-label
+   :verb :datum.label/update
    :context {}))
 
 (defn initialize-client-state [user]
   (hash-map
    :noun user
-   :verb :initialize-client-state
+   :verb :spa.state/initialize
    :context {}))
 
 
@@ -50,7 +50,7 @@
    (hash-map
     :noun {:query-string q
            :entity-type  tp}
-    :verb :search
+    :verb :spa.navigate/search
     :context {})))
 
 
@@ -163,62 +163,62 @@
    (defn register [creds]
      (hash-map 
       :noun creds
-      :verb :register
+      :verb :spa/register
       :context {})))
 #?(:cljs
    (defn register-success [creds]
      (hash-map
       :noun creds
-      :verb :register-success
+      :verb :spa.register/success
       :context {}))
    )
 #?(:cljs
    (defn register-failure [err]
      (hash-map
       :noun err
-      :verb :register-failure
+      :verb :spa.register/failure
       :context {}))
    )
 #?(:cljs
    (defn login [creds]
      (hash-map
       :noun creds
-      :verb :login
+      :verb :spa/login
       :context {}))
    )
 #?(:cljs
    (defn login-success [creds]
      (hash-map
       :noun creds
-      :verb :login-success
+      :verb :spa.login/success
       :context {}))
    )
 #?(:cljs
    (defn login-failure [err]
      (hash-map
       :noun err
-      :verb :login-failure
+      :verb :spa.login/failure
       :context {}))
    )
 #?(:cljs
    (defn logout []
      (hash-map
       :noun nil
-      :verb :logout
+      :verb :spa/logout
       :context {}))
    )
 #?(:cljs
    (defn logout-success [foo]
      (hash-map
       :noun foo
-      :verb :logout-success
+      :verb :spa.logout/success
       :context {}))
    )
 #?(:cljs
    (defn logout-failure [err]
      (hash-map
       :noun err
-      :verb :logout-failure
+      :verb :spa.logout/failure
       :context {}))
    )
 
@@ -242,7 +242,7 @@
         (get msg :verb))
       :default :default)
 
-    (defmethod local->remote :register
+    (defmethod local->remote :spa/register
       [history app-state msg]
       {:post [(valid-remote-message? %)]}
       (hash-map
@@ -258,7 +258,7 @@
        :verb :request
        :context {}))
 
-    (defmethod local->remote :login
+    (defmethod local->remote :spa/login
       [history app-state msg]
       {:post [(valid-remote-message? %)]}
       (hash-map
@@ -279,7 +279,7 @@
        :verb :request
        :context {}))
 
-    (defmethod local->remote :logout
+    (defmethod local->remote :spa/logout
       [history app-state msg]
       {:post [(valid-remote-message? %)]}
       (hash-map
@@ -308,7 +308,7 @@
        :verb :request
        :context {}))
 
-    (defmethod local->remote :initialize-client-state
+    (defmethod local->remote :spa.state/initialize
       [history app-state msg]
       {:post [(valid-remote-message? %)]}
       (hash-map
@@ -351,7 +351,7 @@
    :verb :request
    :context {}))
 
-(defmethod local->remote :update-datum-label
+(defmethod local->remote :datum.label/update
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map
@@ -366,7 +366,7 @@
    :verb :request
    :context {}))
 
-(defmethod local->remote :update-fact
+(defmethod local->remote :datum.fact/update
   [history app-state msg]
   {:post [(valid-remote-message? %)]}
   (hash-map

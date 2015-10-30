@@ -35,7 +35,7 @@
 (defn- send-set-page-msg! [aether match]
   (async/put! (get-in aether [:aether :publisher])
               {:noun match
-               :verb :navigate
+               :verb :spa/navigate
                :context nil}))
 
 (defprotocol INavigator

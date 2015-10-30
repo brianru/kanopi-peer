@@ -15,48 +15,48 @@
 (def mode-verbs
   {:demo
    {:local  #{
-              :search
-              :navigate
+              :spa/navigate
+              :spa.navigate/search
 
-              :login-success    :login-failure
-              :logout-success   :logout-failure
-              :register-success :register-failure
+              :spa.login/success    :spa.login/failure
+              :spa.logout/success   :spa.logout/failure
+              :spa.register/success :spa.register/failure
 
-              :get-datum
-              :update-fact
-              :update-datum-label
+              :datum/get
+              :datum.fact/update
+              :datum.label/update
 
               ;; NOTE: initialize-client-state* is not here
               }
     :remote #{
-              :login :logout :register
+              :spa/login :spa/logout :spa/register
               }}
 
    :authenticated
    {:local  #{
-              :navigate
+              :spa/navigate
 
-              :login-success                   :login-failure
-              :logout-success                  :logout-failure
-              :register-success                :register-failure
+              :spa.login/success    :spa.login/failure
+              :spa.logout/success   :spa.logout/failure
+              :spa.register/success :spa.register/failure
 
-              :switch-team
+              :spa/switch-team
 
-              :search-success                  :search-failure
-              :get-datum-success               :get-datum-failure
-              :initialize-client-state-success :initialize-client-state-failure
-              :update-datum-label-success      :update-datum-label-failure
-              :update-fact-success             :update-fact-failure
+              :spa.navigate.search/success     :spa.navigate.search/failure
+              :datum.get/success               :datum.get/failure
+              :datum.fact.update/success       :datum.fact.update/failure
+              :datum.label.update/success      :datum.label.update/failure
+              :spa.state.initialize/success    :spa.state.initialize/failure
               } 
     :remote #{
-              :login :logout :register
+              :spa/login :spa/logout :spa/register
 
 
-              :search
-              :get-datum
-              :initialize-client-state
-              :update-datum-label
-              :update-fact
+              :spa.navigate/search
+              :datum/get
+              :datum.fact/update
+              :datum.label/update
+              :spa.state/initialize
 
               }}})
 

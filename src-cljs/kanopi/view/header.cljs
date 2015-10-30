@@ -112,8 +112,8 @@
     (render-state [_ state]
       (html
        [:div.header.navbar.navbar-default.navbar-fixed-top
-        (case (get-in props [:intent :id] :navigate)
-          :navigate
+        (case (get-in props [:intent :id] :intent/navigate)
+          :intent/navigate
           [:div.container-fluid
            (om/build left-team-dropdown props)
            (om/build center-search-field props)

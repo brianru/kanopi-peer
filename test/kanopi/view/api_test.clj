@@ -35,7 +35,7 @@
             (test-util/mock-request! system :post "/api" message :creds creds)
             ]
         (is (= 200 (:status resp)))
-        (is (= :get-datum-failure (get body :verb)))
+        (is (= :datum.get/failure (get body :verb)))
         (is (nil? (get-in body [:noun :datum])))
         ))
 
@@ -45,7 +45,7 @@
             (test-util/mock-request! system :post "/api" message :creds creds)
             ]
         (is (= 200 (:status resp)))
-        (is (= :get-datum-success (get body :verb)))
+        (is (= :datum.get/success (get body :verb)))
         (is (= test-datum-ent-id (-> body :noun :datum :db/id)))
         ))
 
@@ -72,7 +72,7 @@
                                      :creds creds)
             ]
         (is (= 200 (:status resp)))
-        (is (= :update-datum-label-success (get body :verb)))
+        (is (= :datum.label.update/success (get body :verb)))
         (is (= lbl' (-> body :noun :datum/label)))
         ))
 
@@ -108,7 +108,7 @@
                  (into (list))) 
             ]
         (is (= 200 (:status resp)))
-        (is (= :update-fact-success (get body :verb)))
+        (is (= :datum.fact.update/success (get body :verb)))
         (is (not-empty new-facts))
         (is (= 1 (count new-facts)))
         (is (= ["age" 42] (util/fact-entity->tuple new-fact)))
@@ -124,7 +124,7 @@
                              (-> test-ent'' :datum/fact set)
                              (-> test-ent'  :datum/fact set)) ]
           (is (= 200 (:status resp)))
-          (is (= :update-fact-success (get body :verb)))
+          (is (= :datum.fact.update/success (get body :verb)))
           (is (not-empty updated-facts))
           (is (= 1 (count updated-facts)))
           (is (= ["age" 17] (util/fact-entity->tuple (first updated-facts))))
@@ -146,7 +146,7 @@
                                      :content-type "application/transit+json")
             ]
         (is (= 200 (:status resp)))
-        (is (= :initialize-client-state-success (:verb body)))
+        (is (= :spa.state.initialize/success (:verb body)))
         (is (every? (partial s/validate schema/Datum)
                     (vals (get-in body [:noun :cache]))))
         ))
@@ -167,6 +167,6 @@
                                      :content-type "application/transit+json")
             ]
         (is (= 200 (:status resp)))
-        (is (= :search-success (:verb body)))
+        (is (= :spa.navigate.search/success (:verb body)))
         (is (not-empty (:noun body)))))))
 
