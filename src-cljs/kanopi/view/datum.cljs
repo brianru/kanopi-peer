@@ -49,15 +49,16 @@
     (display-name [_]
       (str "datum-body"))
 
-    om/IRender
-    (render [_]
+    om/IRenderState
+    (render-state [_ state]
       (let [fact-count (count (get props :datum/fact))]
         (html
          [:div.row
           [:div.datum-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
            [:div.datum-label
             (om/build input/editable-value props
-                      {:init-state {:edit-key :datum/label
+                      {:init-state {:editing (get state :editing-label)
+                                    :edit-key :datum/label
                                     :submit-value
                                     (fn [label']
                                       (->> label'

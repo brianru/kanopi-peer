@@ -25,6 +25,12 @@ input {
     line-height: 2rem !important;
     margin: 0 0.5rem !important;
 }
+span.view-editable-text {
+    margin: 0 0.5rem !important;
+}
+input.edit-editable-text {
+    border-bottom: none;
+}
 input:focus {
     outline: none;
 }
