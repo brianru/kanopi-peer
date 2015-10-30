@@ -4,3 +4,20 @@
 .com-rigsomelight-devcard .navbar-right {
     float: none !important;
 }
+
+.com-rigsomelight-devcard .navbar-fixed-top {
+    top: inherit;
+    position: inherit;
+    right: inherit;
+    left: inherit;
+    z-index: inherit;
+}
+.com-rigsomelight-devcard .navbar-fixed-top .navbar-header {
+    float: left !important;
+}
+.com-rigsomelight-devcard .navbar-fixed-top .navbar-right {
+    float: right !important;
+}
+.com-rigsomelight-devcard .navbar-fixed-top .navbar-center {
+    position: absolute;
+}

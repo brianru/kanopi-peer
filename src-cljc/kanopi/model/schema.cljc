@@ -116,7 +116,7 @@
   {:db/id       (s/maybe DatomicId)
    :datum/team  UserTeam
    :datum/label (s/maybe s/Str)
-   (s/optional-key :datum/fact) [(s/recursive #'Fact)]
+   :datum/fact  [(s/recursive #'Fact)]
    })
 
 ;; NOTE: my expression of Literal types is not pretty, abstract-maps

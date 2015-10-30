@@ -112,7 +112,7 @@
     (render-state [_ state]
       (html
        [:div.header.navbar.navbar-default.navbar-fixed-top
-        (case (get-in props [:intent :id])
+        (case (get-in props [:intent :id] :navigate)
           :navigate
           [:div.container-fluid
            (om/build left-team-dropdown props)

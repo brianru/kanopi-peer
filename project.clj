@@ -57,7 +57,7 @@
 
                  [ring/ring-devel "1.4.0"]
 
-                 [prismatic/schema "1.0.1"]
+                 [prismatic/schema "1.0.3"]
                  ;; Test
                  [org.clojure/test.check "0.8.2"]
                  ]

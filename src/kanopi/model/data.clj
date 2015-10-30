@@ -53,7 +53,7 @@
 (defrecord DatomicDataService [config datomic-peer]
   IDataService
   (init-datum [this creds]
-    (let [datum  (mk-datum datomic-peer creds "banana boat" ["type" "welcome"])
+    (let [datum  (mk-datum datomic-peer creds)
           report @(datomic/transact datomic-peer creds (get datum :txdata))]
       (d/resolve-tempid (:db-after report) (:tempids report) (get datum :ent-id))))
 

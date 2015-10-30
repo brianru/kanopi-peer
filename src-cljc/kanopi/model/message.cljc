@@ -1,5 +1,7 @@
 (ns kanopi.model.message
+  "TODO: schematize all message creator fns"
   (:require #?@(:cljs [[om.core :as om]
+                       [schema.core :as s :include-macros true]
                        [kanopi.controller.history :as history]
                        [ajax.core :as ajax]
                        [cljs.core.async :as async] 

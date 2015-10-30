@@ -19,76 +19,32 @@
             [kanopi.view.widgets.typeahead :as typeahead]
             ))
 
+(def stroke-color "#dddddd")
+
 (defn- handle-borders-group [mode]
   [:g.handle-borders
    {:transform "translate(4, 4)"}
    [:path {:d "m 0 9 v -9 h 9"
-           :stroke "black"
+           :stroke stroke-color
            :fill "transparent"}]
    [:path {:d "m 15 6 v 9 h -9"
-           :stroke "black"
-           :transform (when (= mode :edit)
-                        "translate(0, 48)")
-
+           :stroke stroke-color
            :fill "transparent"}]])
 
 (defn- handle-contents-group [& args]
-  (let [{:keys [mode hovering cancel-handler history-handler submit-handler]
-         :or {mode :view
-              hovering false
-              cancel-handler  (constantly nil)
-              history-handler (constantly nil)
-              submit-handler  (constantly nil)}}
+  (let [{:keys [mode hovering] :or {mode :view, hovering false}}
         (apply hash-map args)]
     [:g.handle-contents
      {:transform "translate(4, 4)"}
-     (cond
-
-      (and (= mode :view) hovering)
-      [:g.handle-hover-contents
-       {:transform "translate(2.5, 2.5)"}
-       [:rect.handle-mode-indicator
-        {:width "10"
-         :height "10"
-         :fill "green"
-         :opacity "0.5"}]]
-
-      (= mode :edit)
-      [:g.handle-edit-contents
-       [:g {:transform "translate(0,0)"}
-        (icons/svg-clear
-         {:transform (icons/transform-scale :from 48 :to 16)
-          :fill "black"})
-        [:rect.click-area
-         {:width 16
-          :height 16
+     (when (or (= mode :edit) hovering)
+       [:g.handle-hover-contents
+        {:transform "translate(2.5, 2.5)"}
+        [:rect.handle-mode-indicator
+         {:width "10"
+          :height "10"
           :fill "green"
-          :on-click cancel-handler
-          }]]
-       [:g {:transform "translate(0,24)"}
-        (icons/svg-restore
-         {:transform (icons/transform-scale :from 48 :to 16)
-          :fill "lightgray"})
-        [:rect.click-area
-         {:width 16
-          :height 16
-          :fill "green"
-          :style {:cursor "inherit"}
-          :on-click history-handler
-          }]]
-       [:g {:transform "translate(0,48)"}
-        (icons/svg-done
-         {:transform (icons/transform-scale :from 48 :to 16)
-          :class "handle-icon"
-          :fill "black"})
-        [:rect.click-area
-         {:width 16
-          :height 16
-          :fill "green"
-          :on-click submit-handler
-          }]]
-
-       ])]))
+          :opacity "0.4"}]]
+       )]))
 
 (defn- merge-updated-data [owner]
   (let [attr'  (om/get-state owner :fact/attribute)
@@ -105,6 +61,8 @@
                            (some identity))]
      }))
 
+;; FIXME: this should not be a separate component. make it an html
+;; template and SIMPLIFY.
 (defn handle
   "TODO: anchor for drag & drop reordering of facts
   TODO: "
@@ -118,19 +76,14 @@
     (render-state [_ {:keys [mode fact-hovering] :as state}]
       (let []
         (html
-         ;; TODO: animate all the width, height and transform
-         ;; attributes
          [:div.fact-handle
           {:on-click #(->> (msg/toggle-fact-mode props)
                            (msg/send! owner))}
-          [:svg {:width "24px"
-                 :height (if (= mode :view) "24px" "72px")}
+          [:svg {:width "24px", :height "24px"}
            (handle-borders-group mode)
            (handle-contents-group
             :mode mode
             :hovering fact-hovering
-            :cancel-handler (constantly nil)
-            :history-handler (constantly nil)
             :submit-handler (fn []
                               (->> (msg/update-fact (om/get-state owner :datum-id)
                                                     (merge-updated-data owner))
@@ -174,6 +127,43 @@
                                          res)
          (msg/send! owner))))
 
+(defn view-fact-part
+  "FIXME: on-click should trigger editing the fact.
+  TODO: display an icon for navigating to the fact-part's reference."
+  [owner k m]
+  [:div.view-fact-part
+   [:a {:href (when-let [id (get m :db/id)]
+                (browser/route-for owner :datum :id id))}
+    [:span.fact-part-representation
+     (schema/display-entity m)]]
+   ;; GOTO icon here.
+   ])
+
+(defn available-input-types
+  "TODO: use argument to filter and sort return value to give user the
+  best possible list of available input types for the value entered."
+  [value]
+  (vector
+   {:value :datum
+    :label "datum"}
+
+   {:value :literal/text
+    :label "text"}
+   ))
+
+(defn input-type->dropdown-menu-item
+  [on-click-fn tp]
+  (assoc tp :type :link, :on-click (partial on-click-fn (:value tp))))
+
+(defn menu-item-comparator
+  [input-value item1 item2]
+  true)
+
+(defn generate-menu-items [value on-click-fn]
+  (->> (available-input-types value)
+       (mapv (partial input-type->dropdown-menu-item on-click-fn))
+       (sort-by :value (partial menu-item-comparator value))))
+
 (defn fact-part
   "Here's how this works.
 
@@ -214,24 +204,16 @@
        })
 
     om/IRenderState
-    (render-state [_ {:keys [mode] :as state}]
+    (render-state [_ {:keys [mode fact-part] :as state}]
       (let [part-type (schema/describe-entity props)]
         (html
          [:div.fact-attribute
           {:on-mouse-enter #(om/set-state! owner :hovering true)
            :on-mouse-leave #(om/set-state! owner :hovering false)}
 
-          #_(when true ;;; dev-mode
-              [:span (str (:fact-part state)
-                          ": " (get-in state [:matching-entity :db/id]))])
-
           (case mode
             :view
-            [:div.view-fact-part
-             [:a {:href (when-let [id (:db/id props)]
-                          (browser/route-for owner :datum :id id))}
-              [:span.fact-part-representation
-               (schema/display-entity props)]]]
+            (view-fact-part owner fact-part props)
 
             :edit
             (let [{:keys [selected-type entered-value matching-entity]}
@@ -247,31 +229,20 @@
                  [:span.type-input-value
                   (om/build dropdown/dropdown props
                             {:state
-                             {:toggle-label (name (or selected-type part-type))}
-
-                             :init-state
-                             {:menu-items
-                              [{:type     :link
-                                :value    :datum
-                                :label    "datum"
-                                :on-click (partial handle-type-selection owner :datum)
-                                }
-                               {:type     :link
-                                :value    :literal/text
-                                :label    "text"
-                                :on-click (partial handle-type-selection owner :literal/text)
-                                }]}})]]
+                             {:toggle-label (name (or selected-type part-type))
+                              :menu-items (generate-menu-items
+                                           entered-value (partial handle-type-selection owner))
+                              }
+                             })]]
                 [:div.value-input
                  [:label.value-input-label (str (text/entity-value-label props) ":")]
                  [:span.value-input-value
                   (om/build typeahead/typeahead props
-                            {
-                             :state
-                             {
-                              :element-type (browser/input-element-for-entity-type
+                            {:state
+                             {:element-type (browser/input-element-for-entity-type
                                              (or selected-type part-type))
-                              :fact-part (get state :fact-part)
-                              }
+                              :fact-part    fact-part}
+
                              :init-state
                              {:input-value (schema/display-entity props)
                               :on-click    (partial handle-result-selection owner)
@@ -356,7 +327,6 @@
 
                          :input-fact-part-value
                          (let []
-                           (println "here!")
                            (om/update-state!
                             owner (get context :fact-part)
                             (partial merge {:input-value (get context :value)})))
@@ -384,3 +354,40 @@
                     {:state (select-keys state [:mode :datum-id :fact/attribute :fact/value])}
                     )] )))
     ))
+
+(defn new-fact-template
+  "The mechanics of initializing a fact are drastically different from
+  those of viewing and editing an existing fact. Therefore, this
+  component will re-use many of the html templates for the normal
+  container and fact-body components while offering a tuned experience
+  for initializing facts.
+  "
+  [props owner opts]
+  (reify
+    om/IRender
+    (render [_]
+      (let []
+        (html
+         [:div.fact-container.container
+          [:div.fact-body.row
+
+           [:div.inline-10-percent.col-xs-1
+            ;; TODO: i'm repeating some code!
+            [:div.fact-handle
+             {:on-click (constantly nil)}
+             [:svg {:width "24px", :height "24px"}
+              (handle-borders-group :view)
+              (handle-contents-group
+               :mode :view
+               :hovering true
+               :cancel-handler  (constantly nil)
+               :history-handler (constantly nil)
+               :submit-handler  (constantly nil))]]
+            ]
+
+           [:div.inline-90-percent.col-xs-11
+            [:div.fact-attribute
+             (view-fact-part owner :fact/attribute {:literal/text "Click here"})]
+            [:div.fact-attribute
+             (view-fact-part owner :fact/value     {:literal/text "to add a fact"})]]]
+          ])))))

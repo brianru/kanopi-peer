@@ -4,10 +4,21 @@
             [quile.component :as component]
             [kanopi.util-dev :as dev-util]
             [om.core :as om]
-            [kanopi.view.datum :as datum]))
+            [kanopi.view.datum :as datum]
+            [kanopi.model.helpers :as helpers]))
 
 (defonce system
   (component/start (dev-util/new-system)))
+
+(def fake-creds
+  (let [username "brian"
+        team     {:db/id 20
+                  :team/id username}
+        ]
+    {:ent-id       92
+     :username     username
+     :teams        [team]
+     :current-team team}))
 
 (defcard view-empty-datum
   (dc/om-root datum/body {:shared (dev-util/shared-state system)})
@@ -16,9 +27,7 @@
 
 (defcard view-init-datum
   (dc/om-root datum/body {:shared (dev-util/shared-state system)})
-  {:db/id -1
-   :datum/label ""
-   :datum/fact []}
+  (helpers/init-datum fake-creds)
   {:inspect-data true, :history true})
 
 (defcard view-datum-one-fact

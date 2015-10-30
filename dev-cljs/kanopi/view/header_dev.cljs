@@ -10,6 +10,8 @@
 (defonce system
   (component/start (dev-util/new-system)))
 
+;; mode: navigate
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defcard team-selector-no-user
   (dc/om-root header/left-team-dropdown {:shared (dev-util/shared-state system)})
   {:user {}})
@@ -40,3 +42,28 @@
             :username "brian"
             :current-team team
             :teams [team]}}))
+
+(defcard header-navigate
+  (dc/om-root header/header {:shared (dev-util/shared-state system)})
+  (let [team {:db/id 22 :team/id "brian"}]
+    {:user {:ent-id 42
+            :identity "brian"
+            :username "brian"
+            :current-team team
+            :teams [team]}
+     :intent {:id :navigate}}))
+
+
+;; mode: update
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defcard header-update
+  (dc/om-root header/header {:shared (dev-util/shared-state system)})
+  (let [team {:db/id 22 :team/id "brian"}]
+    {:user {:ent-id 42
+            :identity "brian"
+            :username "brian"
+            :current-team team
+            :teams [team]}
+     :intent {:id :update
+              :verb :update-datum-label}}))
+

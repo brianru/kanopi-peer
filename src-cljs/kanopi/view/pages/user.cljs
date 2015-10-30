@@ -81,6 +81,11 @@
             login-fn    #(login! owner (select-keys state [:username :password]))
             logout-fn   #(logout! owner)
             register-fn #(register! owner (select-keys state [:username :password]))
+            default-submit-fn (case mode
+                                :register register-fn
+                                :login    login-fn
+                                :logout   logout-fn
+                                )
             submittable (not (some nil? [username password]))]
         (html
          [:div.container-fluid
@@ -98,8 +103,8 @@
              [:div.panel-body
               (when (#{:register :login :enter} mode)
                 [:div
-                 (username-field owner :username submit-fn submittable)
-                 (password-field owner :password submit-fn submittable)])
+                 (username-field owner :username default-submit-fn submittable)
+                 (password-field owner :password default-submit-fn submittable)])
 
               (case mode
                 :enter

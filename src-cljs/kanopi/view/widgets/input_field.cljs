@@ -49,7 +49,10 @@
              {:style {:display (when editing "none")}
               :class [(when hovering "bold-text")]
               :on-click #(start-edit % owner :editing)}
-             (get props edit-key default-value)]
+             (if-let [current-value (not-empty (get props :edit-key))]
+               current-value
+               default-value)]
+
           [:input.edit-editable-text
            {:style       {:display (when-not editing "none")}
             :ref         "text-field"

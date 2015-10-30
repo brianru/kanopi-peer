@@ -152,7 +152,7 @@ a.navbar-brand:focus {
     padding-bottom: 40px;
 }
 .datum-label {
-    padding-bottom: 6px;
+    padding-bottom: 24px;
 }
 .context-datum-cell, .similar-datum-cell {
     text-align: center;
@@ -163,7 +163,7 @@ a.navbar-brand:focus {
 
 /* Facts */
 .fact-body {
-    margin-bottom: 20px;
+    margin-bottom: 12px;
 }
 .fact-container {
     width: 100% !important;
@@ -186,6 +186,7 @@ a.navbar-brand:focus {
 .editable-text-container {
     display: inline-block;
     width: 100%;
+    border-bottom: 1px solid #dddddd;
 }
 .view-editable-text {
     font-size: 16px;
@@ -212,6 +213,7 @@ a.navbar-brand:focus {
     cursor: pointer;
 }
 .fact-part-representation {
+    cursor: text;
     font-size: 16px;
     /*
     max-width: 75%;

@@ -51,7 +51,7 @@
 
     om/IRender
     (render [_]
-      (let []
+      (let [fact-count (count (get props :datum/fact))]
         (html
          [:div.row
           [:div.datum-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
@@ -65,15 +65,19 @@
                                            (msg/send! owner)))}})
             ]
            [:div.datum-facts
-            ;; NOTE: one of the facts is a placeholder for creating a
-            ;; new one
-            (if (:db/id props)
-              (om/build-all fact/container
-                            (get props :datum/fact)
-                            {:key-fn :db/id
-                             :init-state {:datum-id (:db/id props)}
-                             :state {:fact-count (count (:datum/fact props))}})
-              [:span "This datum does not exist."])]
+            ;; NOTE: I want to actually group fact by attribute and
+            ;; render in those groups, but that does not work with
+            ;; Om's cursor model. TODO: make change when I upgrade to
+            ;; Om Next.
+            (om/build-all fact/container
+                          (get props :datum/fact [])
+                          {:key-fn :db/id
+                           :init-state {:datum-id (:db/id props)}
+                           :state {:fact-count fact-count}})
+            ;; NOTE: also build a special fact which is the trigger to
+            ;; add new facts
+            (om/build fact/new-fact-template props)
+            ]
            ]
           ])))
     ))
