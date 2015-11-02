@@ -56,6 +56,9 @@ input:focus {
 a {
     color: inherit !important;
 }
+a .glyphicon {
+    color: #777;
+}
 a:hover {
     text-decoration: none !important;
 }
@@ -141,6 +144,20 @@ a.navbar-brand:focus {
 }
 .dropdown-menu-item {
     cursor: pointer;
+}
+.navbar-brand .glyphicon {
+    cursor: pointer;
+}
+.navbar-brand:hover .glyphicon {
+    color: black;
+}
+.navbar-brand * {
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 
 .prompt {

@@ -38,6 +38,9 @@
         [:div.header-container
          (om/build header/header props)]
         [:div.page-container
+         {:class [(when (get props :modal)
+                    "fade-out-page")
+                  ]}
          [:div.prompt-container
           (om/build prompt/prompt props)]
          (case (get-in props [:page :handler])

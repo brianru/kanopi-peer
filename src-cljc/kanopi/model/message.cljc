@@ -56,7 +56,6 @@
    :verb :spa.state/initialize
    :context {}))
 
-
 (defn search
   ([q]
    (search q nil))

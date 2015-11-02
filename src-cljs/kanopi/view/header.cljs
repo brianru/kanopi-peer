@@ -74,16 +74,17 @@
       (html
        [:ul.nav.navbar-nav.navbar-right
         (->> (icons/goal {})
-             (icons/on-click (constantly nil) {:class "navbar-brand"}))
+             (icons/on-click (constantly nil) {:class ["navbar-brand"]}))
         (->> (icons/insights {})
-             (icons/on-click (constantly nil) {:class "navbar-brand"}))
+             (icons/on-click (constantly nil) {:class ["navbar-brand"]}))
         (if (get-in props [:user :identity])
           [:div.navbar-brand
            (om/build dropdown/dropdown props
                      {:init-state
                       {:toggle-label (get-in props [:user :identity])
-                       :toggle-icon  icons/etcetera
-                       :tab-index -1
+                       :toggle-icon  icons/user
+                       :caret? true
+                       :tab-index    -1
                        :menu-items [{:type  :link
                                      :href  (browser/route-for owner :settings)
                                      :label "Settings"}

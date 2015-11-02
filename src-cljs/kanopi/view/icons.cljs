@@ -31,8 +31,8 @@
   [:div.glyphicon.glyphicon-pushpin
    (merge {} m)])
 
-(defn etcetera [m]
-  [:div.glyphicon.glyphicon-triangle-bottom
+(defn user [m]
+  [:div.glyphicon.glyphicon-user
    (merge {} m)])
 
 ;; TODO: build button wrapper function
