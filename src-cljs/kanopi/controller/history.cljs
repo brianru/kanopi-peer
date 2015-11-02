@@ -27,7 +27,7 @@
                           "register" :register
                           "settings" :settings
                           "datum/"   {[:id ""] :datum}
-                          "literal/" {[:id ""] :literal}
+                         ;; "literal/" {[:id ""] :literal}
                           
                           ;; Server
                           "api"      :api}])

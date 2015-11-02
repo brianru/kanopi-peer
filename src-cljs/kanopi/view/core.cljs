@@ -5,6 +5,7 @@
             [sablono.core :refer-macros [html] :include-macros true]
             [kanopi.model.ref-cursors :as ref-cursors]
             [kanopi.model.message :as msg]
+            [kanopi.view.modal  :as modal]
             [kanopi.view.header :as header]
             [kanopi.view.prompt :as prompt]
             [kanopi.view.footer :as footer]
@@ -53,11 +54,12 @@
            (om/build user/authentication props)
 
            ;; default
-           (om/build datum-search/suggestions props)
-           )
+           (om/build datum-search/suggestions props))
          ]
-        ;;[:div.footer-container
-        ;; (om/build footer/footer props)]
+        [:div.modal-container
+         {:style {:display (when (get props :modal)
+                             "inherit" "none")}}
+         (modal/modal-template (get props :modal))]
         ]
        ))))
 

@@ -24,8 +24,18 @@
 
 ;; FIXME: should be a light bulb
 (defn insights [m]
-  [:div.glyphicon.glyphicon-lamp
+  [:div.glyphicon.glyphicon-flash
    (merge {} m)])
+
+(defn goal [m]
+  [:div.glyphicon.glyphicon-pushpin
+   (merge {} m)])
+
+(defn etcetera [m]
+  [:div.glyphicon.glyphicon-triangle-bottom
+   (merge {} m)])
+
+;; TODO: build button wrapper function
 
 (defn link-to
   "Example usage:

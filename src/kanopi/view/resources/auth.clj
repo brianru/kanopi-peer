@@ -116,13 +116,12 @@
      ;; I don't think that's happening b/c registration does not flow
      ;; through friend.
      ::identity (-> (auth/credentials authenticator username)
-                    (select-keys [:ent-id :team :username])
+                    (dissoc :password)
                     ;; to make this match the friend
                     ;; current-authentication map
                     ((fn [x] (-> x
                                  (dissoc :team)
-                                 (assoc :identity (:username x)
-                                        :teams (->> x :team (map :db/id) (set)))
+                                 (assoc :identity (:username x))
                                  ))))}))
 
 (defn success?

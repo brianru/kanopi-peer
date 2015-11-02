@@ -116,11 +116,12 @@
       {:element-type :input ;; supported values are #{:input :textarea}
        :tab-index 0 ;; decided by platform convention by default
 
-       ;; TODO: document the required arity for each of these
-       ;; functions
-
        ;; Used to render search results into strings for display.
        :display-fn schema/display-entity
+       ;; What to display when there are no search results.
+
+       ;; FIXME: use data of the right shape here.
+       :empty-result [[:foo-bar]]
 
        ;; Escape hatch for tracking the input field's value.
        :on-change (constantly nil)
@@ -152,10 +153,10 @@
       #_(info "mounting typeahead"))
 
     om/IRenderState
-    (render-state [_ {:keys [focused input-ch input-value display-fn on-change]
+    (render-state [_ {:keys [focused input-ch input-value display-fn on-change href-fn]
                       :as state}]
       (let [all-search-results (om/observe owner ((om/get-shared owner :search-results)))
-            search-results (get all-search-results input-value [])
+            search-results (get all-search-results input-value (get state :empty-result []))
             ]
         (html
          [:div.typeahead
@@ -170,7 +171,7 @@
                    :tab-index (get state :tab-index)
                    :value       (get state :input-value)
                    ;; NOTE: debugging
-                   :style {:color (when-not focused "red")}
+                   ;;:style {:color (when-not focused "red")}
                    :on-change   (partial handle-typeahead-input owner) 
                    :on-key-down (partial handle-key-down owner search-results)
                    }))
@@ -184,9 +185,7 @@
               (when (= idx (get state :selection-index))
                 [:span.dropdown-menu-item-marker])
               [:a {
-                   ;; TODO: should I collapse these 2 into a single
-                   ;; selection handler?
-                   :href     ((get state :href-fn) res)
+                   :href     #(href-fn res)
                    :on-click (partial handle-result-click owner res)
                    }
                [:span (display-fn res)]]])]

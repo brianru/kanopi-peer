@@ -145,7 +145,8 @@
   [:div.view-fact-part.row
    [:div.inline-90-percent.col-xs-11
     (om/build typeahead/typeahead m
-              {:state
+              {:react-key (str "view-fact-part" "-" k)
+               :state
                {:element-type :input
                 :fact-part k}
 
@@ -186,10 +187,25 @@
 (defn edit-fact-part
   ""
   [owner m k]
-  (let [{:keys [selected-type entered-value matching-entity]}
+  (let [{:keys [selected-type part-type entered-value matching-entity]}
         (om/get-state owner)]
     [:div.edit-fact-part
+     (om/build typeahead/typeahead m
+                {:react-key (str "edit-fact-part" "-" k)
+                 :state
+                 {:element-type :input
+                  :fact-part k}
+                 :init-state
+                 {:input-value (schema/display-entity m)
+                  :on-click    (partial handle-result-selection owner)
+                  :on-submit   (partial handle-input-submission owner)}})
      [:div.fact-part-metadata-container
+      (om/build dropdown/dropdown m
+                {:react-key (str "edit-fact-part" "-" k)
+                 :state
+                 {:toggle-label (name (or selected-type part-type))
+                  :menu-items   (generate-menu-items
+                                 entered-value (partial handle-type-selection owner))}})
       ]])
   )
 
@@ -239,40 +255,40 @@
             (view-fact-part owner props fact-part)
 
             :edit
-            ;(edit-fact-part owner props fact-part)
-            (let [{:keys [selected-type entered-value matching-entity]}
-                  state
-                  ]
-              [:div.edit-fact-part
-               [:span.fact-part-representation
-                (schema/display-entity matching-entity)]
+            (edit-fact-part owner props fact-part)
+            #_(let [{:keys [selected-type entered-value matching-entity]}
+                    state
+                    ]
+                [:div.edit-fact-part
+                 [:span.fact-part-representation
+                  (schema/display-entity matching-entity)]
 
-               [:div.fact-part-metadata-container
-                [:div.type-input
-                 [:label.type-input-label "type:"]
-                 [:span.type-input-value
-                  (om/build dropdown/dropdown props
-                            {:state
-                             {:toggle-label (name (or selected-type part-type))
-                              :menu-items (generate-menu-items
-                                           entered-value (partial handle-type-selection owner))
-                              }
-                             })]]
-                [:div.value-input
-                 [:label.value-input-label (str (text/entity-value-label props) ":")]
-                 [:span.value-input-value
-                  (om/build typeahead/typeahead props
-                            {:state
-                             {:element-type (browser/input-element-for-entity-type
-                                             (or selected-type part-type))
-                              :fact-part    fact-part}
+                 [:div.fact-part-metadata-container
+                  [:div.type-input
+                   [:label.type-input-label "type:"]
+                   [:span.type-input-value
+                    (om/build dropdown/dropdown props
+                              {:state
+                               {:toggle-label (name (or selected-type part-type))
+                                :menu-items (generate-menu-items
+                                             entered-value (partial handle-type-selection owner))
+                                }
+                               })]]
+                  [:div.value-input
+                   [:label.value-input-label (str (text/entity-value-label props) ":")]
+                   [:span.value-input-value
+                    (om/build typeahead/typeahead props
+                              {:state
+                               {:element-type (browser/input-element-for-entity-type
+                                               (or selected-type part-type))
+                                :fact-part    fact-part}
 
-                             :init-state
-                             {:input-value (schema/display-entity props)
-                              :on-click    (partial handle-result-selection owner)
-                              :on-submit   (partial handle-input-submission owner)
-                              }})]]
-                ]]))
+                               :init-state
+                               {:input-value (schema/display-entity props)
+                                :on-click    (partial handle-result-selection owner)
+                                :on-submit   (partial handle-input-submission owner)
+                                }})]]
+                  ]]))
           ])))
     ))
 
@@ -300,6 +316,9 @@
            ;; BEWARE: (get props :fact/attribute) returns a set which
            ;; is not compatible with Om cursors. Maps and vectors
            ;; only.)
+           ;; NOTE: is this still true? I changed the schema and am
+           ;; now using pull syntax for queries, attributes and values
+           ;; should not be in collections
            (om/build fact-part (get props :fact/attribute)
                      {:init-state {:fact (:db/id props)
                                    :fact-part :fact/attribute}
@@ -308,7 +327,12 @@
            (om/build fact-part (get props :fact/value)
                      {:init-state {:fact (:db/id props)
                                    :fact-part :fact/value}
-                      :state (select-keys state [:mode :fact-hovering])})]
+                      :state (select-keys state [:mode :fact-hovering])})
+           
+           (when (= :edit (get state :mode))
+             [:div.fact-edit-controls.row
+              
+              ])]
           ])))
     ))
 
@@ -388,11 +412,13 @@
   "
   [props owner opts]
   (reify
-    om/IRender
-    (render [_]
+    om/IRenderState
+    (render-state [_ {:keys [hovering] :as state}]
       (let []
         (html
          [:div.fact-container.container
+          {:on-mouse-enter #(om/set-state! owner :hovering true)
+           :on-mouse-leave #(om/set-state! owner :hovering false)}
           [:div.fact-body.row
 
            [:div.inline-10-percent.col-xs-1
@@ -403,7 +429,7 @@
               (handle-borders-group :view)
               (handle-contents-group
                :mode :view
-               :hovering true
+               :hovering hovering
                :cancel-handler  (constantly nil)
                :history-handler (constantly nil)
                :submit-handler  (constantly nil))]]

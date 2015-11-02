@@ -17,7 +17,9 @@
     (render [_]
       (html
        [:div.navbar-center
-        (icons/search {})
+        ;; NOTE: do I need the icon?
+        ;; (icons/search {})
+
         ;; FIXME: this breaks when screen width <= 544px
         ;; Consider a clever interface, maybe only the searchglass
         ;; icon, when clicked, cover entire header with typeahead
@@ -25,10 +27,10 @@
         [:span.search
          (om/build typeahead/typeahead props
                    {:init-state {:display-fn schema/display-entity
-                                 :href-fn #(browser/route-for owner :datum :id (:db/id %))
-                                 :on-click (constantly nil)
-                                 :tab-index 1}})]
-        ]     )))
+                                 :href-fn    #(browser/route-for owner :datum :id (:db/id %))
+                                 :on-click   (constantly nil)
+                                 :tab-index  1}})]
+        ])))
   )
 
 (defn- team->menu-item [owner team]
@@ -47,16 +49,17 @@
       (html
        [:div.navbar-header
         (if (get-in props [:user :current-team])
-          (om/build dropdown/dropdown props
-                    {:init-state
-                     {:tab-index -1
-                      }
-                     :state
-                     {
-                      :toggle-label (get-in props [:user :current-team :team/id])
-                      :menu-items (mapv (partial team->menu-item owner)
-                                        (get-in props [:user :teams]))}
-                     })
+          [:div.navbar-brand
+           (om/build dropdown/dropdown props
+                     {:init-state
+                      {:tab-index -1
+                       }
+                      :state
+                      {
+                       :toggle-label (get-in props [:user :current-team :team/id])
+                       :menu-items (mapv (partial team->menu-item owner)
+                                         (get-in props [:user :teams]))}
+                      })]
           [:a.navbar-brand
            {:href (browser/route-for owner :home)
             :tab-index -1}
@@ -70,23 +73,39 @@
     (render [_]
       (html
        [:ul.nav.navbar-nav.navbar-right
-        #_(->> (icons/create {})
-               (icons/on-click (constantly nil) {:class "navbar-brand"}))
+        (->> (icons/goal {})
+             (icons/on-click (constantly nil) {:class "navbar-brand"}))
         (->> (icons/insights {})
              (icons/on-click (constantly nil) {:class "navbar-brand"}))
         (if (get-in props [:user :identity])
-          (om/build dropdown/dropdown props
-                    {:init-state
-                     {:toggle-label (get-in props [:user :current-team :team/id])
-                      :tab-index -1
-                      :menu-items [{:type  :link
-                                    :href  (browser/route-for owner :settings)
-                                    :label "Settings"}
-                                   {:type  :divider}
-                                   {:type  :link
-                                    :href  (browser/route-for owner :logout)
-                                    :label "Logout"}]
-                      }})
+          [:div.navbar-brand
+           (om/build dropdown/dropdown props
+                     {:init-state
+                      {:toggle-label (get-in props [:user :identity])
+                       :toggle-icon  icons/etcetera
+                       :tab-index -1
+                       :menu-items [{:type  :link
+                                     :href  (browser/route-for owner :settings)
+                                     :label "Settings"}
+
+                                    {:type  :divider}
+
+                                    {:type :link
+                                     :href ""
+                                     :label "Feedback"}
+                                    {:type :link
+                                     :href ""
+                                     :label "About"}
+                                    {:type :link
+                                     :href ""
+                                     :label "Help"}
+
+                                    {:type  :divider}
+
+                                    {:type  :link
+                                     :href  (browser/route-for owner :logout)
+                                     :label "Logout"}]
+                       }})]
           (->> (icons/log-in {})
                (icons/link-to owner :enter {:class "navbar-brand", :tab-index -1})))
         ]))

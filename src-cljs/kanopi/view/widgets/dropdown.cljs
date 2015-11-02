@@ -83,14 +83,16 @@
             :on-mouse-enter #(start-hover! owner)
             :on-mouse-leave #(stop-hover! owner)}
            (cond
-            (om/get-state owner :icon)
-            [:span "TODO: render icon"]
+            (get state :toggle-icon)
+            [:span ((get state :toggle-icon))]
 
-            (om/get-state owner :toggle-label)
+            (get state :toggle-label)
             [:span (str (om/get-state owner :toggle-label) " ") [:span.caret]]
             
             ) 
            ]
+          ;; FIXME: do something different when there's only 1 menu
+          ;; item. no reason to let user expand menu.
           (into
            [:ul.dropdown-menu
             {:style          {:display (when expanded "inherit")}
@@ -98,3 +100,4 @@
              :on-mouse-leave #(close-dropdown! owner)}]
            (map (partial dropdown-menu-item owner) (get state :menu-items)))
           ])))))
+

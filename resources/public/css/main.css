@@ -146,7 +146,14 @@ a.navbar-brand:focus {
 .prompt {
     margin-bottom: 20px;
     text-align: center;
-    font-size: 18px;
+    font-size: 14px;
+    cursor: pointer;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: none;
+    -ms-user-select: none;
+    user-select: none;
 }
 /* Thunks */
 .datum-container {
@@ -228,8 +235,11 @@ a.navbar-brand:focus {
     */
 }
 .fact-part-metadata-container {
-    padding-top: 0.25rem;
-    padding-left: 2rem;
+    font-size: 0.75rem;
+    line-height: 2rem;
+    text-transform: uppercase;
+    margin: 0 0.5rem;
+    padding: 1px;
 }
 .type-input-label, .value-input-label {
     display: inline-block;

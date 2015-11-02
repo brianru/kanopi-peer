@@ -11,6 +11,7 @@
    (routes
 
     ;; authentication
+    (GET  "/enter" [] spa-resource)
     (GET  "/register" [] spa-resource)
     (POST "/register" [] auth/registration-resource)
 

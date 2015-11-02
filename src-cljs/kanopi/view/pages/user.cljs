@@ -82,6 +82,10 @@
             logout-fn   #(logout! owner)
             register-fn #(register! owner (select-keys state [:username :password]))
             default-submit-fn (case mode
+                                ;; TODO: something more than
+                                ;; (constantly nil). user must resolve
+                                ;; ambiguity.)
+                                :enter    (constantly nil)
                                 :register register-fn
                                 :login    login-fn
                                 :logout   logout-fn

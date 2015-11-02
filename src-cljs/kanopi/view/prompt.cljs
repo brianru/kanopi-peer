@@ -15,6 +15,11 @@
    (hash-map
     :message (-> error-messages last :verb name)
     :type :error)
+
+   :default
+   (hash-map
+    :message "Try making your goals explicit by setting a prompt."
+    :type :nudge)
    ))
 
 (defn render-prompt [p]
@@ -35,6 +40,6 @@
          [:div.prompt.container-fluid
           [:div.row
            [:div.col-md-offset-4.col-md-4
-            (render-prompt msg)] ]
+            (render-prompt msg)]]
           ]))
       )))
