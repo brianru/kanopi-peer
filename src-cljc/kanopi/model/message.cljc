@@ -17,6 +17,8 @@
                         :refer-macros (log trace debug info warn error fatal report)]
                        [ajax.core :as ajax]
                        [cljs.core.async :as async] 
+                       [kanopi.model.schema :as schema]
+                       [kanopi.util.core :as util]
                        ]
                 :clj  [[clojure.string]
                        [schema.core :as s]
@@ -29,49 +31,64 @@
 
 ;; Pure cross-compiled message generators
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+
+(defn message [& args]
+  (let [{:keys [noun verb context]
+         :or {noun {} context {}}}
+        (apply hash-map args)]
+    (hash-map
+     :message/id (util/random-uuid)
+     :noun noun
+     :verb verb
+     :context context)))
+
 (defn get-datum [datum-id]
   {:pre [(integer? datum-id)]}
-  (hash-map
-   :noun datum-id
-   :verb :datum/get
-   :context {}))
+  (message :noun datum-id :verb :datum/get))
 
 (defn update-fact [datum-id fact]
-  (hash-map
-   :noun {:datum-id datum-id
-          :fact fact}
-   :verb :datum.fact/update
-   :context {}))
+  (message :noun {:datum-id datum-id
+                  :fact fact}
+           :verb :datum.fact/update))
 
 (defn update-datum-label [ent new-label]
-  (hash-map
-   :noun {:existing-entity ent
-          :new-label new-label}
-   :verb :datum.label/update
-   :context {}))
+  (message :noun {:existing-entity ent, :new-label new-label}
+           :verb :datum.label/update))
 
 (defn initialize-client-state [user]
-  (hash-map
-   :noun user
-   :verb :spa.state/initialize
-   :context {}))
+  (message :noun user, :verb :spa.state/initialize))
+
+(defn create-datum
+  ([]
+   (message :verb :datum/create)))
+
+(defn create-goal
+  ([]
+   (message :verb :goal.modal/open))
+  ([txt]
+   (message :noun {:goal txt}
+            :verb :goal/create)))
+
+(defn record-insight
+  ([]
+   (message :verb :insight.modal/open))
+  ([txt]
+   (message :noun {:insight txt}
+            :verb :insight/record)))
 
 (defn search
   ([q]
    (search q nil))
   ([q tp]
-   (hash-map
-    :noun {:query-string q
-           :entity-type  tp}
-    :verb :spa.navigate/search
-    :context {})))
+   (message :noun {:query-string q, :entity-type tp}
+            :verb :spa.navigate/search)))
 
 
 ;; Server-only utilities for parsing messages out of ring request maps
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #?(:clj
    (defn- request->noun [ctx noun]
-     {:post [(or (integer? %) (instance? java.lang.Long %) (map? %))]}
+     {:post [(or (integer? %) (keyword? %) (instance? java.lang.Long %) (map? %))]}
      noun))
 
 #?(:clj
@@ -139,110 +156,75 @@
     (defn register-intent!
       "Ex: (->> (msg/update-label) (msg/register-intent! owner))"
       [owner msg]
-      (send! owner (hash-map :noun (get msg :verb)
-                             :verb :intent/register
-                             :context (get msg :context))))
+      (send! owner (message :noun (get msg :verb)
+                            :verb :intent/register
+                            :context (get msg :context))))
     ))
 
 #?(:cljs
    (defn switch-team [team-id]
-     (hash-map
-      :noun team-id
-      :verb :switch-team
-      :context {})))
+     (message :noun team-id :verb :switch-team)))
 
 #?(:cljs
    (defn toggle-fact-mode [ent]
-     (hash-map
-      :noun [:fact (:db/id ent)]
-      :verb :toggle-mode
-      :context {}))
+     (message :noun [:fact (:db/id ent)]
+              :verb :toggle-mode))
    )
 #?(:cljs
    (defn select-fact-part-type [fact-id fact-part tp]
-     (hash-map
-      :noun [:fact fact-id]
-      :verb :select-fact-part-type
-      :context {:fact-part fact-part
-                :value tp}))
+     (message :noun [:fact fact-id]
+              :verb :select-fact-part-type
+              :context {:fact-part fact-part
+                        :value tp}))
    )
 #?(:cljs
    (defn input-fact-part-value [fact-id fact-part input-value]
-     (hash-map
-      :noun [:fact fact-id]
-      :verb :input-fact-part-value
-      :context {:fact-part fact-part
-                :value input-value}))
+     (message :noun [:fact fact-id]
+              :verb :input-fact-part-value
+              :context {:fact-part fact-part
+                        :value input-value}))
    )
 #?(:cljs
    (defn select-fact-part-reference [fact-id fact-part selection]
-     (hash-map
-      :noun [:fact fact-id]
-      :verb :select-fact-part-reference
-      :context {:fact-part fact-part
-                :selection selection}))
+     (message :noun [:fact fact-id]
+              :verb :select-fact-part-reference
+              :context {:fact-part fact-part
+                        :selection selection}))
    )
 #?(:cljs
    (defn register [creds]
-     (hash-map 
-      :noun creds
-      :verb :spa/register
-      :context {})))
+     (message :noun creds :verb :spa/register)))
 #?(:cljs
    (defn register-success [creds]
-     (hash-map
-      :noun creds
-      :verb :spa.register/success
-      :context {}))
+     (message :noun creds :verb :spa.register/success))
    )
 #?(:cljs
    (defn register-failure [err]
-     (hash-map
-      :noun err
-      :verb :spa.register/failure
-      :context {}))
+     (message :noun err :verb :spa.register/failure))
    )
 #?(:cljs
    (defn login [creds]
-     (hash-map
-      :noun creds
-      :verb :spa/login
-      :context {}))
+     (message :noun creds :verb :spa/login))
    )
 #?(:cljs
    (defn login-success [creds]
-     (hash-map
-      :noun creds
-      :verb :spa.login/success
-      :context {}))
+     (message :noun creds :verb :spa.login/success))
    )
 #?(:cljs
    (defn login-failure [err]
-     (hash-map
-      :noun err
-      :verb :spa.login/failure
-      :context {}))
+     (message :noun err :verb :spa.login/failure))
    )
 #?(:cljs
    (defn logout []
-     (hash-map
-      :noun nil
-      :verb :spa/logout
-      :context {}))
+     (message :verb :spa/logout))
    )
 #?(:cljs
    (defn logout-success [foo]
-     (hash-map
-      :noun foo
-      :verb :spa.logout/success
-      :context {}))
+     (message :noun foo :verb :spa.logout/success))
    )
 #?(:cljs
    (defn logout-failure [err]
-     (hash-map
-      :noun err
-      :verb :spa.logout/failure
-      :context {}))
+     (message :noun err :verb :spa.logout/failure))
    )
 
 #?(:cljs
@@ -251,10 +233,7 @@
      It's not as willy-nilly as local messages, though that must change
      as well."
      [msg]
-     (-> msg
-         (get :noun)
-         ((juxt :uri :method :response-method :error-method))
-         (->> (every? identity))))
+     (s/validate schema/RemoteMessage (get msg :noun)))
    )
 
 #?(:cljs
@@ -265,6 +244,19 @@
         (get msg :verb))
       :default :default)
 
+    (defn standard-api-post [msg]
+      {:post [(valid-remote-message? %)]}
+      (hash-map
+       :noun {:uri             (history/get-route-for history :api)
+              :params          msg
+              :method          :post
+              :format          :transit
+              :response-format :transit
+              :response-method :aether
+              :error-method    :aether}
+       :verb :request
+       :context {}))
+
     (defmethod local->remote :spa/register
       [history app-state msg]
       {:post [(valid-remote-message? %)]}
@@ -274,6 +266,9 @@
               :method          :post
               :response-format :transit
               :response-method :aether
+              ;; NOTE: here xforms are specified because the server
+              ;; does not respond with a message, but we want to use
+              ;; aether so we must transform it to a message
               :response-xform  register-success
               :error-method    :aether
               :error-xform     register-failure
@@ -319,7 +314,6 @@
 
     (defmethod local->remote :default
       [history app-state msg]
-      {:post [(valid-remote-message? %)]}
       (hash-map 
        :noun {:uri  (history/get-route-for history :api)
               :body msg
@@ -333,74 +327,26 @@
 
     (defmethod local->remote :spa.state/initialize
       [history app-state msg]
-      {:post [(valid-remote-message? %)]}
-      (hash-map
-       :noun {:uri             (history/get-route-for history :api)
-              :params          msg
-              :format          :transit
-              :method          :post
-              :response-format :transit
-              :response-method :aether
-              :error-method    :aether}
-       :verb :request
-       :context {}))
+      (standard-api-post msg))
 
     (defmethod local->remote :search
       [history app-state msg]
-      {:post [(valid-remote-message? %)]}
-      (hash-map
-       :noun {:uri             (history/get-route-for history :api)
-              :params          msg
-              :format          :transit
-              :method          :post
-              :response-format :transit
-              :response-method :aether
-              :error-method    :aether}
-       :verb :request
-       :context {}))
+      (standard-api-post msg))
 
-(defmethod local->remote :get-datum
+(defmethod local->remote :datum/create
   [history app-state msg]
-  {:post [(valid-remote-message? %)]}
-  (hash-map
-   :noun {:uri             (history/get-route-for history :api)
-          :params          msg
-          :format          :transit
-          :method          :post
-          :response-format :transit
-          :response-method :aether
-          :error-method    :aether
-          }
-   :verb :request
-   :context {}))
+  (standard-api-post msg))
+
+(defmethod local->remote :datum/get
+  [history app-state msg]
+  (standard-api-post msg))
 
 (defmethod local->remote :datum.label/update
   [history app-state msg]
-  {:post [(valid-remote-message? %)]}
-  (hash-map
-   :noun {:uri             (history/get-route-for history :api)
-          :params          msg
-          :format          :transit
-          :method          :post
-          :response-format :transit
-          :response-method :aether
-          :error-method    :aether
-          }
-   :verb :request
-   :context {}))
+  (standard-api-post msg))
 
 (defmethod local->remote :datum.fact/update
   [history app-state msg]
-  {:post [(valid-remote-message? %)]}
-  (hash-map
-   :noun {:uri             (history/get-route-for history :api)
-          :params          msg
-          :method          :post
-          :format          :transit
-          :response-format :transit
-          :response-method :aether
-          :error-method    :aether}
-   :verb :request
-   :context {}))
+  (standard-api-post msg))
 
 ))

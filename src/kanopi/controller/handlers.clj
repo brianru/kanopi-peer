@@ -73,6 +73,19 @@
                 :spa.navigate.search/failure)
      :context {})))
 
+(defmethod request-handler :datum/create
+  [request-context message]
+  (let [data-svc (util/get-data-service request-context)
+        creds    (get-in message [:context :creds])
+        dtm-id   (data/init-datum data-svc creds)
+        data     (data/user-datum data-svc creds dtm-id)]
+    (hash-map
+     :noun data
+     :verb (if (get-in data [:datum :db/id])
+             :datum.create/success
+             :datum.create/failure)
+     :context {})))
+
 (defmethod request-handler :datum/get
   [request-context message]
   (let [data-svc (util/get-data-service request-context)

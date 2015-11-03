@@ -34,6 +34,7 @@
  {:db/ident :team/id
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
+  :db/isComponent true
   :db/unique :db.unique/identity
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}

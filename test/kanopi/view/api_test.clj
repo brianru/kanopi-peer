@@ -19,6 +19,18 @@
             [kanopi.test-util :as test-util]
             ))
 
+(deftest create-datum
+  (let [system  (component/start (test-util/system-excl-web-server))
+        creds   {:username "mickey", :password "mouse10101"}
+        _       (test-util/mock-register system creds)
+
+        {:keys [body] :as resp}
+        (test-util/mock-request! system :post "/api" (msg/create-datum) :creds creds)  
+        ]
+    (is (= 200 (:status resp)))
+    (is (= :datum.create/success (get body :verb)))
+    (is (get-in body [:noun :datum :db/id]))))
+
 (deftest get-datum
   (let [system   (component/start (test-util/system-excl-web-server))
         creds    {:username "mickey", :password "mouse132"}

@@ -30,9 +30,8 @@
         (is (not-empty user))))
 
     (testing "user team created"
-      (let [team (d/entity (d/db (get-in sys [:datomic-peer :connection]))
-                           (-> creds :teams first :db/id))]
-        (is (not-empty team))))
+      (let [team (-> creds :current-team)]
+        (is (s/validate schema/UserTeam team))))
 
     (testing "password crypto works"
       (is (not= password (get creds :password)))

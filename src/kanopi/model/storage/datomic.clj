@@ -34,6 +34,7 @@
     [(readable ?team ?e)
      (readable ?team ?ent)
      [?ent _ _ ?e]]
+
     ;; Attributes
 ;;    [(readable ?team ?e)
 ;;     (readable ?team ?ent)
@@ -45,12 +46,14 @@
   ([base-db creds]
    (authorized-entities auth-rules base-db creds))
   ([rules base-db creds]
-   (let [team-id (get-in creds [:current-team :db/id])
+   (let [user-id (get-in creds [:ent-id])
+         team-id (get-in creds [:current-team :db/id])
          ents   (d/q '[:find [?e ...]
                        :in $ % ?team
                        :where (readable ?team ?e)]
                      base-db rules team-id)]
-     (set ents))))
+     ;; NOTE: including team-id is important.
+     (set (conj ents user-id team-id)))))
 
 (defn filtered-db*
   ([base-db creds]

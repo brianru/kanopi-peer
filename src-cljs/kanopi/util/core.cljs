@@ -1,4 +1,8 @@
-(ns kanopi.util.core)
+(ns kanopi.util.core
+  (:require [cljs-uuid-utils.core :as uuid]))
+
+(defn random-uuid []
+  (uuid/make-random-uuid))
 
 (defn- next-row
   [previous current other-seq]

@@ -12,6 +12,10 @@
             [om.core :as om]
             ))
 
+;; TODO: rename mode names to
+;; :spa.mode/offline
+;; :spa.mode/online
+;; :spa.mode/authenticated
 (def mode-verbs
   {:demo
    {:local  #{
@@ -22,9 +26,18 @@
               :spa.logout/success   :spa.logout/failure
               :spa.register/success :spa.register/failure
 
+              :spa.offline.transaction/record
+
+              :datum/create
               :datum/get
               :datum.fact/update
               :datum.label/update
+
+              ;; :goal.modal/open
+              ;; :goal/create
+
+              ;; :insight.modal/open
+              ;; :insight/record
 
               ;; NOTE: initialize-client-state* is not here
               }
@@ -43,6 +56,8 @@
               :spa/switch-team
 
               :spa.navigate.search/success     :spa.navigate.search/failure
+
+              :datum.create/success            :datum.create/failure
               :datum.get/success               :datum.get/failure
               :datum.fact.update/success       :datum.fact.update/failure
               :datum.label.update/success      :datum.label.update/failure
@@ -51,8 +66,9 @@
     :remote #{
               :spa/login :spa/logout :spa/register
 
-
               :spa.navigate/search
+
+              :datum/create
               :datum/get
               :datum.fact/update
               :datum.label/update

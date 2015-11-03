@@ -81,7 +81,7 @@
   datum -> facts -> attributes (literals or datums)
   -> values     (literals or datums)"
   [props datum-id]
-  {:pre [(integer? datum-id)]}
+  {:pre [(or (integer? datum-id) (string? datum-id))]}
   (let [context (context-datums (-> props :cache vals) datum-id)
         similar (similar-datums (-> props :cache vals) datum-id)
         datum (lookup-id props datum-id)]
@@ -259,6 +259,32 @@
   ;; accessible from the new creds
   (->> (msg/initialize-client-state (get @app-state :user))
        (aether/send! aether)))
+
+(defmethod local-event-handler :datum/create
+  [aether history app-state msg]
+  (let [dtm {:datum/label (get-in msg [:noun :label])
+             :datum/team  (get-in app-state [:user :current-team :db/id])
+             :db/id       (util/random-uuid)}]
+    (om/transact! app-state
+                  (fn [app-state]
+                    (let [st'   (assoc-in app-state [:cache (get dtm :db/id)] dtm)
+                          datum (build-datum-data st' (get dtm :db/id))]
+                      (assoc st' :datum datum)))))
+  ;; TODO: forward message to be preserved when user connects
+  )
+
+(defmethod local-event-handler :datum.create/success
+  [aether history app-state msg]
+  (let [dtm (get-in msg [:noun :datum])]
+    (om/transact! app-state
+                  (fn [app-state]
+                   (-> app-state
+                              (assoc :datum (get msg :noun))
+                              (assoc-in [:cache (get dtm :dbn/id)] dtm))))))
+
+(defmethod local-event-handler :datum.create/success
+  [aether history app-state msg]
+  (om/transact! app-state :error-messages #(conj % msg)))
 
 ;; TODO: when handled locally, shouldn't I follow the same code path
 ;; as performing action remotely? eg. send success/failure msgs?

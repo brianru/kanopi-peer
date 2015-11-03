@@ -255,7 +255,8 @@
             (view-fact-part owner props fact-part)
 
             :edit
-            (edit-fact-part owner props fact-part)
+            (view-fact-part owner props fact-part)
+            #_(edit-fact-part owner props fact-part)
             #_(let [{:keys [selected-type entered-value matching-entity]}
                     state
                     ]

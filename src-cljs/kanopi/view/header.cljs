@@ -30,8 +30,7 @@
                                  :href-fn    #(browser/route-for owner :datum :id (:db/id %))
                                  :on-click   (constantly nil)
                                  :tab-index  1}})]
-        ])))
-  )
+        ]))))
 
 (defn- team->menu-item [owner team]
   (hash-map :type     :link
@@ -73,32 +72,40 @@
     (render [_]
       (html
        [:ul.nav.navbar-nav.navbar-right
+        (->> (icons/create {})
+             (icons/on-click #(->> (msg/create-datum)
+                                   (msg/send! owner))
+                             {:class ["navbar-brand"]}))
         (->> (icons/goal {})
-             (icons/on-click (constantly nil) {:class ["navbar-brand"]}))
+             (icons/on-click #(->> (msg/create-goal)
+                                   (msg/send! owner))
+                             {:class ["navbar-brand"]}))
         (->> (icons/insights {})
-             (icons/on-click (constantly nil) {:class ["navbar-brand"]}))
+             (icons/on-click #(->> (msg/record-insight)
+                                   (msg/send! owner))
+                             {:class ["navbar-brand"]}))
         (if (get-in props [:user :identity])
           [:div.navbar-brand
            (om/build dropdown/dropdown props
                      {:init-state
                       {:toggle-label (get-in props [:user :identity])
-                       :toggle-icon  icons/user
+                       :toggle-icon-fn icons/user
                        :caret? true
-                       :tab-index    -1
+                       :tab-index -1
                        :menu-items [{:type  :link
                                      :href  (browser/route-for owner :settings)
                                      :label "Settings"}
 
                                     {:type  :divider}
 
-                                    {:type :link
-                                     :href ""
+                                    {:type  :link
+                                     :href  ""
                                      :label "Feedback"}
-                                    {:type :link
-                                     :href ""
+                                    {:type  :link
+                                     :href  ""
                                      :label "About"}
-                                    {:type :link
-                                     :href ""
+                                    {:type  :link
+                                     :href  ""
                                      :label "Help"}
 
                                     {:type  :divider}
@@ -137,7 +144,6 @@
           [:div.container-fluid
            (om/build left-team-dropdown props)
            (om/build center-search-field props)
-           (om/build right-controls props)]
-          )
+           (om/build right-controls props)])
         ]))))
 

@@ -137,6 +137,26 @@
 (s/defschema Literal
   (s/conditional
    #(find % :literal/text)    TextLiteral
-   #(find % :literal/integer) IntegerLiteral)
-   )
+   #(find % :literal/integer) IntegerLiteral))
+
+(s/defschema Noun s/Any)
+
+(s/defschema Verb s/Keyword)
+
+(s/defschema Context s/Any)
+
+;; Sent as another message's noun.
+(s/defschema RemoteMessage
+  {:uri    s/Str
+   :method s/Keyword
+   :response-method (s/=> s/Any s/Any)
+   :error-method    (s/=> s/Any s/Any)
+   })
+
+(s/defschema Message
+  {:noun       Noun
+   :verb       Verb
+   :context    Context
+   :message/id s/Str
+   })
 

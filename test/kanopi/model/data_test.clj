@@ -13,7 +13,7 @@
             [kanopi.model.data.impl :as impl]
             [kanopi.model.storage.datomic :as datomic]
             [kanopi.controller.authenticator :as auth]
-            [kanopi.test-util :as test-util]
+            [kanopi.test-util :as test-util :refer (get-db)]
             [com.stuartsierra.component :as component]))
 
 (deftest init-datum
@@ -151,16 +151,13 @@
          ]
        db))
 
-(defn- get-db [sys]
-  (d/db (get-in sys [:datomic-peer :connection])))
-
 (deftest context-datums
   (let [{data-svc :data-service :as system}
         (component/start (test-util/system-excl-web))
 
         creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
                    (auth/credentials (:authenticator system) "brian"))
-        db     (get-db system)
+        db     (get-db system creds)
         datum-id (d/q '[:find ?s . :where [?s :datum/label "David Foster Wallace"]] db)
         results (data/context-datums data-svc creds datum-id)
         ]
@@ -182,10 +179,12 @@
         (component/start (test-util/system-excl-web))
         creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
                    (auth/credentials (:authenticator system) "brian"))
-        db     (get-db system)
+        db     (get-db system creds)
         datum-ids (datums-with-titles db)
         results (data/similar-datums data-svc creds (first datum-ids))
         ]
+    (println datum-ids)
+    (clojure.pprint/pprint (map (partial data/get-datum data-svc creds) datum-ids))
     (is (not-empty results))
     (testing "all books with titles are similar to each other"
       (let []

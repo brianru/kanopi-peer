@@ -38,7 +38,7 @@
                  [devcards "0.2.0-8"]
 
                  ;; Database
-                 [com.datomic/datomic-pro "0.9.5302"
+                 [com.datomic/datomic-pro "0.9.5327"
                   :exclusions [joda-time]]
 
                  ;; Web

@@ -3,6 +3,7 @@
             [clojure.data.codec.base64 :as base64]
             [kanopi.main :refer (default-config)]
             [kanopi.controller.system :refer (new-system)]
+            [kanopi.model.storage.datomic :as datomic]
             [datomic.api :as d]
             [kanopi.util.core :as util]
             [ring.mock.request :as mock]))
@@ -26,8 +27,11 @@
 (defn assoc-basic-auth [m creds]
   (assoc-in m [:headers "authorization"] (mk-basic-auth-header creds)))
 
-(defn get-db [system]
-  (d/db (get-in system [:datomic-peer :connection])))
+(defn get-db
+  ([system]
+   (get-db system nil))
+  ([system creds]
+   (datomic/db (get-in system [:datomic-peer]) creds)))
 
 
 (defn mock-request! [system method route params & opts]
@@ -49,3 +53,4 @@
 (defn mock-register [system creds]
   (mock-request! system :post "/register" creds
                  :accept "application/transit+json"))
+

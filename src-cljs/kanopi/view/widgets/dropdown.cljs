@@ -81,10 +81,10 @@
             :aria-haspopup  "true"
             :aria-expanded  expanded
             :on-mouse-enter #(start-hover! owner)
-            :on-mouse-leave #(stop-hover! owner)}
+            :on-mouse-leave #(stop-hover!  owner)}
            (cond
-            (get state :toggle-icon)
-            [:span ((get state :toggle-icon))
+            (get state :toggle-icon-fn)
+            [:span ((get state :toggle-icon-fn))
              (when (get state :caret?)
                [:span.caret])]
 
@@ -92,9 +92,7 @@
             [:span (str (om/get-state owner :toggle-label) " ")
              (when (get state :caret?)
                [:span.caret])]
-
-            ) 
-           ]
+            )]
           ;; FIXME: do something different when there's only 1 menu
           ;; item. no reason to let user expand menu.
           (into
