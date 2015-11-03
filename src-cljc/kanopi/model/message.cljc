@@ -248,7 +248,7 @@
         (get msg :verb))
       :default :default)
 
-    (defn standard-api-post [msg]
+    (defn standard-api-post [history msg]
       {:post [(valid-remote-message? %)]}
       (hash-map
        :noun {:uri             (history/get-route-for history :api)
@@ -331,26 +331,26 @@
 
     (defmethod local->remote :spa.state/initialize
       [history app-state msg]
-      (standard-api-post msg))
+      (standard-api-post history msg))
 
     (defmethod local->remote :search
       [history app-state msg]
-      (standard-api-post msg))
+      (standard-api-post history msg))
 
 (defmethod local->remote :datum/create
   [history app-state msg]
-  (standard-api-post msg))
+  (standard-api-post history msg))
 
 (defmethod local->remote :datum/get
   [history app-state msg]
-  (standard-api-post msg))
+  (standard-api-post history msg))
 
 (defmethod local->remote :datum.label/update
   [history app-state msg]
-  (standard-api-post msg))
+  (standard-api-post history msg))
 
 (defmethod local->remote :datum.fact/update
   [history app-state msg]
-  (standard-api-post msg))
+  (standard-api-post history msg))
 
 ))

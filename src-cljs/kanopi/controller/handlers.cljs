@@ -264,12 +264,14 @@
   [aether history app-state msg]
   (let [dtm {:datum/label (get-in msg [:noun :label])
              :datum/team  (get-in app-state [:user :current-team :db/id])
-             :db/id       (util/random-uuid)}]
+             :db/id       (str (util/random-uuid))}]
     (om/transact! app-state
                   (fn [app-state]
                     (let [st'   (assoc-in app-state [:cache (get dtm :db/id)] dtm)
                           datum (build-datum-data st' (get dtm :db/id))]
-                      (assoc st' :datum datum)))))
+                      (assoc st' :datum datum))))
+    (history/navigate-to! history [:datum :id (get dtm :db/id)])
+    )
   ;; TODO: forward message to be preserved when user connects
   )
 
@@ -280,9 +282,11 @@
                   (fn [app-state]
                    (-> app-state
                               (assoc :datum (get msg :noun))
-                              (assoc-in [:cache (get dtm :dbn/id)] dtm))))))
+                              (assoc-in [:cache (get dtm :db/id)] dtm))))
+    (println "DTM" (get-in @app-state [:cache (get dtm :db/id)]))
+    (history/navigate-to! history [:datum :id (get dtm :db/id)])))
 
-(defmethod local-event-handler :datum.create/success
+(defmethod local-event-handler :datum.create/failure
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
 

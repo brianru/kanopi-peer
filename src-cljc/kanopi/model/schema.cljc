@@ -48,7 +48,9 @@
      :datum
      (get m :datum/label default-value)
      :literal
-     (-> (apply dissoc m literal-meta-keys) (vals) (first) (or default-value)))))
+     (-> (apply dissoc m literal-meta-keys) (vals) (first) (or default-value))
+     :unknown
+     default-value)))
 
 (defn display-entity [m]
   (get-value m "help, I'm trapped!"))
@@ -154,10 +156,15 @@
 
 ;; Sent as another message's noun.
 (s/defschema RemoteMessage
-  {:uri    s/Str
-   :method s/Keyword
-   :response-method (s/=> s/Any s/Any)
-   :error-method    (s/=> s/Any s/Any)
+  {                             :uri  s/Str
+                             :method  s/Keyword
+            (s/optional-key :params)  s/Any
+            (s/optional-key :format)  s/Keyword
+   (s/optional-key :response-format)  s/Keyword
+                    :response-method  s/Keyword
+    (s/optional-key :response-xform)  (s/=> s/Any s/Any)
+                       :error-method  s/Keyword
+       (s/optional-key :error-xform)  (s/=> s/Any s/Any)
    })
 
 (s/defschema Message
