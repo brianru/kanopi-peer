@@ -41,7 +41,7 @@
     (apply f vs)))
 
 (defn random-uuid []
-  (java.util.UUID/randomUUID))
+  (str (java.util.UUID/randomUUID)))
 
 ;; ### HTTP context map helper fns
 
@@ -82,3 +82,9 @@
       (let [in (ByteArrayInputStream. (.getBytes string))
             reader (transit/reader in :json)]
         (transit/read reader))))))
+
+(defn try-read-string [string]
+  (try
+   (read-string string)
+   (catch Exception e
+     string)))

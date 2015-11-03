@@ -60,7 +60,7 @@
            {:style       {:display (when-not editing "none")}
             :ref         "text-field"
             :type        "text"
-            :value       (or (get state :new-value) current-value default-value)
+            :value       (or (get state :new-value) current-value)
             :placeholder (get state :placeholder)
             :on-change   #(handle-change % owner :new-value)
             :on-key-down #(when (= (.-key %) "Enter")

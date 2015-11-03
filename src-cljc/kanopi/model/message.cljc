@@ -37,13 +37,12 @@
          :or {noun {} context {}}}
         (apply hash-map args)]
     (hash-map
-     :message/id (util/random-uuid)
+     :tx/id (util/random-uuid)
      :noun noun
      :verb verb
      :context context)))
 
 (defn get-datum [datum-id]
-  {:pre [(integer? datum-id)]}
   (message :noun datum-id :verb :datum/get))
 
 (defn update-fact [datum-id fact]
@@ -123,7 +122,7 @@
                                         (string? v)
                                         (if (clojure.string/blank? v)
                                           (assoc acc k {})
-                                          (assoc acc k (read-string v))) 
+                                          (assoc acc k (util/try-read-string v))) 
 
                                         :default
                                         (assoc acc k v)))

@@ -145,11 +145,14 @@ a.navbar-brand:focus {
 .dropdown-menu-item {
     cursor: pointer;
 }
-.navbar-brand .glyphicon {
+.navbar-brand {
     cursor: pointer;
 }
 .navbar-brand:hover .glyphicon {
     color: black;
+}
+.navbar-brand.dropdown > a {
+    display: inline;
 }
 .navbar-brand * {
     -webkit-touch-callout: none;

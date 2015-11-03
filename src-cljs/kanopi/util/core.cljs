@@ -1,8 +1,9 @@
 (ns kanopi.util.core
-  (:require [cljs-uuid-utils.core :as uuid]))
+  (:require [cljs-uuid-utils.core :as uuid]
+            cljs.reader))
 
 (defn random-uuid []
-  (uuid/make-random-uuid))
+  (str (uuid/make-random-uuid)))
 
 (defn- next-row
   [previous current other-seq]
@@ -49,3 +50,9 @@
   (if (every? map? vs)
     (apply merge-with (partial deep-merge-with f) vs)
     (apply f vs)))
+
+(defn try-read-string [string]
+  (try
+   (cljs.reader/read-string string)
+   (catch js/Object e
+     string)))

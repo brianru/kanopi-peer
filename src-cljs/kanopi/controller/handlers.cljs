@@ -87,10 +87,11 @@
         datum (lookup-id props datum-id)]
     (hash-map
      :context-datums [(lookup-id props -1008)]
-     :datum (update datum :datum/fact #(vec (conj % placeholder-fact)))
+     :datum datum
      :similar-datums [(lookup-id props -1016)])))
 
 (defn- ensure-current-datum-is-updated [props edited-ent-id]
+  (println "HERE" edited-ent-id (type edited-ent-id))
   (if (= edited-ent-id (current-datum props))
     (let [datum' (build-datum-data props edited-ent-id)]
       (assoc props :datum datum'))
@@ -264,14 +265,13 @@
   [aether history app-state msg]
   (let [dtm {:datum/label (get-in msg [:noun :label])
              :datum/team  (get-in app-state [:user :current-team :db/id])
-             :db/id       (str (util/random-uuid))}]
+             :db/id       (util/random-uuid)}]
     (om/transact! app-state
                   (fn [app-state]
                     (let [st'   (assoc-in app-state [:cache (get dtm :db/id)] dtm)
                           datum (build-datum-data st' (get dtm :db/id))]
                       (assoc st' :datum datum))))
-    (history/navigate-to! history [:datum :id (get dtm :db/id)])
-    )
+    (history/navigate-to! history [:datum :id (get dtm :db/id)]))
   ;; TODO: forward message to be preserved when user connects
   )
 
@@ -283,7 +283,6 @@
                    (-> app-state
                               (assoc :datum (get msg :noun))
                               (assoc-in [:cache (get dtm :db/id)] dtm))))
-    (println "DTM" (get-in @app-state [:cache (get dtm :db/id)]))
     (history/navigate-to! history [:datum :id (get dtm :db/id)])))
 
 (defmethod local-event-handler :datum.create/failure
@@ -329,7 +328,7 @@
 
                       )))
     (when (= :datum handler)
-      (let [datum-id (cljs.reader/read-string (get-in msg [:noun :route-params :id]))]
+      (let [datum-id (util/try-read-string (get-in msg [:noun :route-params :id]))]
         (->> (msg/get-datum datum-id)
              (aether/send! aether))))))
 

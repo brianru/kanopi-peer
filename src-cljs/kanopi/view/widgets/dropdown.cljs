@@ -73,6 +73,7 @@
       (let []
         (html
          [:li.dropdown
+          {:class (concat [] (get state :classes))}
           [:a.dropdown-toggle
            {:on-click       #(toggle-dropdown! owner)
             :data-toggle    "dropdown"

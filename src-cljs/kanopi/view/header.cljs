@@ -85,11 +85,11 @@
                                    (msg/send! owner))
                              {:class ["navbar-brand"]}))
         (if (get-in props [:user :identity])
-          [:div.navbar-brand
-           (om/build dropdown/dropdown props
+         (om/build dropdown/dropdown props
                      {:init-state
                       {:toggle-label (get-in props [:user :identity])
                        :toggle-icon-fn icons/user
+                       :classes ["navbar-brand"]
                        :caret? true
                        :tab-index -1
                        :menu-items [{:type  :link
@@ -113,7 +113,7 @@
                                     {:type  :link
                                      :href  (browser/route-for owner :logout)
                                      :label "Logout"}]
-                       }})]
+                       }})
           (->> (icons/log-in {})
                (icons/link-to owner :enter {:class "navbar-brand", :tab-index -1})))
         ]))
