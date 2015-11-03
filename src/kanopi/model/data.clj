@@ -160,7 +160,8 @@
           txdata (conj (:txdata fact)
                        [:db/add ent-id :datum/fact (:ent-id fact)])
           report @(datomic/transact datomic-peer creds txdata)]
-      (get-datum* (:db-after report) ent-id)))
+      (when (not-empty (get report :tx-data))
+        true)))
 
   (update-fact [this creds {:keys [db/id fact/attribute fact/value] :as fact}]
     (update-fact this creds id (entity->input attribute) (entity->input value)))
@@ -168,7 +169,8 @@
   (update-fact [this creds fact-id attribute value]
     (let [fact-diff (update-fact->txdata datomic-peer creds fact-id attribute value)
           report    @(datomic/transact datomic-peer creds (:txdata fact-diff))]
-      (get-fact* (:db-after report) fact-id)))
+      (when (not-empty (get report :tx-data))
+        true)))
 
   (retract-datum [this creds ent-id]
     (let [{:keys [txdata]} (retract-entity->txdata datomic-peer creds ent-id)

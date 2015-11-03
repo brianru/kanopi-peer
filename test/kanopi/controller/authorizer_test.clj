@@ -22,8 +22,6 @@
         plain-db    (d/db (get-in sys [:datomic-peer :connection]))
         filtered-db (datomic/filtered-db* plain-db creds)
         ]
-    ;; TODO: test authorized entities are available in both plain and
-    ;; filtered db
     (testing "some data is available"
       (is (d/q '[:find ?e .
                  :in $

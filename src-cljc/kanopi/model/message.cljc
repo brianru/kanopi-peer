@@ -113,9 +113,13 @@
      ([ctx]
       (let [body        (util/transit-read (get-in ctx [:request :body]))
             params      (get-in ctx [:request :params])
+            ;; NOTE: keyword namespaces are stripped out by transit
             parsed-body (->> (merge body params)
                              (reduce (fn [acc [k v]]
                                        (cond
+                                        (contains? #{:message/id :id} k)
+                                        (assoc acc k v)
+
                                         (string? v)
                                         (if (clojure.string/blank? v)
                                           (assoc acc k {})

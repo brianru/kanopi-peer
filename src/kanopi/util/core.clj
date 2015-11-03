@@ -76,9 +76,10 @@
 
 (defn transit-read [stream]
   ;; NOTE: type hint avoids warning when calling .getBytes below
-  (let [^java.lang.String string (slurp stream)]
+  (when stream
+   (let [^java.lang.String string (slurp stream)]
     (if (or (nil? string) (clojure.string/blank? string))
       {}
       (let [in (ByteArrayInputStream. (.getBytes string))
             reader (transit/reader in :json)]
-        (transit/read reader)))))
+        (transit/read reader))))))

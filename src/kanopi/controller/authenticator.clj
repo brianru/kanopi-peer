@@ -71,8 +71,12 @@
                                  (slurp)
                                  (read-string)
                                  (->> (map (fn [ent]
-                                             (if (= :datum (schema/describe-entity ent))
+                                             (case (schema/describe-entity ent)
+                                               :datum
                                                (assoc ent :datum/team user-team-id)
+                                               :literal
+                                               (assoc ent :literal/team user-team-id)
+                                               ;; default
                                                ent)))))
           txdata (concat
                   [

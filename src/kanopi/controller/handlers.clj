@@ -59,7 +59,8 @@
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
         data     (hash-map :search-results
-                           (data/search-datums data-svc creds (get message :noun)))
+                           (data/search-datums data-svc creds
+                                               (get-in message [:noun :query-string])))
         ]
     (hash-map
      :noun    data
@@ -92,7 +93,7 @@
         creds    (get-in message [:context :creds])
         data     (data/user-datum data-svc creds (get message :noun))]
     (hash-map
-     :noun    data
+     :noun    (or data {})
      :verb    (if (not-empty (get-in data [:datum]))
                 :datum.get/success
                 :datum.get/failure)
@@ -119,14 +120,14 @@
         creds     (get-in message [:context :creds])
         datm-id   (get-in message [:noun :datum-id])
         fact      (get-in message [:noun :fact])
-        _ (println "UPDATE_FACT REQUEST_HANDLER" fact)
-        data      (if (:db/id fact)
+        result    (if (:db/id fact)
                     (data/update-fact data-svc creds fact)
                     (data/add-fact    data-svc creds datm-id fact)) 
+        data      (data/get-datum data-svc creds datm-id)
         ]
     (hash-map
      :noun data
-     :verb (if data
+     :verb (if result
              :datum.fact.update/success
              :datum.fact.update/failure)
      :context {})))

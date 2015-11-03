@@ -33,18 +33,19 @@
 
 (deftest get-datum
   (let [system   (component/start (test-util/system-excl-web-server))
-        creds    {:username "mickey", :password "mouse132"}
-        resp     (test-util/mock-register system creds)
+        input-creds    {:username "mickey", :password "mouse132"}
+        resp     (test-util/mock-register system input-creds)
+        creds    (get-in resp [:body])
         test-datum-ent-id (d/q '[:find ?eid .
                                  :in $
                                  :where [?eid :datum/label _]]
-                               (test-util/get-db system))
+                               (test-util/get-db system creds))
         ]
 
     (testing "get-datum-failure"
       (let [message (msg/get-datum -1000)
             {:keys [body] :as resp}
-            (test-util/mock-request! system :post "/api" message :creds creds)
+            (test-util/mock-request! system :post "/api" message :creds input-creds)
             ]
         (is (= 200 (:status resp)))
         (is (= :datum.get/failure (get body :verb)))
@@ -54,7 +55,7 @@
     (testing "get-datum-success"
       (let [message (msg/get-datum test-datum-ent-id)
             {:keys [body] :as resp}
-            (test-util/mock-request! system :post "/api" message :creds creds)
+            (test-util/mock-request! system :post "/api" message :creds input-creds)
             ]
         (is (= 200 (:status resp)))
         (is (= :datum.get/success (get body :verb)))
@@ -96,15 +97,15 @@
         data-svc (get system :data-service)
         handler  (get-in system [:web-app :app-handler])
         creds    {:username "mickey", :password "mouse132"}
-        resp     (test-util/mock-register system creds)
+        {full-creds :body} (test-util/mock-register system creds)
         test-ent-id (d/q '[:find ?eid .
                            :in $
                            :where [?eid :datum/label _]]
-                         (test-util/get-db system))
+                         (test-util/get-db system full-creds))
         ]
 
     (testing "add then update fact"
-      (let [test-ent (data/get-datum data-svc creds test-ent-id)
+      (let [test-ent (data/get-datum data-svc full-creds test-ent-id)
             fact' {:fact/attribute {:literal/text "age"}
                    :fact/value     {:literal/integer 42}}
             message (msg/update-fact test-ent-id fact')
@@ -112,7 +113,7 @@
             (test-util/mock-request! system :post "/api" (util/transit-write message)
                                      :creds creds
                                      :content-type "application/transit+json")
-            test-ent' (data/get-datum data-svc creds test-ent-id)
+            test-ent' (get-in body [:noun])
             old-facts (-> test-ent :datum/fact set)
 
             [new-fact & _ :as new-facts]
@@ -131,10 +132,11 @@
               (test-util/mock-request! system :post "/api" (util/transit-write message)
                                        :creds creds
                                        :content-type "application/transit+json")
-              test-ent'' (data/get-datum data-svc creds test-ent-id)
+              test-ent'' (data/get-datum data-svc full-creds test-ent-id)
               updated-facts (clojure.set/difference
                              (-> test-ent'' :datum/fact set)
                              (-> test-ent'  :datum/fact set)) ]
+          (clojure.pprint/pprint updated-facts)
           (is (= 200 (:status resp)))
           (is (= :datum.fact.update/success (get body :verb)))
           (is (not-empty updated-facts))
@@ -164,7 +166,6 @@
         ))
     (component/stop system)))
 
-;; FIXME: search fails here but succeeds in data-test
 (deftest search
   (let [system (component/start (test-util/system-excl-web-server))
         data-svc (get system :data-service)
@@ -172,7 +173,7 @@
         creds {:username "brian" :password "rubinton"}
         resp  (test-util/mock-register system creds)]
     (testing "success"
-      (let [message (msg/search creds "lobster")
+      (let [message (msg/search "lobster")
             {:keys [body] :as resp}
             (test-util/mock-request! system :post "/api" (util/transit-write message)
                                      :creds creds
