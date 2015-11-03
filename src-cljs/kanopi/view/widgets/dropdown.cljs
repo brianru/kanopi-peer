@@ -33,19 +33,59 @@
 (defn- stop-hover! [owner]
   (async/put! (om/get-state owner ::kill-hover-clock-ch) :stop!))
 
-(defmulti dropdown-menu-item (fn [_ itm] (:type itm)))
+(defmulti dropdown-menu-item (fn [_ _ itm] (:type itm)))
 
 (defmethod dropdown-menu-item :link
-  [owner itm]
+  [owner idx itm]
   [:li.dropdown-menu-item
-   [:a {:href     (get itm :href)
+   {:key idx}
+   [:a {:href     idx
         :on-click (juxt (get itm :on-click (constantly nil))
                         #(toggle-dropdown! owner))}
     [:span (get itm :label)]]])
 
 (defmethod dropdown-menu-item :divider
-  [owner itm]
-  [:li.divider {:role "separator"}])
+  [owner idx itm]
+  [:li.divider {:role "separator", :key idx}])
+
+(defn dropdown-menu [owner]
+  ;; FIXME: do something different when there's only 1 menu
+  ;; item. no reason to let user expand menu.
+  (let [{:keys [expanded selection-handler menu-items]} (om/get-state owner)]
+    (into
+     [:ul.dropdown-menu
+      {:style          {:display (when expanded "inherit")}
+       :on-click       selection-handler
+       :on-mouse-leave #(close-dropdown! owner)}]
+     (map-indexed (partial dropdown-menu-item owner) menu-items))))
+
+(defn link-dropdown-toggle [owner]
+  (let [{:keys [tab-index expanded toggle-icon-fn caret? toggle-label]}
+        (om/get-state owner)]
+    [:a.dropdown-toggle
+     {:on-click       #(toggle-dropdown! owner)
+      :data-toggle    "dropdown"
+      :tab-index      tab-index
+      :role           "button"
+      :aria-haspopup  "true"
+      :aria-expanded  expanded
+      :on-mouse-enter #(start-hover! owner)
+      :on-mouse-leave #(stop-hover!  owner)}
+     (cond
+      toggle-icon-fn
+      [:span (toggle-icon-fn)
+       (when caret?
+         [:span.caret])]
+
+      toggle-label
+      [:span (str toggle-label " ")
+       (when caret?
+         [:span.caret])]
+      )]))
+
+;; TODO: implement.
+(defn split-button-dropdown-toggle [owner]
+  )
 
 (defn dropdown
   "All configuration is passed via local state."
@@ -54,9 +94,12 @@
     om/IInitState
     (init-state [_]
       ;; defaults
-      {:toggle-label "Toggle label"
+      {
+       :toggle-type :link
+       :toggle-label "Toggle label"
        :selection-handler (constantly nil)
        :tab-index 0
+       ;; TODO: caret-fn which takes dropdown state
        :menu-items [{:type :link
                      :href ""
                      :label "Item 1"}
@@ -69,38 +112,15 @@
        ::when-hover-started nil})
 
     om/IRenderState
-    (render-state [_ {:keys [expanded] :as state}]
+    (render-state [_ state]
       (let []
         (html
          [:li.dropdown
           {:class (concat [] (get state :classes))}
-          [:a.dropdown-toggle
-           {:on-click       #(toggle-dropdown! owner)
-            :data-toggle    "dropdown"
-            :tab-index      (get state :tab-index)
-            :role           "button"
-            :aria-haspopup  "true"
-            :aria-expanded  expanded
-            :on-mouse-enter #(start-hover! owner)
-            :on-mouse-leave #(stop-hover!  owner)}
-           (cond
-            (get state :toggle-icon-fn)
-            [:span ((get state :toggle-icon-fn))
-             (when (get state :caret?)
-               [:span.caret])]
-
-            (get state :toggle-label)
-            [:span (str (om/get-state owner :toggle-label) " ")
-             (when (get state :caret?)
-               [:span.caret])]
-            )]
-          ;; FIXME: do something different when there's only 1 menu
-          ;; item. no reason to let user expand menu.
-          (into
-           [:ul.dropdown-menu
-            {:style          {:display (when expanded "inherit")}
-             :on-click       (get state :selection-handler)
-             :on-mouse-leave #(close-dropdown! owner)}]
-           (map (partial dropdown-menu-item owner) (get state :menu-items)))
+          (case (get state :toggle-type)
+            :link
+            (link-dropdown-toggle owner))
+          
+          (dropdown-menu owner)
           ])))))
 

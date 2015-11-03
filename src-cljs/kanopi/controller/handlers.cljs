@@ -91,7 +91,6 @@
      :similar-datums [(lookup-id props -1016)])))
 
 (defn- ensure-current-datum-is-updated [props edited-ent-id]
-  (println "HERE" edited-ent-id (type edited-ent-id))
   (if (= edited-ent-id (current-datum props))
     (let [datum' (build-datum-data props edited-ent-id)]
       (assoc props :datum datum'))
@@ -186,7 +185,6 @@
   [aether history app-state msg]
   )
 
-;; TODO: implement.
 (defmethod local-event-handler :datum.label.update/failure
   [aether history app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))

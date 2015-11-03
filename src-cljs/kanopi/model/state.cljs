@@ -32,7 +32,7 @@
   component/Lifecycle
   (start [this]
     (let [cookie           (get-and-remove-cookie "kanopi-init")
-          stored-app-state (local-storage/get! local-storage {})
+          stored-app-state {} ;(local-storage/get! local-storage {})
           atm (atom
                (util/deep-merge
                 {

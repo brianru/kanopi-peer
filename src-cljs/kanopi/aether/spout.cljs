@@ -51,6 +51,7 @@
   ([s itm]
    (enqueue-set! s itm (constantly nil)))
   ([s itm dupe-fn]
+   (info itm)
    (swap! s (fn [the-set]
               (if (some dupe-fn the-set)
                 the-set
@@ -157,6 +158,7 @@
                                                   :format :response-format
                                                   ]))]
                   #_(debug id "ACTIVE")
+                  (info req-map)
                   (req-fn (:uri next-item) req-map)
                   (<! recur-ch)
                   (recur (async/alts! [kill-ch notify-ch])))

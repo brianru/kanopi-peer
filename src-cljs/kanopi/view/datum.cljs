@@ -32,10 +32,10 @@
                                   (take (if (get state :expand)
                                           size
                                           (js/Math.sqrt size))))
-                 :let []
                  :when (:db/id datum)]
              [:div.context-datum-cell.col-xs-3.col-md-3.vcenter
-              {:style (cond-> {}
+              {:key (:db/id datum)
+               :style (cond-> {}
                         (= 0 idx)
                         (merge {:margin-left "11%"}))}
               [:a {:href (browser/route-for owner :datum :id (:db/id datum))}
@@ -105,7 +105,8 @@
                                          (js/Math.sqrt size))))
                 :when (:db/id datum)]
             [:div.similar-datum-cell.vcenter.col-xs-3.col-md-3
-             {:style (cond-> {}
+             {:key (:db/id datum)
+              :style (cond-> {}
                        (= 0 idx)
                        (merge {:margin-left "11%"}))}
              [:a {:href (browser/route-for owner :datum :id (:db/id datum))}
