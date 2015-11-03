@@ -65,7 +65,6 @@
 (defn fact-entity->tuple [ent]
   (let [attr (get-literal-or-label ent :fact/attribute)
         valu (get-literal-or-label ent :fact/value)]
-    (println "fact-entity->tuple" ent [attr valu])
     (vector attr valu)))
 
 (defn transit-write [data]

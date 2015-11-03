@@ -12,7 +12,7 @@
     (vector :db/id (get ent :db/id))
 
     :literal
-    (let [k (-> ent (dissoc :db/id) (keys) (first))]
+    (let [k (-> (apply dissoc ent schema/literal-meta-keys) (keys) (first))]
       (vector k (get ent k)))
 
     ;; default

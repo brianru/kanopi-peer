@@ -32,10 +32,10 @@
     (is (get-in body [:noun :datum :db/id]))))
 
 (deftest get-datum
-  (let [system   (component/start (test-util/system-excl-web-server))
-        input-creds    {:username "mickey", :password "mouse132"}
-        resp     (test-util/mock-register system input-creds)
-        creds    (get-in resp [:body])
+  (let [system      (component/start (test-util/system-excl-web-server))
+        input-creds {:username "mickey", :password "mouse132"}
+        resp        (test-util/mock-register system input-creds)
+        creds       (get-in resp [:body])
         test-datum-ent-id (d/q '[:find ?eid .
                                  :in $
                                  :where [?eid :datum/label _]]
@@ -136,7 +136,6 @@
               updated-facts (clojure.set/difference
                              (-> test-ent'' :datum/fact set)
                              (-> test-ent'  :datum/fact set)) ]
-          (clojure.pprint/pprint updated-facts)
           (is (= 200 (:status resp)))
           (is (= :datum.fact.update/success (get body :verb)))
           (is (not-empty updated-facts))

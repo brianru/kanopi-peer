@@ -116,12 +116,10 @@
     {:authorized?
      ;; FIXME: perform real authorization.
      (fn [ctx]
-       (println "authorized?")
        (-> ctx :request friend/current-authentication))
 
      :handle-unauthorized
      (fn [ctx]
-       (println "handle-unauthorized")
        (friend/throw-unauthorized
         (friend/identity ctx)
         {::friend/wrapped-handler (-> ctx :resource :allowed?)}))

@@ -37,11 +37,18 @@
   {:datum :datum/label
    :literal :literal/text})
 
+(def literal-meta-keys
+  #{:db/id :literal/team})
+
 (defn get-value
   ([m]
    (get-value m ""))
   ([m default-value]
-   (get m (get default-value-key (describe-entity m)) default-value)))
+   (case (describe-entity m)
+     :datum
+     (get m :datum/label default-value)
+     :literal
+     (-> (apply dissoc m literal-meta-keys) (vals) (first) (or default-value)))))
 
 (defn display-entity [m]
   (get-value m "help, I'm trapped!"))
