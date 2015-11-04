@@ -15,7 +15,8 @@
 ;; need one.
 (defn- toggle-dropdown! [owner]
   (om/update-state! owner :expanded not))
-
+(defn- open-dropdown! [owner]
+  (om/set-state! owner :expanded true))
 (defn- close-dropdown! [owner]
   (om/set-state! owner :expanded false))
 
@@ -27,7 +28,7 @@
      (let [[v ch] (async/alts! [kill-hover-clock (async/timeout 1000)])]
        ;; NOTE: non-nil value must be sent to kill-channel
        (when (nil? v)
-         (om/set-state! owner :expanded true))
+         (open-dropdown! owner))
        (async/close! kill-hover-clock)))))
 
 (defn- stop-hover! [owner]
@@ -39,8 +40,7 @@
   [owner idx itm]
   [:li.dropdown-menu-item
    {:key idx}
-   [:a {:href     idx
-        :on-click (juxt (get itm :on-click (constantly nil))
+   [:a {:on-click (juxt (get itm :on-click (constantly nil))
                         #(toggle-dropdown! owner))}
     [:span (get itm :label)]]])
 
@@ -56,6 +56,7 @@
      [:ul.dropdown-menu
       {:style          {:display (when expanded "inherit")}
        :on-click       selection-handler
+       :on-mouse-enter #(open-dropdown! owner)
        :on-mouse-leave #(close-dropdown! owner)}]
      (map-indexed (partial dropdown-menu-item owner) menu-items))))
 
@@ -70,7 +71,9 @@
       :aria-haspopup  "true"
       :aria-expanded  expanded
       :on-mouse-enter #(start-hover! owner)
-      :on-mouse-leave #(stop-hover!  owner)}
+      :on-mouse-leave (fn [_]
+                        (stop-hover!  owner)
+                        (om/set-state! owner :expanded false))}
      (cond
       toggle-icon-fn
       [:span (toggle-icon-fn)

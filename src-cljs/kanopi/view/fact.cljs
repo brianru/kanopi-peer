@@ -26,9 +26,22 @@
             [kanopi.view.widgets.typeahead :as typeahead]
             ))
 
+(defn prepare-fact [entity state]
+  (let [{:keys [fact/attribute fact/value]} state]
+    (cond-> {}
+      (get entity :db/id)
+      (assoc :db/id (get entity :db/id))
+      
+      true
+      (assoc :fact/attribute (hash-map (get attribute :input-type :literal/text)
+                                       (get attribute :input-value))
+             :fact/value     (hash-map (get value :input-type :literal/text)
+                                       (get value :input-value)))
+      )))
+
 (def stroke-color "#dddddd")
 
-(defn- handle-borders-group [mode]
+(defn- handle-borders-group []
   [:g.handle-borders
    {:transform "translate(4, 4)"}
    [:path {:d "m 0 9 v -9 h 9"
@@ -38,35 +51,81 @@
            :stroke stroke-color
            :fill "transparent"}]])
 
+(defn handle-fill
+  [mode editing]
+  (let [red    "red"
+        yellow "yellow"
+        green  "green"
+        clear  "transparent"]
+    (case mode
+      :empty
+      (if editing
+        yellow
+        red)
+
+      :partial
+      (if editing
+        green
+        yellow)
+
+      :complete
+      (if editing
+        green
+        clear))))
+
+(defn any-value [entity]
+  (or (get entity :input-value)
+      (schema/get-value entity)))
+
+(defn update-mode [fact]
+  (let [part-values (->> fact
+                         ((juxt :fact/attribute :fact/value))
+                         (map any-value))
+        mode' (cond
+               (every? not-empty part-values)
+               :complete
+
+               (some not-empty part-values)
+               :partial
+
+               (every? empty? part-values)
+               :empty
+
+               :default
+               :error)]
+    (assoc fact :mode mode')))
+
 (defn- handle-contents-group [& args]
-  (let [{:keys [mode hovering] :or {mode :view, hovering false}}
-        (apply hash-map args)]
+  (let [{:keys [mode hovering editing] :or {mode :view, hovering false}}
+        (apply hash-map args)
+
+        fill (handle-fill mode editing)]
     [:g.handle-contents
      {:transform "translate(4, 4)"}
-     (when (or (= mode :edit) hovering)
-       [:g.handle-hover-contents
-        {:transform "translate(2.5, 2.5)"}
-        [:rect.handle-mode-indicator
-         {:width "10"
-          :height "10"
-          :fill "green"
-          :opacity "0.4"}]]
-       )]))
+     [:g.handle-hover-contents
+      {:transform "translate(2.5, 2.5)"}
+      [:rect.handle-mode-indicator
+       {:width "10"
+        :height "10"
+        :fill fill
+        :opacity "0.4"}]]
 
-(defn- merge-updated-data [owner]
-  (let [attr'  (om/get-state owner :fact/attribute)
-        value' (om/get-state owner :fact/value)
-        fact   (om/get-props owner)]
-    {:db/id (:db/id fact)
-     :fact/attribute [(->> attr'
-                           (merge (first (:fact/attribute fact)))
-                           ((juxt :db/id identity))
-                           (some identity))]
-     :fact/value     [(->> value'
-                           (merge (first (:fact/value fact)))
-                           ((juxt :db/id identity))
-                           (some identity))]
-     }))
+     ]))
+
+; (defn- merge-updated-data [owner]
+;   (let [attr'  (om/get-state owner :fact/attribute)
+;         value' (om/get-state owner :fact/value)
+;         fact   (om/get-props owner)]
+;     {:db/id (:db/id fact)
+;      :fact/attribute [(->> attr'
+;                            (merge (first (:fact/attribute fact)))
+;                            ((juxt :db/id identity))
+;                            (some identity))]
+;      :fact/value     [(->> value'
+;                            (merge (first (:fact/value fact)))
+;                            ((juxt :db/id identity))
+;                            (some identity))]
+;      }))
 
 
 (defn- handle-type-selection [owner tp evt]
@@ -76,72 +135,22 @@
                                   tp)
        (msg/send! owner)))
 
-(defn- handle-result-selection [owner res evt]
-  (om/update-state!
-   owner
-   (fn [existing]
-     (assoc existing
-            :selected-type (schema/describe-entity res)
-            :entered-value (schema/get-value res)
-            :matching-entity res)))
-  (->> (msg/select-fact-part-reference (om/get-state owner :fact)
-                                       (om/get-state owner :fact-part)
-                                       res)
-       (msg/send! owner)))
-
-(defn- handle-input-submission
-  "This is always used to create new entities.
-  FIXME: this fails when there was previously a matching entity."
-  [owner value evt]
-  (let [res (schema/create-entity (om/get-state owner :selected-type) value)]
-    (om/update-state!
-     owner
-     (fn [existing]
-       (assoc existing
-              :selected-type (schema/describe-entity res)
-              :entered-value (schema/get-value res)
-              :matching-entity res)))
-    (->> (msg/select-fact-part-reference (om/get-state owner :fact)
-                                         (om/get-state owner :fact-part)
-                                         res)
-         (msg/send! owner))))
-
-(defn render-fact-part [m]
-  [:span.fact-part-representation
-   (schema/display-entity m)])
-
-(defn view-fact-part
-  "One click away from editing in place and navigating to value.
-  "
-  [owner m k]
-  [:div.view-fact-part.row
-   [:div.inline-90-percent.col-xs-11
-    (om/build typeahead/typeahead m
-              {:react-key (str "view-fact-part" "-" k)
-               :state
-               {:element-type :input
-                :fact-part k}
-
-               :init-state
-               {:input-value (schema/display-entity m)
-                :on-click  (partial handle-result-selection owner)
-                :on-submit (partial handle-input-submission owner)}
-               })]
-   [:div.inline-10-percent.col-xs-1
-    (when-let [id (get m :db/id)]
-      (->> (icons/open {})
-           (icons/link-to owner [:datum :id id])))]])
-
 (defn available-input-types
   "TODO: use argument to filter and sort return value to give user the
   best possible list of available input types for the value entered."
   [value]
   (vector
-   {:value :datum
+   {:value :datum/label
     :label "datum"}
 
    {:value :literal/text
-    :label "text"}))
+    :label "text"}
+   
+   {:value :literal/integer
+    :label "integer"}
+   
+   {:value :literal/decimal
+    :lable "decimal"}))
 
 (defn input-type->dropdown-menu-item
   [on-click-fn tp]
@@ -156,60 +165,68 @@
        (mapv (partial input-type->dropdown-menu-item on-click-fn))
        (sort-by :value (partial menu-item-comparator value))))
 
-(defn edit-fact-part
-  ""
-  [owner m k]
-  (let [{:keys [selected-type part-type entered-value matching-entity]}
-        (om/get-state owner)]
-    [:div.edit-fact-part
-     (om/build typeahead/typeahead m
-                {:react-key (str "edit-fact-part" "-" k)
-                 :state
-                 {:element-type :input
-                  :fact-part k}
-                 :init-state
-                 {:input-value (schema/display-entity m)
-                  :on-click    (partial handle-result-selection owner)
-                  :on-submit   (partial handle-input-submission owner)}})
-     [:div.fact-part-metadata-container
-      (om/build dropdown/dropdown m
-                {:react-key (str "edit-fact-part" "-" k)
-                 :state
-                 {:toggle-label (name (or selected-type part-type))
-                  :menu-items   (generate-menu-items
-                                 entered-value (partial handle-type-selection owner))}})
-      ]]))
-
-
-(defn handle [mode hovering]
-  (let []
+(defn handle [& args]
+  (let [{:keys [mode hovering editing]} (apply hash-map args)]
     [:div.fact-handle
-     {}
-     [:svg {:width "24px"
-            :height "24px"}
-      (handle-borders-group mode)
-      (handle-contents-group :mode mode :hovering hovering)
+     [:svg {:width "24px" :height "24px"}
+      (handle-borders-group)
+      (handle-contents-group :mode mode :hovering hovering :editing editing)
       ]]))
 
 (defn fact-part [owner part entity]
-  [:div.fact-attribute
-   [:div.view-fact-part.row
-    [:div.inline-90-percent.col-xs-11
-     (om/build typeahead/typeahead entity
-               {:react-key (str "view-fact-part" "-" part)
-                :state
-                {:element-type :input
-                 :fact-part part}
+  (let [current-value (->> entity
+                           ((juxt :input-value :datum/label :literal/text))
+                           (some identity))
+        ]
+    [:div.fact-attribute
+     [:div.view-fact-part.row
+      [:div.inline-90-percent.col-xs-11
+       (om/build typeahead/typeahead entity
+                 {:react-key (str "view-fact-part" "-" part)
+                  :state
+                  {:element-type :input
+                   :fact-part part}
 
-                :init-state
-                {:input-value (schema/display-entity entity)
-                 :on-click  (partial handle-result-selection owner)
-                 :on-submit (partial handle-input-submission owner)}
-                })]
-    [:div.inline-10-percent.col-xs-1
-     (when-let [id (get entity :db/id)]
-       (->> (icons/open {})
-            (icons/link-to owner [:datum :id id])))]]])
+                  :init-state
+                  {:initial-input-value current-value
+                   :on-focus  (fn [v]
+                                (when (not-empty v)
+                                  (om/set-state! owner :editing part))) 
+
+                   ;; TODO: focus on value input if editing attribute.
+                   :on-submit (fn [v]
+                                (let [state (om/get-state owner)
+                                      state'(-> state
+                                                (assoc-in [part :input-value] v)
+                                                (assoc :editing nil)
+                                                (update-mode))]
+                                  (when (= :complete (get state' :mode))
+                                    (->> (prepare-fact entity state')
+                                         (msg/update-fact (get state' :datum-id))
+                                         (msg/send! owner)))
+                                  (om/set-state! owner state'))
+                                ) 
+                   ;                 :on-click  (partial handle-result-selection owner)
+                   }
+                  })
+       ; NOTE: see edit-fact-part for example
+       [:div.fact-part-metadata.container
+        (om/build dropdown/dropdown entity
+                  {:init-state {:caret? true}
+                   :state {:toggle-label (name (get entity :input-type :literal/text))
+                           :menu-items (generate-menu-items
+                                        current-value
+                                        (fn [tp evt]
+                                          (om/set-state! owner [part :input-type] tp))
+                                        )}})
+        ]
+       ]
+      [:div.inline-10-percent.col-xs-1
+       (when-let [id (get entity :db/id)]
+         (->> (icons/open {})
+              (icons/link-to owner [:datum :id id])))]]]  )
+  )
+
 
 (defn fact-next
   [props owner opts]
@@ -217,28 +234,37 @@
     om/IInitState
     (init-state [_]
       {
-       ;Modes #{::empty ::partial ::complete}
+       ;Modes #{:empty :partial :complete}
        :mode :empty
 
-       :attribute (get props :fact/attribute)
-       :value     (get props :fact/value)
+       ; Editing states #{nil :attribute :value}
+       ; Only registers as editing that state if the current value is
+       ; nil. It's the marginal editing state. If you're editing an
+       ; attribute where the fact already has an attribute, it does
+       ; not affect the viability of the current state.
+       :editing nil
+
+       ; I need computed attribute and value values.
+       ; Keep track of: input-value, input-matched-entity
+       :fact/attribute (get props :fact/attribute)
+       :fact/value     (get props :fact/value)
 
        })
 
-    ; Synchronize props with component state when component updates
+    ; TODO: Synchronize props with component state when component updates
 
     om/IRenderState
-    (render-state [_ {:keys [mode hovering attribute value] :as state}]
+    (render-state [_ {:keys [mode hovering editing fact/attribute fact/value] :as state}]
       (let []
         (html
          [:div.fact-container.container
           [:div.fact-body.row
            {:on-mouse-enter #(om/set-state! owner :hovering true)
-            :on-mouse-leave #(om/set-state! owner :hovering false)
-            }
+            :on-mouse-leave #(om/set-state! owner :hovering false)}
            [:div.inline-10-percent.col-xs-1
-            (handle mode hovering)]
+            (handle :mode mode :hovering hovering :editing editing)]
            [:div.inline-90-percent.col-xs-11
             (fact-part owner :fact/attribute attribute)
             (fact-part owner :fact/value value)
             ]]])))))
+

@@ -26,9 +26,11 @@
   ((om/get-state owner :on-click) res evt))
 
 (defn- handle-submission [owner evt]
-  (let [submit-fn (om/get-state owner :on-submit)
-        value     (om/get-state owner :input-value)]
-    (submit-fn value evt)))
+  (let [{submit-fn :on-submit value :input-value}
+        (om/get-state owner)]
+    (submit-fn value evt)
+    (om/set-state! owner :focused false)
+    ))
 
 (defn- handle-key-down
   [owner search-results evt]
@@ -51,12 +53,13 @@
                               x)))
         (. evt preventDefault))
 
-    "Enter"
+    ("Enter" "Tab")
     (let [[idx selected-result]
           (nth search-results (om/get-state owner :selection-index) nil)
           ]
       (if selected-result
         (do
+         ; NOTE: this should only happen when user is not editing the typeahead
          (handle-result-click owner selected-result evt) 
          ;; href-fn always exists, but should only be used when it
          ;; produces a truthy value. by default it always evaluates to
@@ -72,11 +75,15 @@
 
         )
 
+      (. evt preventDefault)
       (.. evt -target (blur)))
 
     "Escape"
     (do
-     (om/set-state! owner :focused false))
+     (om/set-state! owner :focused false)
+     (om/update-state! owner #(assoc % :input-value (:initial-input-value %)))
+     (. evt preventDefault)
+     (.. evt -target (blur)))
 
     ;; default
     nil))
@@ -117,14 +124,19 @@
        :tab-index 0 ;; decided by platform convention by default
 
        ;; Used to render search results into strings for display.
-       :display-fn schema/display-entity
+       :display-fn str
        ;; What to display when there are no search results.
 
        ;; FIXME: use data of the right shape here.
-       :empty-result [[:foo-bar]]
+       :empty-result [[nil "No matching entities. Hit Enter to create one."]]
 
        ;; Escape hatch for tracking the input field's value.
        :on-change (constantly nil)
+
+       ;; Outside world can track this too!
+       ;; Fns take 1 arg: the current input value.
+       :on-focus (constantly nil)
+       :on-blur  (constantly nil)
        ;; Submission is different from selection (below).
        :on-submit (constantly nil)
 
@@ -143,17 +155,18 @@
        :input-ch (-> (async/chan)
                      (async-util/debounce 100)
                      (async/pipe (msg/publisher owner)))
-       :selection-index 0
+       :selection-index -1
        :focused false
+       ; initial-input-value should be set externally
+       :initial-input-value nil
+       ; input-value should be kept internal
        :input-value nil
+       :placeholder "Placeholder"
        })
 
-    om/IWillMount
-    (will-mount [_]
-      #_(info "mounting typeahead"))
-
     om/IRenderState
-    (render-state [_ {:keys [focused input-ch input-value display-fn on-change href-fn]
+    (render-state [_ {:keys [focused input-ch input-value display-fn
+                             on-focus on-blur on-change href-fn]
                       :as state}]
       (let [all-search-results (om/observe owner ((om/get-shared owner :search-results)))
             search-results (get all-search-results input-value (get state :empty-result []))
@@ -166,17 +179,24 @@
            ;; more duplicated code.
            (get state :element-type)
            (merge (element-specific-attrs state)
-                  {:on-focus    #(om/set-state! owner :focused true)
-                  ; :on-blur     #(om/set-state! owner :focused false)
+                  {:on-focus    (fn [_]
+                                  (om/set-state! owner :focused true)
+                                  (on-focus (get state :input-value))) 
+                   :on-blur     (fn [_]
+                                  (on-blur (get state :input-value)))
                    :tab-index (get state :tab-index)
-                   :value       (get state :input-value)
+                   :value       (or (get state :input-value)
+                                    (get state :initial-input-value))
+                   :placeholder (get state :placeholder)
                    ;; NOTE: debugging
                    ;;:style {:color (when-not focused "red")}
                    :on-change   (partial handle-typeahead-input owner) 
                    :on-key-down (partial handle-key-down owner search-results)
                    }))
           [:ul.dropdown-menu.typeahead-results
-           {:style {:display (if (and (om/get-state owner :focused) (not-empty search-results))
+           {:style {:display (if (and (om/get-state owner :focused)
+                                      (not-empty input-value)
+                                      (not-empty search-results))
                                "inherit"
                                "none"
                                )}}

@@ -70,14 +70,17 @@
             ;; render in those groups, but that does not work with
             ;; Om's cursor model. TODO: make change when I upgrade to
             ;; Om Next.
-            (om/build-all fact/container
+            (om/build-all fact/fact-next
                           (get props :datum/fact [])
                           {:key-fn :db/id
                            :init-state {:datum-id (:db/id props)}
                            :state {:fact-count fact-count}})
             ;; NOTE: also build a special fact which is the trigger to
             ;; add new facts
-            (om/build fact/new-fact-template props)
+            (om/build fact/fact-next {}
+                      {:react-key "nil-fact"
+                       :init-state {:datum-id (:db/id props)}
+                       :state {:fact-count fact-count}})
             ]
            ]
           ])))

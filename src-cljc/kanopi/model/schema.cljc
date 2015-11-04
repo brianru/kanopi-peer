@@ -53,7 +53,7 @@
      default-value)))
 
 (defn display-entity [m]
-  (get-value m "help, I'm trapped!"))
+  (get-value m))
 
 (defn create-entity [tp value]
   (hash-map

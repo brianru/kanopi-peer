@@ -5,7 +5,7 @@
             [kanopi.util.core :as util]))
 
 (defn include-bootstrap []
-  (include-css "//maxcdn.bootstrapcdn.com/bootstrap/3.3.5/css/bootstrap.min.css"))
+  (include-css "/css/bootstrap.3.3.5.min.css"))
 
 (defn include-om []
   (include-js "/js/main.js"))

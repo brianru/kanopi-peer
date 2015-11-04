@@ -1,6 +1,7 @@
 (ns kanopi.view.fact-dev
   (:require-macros [devcards.core :as dc :refer (defcard deftest)])
   (:require [sablono.core :as sab]
+            [cljs.test :refer-macros (is)]
             [quile.component :as component]
             [kanopi.util-dev :as dev-util]
             [om.core :as om]
@@ -11,81 +12,30 @@
 (defonce system
   (component/start (dev-util/new-system)))
 
-(defcard view-fact-handle
-  (dc/om-root fact/handle {:init-state {:mode :view
-                                        :fact-hovering false
-                                        :fact-count 1
-                                        :datum-id -200}
-                           :shared (dev-util/shared-state system)})
-  {:db/id -100}
+(defcard empty-fact
+  (dc/om-root fact/fact-next {:shared (dev-util/shared-state system)
+                              :init-state {:datum-id -42
+                                           :mode :empty
+                                           :editing nil}
+                              :state {:fact-count 0}})
+  {}
   {:inspect-data true, :history true})
 
-(defcard view-fact-handle-hover
-  (dc/om-root fact/handle {:init-state {:mode :view
-                                        :fact-hovering true
-                                        :fact-count 1
-                                        :datum-id -201}
-                           :shared (dev-util/shared-state system)})
-  {:db/id -101}
-  {:inspect-data true, :history true})
+(defcard empty-fact-editing
+  (dc/om-root fact/fact-next {:shared (dev-util/shared-state system)
+                              :init-state {:datum-id 42
+                                           :mode :empty
+                                           :editing :attribute}
+                              :state {:fact-count 0}}))
 
-(defcard edit-fact-handle
-  (dc/om-root fact/handle {:init-state {:mode :edit
-                                        :fact-hovering false
-                                        :fact-count 1
-                                        :datum-id -202}
-                           :shared (dev-util/shared-state system)})
-  {:db/id -102}
-  {:inspect-data true, :history true})
+(deftest correct-handle-states
+  (is (fact/handle-fill :empty nil)          "red")
+  (is (fact/handle-fill :empty :attribute)   "red")
+  (is (fact/handle-fill :partial nil)        "red")
+  
+  (is (fact/handle-fill :partial :attribute) "yellow")
+  (is (fact/handle-fill :partial :value)     "yellow")
 
-(defcard empty-fact-container
-  (dc/om-root fact/container {:init-state {:datum-id -203
-                                           :fact-count 1}
-                              :shared (dev-util/shared-state system)})
-  (atom {:db/id -103})
-  {:inspect-data true, :history true})
+  (is (fact/handle-fill :complete :attribute) "green")
 
-(defcard fact-missing-value
-  (dc/om-root fact/container {:init-state {:datum-id -204
-                                           :fact-count 1}
-                              :shared (dev-util/shared-state system)})
-  (atom {:db/id -104
-         :fact/attribute {:db/id -204
-                          :literal/text "I am an attribute!"}
-         :fact/value nil
-         })
-  {:inspect-data true, :history true})
-
-(defcard fact-missing-attribute
-  (dc/om-root fact/container {:init-state {:datum-id -204
-                                           :fact-count 1
-                                           :mode :view}
-                              :shared (dev-util/shared-state system)})
-  (atom {:db/id -104
-         :fact/attribute {}
-         :fact/value {:db/id -204
-                      :literal/text "I am a value!"}
-         })
-  {:inspect-data true, :history true})
-
-(defcard fact-view-mode
-  (dc/om-root fact/container {:init-state {:datum-id -204
-                                           :fact-count 1
-                                           :mode :view}
-                              :shared (dev-util/shared-state system)})
-  (atom {:db/id -104
-         :fact/attribute {}
-         :fact/value {}
-         })
-  {:inspect-data true, :history true})
-
-(defcard fact-edit-mode
-  (dc/om-root fact/container {:init-state {:datum-id -204
-                                           :fact-count 1
-                                           :mode :edit}
-                              :shared (dev-util/shared-state system)})
-  (atom {:db/id -104
-         :fact/attribute {}
-         :fact/value {}
-         })
-  {:inspect-data true, :history true})
+  (is (fact/handle-fill :complete nil) ""))

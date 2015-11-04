@@ -82,6 +82,9 @@ a:hover {
 .dropdown {
     list-style: none;
 }
+.dropdown > a , .dropdown > button {
+    padding-bottom: 10px;
+}
 
 /* Overrides bootstrap styling when width < 768px. */
 .header .navbar-header {
@@ -195,6 +198,7 @@ a.navbar-brand:focus {
 .context-datums {
 }
 
+
 /* Facts */
 .fact-body {
     margin-bottom: 12px;
@@ -281,9 +285,6 @@ a.navbar-brand:focus {
 }
 .view-fact-part {
     margin-bottom: 12px;
-}
-.view-fact-part .typeahead input {
-    border-bottom: none;
 }
 .edit-fact-part {
     margin-bottom: 1rem;
