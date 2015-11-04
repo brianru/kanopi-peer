@@ -337,7 +337,7 @@
                   (fn [app-state]
                     (assoc app-state
                            :user noun
-                           :mode :authenticated
+                           :mode :spa.authenticated/online
                            :datum {:context-datums []
                                    :datum {}
                                    :similar-datums []}
@@ -360,7 +360,7 @@
                   (fn [app-state]
                     (assoc app-state
                            :user noun
-                           :mode :authenticated
+                           :mode :spa.authenticated/online
                            :datum {:context-datums []
                                    :datum {}
                                    :similar-datums []}
@@ -382,7 +382,7 @@
                   (fn [app-state]
                     (assoc app-state
                            :user nil
-                           :mode :demo
+                           :mode :spa.unauthenticated/online
                            :datum {:context-datums []
                                    :datum []
                                    :similar-datums []}

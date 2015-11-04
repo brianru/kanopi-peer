@@ -36,7 +36,7 @@
           atm (atom
                (util/deep-merge
                 {
-                 :mode :demo
+                 :mode :spa.unauthenticated/online
                  :user (get cookie :user {})  
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
@@ -84,7 +84,7 @@
     (let [{:keys [mode]} config
           atm (atom
                {:mode mode
-                :user (if (= :demo mode)
+                :user (if (= :spa.unauthenticated/online mode)
                         {}
                         {:ent-id 42
                          :identity "brian"

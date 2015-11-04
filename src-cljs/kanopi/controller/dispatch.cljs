@@ -12,12 +12,8 @@
             [om.core :as om]
             ))
 
-;; TODO: rename mode names to
-;; :spa.mode/offline
-;; :spa.mode/online
-;; :spa.mode/authenticated
 (def mode-verbs
-  {:demo
+  {:spa.unauthenticated/online
    {:local  #{
               :spa/navigate
               :spa.navigate/search
@@ -45,7 +41,7 @@
               :spa/login :spa/logout :spa/register
               }}
 
-   :authenticated
+   :spa.authenticated/online
    {:local  #{
               :spa/navigate
 

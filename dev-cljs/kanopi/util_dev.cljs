@@ -10,7 +10,7 @@
 (def dev-config
   {:dimensions [:noun :verb]
    :aether-log true
-   :mode :authenticated})
+   :mode :spa.authenticated/online})
 
 (defn new-system
   ([]

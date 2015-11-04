@@ -54,6 +54,7 @@
                  [crypto-password "0.1.3"]
                  [cheshire "5.5.0"]
                  [clj-time "0.11.0"]
+                 [garden "1.3.0-SNAPSHOT"]
 
                  [ring/ring-devel "1.4.0"]
 
