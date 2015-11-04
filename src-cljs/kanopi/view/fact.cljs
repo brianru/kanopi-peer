@@ -68,34 +68,6 @@
                            (some identity))]
      }))
 
-;; FIXME: this should not be a separate component. make it an html
-;; template and SIMPLIFY.
-(defn handle
-  "TODO: anchor for drag & drop reordering of facts
-  TODO: "
-  [props owner opts]
-  (reify
-    om/IDisplayName
-    (display-name [_]
-      (str "fact-handle-" (:db/id props)))
-
-    om/IRenderState
-    (render-state [_ {:keys [mode fact-hovering] :as state}]
-      (let []
-        (html
-         [:div.fact-handle
-          {:on-click #(->> (msg/toggle-fact-mode props)
-                           (msg/send! owner))}
-          [:svg {:width "24px", :height "24px"}
-           (handle-borders-group mode)
-           (handle-contents-group
-            :mode mode
-            :hovering fact-hovering
-            :submit-handler (fn []
-                              (->> (msg/update-fact (om/get-state owner :datum-id)
-                                                    (merge-updated-data owner))
-                                   (msg/send! owner))))
-           ]])))))
 
 (defn- handle-type-selection [owner tp evt]
   (om/set-state! owner :selected-type tp)
@@ -206,239 +178,67 @@
                  {:toggle-label (name (or selected-type part-type))
                   :menu-items   (generate-menu-items
                                  entered-value (partial handle-type-selection owner))}})
-      ]])
-  )
+      ]]))
 
-(defn fact-part
-  "Here's how this works.
 
-  Fact parts are selection / initialziation mechanisms.
+(defn handle [mode hovering]
+  (let []
+    [:div.fact-handle
+     {}
+     [:svg {:width "24px"
+            :height "24px"}
+      (handle-borders-group mode)
+      (handle-contents-group :mode mode :hovering hovering)
+      ]]))
 
-  The goal is to connect the parent entity to another entity via an attribute.
+(defn fact-part [owner part entity]
+  [:div.fact-attribute
+   [:div.view-fact-part.row
+    [:div.inline-90-percent.col-xs-11
+     (om/build typeahead/typeahead entity
+               {:react-key (str "view-fact-part" "-" part)
+                :state
+                {:element-type :input
+                 :fact-part part}
 
-  We are not modifying any entity besides the parent (really, the
-  fact, which is referenced by the parent).
+                :init-state
+                {:input-value (schema/display-entity entity)
+                 :on-click  (partial handle-result-selection owner)
+                 :on-submit (partial handle-input-submission owner)}
+                })]
+    [:div.inline-10-percent.col-xs-1
+     (when-let [id (get entity :db/id)]
+       (->> (icons/open {})
+            (icons/link-to owner [:datum :id id])))]]])
 
-  So here are the states:
-  View is actually editable, it's a typeahead input field.
-  Edit is a big textarea with buttons to do fancy things.
-
-  "
+(defn fact-next
   [props owner opts]
   (reify
-    om/IDisplayName
-    (display-name [_]
-      (str "fact-part-" (:db/id props)))
-
     om/IInitState
     (init-state [_]
-      {:hovering false
+      {
+       ;Modes #{::empty ::partial ::complete}
+       :mode :empty
 
-       :selected-type (let [desc (schema/describe-entity props)]
-                        (if (= :unknown desc)
-                          :literal/text
-                          desc))
-       :entered-value ""
-       :matching-entity props
+       :attribute (get props :fact/attribute)
+       :value     (get props :fact/value)
+
        })
 
-    om/IRenderState
-    (render-state [_ {:keys [mode fact-part] :as state}]
-      (let [part-type (schema/describe-entity props)]
-        (html
-         [:div.fact-attribute
-          {:on-mouse-enter #(om/set-state! owner :hovering true)
-           :on-mouse-leave #(om/set-state! owner :hovering false)}
-
-          (case mode
-            :view
-            (view-fact-part owner props fact-part)
-
-            :edit
-            (view-fact-part owner props fact-part)
-            #_(edit-fact-part owner props fact-part)
-            #_(let [{:keys [selected-type entered-value matching-entity]}
-                    state
-                    ]
-                [:div.edit-fact-part
-                 [:span.fact-part-representation
-                  (schema/display-entity matching-entity)]
-
-                 [:div.fact-part-metadata-container
-                  [:div.type-input
-                   [:label.type-input-label "type:"]
-                   [:span.type-input-value
-                    (om/build dropdown/dropdown props
-                              {:state
-                               {:toggle-label (name (or selected-type part-type))
-                                :menu-items (generate-menu-items
-                                             entered-value (partial handle-type-selection owner))
-                                }
-                               })]]
-                  [:div.value-input
-                   [:label.value-input-label (str (text/entity-value-label props) ":")]
-                   [:span.value-input-value
-                    (om/build typeahead/typeahead props
-                              {:state
-                               {:element-type (browser/input-element-for-entity-type
-                                               (or selected-type part-type))
-                                :fact-part    fact-part}
-
-                               :init-state
-                               {:input-value (schema/display-entity props)
-                                :on-click    (partial handle-result-selection owner)
-                                :on-submit   (partial handle-input-submission owner)
-                                }})]]
-                  ]]))
-          ])))
-    ))
-
-(defn body
-  [props owner opts]
-  (reify
-    om/IDisplayName
-    (display-name [_]
-      (str "fact-body-" (:db/id props)))
+    ; Synchronize props with component state when component updates
 
     om/IRenderState
-    (render-state [_ state]
-      (let []
-        (html
-         [:div.fact-body.row
-          {:on-mouse-enter #(om/set-state! owner :fact-hovering true)
-           :on-mouse-leave #(om/set-state! owner :fact-hovering false)}
-          [:div.inline-10-percent.col-xs-1
-           (om/build handle props
-                     {:state (select-keys
-                              state [:mode :datum-id :fact-hovering
-                                     :fact/attribute :fact/value])})]
-
-          [:div.inline-90-percent.col-xs-11
-           ;; BEWARE: (get props :fact/attribute) returns a set which
-           ;; is not compatible with Om cursors. Maps and vectors
-           ;; only.)
-           ;; NOTE: is this still true? I changed the schema and am
-           ;; now using pull syntax for queries, attributes and values
-           ;; should not be in collections
-           (om/build fact-part (get props :fact/attribute)
-                     {:init-state {:fact (:db/id props)
-                                   :fact-part :fact/attribute}
-                      :state (select-keys state [:mode :fact-hovering])})
-
-           (om/build fact-part (get props :fact/value)
-                     {:init-state {:fact (:db/id props)
-                                   :fact-part :fact/value}
-                      :state (select-keys state [:mode :fact-hovering])})
-           
-           (when (= :edit (get state :mode))
-             [:div.fact-edit-controls.row
-              
-              ])]
-          ])))
-    ))
-
-(defn container
-  [props owner opts]
-  {:pre [(om/cursor? props)]}
-  (reify
-    om/IDisplayName
-    (display-name [_]
-      (str "fact" (:db/id props)))
-
-    om/IInitState
-    (init-state [_]
-      {:mode :view
-       :fact/attribute {:db/id nil}
-       :fact/value     {:db/id nil}})
-
-    om/IWillMount
-    (will-mount [_]
-      (aether/listen! owner :noun [:fact (:db/id props)]
-                      (fn [{:keys [noun verb context]}]
-                        (case verb
-                          :toggle-mode
-                          (let [new-mode 
-                                (if (= :view (om/get-state owner :mode))
-                                  :edit
-                                  :view)]
-                            (om/set-state! owner :mode new-mode))
-
-                          :select-fact-part-type
-                          (om/update-state!
-                           owner (get context :fact-part)
-                           #(merge % {:selected-type (get context :value)}))
-
-                          :select-fact-part-reference
-                          (let []
-                            (om/update-state!
-                             owner (get context :fact-part)
-                             #(merge % (get context :selection))))
-
-                          :input-fact-part-value
-                          (let []
-                            (om/update-state!
-                             owner (get context :fact-part)
-                             (partial merge {:input-value (get context :value)})))
-
-                          ;;default
-                          (debug "what?" noun verb)
-                          ))
-                      #_(partial println "here")))
-    om/IWillUnmount
-    (will-unmount [_]
-      (aether/stop-listening! owner))
-
-    om/IWillUpdate
-    (will-update [this next-props next-state]
-      #_(info "will-update" next-state))
-
-    om/IRenderState
-    (render-state [_ state]
+    (render-state [_ {:keys [mode hovering attribute value] :as state}]
       (let []
         (html
          [:div.fact-container.container
-          ;; TODO: receiving (get state :fact-count). if (= 1 %) and
-          ;; (nil? (:db/id %)) then initialize in edit mode.
-          (om/build body props
-                    {:state (select-keys state [:mode :datum-id :fact/attribute :fact/value])}
-                    )] )))
-    ))
-
-(defn new-fact-template
-  "The mechanics of initializing a fact are drastically different from
-  those of viewing and editing an existing fact. Therefore, this
-  component will re-use many of the html templates for the normal
-  container and fact-body components while offering a tuned experience
-  for initializing facts.
-  "
-  [props owner opts]
-  (reify
-    om/IRenderState
-    (render-state [_ {:keys [hovering] :as state}]
-      (let []
-        (html
-         [:div.fact-container.container
-          {:on-mouse-enter #(om/set-state! owner :hovering true)
-           :on-mouse-leave #(om/set-state! owner :hovering false)}
           [:div.fact-body.row
-
+           {:on-mouse-enter #(om/set-state! owner :hovering true)
+            :on-mouse-leave #(om/set-state! owner :hovering false)
+            }
            [:div.inline-10-percent.col-xs-1
-            ;; TODO: i'm repeating some code!
-            [:div.fact-handle
-             {:on-click (constantly nil)}
-             [:svg {:width "24px", :height "24px"}
-              (handle-borders-group :view)
-              (handle-contents-group
-               :mode :view
-               :hovering hovering
-               :cancel-handler  (constantly nil)
-               :history-handler (constantly nil)
-               :submit-handler  (constantly nil))]]
-            ]
-
+            (handle mode hovering)]
            [:div.inline-90-percent.col-xs-11
-            [:div.fact-attribute
-             (view-fact-part owner {:literal/text "Click here"} :fact/attribute)]
-            [:div.fact-attribute
-             (view-fact-part owner {:literal/text "to add a fact"} :fact/value)]]]
-          ])))))
+            (fact-part owner :fact/attribute attribute)
+            (fact-part owner :fact/value value)
+            ]]])))))

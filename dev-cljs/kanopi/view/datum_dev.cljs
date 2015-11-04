@@ -21,16 +21,23 @@
      :current-team team}))
 
 (defcard view-empty-datum
+  "### Try updated the label or adding a fact
+  -> both should fail an assertion because datums should always have a
+  db/id to be rendered.
+  
+  TODO: should this even render?"
   (dc/om-root datum/body {:shared (dev-util/shared-state system)})
   {}
   {:inspect-data true, :history true})
 
 (defcard view-init-datum
+  "### All interactions should successfully send messages here."
   (dc/om-root datum/body {:shared (dev-util/shared-state system)})
   (helpers/init-datum fake-creds)
   {:inspect-data true, :history true})
 
 (defcard edit-label-init-datum
+  "Label is in its edit state."
   (dc/om-root datum/body {:init-state {:editing-label true}
                           :shared (dev-util/shared-state system)})
   (helpers/init-datum fake-creds))

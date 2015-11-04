@@ -17,7 +17,8 @@
   (init-datum    [this creds])
   (update-datum-label [this creds datum-id label])
   (get-datum     [this creds datum-id]
-                 [this creds as-of datum-id])
+             [this creds as-of datum-id])
+  (-get-fact [this creds fact-id])
   (search-datums [this creds search])
 
   (context-datums [this creds datum-id])
@@ -31,7 +32,8 @@
   ;; TODO: add arities accepting fact as an entity map? this is how
   ;; the client sends the facts. the extra arity would just parse the
   ;; entity map into the attr/value input shape [_tag_ _value_]]
-  (add-fact [this creds datum-id fact]
+  (add-fact [this creds datum-id]
+            [this creds datum-id fact]
             [this creds datum-id attribute value])
   (update-fact [this creds fact]
                [this creds fact-id attribute value]
@@ -69,6 +71,10 @@
   (get-datum [this creds as-of ent-id]
     (let [db (datomic/db datomic-peer creds as-of)]
       (get-datum* db ent-id)))
+
+  (-get-fact [this creds ent-id]
+    (let [db (datomic/db datomic-peer creds)]
+      (get-fact* db ent-id)))
 
   (search-datums [this creds search]
     (let [db (datomic/db datomic-peer creds)]
@@ -152,30 +158,30 @@
            (datomic/db datomic-peer creds)
            user-teams)))
 
-  (add-fact [this creds ent-id {:keys [fact/attribute fact/value] :as fact}]
-    (add-fact this creds ent-id (entity->input attribute) (entity->input value)))
+(add-fact [this creds ent-id {:keys [fact/attribute fact/value] :as fact}]
+          (add-fact this creds ent-id (entity->input attribute) (entity->input value)))
 
-  (add-fact [this creds ent-id attribute value]
-    (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)
-          txdata (conj (:txdata fact)
-                       [:db/add ent-id :datum/fact (:ent-id fact)])
-          report @(datomic/transact datomic-peer creds txdata)]
-      (when (not-empty (get report :tx-data))
-        true)))
+(add-fact [this creds ent-id attribute value]
+          (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)
+                txdata (conj (:txdata fact)
+                             [:db/add ent-id :datum/fact (:ent-id fact)])
+                report @(datomic/transact datomic-peer creds txdata)]
+            (when (not-empty (get report :tx-data))
+              (get-datum this creds ent-id))))
 
-  (update-fact [this creds {:keys [db/id fact/attribute fact/value] :as fact}]
-    (update-fact this creds id (entity->input attribute) (entity->input value)))
+(update-fact [this creds {:keys [db/id fact/attribute fact/value] :as fact}]
+             (update-fact this creds id (entity->input attribute) (entity->input value)))
 
-  (update-fact [this creds fact-id attribute value]
-    (let [fact-diff (update-fact->txdata datomic-peer creds fact-id attribute value)
-          report    @(datomic/transact datomic-peer creds (:txdata fact-diff))]
-      (when (not-empty (get report :tx-data))
-        true)))
+(update-fact [this creds fact-id attribute value]
+             (let [fact-diff (update-fact->txdata datomic-peer creds fact-id attribute value)
+                   report    @(datomic/transact datomic-peer creds (:txdata fact-diff))]
+               (when (not-empty (get report :tx-data))
+                 (-get-fact this creds fact-id))))
 
-  (retract-datum [this creds ent-id]
-    (let [{:keys [txdata]} (retract-entity->txdata datomic-peer creds ent-id)
-          report @(datomic/transact datomic-peer creds txdata)]
-      report)))
+(retract-datum [this creds ent-id]
+               (let [{:keys [txdata]} (retract-entity->txdata datomic-peer creds ent-id)
+                     report @(datomic/transact datomic-peer creds txdata)]
+                 report)))
 
 (defn data-service []
   (map->DatomicDataService {:config nil}))

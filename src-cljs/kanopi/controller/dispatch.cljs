@@ -22,10 +22,9 @@
               :spa.logout/success   :spa.logout/failure
               :spa.register/success :spa.register/failure
 
-              :spa.offline.transaction/record
-
               :datum/create
               :datum/get
+              :datum.fact/add
               :datum.fact/update
               :datum.label/update
 
@@ -55,6 +54,7 @@
 
               :datum.create/success            :datum.create/failure
               :datum.get/success               :datum.get/failure
+              :datum.fact.add/success          :datum.fact.add/failure
               :datum.fact.update/success       :datum.fact.update/failure
               :datum.label.update/success      :datum.label.update/failure
               :spa.state.initialize/success    :spa.state.initialize/failure
@@ -66,6 +66,7 @@
 
               :datum/create
               :datum/get
+              :datum.fact/add
               :datum.fact/update
               :datum.label/update
               :spa.state/initialize
@@ -85,6 +86,7 @@
                      (let [{:keys [noun verb context]} v
                            root-crsr    (om/root-cursor (:app-state app-state))
                            mode         (get @root-crsr :mode)
+                           _ (info "Dispatcher current mode:" mode)
                            local-verbs  (get-in mode-verbs [mode :local])
                            remote-verbs (get-in mode-verbs [mode :remote])]
                        ;; first run v is nil

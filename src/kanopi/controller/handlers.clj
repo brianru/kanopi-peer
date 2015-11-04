@@ -114,6 +114,20 @@
              :datum.label.update/failure)
      :context {})))
 
+(defmethod request-handler :datum.fact/add
+  [request-context message]
+  (let [data-svc  (util/get-data-service request-context)
+        creds     (get-in message [:context :creds])
+        datum-id  (get-in message [:noun :datum-id])
+        result    (data/add-fact data-svc creds datum-id nil nil)
+        data      (data/get-datum data-svc creds datum-id)]
+    (hash-map
+     :noun data
+     :verb (if result
+             :datum.fact.add/success
+             :datum.fact.add/failure)
+     :context {})))
+
 (defmethod request-handler :datum.fact/update
   [request-context message]
   (let [data-svc  (util/get-data-service request-context)

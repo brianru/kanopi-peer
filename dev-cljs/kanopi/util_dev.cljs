@@ -10,7 +10,7 @@
 (def dev-config
   {:dimensions [:noun :verb]
    :aether-log true
-   :mode :spa.authenticated/online})
+   :mode :spa.unauthenticated/online})
 
 (defn new-system
   ([]
@@ -45,3 +45,6 @@
    :history (get-in system [:history])
    :search-results
    (ref-cursors/mk-ref-cursor-fn mock-search-results-app-state :search-results)})
+
+(defn app-state [system]
+  (get-in system [:app-state :app-state]))

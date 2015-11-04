@@ -95,7 +95,11 @@
 
   Consumers will pass either literals of entity refs to attr and value. The methods should take those inputs and generate the necessary transaction data (including nested entities, as necessary).
 
-  NOTE: at this stage we're only working with references and strings."
+  NOTE: at this stage we're only working with references and strings.
+  
+  NOTE: purpose did not implement ::retract methods. Facts must be
+  created with both an attribute and a value. Otherwise it is not a fact.
+  See kanopi.model.schema/Fact"
   (fn [datomic-peer creds ent-id attribute value]
     (mapv (partial describe-input datomic-peer creds)
           [attribute value])))
@@ -178,12 +182,18 @@
                [:db/add value-id value-attribute parsed-value]]))))
 
 (defn mk-fact
-  [datomic-peer creds attribute-id value-id]
-  (let [fact-id (d/tempid :db.part/structure)]
-    (hash-map
-     :ent-id fact-id
-     :txdata [[:db/add fact-id :fact/attribute attribute-id]
-              [:db/add fact-id :fact/value     value-id]])))
+  ([datomic-peer creds attribute-id value-id]
+   (let [fact-id (d/tempid :db.part/structure)]
+     (assert (or attribute-id fact-id)
+             "Fact must be created with at least one datom.")
+     (hash-map
+      :ent-id fact-id
+      :txdata (cond-> []
+                attribute-id
+                (conj [:db/add fact-id :fact/attribute attribute-id])
+                value-id
+                (conj [:db/add fact-id :fact/value     value-id]))))) 
+  )
 
 (defn mk-datum
   "ex: (mk-datum dp creds label [attr-id-tuple val-id-tuple]

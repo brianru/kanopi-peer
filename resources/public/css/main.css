@@ -55,6 +55,7 @@ input:focus {
 }
 a {
     color: inherit !important;
+    cursor: pointer;
 }
 a .glyphicon {
     color: #777;

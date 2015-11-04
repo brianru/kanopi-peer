@@ -45,6 +45,10 @@
 (defn get-datum [datum-id]
   (message :noun datum-id :verb :datum/get))
 
+(defn add-fact [datum-id]
+  (message :noun {:datum-id datum-id}
+           :verb :datum.fact/add))
+
 (defn update-fact [datum-id fact]
   (message :noun {:datum-id datum-id
                   :fact fact}

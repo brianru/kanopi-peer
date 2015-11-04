@@ -52,6 +52,7 @@
         ]
 
     (testing "assert fact"
+      (clojure.pprint/pprint ent-1)
       (let [new-fact (->> (clojure.set/difference (set (get ent-1 :datum/fact))
                                                   (set (get ent-0 :datum/fact)))
                           (first))]
@@ -93,7 +94,15 @@
         (is (= lbl' (get datum' :datum/label)))))
     
     (is (s/validate schema/Datum (data/get-datum (:data-service system) creds ent-id))
-        "No longer valid!")))
+        "No longer valid!")
+
+    (testing "add-fact"
+      (let [datum-id (data/init-datum (:data-service system) creds)
+            datum'   (data/add-fact (:data-service system) creds datum-id nil nil)]
+        (is (not-empty datum'))
+        (is (not-empty (get datum' :datum/fact)))))
+    
+    (component/stop system)))
 
 (deftest literal-types
   (let [system  (component/start (test-util/system-excl-web))
@@ -183,8 +192,6 @@
         datum-ids (datums-with-titles db)
         results (data/similar-datums data-svc creds (first datum-ids))
         ]
-    (println datum-ids)
-    (clojure.pprint/pprint (map (partial data/get-datum data-svc creds) datum-ids))
     (is (not-empty results))
     (testing "all books with titles are similar to each other"
       (let []
@@ -225,8 +232,7 @@
           results (data/recent-datums data-svc creds)
           db (get-db system)
           ]
-      ;(is (not-empty results))
-      (println "HERE" results)
+      ; (is (not-empty results))
       (component/stop system)))
 
 ;;(deftest authorization-controls

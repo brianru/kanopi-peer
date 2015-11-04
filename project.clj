@@ -124,6 +124,7 @@
                 :figwheel {:on-jsload "kanopi.core/reload-om"}
                 :compiler {:output-to "resources/public/js/main.js"
                            :output-dir "resources/public/js/out"
+                           ;; NOTE: yes leading slash here for a reason!
                            :asset-path "/js/out"
                            :main kanopi.core
                            :optimizations :none
@@ -136,7 +137,8 @@
                 :figwheel {:devcards true}
                 :compiler {:output-to "resources/public/js/main_devcards.js"
                            :output-dir "resources/public/js/out_devcards"
-                           :asset-path "/js/out_devcards"
+                           ;; NOTE: no leading slash here for a reason!
+                           :asset-path "js/out_devcards"
                            :main kanopi.devcards
                            :optimizations :none
                            :pretty-print true
