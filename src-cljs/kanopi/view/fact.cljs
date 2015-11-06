@@ -28,14 +28,18 @@
 
 (defn prepare-fact [entity state]
   (let [{:keys [fact/attribute fact/value]} state]
+    (assert (not-empty (get attribute :input-value))
+            "Must have a value!")
+    (assert (not-empty (get value     :input-value))
+            "Must have a value!")
     (cond-> {}
       (get entity :db/id)
       (assoc :db/id (get entity :db/id))
       
       true
-      (assoc :fact/attribute (hash-map (get attribute :input-type :literal/text)
+      (assoc :fact/attribute (hash-map (get attribute :input-type)
                                        (get attribute :input-value))
-             :fact/value     (hash-map (get value :input-type :literal/text)
+             :fact/value     (hash-map (get value :input-type)
                                        (get value :input-value)))
       )))
 
@@ -64,9 +68,7 @@
         red)
 
       :partial
-      (if editing
-        green
-        yellow)
+      yellow
 
       :complete
       (if editing
@@ -111,29 +113,6 @@
         :opacity "0.4"}]]
 
      ]))
-
-; (defn- merge-updated-data [owner]
-;   (let [attr'  (om/get-state owner :fact/attribute)
-;         value' (om/get-state owner :fact/value)
-;         fact   (om/get-props owner)]
-;     {:db/id (:db/id fact)
-;      :fact/attribute [(->> attr'
-;                            (merge (first (:fact/attribute fact)))
-;                            ((juxt :db/id identity))
-;                            (some identity))]
-;      :fact/value     [(->> value'
-;                            (merge (first (:fact/value fact)))
-;                            ((juxt :db/id identity))
-;                            (some identity))]
-;      }))
-
-
-(defn- handle-type-selection [owner tp evt]
-  (om/set-state! owner :selected-type tp)
-  (->> (msg/select-fact-part-type (om/get-state owner :fact)
-                                  (om/get-state owner :fact-part)
-                                  tp)
-       (msg/send! owner)))
 
 (defn available-input-types
   "TODO: use argument to filter and sort return value to give user the
@@ -189,14 +168,20 @@
 
                   :init-state
                   {:initial-input-value current-value
+                   :input-value current-value
                    :on-focus  (fn [v]
-                                (when (not-empty v)
-                                  (om/set-state! owner :editing part))) 
+                                (om/set-state! owner :editing part)) 
 
                    ;; TODO: focus on value input if editing attribute.
+                   :on-change (fn [v]
+                                (let [state  (om/get-state owner)
+                                      state' (-> state
+                                                (assoc-in [part :input-value] v)
+                                                (update-mode))]
+                                  (om/set-state! owner state')))
                    :on-submit (fn [v]
-                                (let [state (om/get-state owner)
-                                      state'(-> state
+                                (let [state  (om/get-state owner)
+                                      state' (-> state
                                                 (assoc-in [part :input-value] v)
                                                 (assoc :editing nil)
                                                 (update-mode))]
@@ -213,7 +198,10 @@
        [:div.fact-part-metadata.container
         (om/build dropdown/dropdown entity
                   {:init-state {:caret? true}
-                   :state {:toggle-label (name (get entity :input-type :literal/text))
+                   :state {:toggle-label (let [tp (get entity :input-type)]
+                                           (if (keyword? tp)
+                                             (name tp)
+                                             tp)) 
                            :menu-items (generate-menu-items
                                         current-value
                                         (fn [tp evt]
@@ -246,10 +234,24 @@
 
        ; I need computed attribute and value values.
        ; Keep track of: input-value, input-matched-entity
-       :fact/attribute (get props :fact/attribute)
-       :fact/value     (get props :fact/value)
+       :fact/attribute (let [attr (get props :fact/attribute)]
+                         (assoc attr
+                                :input-value (schema/get-value attr)
+                                :input-type  (schema/get-type  attr "Select a type"))) 
+       :fact/value     (let [valu (get props :fact/value)]
+                         (assoc valu
+                                :input-value (schema/get-value valu)
+                                :input-type  (schema/get-type  valu "Select a type")))
 
        })
+
+    om/IWillReceiveProps
+    (will-receive-props [_ next-props]
+      (let [curr-props (om/get-props owner)]
+        (when (not= (:fact/attribute next-props) (:fact/attribute curr-props))
+          (info "changed fact/attribute"))
+        (when (not= (:fact/value next-props) (:fact/value curr-props))
+          (info "changed fact/value"))))
 
     ; TODO: Synchronize props with component state when component updates
 

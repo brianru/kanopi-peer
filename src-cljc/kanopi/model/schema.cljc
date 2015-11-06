@@ -52,6 +52,21 @@
      :unknown
      default-value)))
 
+(defn get-type
+  [m default-type]
+  (case (describe-entity m)
+    :datum
+    :datum
+    
+    :fact
+    :fact
+    
+    :literal
+    (-> (apply dissoc m literal-meta-keys) (keys) (first))
+    
+    :unknown
+    default-type))
+
 (defn display-entity [m]
   (get-value m))
 

@@ -11,14 +11,7 @@
             [cljs-uuid-utils.core :as uuid]
             [cljs-time.core :as t]))
 
-;; NOTE: I'm aware there's no `open-dropdown!`. I don't know if we
-;; need one.
-(defn- toggle-dropdown! [owner]
-  (om/update-state! owner :expanded not))
-(defn- open-dropdown! [owner]
-  (om/set-state! owner :expanded true))
-(defn- close-dropdown! [owner]
-  (om/set-state! owner :expanded false))
+(declare open-dropdown!)
 
 ;; TODO: refactor into a re-usable timer toy thing
 (defn- start-hover! [owner]
@@ -34,6 +27,14 @@
 (defn- stop-hover! [owner]
   (async/put! (om/get-state owner ::kill-hover-clock-ch) :stop!))
 
+(defn- open-dropdown! [owner]
+  (om/set-state! owner :expanded true)
+  (stop-hover! owner))
+
+(defn- close-dropdown! [owner]
+  (om/set-state! owner :expanded false)
+  (stop-hover! owner))
+
 (defmulti dropdown-menu-item (fn [_ _ itm] (:type itm)))
 
 (defmethod dropdown-menu-item :link
@@ -41,7 +42,7 @@
   [:li.dropdown-menu-item
    {:key idx}
    [:a {:on-click (juxt (get itm :on-click (constantly nil))
-                        #(toggle-dropdown! owner))}
+                        #(close-dropdown! owner))}
     [:span (get itm :label)]]])
 
 (defmethod dropdown-menu-item :divider
@@ -64,16 +65,14 @@
   (let [{:keys [tab-index expanded toggle-icon-fn caret? toggle-label]}
         (om/get-state owner)]
     [:a.dropdown-toggle
-     {:on-click       #(toggle-dropdown! owner)
+     {:on-click       #(open-dropdown! owner)
       :data-toggle    "dropdown"
       :tab-index      tab-index
       :role           "button"
       :aria-haspopup  "true"
       :aria-expanded  expanded
       :on-mouse-enter #(start-hover! owner)
-      :on-mouse-leave (fn [_]
-                        (stop-hover!  owner)
-                        (om/set-state! owner :expanded false))}
+      :on-mouse-leave #(close-dropdown! owner)}
      (cond
       toggle-icon-fn
       [:span (toggle-icon-fn)

@@ -12,13 +12,17 @@
 (defonce system
   (component/start (dev-util/new-system)))
 
+(defcard fact-docs
+  "Facts work even when props are empty. Single component for
+  initialization viewing and editing.
+  ")
+
 (defcard empty-fact
   (dc/om-root fact/fact-next {:shared (dev-util/shared-state system)
                               :init-state {:datum-id -42
                                            :mode :empty
                                            :editing nil}
                               :state {:fact-count 0}})
-  {}
   {:inspect-data true, :history true})
 
 (defcard empty-fact-editing
@@ -27,6 +31,16 @@
                                            :mode :empty
                                            :editing :attribute}
                               :state {:fact-count 0}}))
+
+(defcard view-existing-fact
+  (dc/om-root fact/fact-next {:shared (dev-util/shared-state system)
+                              :init-state {:datum-id 42}
+                              :state {:fact-count 1}})
+  {:db/id 710
+   :fact/attribute {:db/id 810
+                    :literal/text "pattern"}
+   :fact/value     {:db/id 901
+                    :datum/label "lantern in the fog"}})
 
 (deftest correct-handle-states
   (is (fact/handle-fill :empty nil)          "red")
