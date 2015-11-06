@@ -86,7 +86,6 @@
                      (let [{:keys [noun verb context]} v
                            root-crsr    (om/root-cursor (:app-state app-state))
                            mode         (get @root-crsr :mode)
-                           _ (info "Dispatcher current mode:" mode)
                            local-verbs  (get-in mode-verbs [mode :local])
                            remote-verbs (get-in mode-verbs [mode :remote])]
                        ;; first run v is nil

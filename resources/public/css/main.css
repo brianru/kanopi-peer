@@ -25,6 +25,10 @@ input {
     line-height: 2rem !important;
     margin: 0 0.5rem !important;
 }
+.btn {
+    -webkit-transition: opacity 0.3s;
+    transition: opacity 0.3s;
+}
 span.view-editable-text {
     margin: 0 0.5rem !important;
 }

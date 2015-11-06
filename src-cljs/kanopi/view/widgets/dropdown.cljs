@@ -22,10 +22,12 @@
        ;; NOTE: non-nil value must be sent to kill-channel
        (when (nil? v)
          (open-dropdown! owner))
-       (async/close! kill-hover-clock)))))
+       (async/close! kill-hover-clock)))
+    nil))
 
 (defn- stop-hover! [owner]
-  (async/put! (om/get-state owner ::kill-hover-clock-ch) :stop!))
+  (async/put! (om/get-state owner ::kill-hover-clock-ch) :stop!)
+  nil)
 
 (defn- open-dropdown! [owner]
   (om/set-state! owner :expanded true)
@@ -40,14 +42,14 @@
 (defmethod dropdown-menu-item :link
   [owner idx itm]
   [:li.dropdown-menu-item
-   {:key idx}
+   {:react-key idx}
    [:a {:on-click (juxt (get itm :on-click (constantly nil))
                         #(close-dropdown! owner))}
     [:span (get itm :label)]]])
 
 (defmethod dropdown-menu-item :divider
   [owner idx itm]
-  [:li.divider {:role "separator", :key idx}])
+  [:li.divider {:role "separator", :react-key idx}])
 
 (defn dropdown-menu [owner]
   ;; FIXME: do something different when there's only 1 menu

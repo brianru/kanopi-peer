@@ -23,7 +23,8 @@
     {:type        "text"
      :placeholder "username"
      :value       (om/get-state owner username-key)
-     :on-change   #(om/set-state! owner username-key (.. % -target -value))
+     :on-change   (fn [evt]
+                    (om/set-state! owner username-key (.. evt -target -value))) 
      :on-key-down (partial handle-key-down owner submit-fn submittable)
      }]])
 
@@ -90,7 +91,7 @@
                                 :login    login-fn
                                 :logout   logout-fn
                                 )
-            submittable (not (some nil? [username password]))]
+            submittable (not (some empty? [username password]))]
         (html
          [:div.container-fluid
           [:div.row

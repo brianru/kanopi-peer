@@ -81,9 +81,7 @@
                       {:react-key "nil-fact"
                        :init-state {:datum-id (:db/id props)}
                        :state {:fact-count fact-count}})
-            ]
-           ]
-          ])))
+            ]]])))
     ))
 
 (defn similar-datums

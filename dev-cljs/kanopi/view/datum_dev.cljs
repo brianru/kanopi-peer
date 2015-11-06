@@ -21,10 +21,10 @@
      :current-team team}))
 
 (defcard view-empty-datum
-  "### Try updated the label or adding a fact
+  "### Try updating the label or adding a fact
   -> both should fail an assertion because datums should always have a
   db/id to be rendered.
-  
+
   TODO: should this even render?"
   (dc/om-root datum/body {:shared (dev-util/shared-state system)})
   {}

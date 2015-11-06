@@ -1,6 +1,7 @@
 (ns kanopi.devcards
   (:require [sablono.core :as sab]
             [kanopi.om-next]
+            [kanopi.transit-dev]
             [kanopi.aether.core-dev]
             [kanopi.view.fact-dev]
             [kanopi.view.datum-dev]

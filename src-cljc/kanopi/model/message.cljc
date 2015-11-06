@@ -255,7 +255,7 @@
       {:post [(valid-remote-message? %)]}
       (hash-map
        :noun {:uri             (history/get-route-for history :api)
-              :params          msg
+              :params          (select-keys msg [:noun :verb :context])
               :method          :post
               :format          :transit
               :response-format :transit

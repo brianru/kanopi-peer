@@ -5,17 +5,17 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :min-lein-version "2.5.0"
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [com.stuartsierra/component "0.2.3"]
+                 [com.stuartsierra/component "0.3.0"]
                  [com.taoensso/timbre "4.1.4"]
                  [environ "1.0.1"]
-                 [com.cognitect/transit-clj "0.8.283"]
+                 [com.cognitect/transit-clj "0.8.285"]
 
                  ;; Core libraries
-                 [org.clojure/core.async "0.1.346.0-17112a-alpha"]
+                 [org.clojure/core.async "0.2.371"]
                  [com.cognitect/transit-cljs "0.8.225"]
                  ;; resolves a dependency issue with figwheel and
                  ;; core.async
-                 [org.clojure/core.memoize "0.5.6"]
+                 [org.clojure/core.memoize "0.5.8"]
 
                  ;; Fuzzy string matching
                  [clj-fuzzy "0.3.1"]
@@ -23,16 +23,19 @@
                  ;; Client
                  [org.clojure/clojurescript "1.7.145"]
                  [quile/component-cljs "0.2.4" :exclusions [org.clojure/clojure]]
-                 [org.omcljs/om "1.0.0-alpha3"
+                 [org.omcljs/om "1.0.0-alpha14"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [cljsjs/react-with-addons "0.14.0-0"]
-                 [bidi "1.21.0"]
+                 [bidi "1.22.0"]
                  [kibu/pushy "0.3.6"]
-                 [cljs-ajax "0.5.0"]
+                 ;; NOTE: problems with cljs-ajax 0.5.1
+                 ;; Not pulling :handler out of req map before writing
+                 ;; to transit json.
+                 [cljs-ajax "0.5.1"]
                  [com.andrewmcveigh/cljs-time "0.3.14"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.cemerick/url "0.1.1"]
-                 [sablono "0.3.6"
+                 [sablono "0.4.0"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [jamesmacaulay/zelkova "0.4.0"]
                  [devcards "0.2.0-8"]
@@ -49,7 +52,7 @@
                  ;; manually.
                  [com.cemerick/friend "0.2.1"]
                  [ring/ring-defaults "0.1.5"]
-                 [ring-middleware-format "0.6.0"]
+                 [ring-middleware-format "0.7.0"]
                  [hiccup "1.0.5"]
                  [crypto-password "0.1.3"]
                  [cheshire "5.5.0"]
@@ -82,10 +85,10 @@
              {:jvm-opts ["-XX:MaxPermSize=128M"]
               :plugins [[lein-environ "1.0.1"]
                         [lein-ancient "0.6.6"]]
-              :dependencies [[org.clojure/tools.nrepl "0.2.10"]
+              :dependencies [[org.clojure/tools.nrepl "0.2.12"]
                              [org.clojure/tools.namespace "0.2.11"]
                              [ring/ring-devel "1.4.0"]
-                             [ring/ring-mock "0.2.0"]
+                             [ring/ring-mock "0.3.0"]
                              [org.clojure/data.codec "0.1.0"]
                              [org.clojure/data.csv "0.1.3"]
                              
@@ -98,10 +101,10 @@
 
              :devcards
              {:plugins [[lein-environ "1.0.1"]]
-              :dependencies [[org.clojure/tools.nrepl "0.2.10"]
+              :dependencies [[org.clojure/tools.nrepl "0.2.12"]
                              [org.clojure/tools.namespace "0.2.11"]
                              [ring/ring-devel "1.4.0"]
-                             [ring/ring-mock "0.2.0"]
+                             [ring/ring-mock "0.3.0"]
                              [org.clojure/data.codec "0.1.0"]
                              [org.clojure/data.csv "0.1.3"]
                              

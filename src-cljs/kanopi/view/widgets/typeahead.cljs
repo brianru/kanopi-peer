@@ -57,6 +57,8 @@
     (let [[idx selected-result]
           (nth search-results (om/get-state owner :selection-index) nil)
           ]
+      (. evt preventDefault)
+
       (if selected-result
         (do
          ; NOTE: this should only happen when user is not editing the typeahead
@@ -71,18 +73,15 @@
          ;; even if its default is used, which always evaluates to nil
          ((om/get-state owner :on-click) selected-result evt))
         (do
-         (handle-submission owner evt))
+         (handle-submission owner evt)) )
 
-        )
-
-      (. evt preventDefault)
       (.. evt -target (blur)))
 
     "Escape"
     (do
+     (. evt preventDefault)
      (om/set-state! owner :focused false)
      (om/update-state! owner #(assoc % :input-value (:initial-input-value %)))
-     (. evt preventDefault)
      (.. evt -target (blur)))
 
     ;; default
@@ -182,7 +181,16 @@
                   {:on-focus    (fn [_]
                                   (om/set-state! owner :focused true)
                                   (on-focus (get state :input-value))) 
-                   :on-blur     (fn [_]
+                   :on-blur     (fn [evt]
+                                  ;; Not unfocused by previous event
+                                  ;; handler! Must handle here!
+                                  (when (om/get-state owner :focused)
+                                    ;; FIXME: anything else to do here?
+                                    ;; submit or cancel?
+                                    ;; I must choose one. It makes no
+                                    ;; sense to do neither.
+                                    (.. evt -target (blur)))
+
                                   (on-blur (get state :input-value)))
                    :tab-index (get state :tab-index)
                    :value       (or (get state :input-value)
