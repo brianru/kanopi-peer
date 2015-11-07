@@ -12,9 +12,20 @@
              :refer-macros (log trace debug info warn error fatal report)]
             ))
 
+(defn log-msg! [app-state msg]
+  (om/transact! app-state :log
+                (fn [log]
+                  (if (< (count log) 100)
+                    (conj log msg)
+                    (vector msg)))))
+
 (defmulti local-event-handler
   (fn [aether history app-state msg]
     (println "local-event-handler" msg)
+    ;; This may not be idiomatic, but it's the simplest place to do
+    ;; it.
+    (log-msg! app-state msg)
+
     (get msg :verb))
   :default
   :log)

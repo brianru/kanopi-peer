@@ -63,6 +63,7 @@
                  ;; back
                  :search-results {"foo" [[0.75 "food"] [0.42 "baffoon"]]}
                  :error-messages []
+                 :log []
                  }
                 stored-app-state
                 ))]
