@@ -4,38 +4,36 @@
             [om.core :as om]
             [sablono.core :refer-macros [html] :include-macros true]
             [kanopi.model.ref-cursors :as ref-cursors]
+            [kanopi.model.schema :as schema]
             [kanopi.util.browser :as browser]
             ))
 
-(defn datum-list-entry [owner [db/id lbl _ _]]
+(defn datum-list-entry [owner [{:keys [db/id datum/label] :as datum} & _]]
   [:div
    [:a {:href (when id
                 (browser/route-for owner :datum :id id))}
-    [:span lbl]]])
+    [:span (schema/get-value datum)]]])
 
 (defn most-viewed-datums [owner datums]
   [:div.panel.panel-default
    [:div.panel-heading
     [:h3.panel-title "Most Viewed"]]
    (into [:div.panel-body]
-         (map datum-list-entry datums)) 
-   ])
+         (doall (map (partial datum-list-entry owner) datums))) ])
 
 (defn most-edited-datums [owner datums]
   [:div.panel.panel-default
    [:div.panel-heading
     [:h3.panel-title "Most Edited"]]
    (into [:div.panel-body]
-         (map datum-list-entry datums))
-   ])
+         (doall (map (partial datum-list-entry owner) datums)))])
 
 (defn recently-touched-datums [owner datums]
   [:div.panel.panel-default
    [:div.panel-heading
     [:h3.panel-title "Recent"]]
    (into [:div.panel-body]
-         (map datum-list-entry datums))
-   ])
+         (doall (map (partial datum-list-entry owner) datums)))])
 
 (defn suggestions
   [props owner opts]
