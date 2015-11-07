@@ -12,6 +12,8 @@
   "
   (:require #?@(:cljs [[om.core :as om]
                        [schema.core :as s :include-macros true]
+                       [schema.experimental.abstract-map :as abstract-map
+                        :include-macros true]
                        [kanopi.controller.history :as history]
                        [taoensso.timbre :as timbre
                         :refer-macros (log trace debug info warn error fatal report)]
@@ -22,6 +24,7 @@
                        ]
                 :clj  [[clojure.string]
                        [schema.core :as s]
+                       [schema.experimental.abstract-map :as abstract-map]
                        [cemerick.friend :as friend]
                        [taoensso.timbre :as timbre
                         :refer (log trace debug info warn error fatal report)]
@@ -32,7 +35,16 @@
 ;; Pure cross-compiled message generators
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
-(defn message [& args]
+(s/defschema Message
+  (abstract-map/abstract-map-schema
+   :verb
+   {:noun    schema/Noun
+    :verb    schema/Verb
+    :context schema/Context
+    :tx/id   s/Str}))
+
+(s/defn message :- Message
+  [& args]
   (let [{:keys [noun verb context]
          :or {noun {} context {}}}
         (apply hash-map args)]
@@ -42,26 +54,51 @@
      :verb verb
      :context context)))
 
-(defn get-datum [datum-id]
+(abstract-map/extend-schema GetDatum Message
+                            [:datum/get]
+                            {:noun schema/DatomicId})
+(s/defn get-datum :- GetDatum
+  [datum-id]
   (message :noun datum-id :verb :datum/get))
 
-(defn add-fact [datum-id]
+(abstract-map/extend-schema AddFact Message
+                            [:datum.fact/add]
+                            {:noun {:datum-id schema/DatomicId}})
+(s/defn add-fact :- AddFact
+  [datum-id]
   (message :noun {:datum-id datum-id}
            :verb :datum.fact/add))
 
-(defn update-fact [datum-id fact]
+(abstract-map/extend-schema UpdateFact Message
+                            [:datum.fact/update]
+                            {:noun {:datum-id schema/DatomicId
+                                    :fact     schema/Fact}})
+(s/defn update-fact :- UpdateFact
+  [datum-id fact]
   (message :noun {:datum-id datum-id
                   :fact fact}
            :verb :datum.fact/update))
 
-(defn update-datum-label [ent new-label]
+(abstract-map/extend-schema UpdateDatumLabel Message
+                            [:datum.label/update]
+                            {:noun {:existing-entity schema/Datum
+                                    :new-label       s/Str}})
+(s/defn update-datum-label :- UpdateDatumLabel
+  [ent new-label]
   (message :noun {:existing-entity ent, :new-label new-label}
            :verb :datum.label/update))
 
-(defn initialize-client-state [user]
+(abstract-map/extend-schema InitializeClientState Message
+                            [:spa.state/initialize]
+                            {:noun schema/Credentials})
+(s/defn initialize-client-state :- InitializeClientState
+  [user]
   (message :noun user, :verb :spa.state/initialize))
 
-(defn create-datum
+(abstract-map/extend-schema CreateDatum Message
+                            [:datum/create]
+                            {})
+(s/defn create-datum :- CreateDatum
   ([]
    (message :verb :datum/create)))
 
@@ -79,7 +116,11 @@
    (message :noun {:insight txt}
             :verb :insight/record)))
 
-(defn search
+(abstract-map/extend-schema Search Message
+                            [:spa.navigate/search]
+                            {:noun {:query-string schema/QueryString
+                                    :entity-type  s/Keyword}})
+(s/defn search :- Search
   ([q]
    (search q nil))
   ([q tp]
