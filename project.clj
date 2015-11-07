@@ -28,9 +28,6 @@
                  [cljsjs/react-with-addons "0.14.0-0"]
                  [bidi "1.22.0"]
                  [kibu/pushy "0.3.6"]
-                 ;; NOTE: problems with cljs-ajax 0.5.1
-                 ;; Not pulling :handler out of req map before writing
-                 ;; to transit json.
                  [cljs-ajax "0.5.1"]
                  [com.andrewmcveigh/cljs-time "0.3.14"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]

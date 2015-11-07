@@ -172,10 +172,10 @@
         ]
     (is (not-empty results))
 
-    (testing "context-datums are all datums"
+    (testing "context-datums all have values"
       (is (->> results
                (map first)
-               (map (comp :datum/label (partial d/entity db)))
+               (map #(schema/get-value % nil))
                (every? identity))))
 
     (testing "one step removed")
@@ -202,9 +202,8 @@
     (testing "similar datums are all datums"
       (is (->> results
                (map first)
-               (map (comp :datum/label (partial d/entity db)))
-               (every? identity)
-               )))
+               (map #(schema/get-value % nil))
+               (every? identity))))
 
     (component/stop system)
     ))

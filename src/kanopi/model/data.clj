@@ -77,50 +77,53 @@
       (get-fact* db ent-id)))
 
   (search-datums [this creds search]
-    (let [db (datomic/db datomic-peer creds)]
-      (d/q '[:find ?score ?entity
-             :in $ ?search
-             :where [(fulltext $ :datum/label ?search) [[?entity ?name ?tx ?score]]]
-             ]
-           db search)))
+    (let [db (datomic/db datomic-peer creds)
+          results (d/q '[:find ?score ?entity
+                         :in $ ?search
+                         :where [(fulltext $ :datum/label ?search) [[?entity ?name ?tx ?score]]]
+                         ]
+                       db search)]
+      (or results [])))
 
   (context-datums [this creds ent-id]
-    (let []
-      (->> (d/q
-            '[:find ?subj ?attr ?ent-id
-              :in $ ?ent-id
-              :where
-              [?subj :datum/fact ?fact]
-              [?fact :fact/attribute ?attr]
-              [?fact :fact/value ?ent-id]]
-            (datomic/db datomic-peer creds)
-            ent-id)
-           (sort-by first)
-           )
-      ))
+    (let [matches (->> (d/q
+                        '[:find ?subj ?attr
+                          :in $ ?ent-id
+                          :where
+                          [?subj :datum/fact ?fact]
+                          [?fact :fact/attribute ?attr]
+                          [?fact :fact/value ?ent-id]]
+                        (datomic/db datomic-peer creds)
+                        ent-id)
+                       (take 10))
+          ]
+      (mapv (fn [result]
+              (mapv (partial get-datum this creds) result))
+            matches)))
 
   (similar-datums [this creds ent-id]
     ;; TODO: this should be more complex. sharing a fact is too
     ;; strict. what about similar attrs in different facts? (diff vals?)
     (let [datums-with-shared-facts []
-          datums-with-shared-attrs []]
-      (->> (d/q
-            '[:find ?subj ?attr ?valu
-              :in $ ?ent-id
-              :where
-              [?ent-id :datum/fact ?fact]
-              [?subj :datum/fact ?fact]
-              [(!= ?ent-id ?subj)]
-              [?fact :fact/attribute ?attr]
-              [?fact :fact/value ?valu]
+          datums-with-shared-attrs []
+          matches (->> (d/q
+                        '[:find ?subj ?attr ?valu
+                          :in $ ?ent-id
+                          :where
+                          [?ent-id :datum/fact ?fact]
+                          [?subj :datum/fact ?fact]
+                          [(!= ?ent-id ?subj)]
+                          [?fact :fact/attribute ?attr]
+                          [?fact :fact/value ?valu]
 
-              ]
-            (datomic/db datomic-peer creds)
-            ent-id)
-           (sort-by first)
-           )
-
-      ))
+                          ]
+                        (datomic/db datomic-peer creds)
+                        ent-id)
+                       (take 10))
+          ]
+      (mapv (fn [result]
+              (mapv (partial get-datum this creds) result))
+            matches)))
 
   (user-datum [this creds datum-id]
     (hash-map :context-datums
@@ -132,14 +135,18 @@
               ))
 
   (most-edited-datums [this creds]
-    (let [user-teams (->> creds :teams (mapv :db/id))]
-      (d/q '[:find ?e (count-distinct ?tx)
-             :in $ [?user-team ...]
-             :where
-             [?e :datum/team ?user-team]
-             [?e _ _ ?tx]]
-           (datomic/db datomic-peer creds)
-           user-teams)))
+    (let [user-teams (->> creds :teams (mapv :db/id))
+          results (->> (d/q '[:find ?e (count-distinct ?tx)
+                              :in $ [?user-team ...]
+                              :where
+                              [?e :datum/team ?user-team]
+                              [?e _ _ ?tx]]
+                            (datomic/db datomic-peer creds)
+                            user-teams)
+                       (take 10))]
+      (mapv (fn [[datum-id cnt]]
+              (vector (get-datum this creds datum-id) cnt))
+            results)))
 
   (most-viewed-datums [this creds]
     (let []
@@ -147,16 +154,20 @@
 
   (recent-datums [this creds]
     ;; TODO: filter by recency
-    (let [user-teams (->> creds :teams (mapv :db/id))]
-      (d/q '[:find ?e ?time ?tx
-             :in $ [?user-team ...]
-             :where
-             [?e :datum/team ?user-team]
-             [?e _ _ ?tx]
-             [?tx :db/txInstant ?time]
-             ]
-           (datomic/db datomic-peer creds)
-           user-teams)))
+    (let [user-teams (->> creds :teams (mapv :db/id))
+          results    (->> (d/q '[:find ?e ?time ?tx
+                                 :in $ [?user-team ...]
+                                 :where
+                                 [?e :datum/team ?user-team]
+                                 [?e _ _ ?tx]
+                                 [?tx :db/txInstant ?time]
+                                 ]
+                               (datomic/db datomic-peer creds)
+                               user-teams)
+                          )]
+      (mapv (fn [[datum-id tm tx]]
+              (vector (get-datum this creds datum-id) tm tx))
+            results)))
 
 (add-fact [this creds ent-id {:keys [fact/attribute fact/value] :as fact}]
           (add-fact this creds ent-id (entity->input attribute) (entity->input value)))
