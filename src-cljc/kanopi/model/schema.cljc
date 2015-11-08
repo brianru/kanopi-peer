@@ -90,7 +90,7 @@
 (s/defschema DatomicId s/Int)
 
 ;; TODO: flesh this out based on lucene search syntax
-(s/defschema QueryString s/Str)
+;(s/defschema QueryString s/Str)
 
 (s/defschema UserId
   (s/conditional #(>= (count %) 3) s/Str))

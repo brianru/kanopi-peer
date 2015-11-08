@@ -191,10 +191,15 @@
                         (assoc-in [:cache ent-id :datum/label] label')
                         (ensure-current-datum-is-updated ent-id))))))
 
-;; TODO: implement.
+;; FIXME: what about cache?
 (defmethod local-event-handler :datum.label.update/success
   [aether history app-state msg]
-  )
+  (om/transact! app-state
+                (fn [app-state]
+                  (let [datum-id (get-in msg [:noun :datum :db/id])]
+                    (-> app-state
+                        (assoc :datum (get-in msg [:noun]))
+                        (assoc-in [:cache datum-id] (get-in msg [:noun :datum])))))))
 
 (defmethod local-event-handler :datum.label.update/failure
   [aether history app-state msg]
@@ -211,8 +216,7 @@
     (when-not (or (clojure.string/blank? base-string)
                   (clojure.string/blank? match-string))
       (list (/ (count base-string) (count match-string))
-            ent)))
-  )
+            ent))))
 
 (defn- matching-entity-type [tp ent]
   (if-not tp true
@@ -302,6 +306,7 @@
 ;; as performing action remotely? eg. send success/failure msgs?
 ;; OR, should I purposely not do this and have a clear distinction b/w
 ;; actions handled transactionally vs hypothetically
+;; FIXME: what about cache?
 (defmethod local-event-handler :datum/get
   [aether history app-state msg]
   (om/transact! app-state

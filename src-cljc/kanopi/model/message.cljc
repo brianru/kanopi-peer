@@ -55,24 +55,24 @@
      :context context)))
 
 (abstract-map/extend-schema GetDatum Message
-                            [:datum/get]
-                            {:noun schema/DatomicId})
+  [:datum/get]
+  {:noun schema/DatomicId})
 (s/defn get-datum :- GetDatum
   [datum-id]
   (message :noun datum-id :verb :datum/get))
 
 (abstract-map/extend-schema AddFact Message
-                            [:datum.fact/add]
-                            {:noun {:datum-id schema/DatomicId}})
+  [:datum.fact/add]
+  {:noun {:datum-id schema/DatomicId}})
 (s/defn add-fact :- AddFact
   [datum-id]
   (message :noun {:datum-id datum-id}
            :verb :datum.fact/add))
 
 (abstract-map/extend-schema UpdateFact Message
-                            [:datum.fact/update]
-                            {:noun {:datum-id schema/DatomicId
-                                    :fact     schema/Fact}})
+  [:datum.fact/update]
+  {:noun {:datum-id schema/DatomicId
+          :fact     schema/Fact}})
 (s/defn update-fact :- UpdateFact
   [datum-id fact]
   (message :noun {:datum-id datum-id
@@ -80,24 +80,24 @@
            :verb :datum.fact/update))
 
 (abstract-map/extend-schema UpdateDatumLabel Message
-                            [:datum.label/update]
-                            {:noun {:existing-entity schema/Datum
-                                    :new-label       s/Str}})
+  [:datum.label/update]
+  {:noun {:existing-entity schema/Datum
+          :new-label       s/Str}})
 (s/defn update-datum-label :- UpdateDatumLabel
   [ent new-label]
   (message :noun {:existing-entity ent, :new-label new-label}
            :verb :datum.label/update))
 
 (abstract-map/extend-schema InitializeClientState Message
-                            [:spa.state/initialize]
-                            {:noun schema/Credentials})
+  [:spa.state/initialize]
+  {:noun schema/Credentials})
 (s/defn initialize-client-state :- InitializeClientState
   [user]
   (message :noun user, :verb :spa.state/initialize))
 
 (abstract-map/extend-schema CreateDatum Message
-                            [:datum/create]
-                            {})
+  [:datum/create]
+  {})
 (s/defn create-datum :- CreateDatum
   ([]
    (message :verb :datum/create)))
@@ -117,9 +117,9 @@
             :verb :insight/record)))
 
 (abstract-map/extend-schema Search Message
-                            [:spa.navigate/search]
-                            {:noun {:query-string schema/QueryString
-                                    :entity-type  s/Keyword}})
+  [:spa.navigate/search]
+  {:noun {:query-string s/Str
+          :entity-type  s/Keyword}})
 (s/defn search :- Search
   ([q]
    (search q nil))
@@ -129,6 +129,10 @@
 
 
 ;; Server-only utilities for parsing messages out of ring request maps
+;; TODO: refactor this to a schema transformation
+;; https://github.com/Prismatic/schema/wiki/Writing-Custom-Transformations
+;; http://blog.getprismatic.com/schema-0-2-0-back-with-clojurescript-data-coercion/
+;; http://camdez.com/blog/2015/08/27/practical-data-coercion-with-prismatic-schema/
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #?(:clj
    (defn- request->noun [ctx noun]
@@ -151,7 +155,7 @@
        (assoc message-context :creds creds))))
 
 #?(:clj
-   (defn remote->local
+   (s/defn remote->local :- schema/Message
      "If for some reason the request is in some way logically incomplete,
      here's the place to indicate that."
      ([ctx]
@@ -381,13 +385,13 @@
       [history app-state msg]
       (standard-api-post history msg))
 
-(defmethod local->remote :datum/create
-  [history app-state msg]
-  (standard-api-post history msg))
+    (defmethod local->remote :datum/create
+      [history app-state msg]
+      (standard-api-post history msg))
 
-(defmethod local->remote :datum/get
-  [history app-state msg]
-  (standard-api-post history msg))
+    (defmethod local->remote :datum/get
+      [history app-state msg]
+      (standard-api-post history msg))
 
 (defmethod local->remote :datum.label/update
   [history app-state msg]
