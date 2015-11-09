@@ -103,6 +103,8 @@
             "Register"]
            ]]]]]])))
 
+;; TODO: refactor to accept ordered set of messages which the server
+;; should handle and return responses for (in same order)
 (defn register!
   [ctx]
   (let [params (get-in ctx [:request :params])
@@ -115,6 +117,7 @@
      ;; NOTE: could this actually created an authenticated response?
      ;; I don't think that's happening b/c registration does not flow
      ;; through friend.
+     ;; FIXME: refactor to 'creds->friend-identity'
      ::identity (-> (auth/credentials authenticator username)
                     (dissoc :password)
                     ;; to make this match the friend

@@ -2,6 +2,7 @@
   (:require [com.stuartsierra.component :as component]
             [kanopi.model.storage.datomic :refer (datomic-peer)]
             [kanopi.model.data :refer (data-service)]
+            [kanopi.model.session :refer (session-service)]
             [kanopi.controller.authenticator :as authenticator]
             [kanopi.controller.authorizer :as authorizer]
             [kanopi.controller.web-server :as server]
@@ -26,6 +27,11 @@
       (data-service)
       {:datomic-peer :datomic-peer})
 
+     :session-service
+     (component/using
+      (session-service (with-dev :session))
+      {:data-service :data-service})
+
      :authenticator
      (component/using
       (authenticator/new-authentication-service (with-dev :auth))
@@ -39,8 +45,9 @@
      :web-app
      (component/using
       (app/new-web-app (with-dev :web-app))
-      {:data-service :data-service
-       :authenticator :authenticator})
+      {:data-service    :data-service
+       :session-service :session-service
+       :authenticator   :authenticator})
 
      :web-server
      (component/using

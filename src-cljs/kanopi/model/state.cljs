@@ -1,4 +1,5 @@
 (ns kanopi.model.state
+  "This is session state. Outside the client it is always referred to as session data."
   (:require [quile.component :as component]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]

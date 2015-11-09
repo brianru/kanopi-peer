@@ -52,7 +52,7 @@
                  [ring-middleware-format "0.7.0"]
                  [hiccup "1.0.5"]
                  [crypto-password "0.1.3"]
-                 [cheshire "5.5.0"]
+                 [cheshire "5.5.0"] ;;; JSON
                  [clj-time "0.11.0"]
                  [garden "1.3.0-SNAPSHOT"]
 

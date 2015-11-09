@@ -14,6 +14,8 @@
   [request-context message]
   (identity message))
 
+;; TODO: refactor to use session service
+;; this is really initialize the client's session
 (defmethod request-handler :spa.state/initialize
   [request-context message]
   (let [data-svc (util/get-data-service request-context)

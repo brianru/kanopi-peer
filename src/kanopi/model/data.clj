@@ -42,8 +42,7 @@
   (retract-datum [this creds ent-id]
                  "Assumes only 1 user has access, and thus retracting totally retracts it.
                  If more than 1 user has that access this must only retract the appropriate
-                 team(s) from the entity.")
-  )
+                 team(s) from the entity."))
 
 (defn annotate-transaction
   "TODO: add tx datums
@@ -152,22 +151,22 @@
     (let []
       []))
 
-  (recent-datums [this creds]
-    ;; TODO: filter by recency
-    (let [user-teams (->> creds :teams (mapv :db/id))
-          results    (->> (d/q '[:find ?e ?time ?tx
-                                 :in $ [?user-team ...]
-                                 :where
-                                 [?e :datum/team ?user-team]
-                                 [?e _ _ ?tx]
-                                 [?tx :db/txInstant ?time]
-                                 ]
-                               (datomic/db datomic-peer creds)
-                               user-teams)
-                          )]
-      (mapv (fn [[datum-id tm tx]]
-              (vector (get-datum this creds datum-id) tm tx))
-            results)))
+  ;; TODO: filter by recency
+(recent-datums [this creds]
+               (let [user-teams (->> creds :teams (mapv :db/id))
+                     results    (->> (d/q '[:find ?e ?time ?tx
+                                            :in $ [?user-team ...]
+                                            :where
+                                            [?e :datum/team ?user-team]
+                                            [?e _ _ ?tx]
+                                            [?tx :db/txInstant ?time]
+                                            ]
+                                          (datomic/db datomic-peer creds)
+                                          user-teams)
+                                     )]
+                 (mapv (fn [[datum-id tm tx]]
+                         (vector (get-datum this creds datum-id) tm tx))
+                       results)))
 
 (add-fact [this creds ent-id {:keys [fact/attribute fact/value] :as fact}]
           (add-fact this creds ent-id (entity->input attribute) (entity->input value)))

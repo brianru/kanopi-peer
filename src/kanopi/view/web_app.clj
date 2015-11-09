@@ -65,7 +65,7 @@
   (fn [req]
     (handler (assoc req k payload))))
 
-(defrecord WebApp [config data-service app-handler authenticator]
+(defrecord WebApp [config data-service session-service app-handler authenticator]
 
   component/Lifecycle
   (start [this]
@@ -88,6 +88,7 @@
             (cond-> (:dev config)
               (wrap-trace :header :ui))
             ;(wrap-ensure-session)
+            (wrap-add-to-req :session-service session-service)
             (wrap-add-to-req :data-service data-service)
             (wrap-add-to-req :authenticator authenticator)
             (->> (assoc this :app-handler))))))

@@ -57,6 +57,9 @@
 (defn get-web-handler [web-app]
   (get web-app :app-handler))
 
+(defn get-session-service [ctx]
+  (get-in ctx [:request :session-service]))
+
 ;; ### Datomic EntityMap helper fns for navigating the schema
 (defn get-literal-or-label [ent k]
   (or (-> ent (get k) (get :datum/label))

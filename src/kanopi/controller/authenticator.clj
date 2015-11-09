@@ -121,7 +121,8 @@
     (let [init-data (some-> (get config :init-user-data)
                             (slurp)
                             (read-string))]
-      (assoc this :user-lookup-fn (partial credentials this)
+      (assoc this
+             :user-lookup-fn (partial credentials this)
              :init-data init-data)))
 
   (stop [this]
