@@ -33,11 +33,12 @@
   (start [this]
     (let [cookie           (get-and-remove-cookie "kanopi-init")
           stored-app-state {} ;(local-storage/get! local-storage {})
+          _ (println cookie)
           atm (atom
                (util/deep-merge
                 {
-                 :mode (get config :mode :spa.unauthenticated/online)
-                 :user (get cookie :user {})  
+                 :mode :spa.unauthenticated/online
+                 :user {}  
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
                  :page {}
@@ -55,7 +56,7 @@
 
                  ;; local cache
                  ;; {<ent-id> <entity>}
-                 :cache (get cookie :cache {})
+                 :cache {}
 
                  ;; TODO: this map grows too fast.
                  ;; implement a map that only stores the last n
@@ -65,6 +66,7 @@
                  :error-messages []
                  :log []
                  }
+                cookie
                 stored-app-state
                 ))]
       (info "create ephemeral app state" @atm)

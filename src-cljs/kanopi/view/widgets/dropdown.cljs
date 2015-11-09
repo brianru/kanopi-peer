@@ -29,6 +29,10 @@
   (async/put! (om/get-state owner ::kill-hover-clock-ch) :stop!)
   nil)
 
+(defn- toggle-dropdown! [owner]
+  (om/update-state! owner :expanded not)
+  (stop-hover! owner))
+
 (defn- open-dropdown! [owner]
   (om/set-state! owner :expanded true)
   (stop-hover! owner))
@@ -63,33 +67,58 @@
        :on-mouse-leave #(close-dropdown! owner)}]
      (map-indexed (partial dropdown-menu-item owner) menu-items))))
 
-(defn link-dropdown-toggle [owner]
-  (let [{:keys [tab-index expanded toggle-icon-fn caret? toggle-label]}
+(defn link-dropdown [owner]
+  (let [{:keys [tab-index expanded toggle-icon-fn caret? toggle-label classes]}
         (om/get-state owner)]
-    [:a.dropdown-toggle
-     {:on-click       #(open-dropdown! owner)
-      :data-toggle    "dropdown"
-      :tab-index      tab-index
-      :role           "button"
-      :aria-haspopup  "true"
-      :aria-expanded  expanded
-      :on-mouse-enter #(start-hover! owner)
+    [:li.dropdown
+     {:class (concat [] classes)}
+     [:a.dropdown-toggle
+      {:on-click       #(toggle-dropdown! owner)
+       :data-toggle    "dropdown"
+       :tab-index      tab-index
+       :role           "button"
+       :aria-haspopup  "true"
+       :aria-expanded  expanded
+       :on-mouse-enter #(start-hover! owner)
+       :on-mouse-leave #(close-dropdown! owner)}
+      (cond
+       toggle-icon-fn
+       [:span (toggle-icon-fn)
+        (when caret?
+          [:span.caret])]
+
+       toggle-label
+       [:span (str toggle-label " ")
+        (when caret?
+          [:span.caret])]
+       )]
+     (dropdown-menu owner)]))
+
+(defn split-button-dropdown [owner]
+  (let [{:keys [tab-index expanded toggle-label button-on-click]}
+        (om/get-state owner)]
+    [:div.btn-group
+     {:on-mouse-enter #(start-hover! owner)
       :on-mouse-leave #(close-dropdown! owner)}
-     (cond
-      toggle-icon-fn
-      [:span (toggle-icon-fn)
-       (when caret?
-         [:span.caret])]
+     [:button.btn
+      {:type "button"
+       :on-click button-on-click}
+      toggle-label]
 
-      toggle-label
-      [:span (str toggle-label " ")
-       (when caret?
-         [:span.caret])]
-      )]))
+     [:button.btn.dropdown-toggle
+      {:data-toggle "dropdown"
+       :aria-haspopup "true"
+       :aria-expanded expanded
+       :on-click #(toggle-dropdown! owner)
+       :tab-index tab-index
+       ; :on-mouse-enter #(start-hover! owner)
+       ; :on-mouse-leave #(close-dropdown! owner)
+       }
+      [:span.caret]
+      [:span.sr-only
+       "Toggle Dropdown"]]
 
-;; TODO: implement.
-(defn split-button-dropdown-toggle [owner]
-  )
+     (dropdown-menu owner)]))
 
 (defn dropdown
   "All configuration is passed via local state."
@@ -101,6 +130,8 @@
       {
        :toggle-type :link
        :toggle-label "Toggle label"
+       ;; For current value with split-button-dropdown.
+       :button-on-click (constantly nil)
        :selection-handler (constantly nil)
        :tab-index 0
        ;; TODO: caret-fn which takes dropdown state
@@ -119,12 +150,14 @@
     (render-state [_ state]
       (let []
         (html
-         [:li.dropdown
-          {:class (concat [] (get state :classes))}
-          (case (get state :toggle-type)
-            :link
-            (link-dropdown-toggle owner))
-          
-          (dropdown-menu owner)
-          ])))))
+         (case (get state :toggle-type)
+           :link
+           (link-dropdown owner)
+
+           :split-button
+           (split-button-dropdown owner)
+
+           ; default
+           (link-dropdown owner))
+         )))))
 

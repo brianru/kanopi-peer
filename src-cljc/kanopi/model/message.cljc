@@ -73,20 +73,32 @@
   [:datum.fact/update]
   {:noun {:datum-id schema/DatomicId
           :fact     schema/Fact}})
-(s/defn update-fact :- UpdateFact
+(defn update-fact
   [datum-id fact]
   (message :noun {:datum-id datum-id
-                  :fact fact}
+                  :fact     fact}
            :verb :datum.fact/update))
+; (s/defn update-fact :- UpdateFact
+;   [datum-id fact]
+;   (message :noun {:datum-id datum-id
+;                   :fact fact}
+;            :verb :datum.fact/update))
 
 (abstract-map/extend-schema UpdateDatumLabel Message
   [:datum.label/update]
   {:noun {:existing-entity schema/Datum
           :new-label       s/Str}})
-(s/defn update-datum-label :- UpdateDatumLabel
+(defn update-datum-label
   [ent new-label]
-  (message :noun {:existing-entity ent, :new-label new-label}
+  (message :noun {:existing-entity ent
+                  :new-label new-label}
            :verb :datum.label/update))
+;; Not sure why this version is failing:
+; (s/defn update-datum-label :- UpdateDatumLabel
+;   [ent :- s/Any
+;    new-label :- s/Any]
+;   (message :noun {:existing-entity ent, :new-label new-label}
+;            :verb :datum.label/update))
 
 (abstract-map/extend-schema InitializeClientState Message
   [:spa.state/initialize]
@@ -215,7 +227,7 @@
 
 #?(:cljs
    (defn switch-team [team-id]
-     (message :noun team-id :verb :switch-team)))
+     (message :noun team-id :verb :spa/switch-team)))
 
 #?(:cljs
    (defn toggle-fact-mode [ent]

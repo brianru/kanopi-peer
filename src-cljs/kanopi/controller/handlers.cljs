@@ -272,7 +272,8 @@
   ;; reinitialize => could have a current-datum which is not
   ;; accessible from the new creds
   (->> (msg/initialize-client-state (get @app-state :user))
-       (aether/send! aether)))
+       (aether/send! aether))
+  (history/navigate-to! history :home))
 
 (defmethod local-event-handler :datum/create
   [aether history app-state msg]

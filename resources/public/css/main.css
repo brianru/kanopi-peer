@@ -29,6 +29,27 @@ input {
     -webkit-transition: opacity 0.3s;
     transition: opacity 0.3s;
 }
+.header button {
+    background-color: inherit !important;
+    padding: inherit !important;
+    border-radius: 0 !important;
+}
+.header button:active {
+    box-shadow: none !important;
+    -webkit-box-shadow: none !important;
+}
+.header button:focus {
+    outline: none !important;
+    outline-offset: none !important;
+}
+.vertical-divider {
+    border-right: 1px solid black;
+    margin-left: 0.5rem;
+    margin-right: 0.5rem;
+}
+button.dropdown-toggle > .caret {
+    margin-left: 0.5rem;
+}
 span.view-editable-text {
     margin: 0 0.5rem !important;
 }

@@ -47,15 +47,19 @@
     (render [_]
       (html
        [:div.navbar-header
-        (if (get-in props [:user :current-team])
+        (if-let [current-team (get-in props [:user :current-team])]
           [:div.navbar-brand
            (om/build dropdown/dropdown props
                      {:init-state
                       {:tab-index -1
-                       }
+                       :toggle-type :split-button}
                       :state
                       {
-                       :toggle-label (get-in props [:user :current-team :team/id])
+                       :button-on-click (fn [_]
+                                          (println "HERE")
+                                          (->> (msg/switch-team (:team/id current-team))
+                                               (msg/send! owner)))
+                       :toggle-label (:team/id current-team)
                        :menu-items (mapv (partial team->menu-item owner)
                                          (get-in props [:user :teams]))}
                       })]
@@ -63,7 +67,8 @@
            {:href (browser/route-for owner :home)
             :tab-index -1}
            "Kanopi"]
-          )]))))
+          )]))
+    ))
 
 (defn right-controls
   [props owner]
@@ -85,35 +90,35 @@
                                    (msg/send! owner))
                              {:class ["navbar-brand"]}))
         (if (get-in props [:user :identity])
-         (om/build dropdown/dropdown props
-                     {:init-state
-                      {:toggle-label (get-in props [:user :identity])
-                       :toggle-icon-fn icons/user
-                       :classes ["navbar-brand"]
-                       :caret? true
-                       :tab-index -1
-                       :menu-items [{:type  :link
-                                     :href  (browser/route-for owner :settings)
-                                     :label "Settings"}
+          (om/build dropdown/dropdown props
+                    {:init-state
+                     {:toggle-label (get-in props [:user :identity])
+                      :toggle-icon-fn icons/user
+                      :classes ["navbar-brand"]
+                      :caret? true
+                      :tab-index -1
+                      :menu-items [{:type  :link
+                                    :href  (browser/route-for owner :settings)
+                                    :label "Settings"}
 
-                                    {:type  :divider}
+                                   {:type  :divider}
 
-                                    {:type  :link
-                                     :href  ""
-                                     :label "Feedback"}
-                                    {:type  :link
-                                     :href  ""
-                                     :label "About"}
-                                    {:type  :link
-                                     :href  ""
-                                     :label "Help"}
+                                   {:type  :link
+                                    :href  ""
+                                    :label "Feedback"}
+                                   {:type  :link
+                                    :href  ""
+                                    :label "About"}
+                                   {:type  :link
+                                    :href  ""
+                                    :label "Help"}
 
-                                    {:type  :divider}
+                                   {:type  :divider}
 
-                                    {:type  :link
-                                     :href  (browser/route-for owner :logout)
-                                     :label "Logout"}]
-                       }})
+                                   {:type  :link
+                                    :href  (browser/route-for owner :logout)
+                                    :label "Logout"}]
+                      }})
           (->> (icons/log-in {})
                (icons/link-to owner :enter {:class "navbar-brand", :tab-index -1})))
         ]))

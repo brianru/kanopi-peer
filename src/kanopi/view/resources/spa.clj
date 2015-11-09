@@ -7,6 +7,7 @@
 
 (defn spa [ctx]
   (let [user-data (friend/current-authentication (:request ctx))
+        ;; FIXME: do this.
         init-data nil]
     (html/om-page
      ctx
