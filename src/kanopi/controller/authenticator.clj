@@ -16,7 +16,20 @@
 (defn valid-credentials? [creds]
   (s/validate schema/Credentials creds))
 
-(defrecord AuthenticationService [config database user-lookup-fn]
+(defn temp-user []
+  (let [temp-name       (util/random-uuid) 
+        temp-user-id    (util/random-uuid)
+        temp-team-db-id (util/random-uuid)
+        team {:team/id temp-name
+              :db/id   temp-team-db-id}]
+    (hash-map
+     :ent-id temp-user-id
+     :username temp-name
+     :password nil
+     :teams [team]
+     :current-team team)))
+
+(defrecord AuthenticationService [config init-data database user-lookup-fn]
 
   IAuthenticate
 
@@ -67,17 +80,15 @@
     ;; TODO: add audit datoms to the tx entity
     (let [user-ent-id    (d/tempid :db.part/user -1)
           user-team-id   (d/tempid :db.part/users -1000)
-          init-user-data (some-> (get config :init-user-data)
-                                 (slurp)
-                                 (read-string)
-                                 (->> (map (fn [ent]
-                                             (case (schema/describe-entity ent)
-                                               :datum
-                                               (assoc ent :datum/team user-team-id)
-                                               :literal
-                                               (assoc ent :literal/team user-team-id)
-                                               ;; default
-                                               ent)))))
+          init-user-data (map (fn [ent]
+                                (case (schema/describe-entity ent)
+                                  :datum
+                                  (assoc ent :datum/team user-team-id)
+                                  :literal
+                                  (assoc ent :literal/team user-team-id)
+                                  ;; default
+                                  ent))
+                              init-data)
           txdata (concat
                   [
                    [:db/add user-team-id :team/id username]
@@ -107,7 +118,11 @@
   component/Lifecycle
 
   (start [this]
-    (assoc this :user-lookup-fn (partial credentials this)))
+    (let [init-data (some-> (get config :init-user-data)
+                            (slurp)
+                            (read-string))]
+      (assoc this :user-lookup-fn (partial credentials this)
+             :init-data init-data)))
 
   (stop [this]
     (assoc this :user-lookup-fn nil)))
