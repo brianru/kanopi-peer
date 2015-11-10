@@ -11,6 +11,7 @@
             ))
 
 (defn get-cookie [id]
+  (println "foo" (cookies/get id))
   (-> (cookies/get id)
       (url/query->map)
       (get "init")
@@ -28,26 +29,32 @@
     (delete-cookie! id)
     c))
 
+(defn get-init-session []
+  (-> (js/document.getElementById "kanopi-init")
+      (. -textContent)
+      (->> (. js/JSON parse))
+      (js->clj :keywordize-keys true)))
+
 ;; TODO: local storage should be stored per user
 (defrecord LocalStorageAppState [config local-storage app-state]
   component/Lifecycle
   (start [this]
-    (let [cookie           (get-and-remove-cookie "kanopi-init")
+    (let [init-session     (get-init-session)
           stored-app-state {} ;(local-storage/get! local-storage {})
-          _ (println "HERE" cookie)
+          _ (println "HERE" (keys init-session))
           atm (atom
                (util/deep-merge
                 {
                  :mode :spa.unauthenticated/online
-                 :user (get cookie :user {})
+                 :user (get init-session :user {})
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
-                 :page (get cookie :page nil)
+                 :page (get init-session :page nil)
                  ;; used by header to do fancy modal stuff
                  :intent {:id :spa/navigate}
 
                  ;; TODO: rename to current-datum
-                 :datum (get cookie :datum
+                 :datum (get init-session :datum
                              {:context-datums []
                               :similar-datums []
                               :datum          {}}) 
@@ -58,7 +65,7 @@
 
                  ;; local cache
                  ;; {<ent-id> <entity>}
-                 :cache (get cookie :cache {})
+                 :cache (get init-session :cache {})
 
                  ;; TODO: this map grows too fast.
                  ;; implement a map that only stores the last n

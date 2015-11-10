@@ -70,7 +70,8 @@
        :most-edited-datums []
        :recent-datums      []
        :cache (hash-map welcome-ent-id
-                        (data-impl/get-datum* db welcome-ent-id)))))
+                        (data-impl/get-datum* db welcome-ent-id))
+       )))
 
   (init-session [this creds]
     (let [db (datomic/db datomic-peer creds)
@@ -80,13 +81,13 @@
           ]
       (hash-map
        :user creds
-       :page  (str "/datum/" welcome-ent-id)
-       :datum (data/user-datum* db welcome-ent-id)
+       ; :page  (str "/datum/" welcome-ent-id)
+       ; :datum (data/user-datum* db welcome-ent-id)
        :most-viewed-datums (data/most-viewed-datums data-service creds)
        :most-edited-datums (data/most-edited-datums data-service creds)
        :recent-datums      (data/recent-datums data-service creds)
-       :cache (hash-map welcome-ent-id
-                        (data-impl/get-datum* db welcome-ent-id))
+       ; :cache (hash-map welcome-ent-id
+       ;                  (data-impl/get-datum* db welcome-ent-id))
        ))))
 
 (defn session-service [config]

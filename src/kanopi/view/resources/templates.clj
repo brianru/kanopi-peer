@@ -10,6 +10,12 @@
 (defn include-om []
   (include-js "/js/main.js"))
 
+(defn include-json [json]
+  [:script
+   {:type "text/javascript"
+    :id "kanopi-init"}
+   json])
+
 (defn header [title]
   (vector :head
           [:title title]
@@ -22,7 +28,7 @@
 (defn om-page
   "TODO: set cookie with no expiration (expire at end of session)
   which contains user identity and recently modified datums and config information"
-  [ctx {:keys [title cookie] :as opts}]
+  [ctx {:keys [title session-state] :as opts}]
   (let [cookies (get-in ctx [:request :cookies])]
     (rep/ring-response
      {:cookies
@@ -32,6 +38,8 @@
       (html5
        (header title)
        [:body
+        (when session-state
+          (include-json (json/generate-string session-state))) 
         [:div#app-container]
         (include-om)])
       })))

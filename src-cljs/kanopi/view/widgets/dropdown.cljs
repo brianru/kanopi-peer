@@ -48,7 +48,8 @@
   [:li.dropdown-menu-item
    {:react-key idx}
    [:a {:on-click (juxt (get itm :on-click (constantly nil))
-                        #(close-dropdown! owner))}
+                        #(close-dropdown! owner))
+        :href (get itm :href)}
     [:span (get itm :label)]]])
 
 (defmethod dropdown-menu-item :divider

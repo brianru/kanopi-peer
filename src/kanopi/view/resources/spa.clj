@@ -14,9 +14,9 @@
     (html/om-page
      ctx
      {:title  "kanopi"
-      :cookie (if user-data
-                (session/init-session session-svc user-data)
-                (session/init-anonymous-session session-svc)) 
+      :session-state (if user-data
+                       (session/init-session session-svc user-data)
+                       (session/init-anonymous-session session-svc)) 
       })))
 
 (defresource spa-resource
