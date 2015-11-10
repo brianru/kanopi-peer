@@ -2,7 +2,6 @@
   (:require [kanopi.model.message :as msg]
             [kanopi.model.data :as data]
             [kanopi.util.core :as util]
-            [clojure.pprint :refer (pprint)]
             ))
 
 (defmulti request-handler

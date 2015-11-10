@@ -4,9 +4,15 @@
             [schema.core :as s]
             [cemerick.friend.credentials :as creds]
             [kanopi.model.schema :as schema]
-            [kanopi.model.storage.datomic :as datomic]))
+            [kanopi.model.storage.datomic :as datomic]
+            [kanopi.util.core :as util]
+            ))
 
 (defprotocol IAuthenticate
+  (-init-user-data [this username password user-ent-id user-team-id]
+                   "Datoms asserting the user and team entities.")
+  (-init-team-data [this team-id]
+                   "Add team datoms to raw data.")
   (register!    [this username password])
   (credentials  [this username])
   (verify-creds [this input-creds]
@@ -16,6 +22,7 @@
 (defn valid-credentials? [creds]
   (s/validate schema/Credentials creds))
 
+;; TODO: should this be a method of the authentication service?
 (defn temp-user []
   (let [temp-name       (util/random-uuid) 
         temp-user-id    (util/random-uuid)
@@ -28,6 +35,11 @@
      :password nil
      :teams [team]
      :current-team team)))
+
+(defn temp-user?
+  ":password must be in creds and its value must be nil."
+  [creds]
+  (nil? (get creds :password :not-there)))
 
 (defrecord AuthenticationService [config init-data database user-lookup-fn]
 
@@ -70,6 +82,26 @@
              :password
              (creds/bcrypt-verify password)))
 
+  (-init-team-data [this team-id]
+    (map (fn [ent]
+           (case (schema/describe-entity ent)
+             :datum
+             (assoc ent :datum/team team-id)
+             :literal
+             (assoc ent :literal/team team-id)
+             ;; default
+             ent))
+         init-data))
+
+  (-init-user-data [this username password user-ent-id user-team-id]
+    (vector
+     [:db/add user-team-id :team/id username]
+     [:db/add user-ent-id  :team/id username]
+     (when password
+       [:db/add user-ent-id :user/password (creds/hash-bcrypt password)])
+     [:db/add user-ent-id  :user/team user-team-id]
+     ))
+
   (register! [this username password]
     ;; TODO: should this return nil when user already exists or throw
     ;; an exception? Currently it throws an exception.
@@ -80,24 +112,9 @@
     ;; TODO: add audit datoms to the tx entity
     (let [user-ent-id    (d/tempid :db.part/user -1)
           user-team-id   (d/tempid :db.part/users -1000)
-          init-user-data (map (fn [ent]
-                                (case (schema/describe-entity ent)
-                                  :datum
-                                  (assoc ent :datum/team user-team-id)
-                                  :literal
-                                  (assoc ent :literal/team user-team-id)
-                                  ;; default
-                                  ent))
-                              init-data)
           txdata (concat
-                  [
-                   [:db/add user-team-id :team/id username]
-                   [:db/add user-ent-id  :user/id username]
-                   [:db/add user-ent-id  :user/password (creds/hash-bcrypt password)]
-                   [:db/add user-ent-id  :user/team user-team-id]
-                   ]
-                  init-user-data
-                  ) 
+                  (-init-user-data this username password user-ent-id user-team-id)
+                  (-init-team-data this user-team-id)) 
           report @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-ent-id)))
 

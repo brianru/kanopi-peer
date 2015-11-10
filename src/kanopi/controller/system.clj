@@ -18,40 +18,42 @@
          with-dev #(util/select-with-merge config % [:dev])]
      (println "New System")
      (println "Configuration:" config)
-    (component/system-map
-     :datomic-peer
-     (datomic-peer (with-dev :datomic))
+     (component/system-map
+      :datomic-peer
+      (datomic-peer (with-dev :datomic))
 
-     :data-service
-     (component/using
-      (data-service)
-      {:datomic-peer :datomic-peer})
+      :data-service
+      (component/using
+       (data-service)
+       {:datomic-peer :datomic-peer})
 
-     :session-service
-     (component/using
-      (session-service (with-dev :session))
-      {:data-service :data-service})
+      :authenticator
+      (component/using
+       (authenticator/new-authentication-service (with-dev :auth))
+       {:database :datomic-peer})
 
-     :authenticator
-     (component/using
-      (authenticator/new-authentication-service (with-dev :auth))
-      {:database :datomic-peer})
+      :session-service
+      (component/using
+       (session-service (with-dev :session))
+       {:data-service  :data-service
+        :datomic-peer  :datomic-peer
+        :authenticator :authenticator})
 
-     :authorizer
-     (component/using
-      (authorizer/new-authorization-service (with-dev :auth))
-      {:database :datomic-peer})
+      :authorizer
+      (component/using
+       (authorizer/new-authorization-service (with-dev :auth))
+       {:database :datomic-peer})
 
-     :web-app
-     (component/using
-      (app/new-web-app (with-dev :web-app))
-      {:data-service    :data-service
-       :session-service :session-service
-       :authenticator   :authenticator})
+      :web-app
+      (component/using
+       (app/new-web-app (with-dev :web-app))
+       {:data-service    :data-service
+        :session-service :session-service
+        :authenticator   :authenticator})
 
-     :web-server
-     (component/using
-      (server/new-web-server (with-dev :web-server))
-      {:web-app :web-app})
-     
-     ))))
+      :web-server
+      (component/using
+       (server/new-web-server (with-dev :web-server))
+       {:web-app :web-app})
+
+      ))))
