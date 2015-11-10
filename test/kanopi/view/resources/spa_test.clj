@@ -32,8 +32,25 @@
       (let [req (mock/request :get "/")
             resp (handler req)
             cookie (get-kanopi-init-cookie resp)]
-        (is (not-empty (get cookie :user)))
-        (is (not-empty (get cookie :datum)))
-        (is (not-empty (get cookie :cache)))
+        (is (->>
+             cookie
+             ((juxt :user :page :datum :cache))
+             (every? not-empty)))
         ))
     (component/stop system)))
+
+(deftest authenticated-cookie
+  (let [system  (component/start (test-util/system-excl-web-server))
+        handler (get-in system [:web-app :app-handler])
+        creds   {:username "mickeymouse" :password "minneymouse"}
+        _       (test-util/mock-register system creds)]
+    (testing "bar"
+      (let [req    (-> (mock/request :get "/")
+                       (test-util/assoc-basic-auth creds))
+            resp   (handler req)
+            cookie (get-kanopi-init-cookie resp)]
+        (is (->>
+             cookie
+             ((juxt :user :page :datum :cache))
+             (every? not-empty)))
+        ))))

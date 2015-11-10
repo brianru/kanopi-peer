@@ -96,7 +96,8 @@
       ;; NOTE: when starting component if page is set it must be the
       ;; full string path: e.g. "/datum/<datum-id>"
        (when-let [page (not-empty (-> app-state :app-state (deref) :page))]
-         ((get history :set-page!) page))
+         (when (string? page)
+           ((get history :set-page!) page)))
 
       (info "mount om root" (:container-id config))
       (mount-root! (:app-state app-state) container aether history (:ref-cursors config))

@@ -36,7 +36,6 @@
       (let [creds (do (authenticator/register! authenticator "brian" "rubinton")
                       (authenticator/credentials authenticator "brian"))
             ses   (session/init-session session-service creds)]
-        (pprint ses)
         (is (not-empty (get ses :user)))
         (is (= creds (get ses :user)))
         (is (->> ses

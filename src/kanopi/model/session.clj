@@ -73,17 +73,20 @@
                         (data-impl/get-datum* db welcome-ent-id)))))
 
   (init-session [this creds]
-    (let []
+    (let [db (datomic/db datomic-peer creds)
+          welcome-ent-id (d/q '[:find ?e .
+                                :in $
+                                :where [?e :datum/label "Welcome to Kanopi!"]] db)
+          ]
       (hash-map
        :user creds
-       ;; TODO: welcome to kanopi datum (b/c it's the users first time
-       ;; if this is executing.))
-       :page  {}
-       :datum {} ;; TODO: if page is datum, use that, else {}
+       :page  (str "/datum/" welcome-ent-id)
+       :datum (data/user-datum* db welcome-ent-id)
        :most-viewed-datums (data/most-viewed-datums data-service creds)
        :most-edited-datums (data/most-edited-datums data-service creds)
        :recent-datums      (data/recent-datums data-service creds)
-       :cache {}
+       :cache (hash-map welcome-ent-id
+                        (data-impl/get-datum* db welcome-ent-id))
        ))))
 
 (defn session-service [config]

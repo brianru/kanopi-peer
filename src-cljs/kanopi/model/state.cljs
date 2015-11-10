@@ -34,22 +34,23 @@
   (start [this]
     (let [cookie           (get-and-remove-cookie "kanopi-init")
           stored-app-state {} ;(local-storage/get! local-storage {})
-          _ (println cookie)
+          _ (println "HERE" cookie)
           atm (atom
                (util/deep-merge
                 {
                  :mode :spa.unauthenticated/online
-                 :user {}  
+                 :user (get cookie :user {})
                  ;; I don't want to use the URI as a place to
                  ;; store state. All state is here.
-                 :page {}
+                 :page (get cookie :page nil)
                  ;; used by header to do fancy modal stuff
                  :intent {:id :spa/navigate}
 
                  ;; TODO: rename to current-datum
-                 :datum {:context-datums []
-                         :similar-datums []
-                         :datum          {}}
+                 :datum (get cookie :datum
+                             {:context-datums []
+                              :similar-datums []
+                              :datum          {}}) 
 
                  :most-viewed-datums []
                  :most-edited-datums []
@@ -57,7 +58,7 @@
 
                  ;; local cache
                  ;; {<ent-id> <entity>}
-                 :cache {}
+                 :cache (get cookie :cache {})
 
                  ;; TODO: this map grows too fast.
                  ;; implement a map that only stores the last n
@@ -67,7 +68,6 @@
                  :error-messages []
                  :log []
                  }
-                cookie
                 stored-app-state
                 ))]
       (info "create ephemeral app state" @atm)
