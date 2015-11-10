@@ -357,6 +357,7 @@
                     (assoc app-state
                            :user noun
                            :mode :spa.authenticated/online
+                           :intent {:id :spa.authenticated/navigate}
                            :datum {:context-datums []
                                    :datum {}
                                    :similar-datums []}
@@ -380,6 +381,7 @@
                     (assoc app-state
                            :user noun
                            :mode :spa.authenticated/online
+                           :intent {:id :spa.authenticated/navigate}
                            :datum {:context-datums []
                                    :datum {}
                                    :similar-datums []}
@@ -402,6 +404,7 @@
                     (assoc app-state
                            :user nil
                            :mode :spa.unauthenticated/online
+                           :intent {:id :spa.unauthenticated/navigate}
                            :datum {:context-datums []
                                    :datum []
                                    :similar-datums []}

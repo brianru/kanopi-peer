@@ -40,14 +40,32 @@
             :label    (get team :team/id)
             ))
 
-(defn left-team-dropdown
+(defn header-intent-dispatcher [props _]
+  (get-in props [:intent :id] :spa.unauthenticated/navigate))
+
+(defmulti left-team-dropdown
+  header-intent-dispatcher)
+
+(defmethod left-team-dropdown :spa.unauthenticated/navigate
   [props owner]
   (reify
     om/IRender
     (render [_]
       (html
        [:div.navbar-header
-        (if-let [current-team (get-in props [:user :current-team])]
+        [:a.navbar-brand
+         {:href (browser/route-for owner :home)
+          :tab-index -1}
+         "Kanopi"]]))))
+
+(defmethod left-team-dropdown :spa.authenticated/navigate
+  [props owner]
+  (reify
+    om/IRender
+    (render [_]
+      (let [current-team (get-in props [:user :current-team])]
+        (html
+         [:div.navbar-header
           [:div.navbar-brand
            (om/build dropdown/dropdown props
                      {:init-state
@@ -63,14 +81,13 @@
                        :menu-items (mapv (partial team->menu-item owner)
                                          (get-in props [:user :teams]))}
                       })]
-          [:a.navbar-brand
-           {:href (browser/route-for owner :home)
-            :tab-index -1}
-           "Kanopi"]
-          )]))
-    ))
+          ]))
+      )))
 
-(defn right-controls
+(defmulti right-controls
+  header-intent-dispatcher)
+
+(defmethod right-controls :spa.unauthenticated/navigate
   [props owner]
   (reify
     om/IRender
@@ -89,40 +106,60 @@
              (icons/on-click #(->> (msg/record-insight)
                                    (msg/send! owner))
                              {:class ["navbar-brand"]}))
-        (if (get-in props [:user :identity])
-          (om/build dropdown/dropdown props
-                    {:init-state
-                     {:toggle-label (get-in props [:user :identity])
-                      :toggle-icon-fn icons/user
-                      :classes ["navbar-brand"]
-                      :caret? true
-                      :tab-index -1
-                      :menu-items [{:type  :link
-                                    :href  (browser/route-for owner :settings)
-                                    :label "Settings"}
+        (->> (icons/log-in {})
+               (icons/link-to owner :enter {:class "navbar-brand", :tab-index -1}))
+        ]))))
 
-                                   {:type  :divider}
+(defmethod right-controls :spa.authenticated/navigate
+  [props owner]
+  (reify
+    om/IRender
+    (render [_]
+      (html
+       [:ul.nav.navbar-nav.navbar-right
+        (->> (icons/create {})
+             (icons/on-click #(->> (msg/create-datum)
+                                   (msg/send! owner))
+                             {:class ["navbar-brand"]}))
+        (->> (icons/goal {})
+             (icons/on-click #(->> (msg/create-goal)
+                                   (msg/send! owner))
+                             {:class ["navbar-brand"]}))
+        (->> (icons/insights {})
+             (icons/on-click #(->> (msg/record-insight)
+                                   (msg/send! owner))
+                             {:class ["navbar-brand"]}))
 
-                                   {:type  :link
-                                    :href  ""
-                                    :label "Feedback"}
-                                   {:type  :link
-                                    :href  ""
-                                    :label "About"}
-                                   {:type  :link
-                                    :href  ""
-                                    :label "Help"}
+        (om/build dropdown/dropdown props
+                  {:init-state
+                   {:toggle-label (get-in props [:user :identity])
+                    :toggle-icon-fn icons/user
+                    :classes ["navbar-brand"]
+                    :caret? true
+                    :tab-index -1
+                    :menu-items [{:type  :link
+                                  :href  (browser/route-for owner :settings)
+                                  :label "Settings"}
 
-                                   {:type  :divider}
+                                 {:type  :divider}
 
-                                   {:type  :link
-                                    :href  (browser/route-for owner :logout)
-                                    :label "Logout"}]
-                      }})
-          (->> (icons/log-in {})
-               (icons/link-to owner :enter {:class "navbar-brand", :tab-index -1})))
-        ]))
-    ))
+                                 {:type  :link
+                                  :href  ""
+                                  :label "Feedback"}
+                                 {:type  :link
+                                  :href  ""
+                                  :label "About"}
+                                 {:type  :link
+                                  :href  ""
+                                  :label "Help"}
+
+                                 {:type  :divider}
+
+                                 {:type  :link
+                                  :href  (browser/route-for owner :logout)
+                                  :label "Logout"}]
+                    }})
+        ]))))
 
 (defn header
   "A modal header. Contents will change based on the user's present
@@ -144,11 +181,10 @@
     (render-state [_ state]
       (html
        [:div.header.navbar.navbar-default.navbar-fixed-top
-        (case (get-in props [:intent :id] :intent/navigate)
-          :spa/navigate
-          [:div.container-fluid
-           (om/build left-team-dropdown props)
-           (om/build center-search-field props)
-           (om/build right-controls props)])
+        [:div.container-fluid
+         (om/build left-team-dropdown props)
+         (om/build center-search-field props)
+         (om/build right-controls props)
+         ]
         ]))))
 

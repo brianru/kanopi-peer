@@ -41,7 +41,6 @@
   (start [this]
     (let [init-session     (get-init-session)
           stored-app-state {} ;(local-storage/get! local-storage {})
-          _ (println "HERE" (keys init-session))
           atm (atom
                (util/deep-merge
                 {
@@ -51,7 +50,7 @@
                  ;; store state. All state is here.
                  :page (get init-session :page nil)
                  ;; used by header to do fancy modal stuff
-                 :intent {:id :spa/navigate}
+                 :intent {:id :spa.unauthenticated/navigate}
 
                  ;; TODO: rename to current-datum
                  :datum (get init-session :datum

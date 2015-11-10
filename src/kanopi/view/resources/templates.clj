@@ -31,8 +31,7 @@
   [ctx {:keys [title session-state] :as opts}]
   (let [cookies (get-in ctx [:request :cookies])]
     (rep/ring-response
-     {:cookies
-      (assoc cookies "kanopi-init" {:value {:init (json/generate-string cookie)}})
+     {:cookies cookies
 
       :body
       (html5
