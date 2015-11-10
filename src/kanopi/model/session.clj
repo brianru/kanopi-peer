@@ -18,10 +18,14 @@
     (let []
       (hash-map
        :user  creds
+       ;; TODO: if temp creds, direct to Welcome to Kanopi! datum.
+       ;; otherwise, for now leave it empty. in the future this is
+       ;; where we figure out the user's ideal homepage. 
+       :page  {}
        :datum {}
-       :most-viewed-datums (data/most-viewed-datums data-service creds)
-       :most-edited-datums (data/most-edited-datums data-service creds)
-       :recent-datums      (data/recent-datums data-service creds)
+       :most-viewed-datums [] ;(data/most-viewed-datums data-service creds)
+       :most-edited-datums [] ;(data/most-edited-datums data-service creds)
+       :recent-datums      [] ;(data/recent-datums data-service creds)
        :cache {}
        ))))
 

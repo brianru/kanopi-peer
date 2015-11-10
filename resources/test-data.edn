@@ -229,6 +229,7 @@
               #db/id [:db.part/structure -7002]
               #db/id [:db.part/structure -7003]
               #db/id [:db.part/structure -7004]
+              #db/id [:db.part/structure -7013]
               ]}
 
 ;; Demo: 
@@ -240,9 +241,51 @@
 {:db/id #db/id [:db.part/structure -7006]
  :literal/text "Please feel free to play and explore kanopi anonymously. Any information you create will be stored in your browser for future use and can be transferred to your account when you register."}
 
+;; The Rabbit Hole:
 {:db/id #db/id [:db.part/structure -7002]
  :fact/attribute #db/id [:db.part/structure -7007]
  :fact/value #db/id [:db.part/structure -7008]}
+{:db/id #db/id [:db.part/structure -7007]
+ :datum/label "The Rabbit Hole"}
+{:db/id #db/id [:db.part/structure -7008]
+ :literal/text "TODO: Fill this out."}
+
+;; Not sure what to do?
+{:db/id #db/id [:db.part/structure -7003]
+ :fact/attribute #db/id [:db.part/structure -7009]
+ :fact/value #db/id [:db.part/structure -7010]}
+{:db/id #db/id [:db.part/structure -7009]
+ :datum/label "Not sure what to do?"}
+{:db/id #db/id [:db.part/structure -7010]
+ :literal/text "TODO: Fill this out"}
+
+;; Fantastic Origin Story
+{:db/id #db/id [:db.part/structure -7004]
+ :fact/attribute #db/id [:db.part/structure -7011]
+ :fact/value #db/id [:db.part/structure -7012]}
+{:db/id #db/id [:db.part/structure -7011]
+ :datum/label "Fantastic Origin Story"}
+{:db/id #db/id [:db.part/structure -7012]
+ :literal/text "TODO: fipi"
+ }
+
+;; Real Origin Story
+{:db/id #db/id [:db.part/structure -7013]
+ :fact/attribute #db/id [:db.part/structure -7014]
+ :fact/value #db/id [:db.part/structure -7015]}
+{:db/id #db/id [:db.part/structure -7014]
+ :datum/label "Real Origin Story"
+ }
+{:db/id #db/id [:db.part/structure -7015]
+ :literal/text "TODO"
+ }
+
+;; Design Document
+{:db/id #db/id [:db.part/structure -7016]
+ :fact/attribute #db/id [:db.part/structure -7017]
+ :fact/value #db/id [:db.part/structure -9000]}
+{:db/id #db/id [:db.part/structure -7017]
+ :datum/label "Design Document"}
 
 ]
 
