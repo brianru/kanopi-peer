@@ -1,4 +1,5 @@
 (ns kanopi.view.datum-search
+  "TODO: refactor to Most Edited, Recently Edited, Recent Insights?"
   (:require [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [om.core :as om]

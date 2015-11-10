@@ -16,9 +16,8 @@
                              (env :datomic-database-name)
                              "kanopi42")
                 :schema  ["resources/schema.edn"]
-                :data    ["resources/test-data.edn"
-                          "resources/init-data.edn"]}
-   :auth       {:init-user-data "resources/test-data.edn"}
+                :data    ["resources/test-data.edn"]}
+   :auth       {:init-user-data "resources/init-data.edn"}
    :dev true})
 
 (defn system-config

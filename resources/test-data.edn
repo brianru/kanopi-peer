@@ -1,8 +1,7 @@
 [
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Test data
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;; Test data
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 
  {:db/id #db/id [:db.part/structure -3000]
   :datum/label "Infinite Jest"
@@ -91,27 +90,27 @@
                ]}
 
  ;; Title: The End of the Tour
-{:db/id #db/id [:db.part/structure -3019]
- :fact/attribute #db/id [:db.part/structure -3005]
- :fact/value #db/id [:db.part/structure -3020]}
-{:db/id #db/id [:db.part/structure -3020]
- :literal/text "The End of the Tour"}
+ {:db/id #db/id [:db.part/structure -3019]
+  :fact/attribute #db/id [:db.part/structure -3005]
+  :fact/value #db/id [:db.part/structure -3020]}
+ {:db/id #db/id [:db.part/structure -3020]
+  :literal/text "The End of the Tour"}
 
-;; Protagonist: David Foster Wallace
-{:db/id #db/id [:db.part/structure -3021]
- :fact/attribute #db/id [:db.part/structure -3022]
- :fact/value #db/id [:db.part/structure -3003]}
+ ;; Protagonist: David Foster Wallace
+ {:db/id #db/id [:db.part/structure -3021]
+  :fact/attribute #db/id [:db.part/structure -3022]
+  :fact/value #db/id [:db.part/structure -3003]}
 {:db/id #db/id [:db.part/structure -3022]
  :literal/text "Protagonist"}
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
- ;;
- {:db/id #db/id [:db.part/structure -3023]
-  :datum/label "Exercise: Monday, 19 October 2015"
-  :datum/fact [#db/id [:db.part/structure -3024]
-               #db/id [:db.part/structure -3027]
-               #db/id [:db.part/structure -3029]
-               ]}
+;;
+{:db/id #db/id [:db.part/structure -3023]
+ :datum/label "Exercise: Monday, 19 October 2015"
+ :datum/fact [#db/id [:db.part/structure -3024]
+              #db/id [:db.part/structure -3027]
+              #db/id [:db.part/structure -3029]
+              ]}
 
 ;; Number of 5.5 routes completed: 3
 {:db/id #db/id [:db.part/structure -3024]
@@ -137,155 +136,4 @@
  :literal/text "Number of 5.7 routes completed"}
 {:db/id #db/id [:db.part/structure -3031]
  :literal/integer 2}
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Design data
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-{:db/id #db/id [:db.part/structure -9000]
- :datum/label "Kanopi Pattern Language"
- :datum/fact [#db/id [:db.part/structure -9001]
-              #db/id [:db.part/structure -9002]
-              #db/id [:db.part/structure -9003]
-              #db/id [:db.part/structure -9010]
-              #db/id [:db.part/structure -9011]
-              #db/id [:db.part/structure -9012]
-              ]}
-
-{:db/id #db/id [:db.part/structure -9004]
- :datum/label "Pattern"}
-{:db/id #db/id [:db.part/structure -9006]
- :datum/label "Goal"}
-{:db/id #db/id [:db.part/structure -9007]
- :datum/label "Inspiration"}
-
-{:db/id #db/id [:db.part/structure -9016]
- :datum/label "Context"}
-{:db/id #db/id [:db.part/structure -9017]
- :datum/label "Problem Statement"}
-{:db/id #db/id [:db.part/structure -9018]
- :datum/label "Solution"}
-
-;; Pattern: Learning as dialogue
-{:db/id #db/id [:db.part/structure -9001]
- :fact/attribute #db/id [:db.part/structure -9004]
- :fact/value #db/id [:db.part/structure -9005]}
-{:db/id #db/id [:db.part/structure -9005]
- :datum/label "Learning as dialogue"
- :datum/fact [#db/id [:db.part/structure -9022]]}
-{:db/id #db/id [:db.part/structure -9022]
- :literal/text "Learning comes from friction. Rub datums together until a connection can be identified. Sometimes that connection is indirect, sometimes it is a mirage. This can be done in many mediums: inner monologue, paper, white boards, mind maps, outlines, and now Kanopi. We must encourage a dialogue by allowing users to participate in tight try -> undo feedback loops, timely suggestions, hide interface elements to help the user focus (blinders)."}
-
-;; Pattern: Gentle transitions
-{:db/id #db/id [:db.part/structure -9002]
- :fact/attribute #db/id [:db.part/structure -9004]
- :fact/value #db/id [:db.part/structure -9008]}
-{:db/id #db/id [:db.part/structure -9008]
- :datum/label "Gentle transitions"
- :datum/fact [#db/id [:db.part/structure -9021]]}
-{:db/id #db/id [:db.part/structure -9021]
- :literal/text "The engaged mind takes time to recognize change in the periphery. Sudden changes are distracting and disrupt flow. To show users relevant interface elements without interrupting flow we must gently transition them into view near their current area of focus. If the elements are too close they crowd the area of focus forcing the user to focus on a smaller space, too far and they pull the eyes away. A gentle balance must be achieved in proximity, transition and appearance."}
-
-;; Patern: Lantern in the fog
-{:db/id #db/id [:db.part/structure -9003]
- :fact/attribute #db/id [:db.part/structure -9004]
- :fact/value #db/id [:db.part/structure -9009]}
-{:db/id #db/id [:db.part/structure -9009]
- :datum/label "Lantern in the fog"
- :datum/fact [#db/id [:db.part/structure -9019]]}
-{:db/id #db/id [:db.part/structure -9019]
- :fact/attribute #db/id [:db.part/structure -9017]
- :fact/value #db/id [:db.part/structure -9020]}
-{:db/id #db/id [:db.part/structure -9020]
- :literal/text "Learning is an active process. Users must engage with the content. Therefore, the interface cannot push users through a particular flow or tell users to try X if stuck. Instead, the interface must gently display related information to help the user find her way through the fog of her thoughts."}
-
-;; Pattern: Passive vs active interface elements
-{:db/id #db/id [:db.part/structure -9010]
- :fact/attribute #db/id [:db.part/structure -9004]
- :fact/value #db/id [:db.part/structure -9013] }
-{:db/id #db/id [:db.part/structure -9013]
- :datum/label "Passive vs active interface elements"}
-
-;; Patern: Adapt to user intention
-{:db/id #db/id [:db.part/structure -9011]
- :fact/attribute #db/id [:db.part/structure -9004]
- :fact/value #db/id [:db.part/structure -9014]}
-{:db/id #db/id [:db.part/structure -9014]
- :datum/label "Adapt to user intention"}
-
-;; Pattern: Great mediums transport you
-{:db/id #db/id [:db.part/structure -9012]
- :fact/attribute #db/id [:db.part/structure -9004]
- :fact/value #db/id [:db.part/structure -9015]}
-{:db/id #db/id [:db.part/structure -9015]
- :datum/label "Great mediums transport you"}
-
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-;; Welcome data
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-{:db/id #db/id [:db.part/structure -7000]
- :datum/label "Welcome to Kanopi!"
- :datum/fact [#db/id [:db.part/structure -7001]
-              #db/id [:db.part/structure -7002]
-              #db/id [:db.part/structure -7003]
-              #db/id [:db.part/structure -7004]
-              #db/id [:db.part/structure -7013]
-              ]}
-
-;; Demo: 
-{:db/id #db/id [:db.part/structure -7001]
- :fact/attribute #db/id [:db.part/structure -7005]
- :fact/value #db/id [:db.part/structure -7006]}
-{:db/id #db/id [:db.part/structure -7005]
- :datum/label "This is a demo"}
-{:db/id #db/id [:db.part/structure -7006]
- :literal/text "Please feel free to play and explore kanopi anonymously. Any information you create will be stored in your browser for future use and can be transferred to your account when you register."}
-
-;; The Rabbit Hole:
-{:db/id #db/id [:db.part/structure -7002]
- :fact/attribute #db/id [:db.part/structure -7007]
- :fact/value #db/id [:db.part/structure -7008]}
-{:db/id #db/id [:db.part/structure -7007]
- :datum/label "The Rabbit Hole"}
-{:db/id #db/id [:db.part/structure -7008]
- :literal/text "TODO: Fill this out."}
-
-;; Not sure what to do?
-{:db/id #db/id [:db.part/structure -7003]
- :fact/attribute #db/id [:db.part/structure -7009]
- :fact/value #db/id [:db.part/structure -7010]}
-{:db/id #db/id [:db.part/structure -7009]
- :datum/label "Not sure what to do?"}
-{:db/id #db/id [:db.part/structure -7010]
- :literal/text "TODO: Fill this out"}
-
-;; Fantastic Origin Story
-{:db/id #db/id [:db.part/structure -7004]
- :fact/attribute #db/id [:db.part/structure -7011]
- :fact/value #db/id [:db.part/structure -7012]}
-{:db/id #db/id [:db.part/structure -7011]
- :datum/label "Fantastic Origin Story"}
-{:db/id #db/id [:db.part/structure -7012]
- :literal/text "TODO: fipi"
- }
-
-;; Real Origin Story
-{:db/id #db/id [:db.part/structure -7013]
- :fact/attribute #db/id [:db.part/structure -7014]
- :fact/value #db/id [:db.part/structure -7015]}
-{:db/id #db/id [:db.part/structure -7014]
- :datum/label "Real Origin Story"
- }
-{:db/id #db/id [:db.part/structure -7015]
- :literal/text "TODO"
- }
-
-;; Design Document
-{:db/id #db/id [:db.part/structure -7016]
- :fact/attribute #db/id [:db.part/structure -7017]
- :fact/value #db/id [:db.part/structure -9000]}
-{:db/id #db/id [:db.part/structure -7017]
- :datum/label "Design Document"}
-
 ]
-
