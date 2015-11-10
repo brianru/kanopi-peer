@@ -82,10 +82,6 @@
 
     (component/stop sys)))
 
-(deftest validate-temp-user
-  (let [creds (temp-user)]
-    (is (s/check schema/Credentials creds))))
-
 (deftest register-team!
   (let []
     ))

@@ -22,58 +22,45 @@
 (defn valid-credentials? [creds]
   (s/validate schema/Credentials creds))
 
-;; TODO: should this be a method of the authentication service?
-(defn temp-user []
-  (let [temp-name       (util/random-uuid) 
-        temp-user-id    (util/random-uuid)
-        temp-team-db-id (util/random-uuid)
-        team {:team/id temp-name
-              :db/id   temp-team-db-id}]
-    (hash-map
-     :ent-id temp-user-id
-     :username temp-name
-     :password nil
-     :teams [team]
-     :current-team team)))
-
-(defn temp-user?
-  ":password must be in creds and its value must be nil."
-  [creds]
-  (nil? (get creds :password :not-there)))
+(defn credentials*
+  ([db username]
+   (credentials* db username true))
+  ([db username validate?]
+   (let [ent-id (-> (d/entity db [:user/id username]) :db/id)
+         ;; NOTE: this pull call and the following when/not-empty
+         ;; check belong in a lower-level ns. see kanopi.data vs
+         ;; kanopi.data.impl as example
+         creds  (d/pull db
+                        '[:db/id
+                          {:user/team [:db/id :team/id]}
+                          :user/id
+                          :user/password]
+                        ent-id) 
+         ;; NOTE: the shape of creds' is largely dictated by friend
+         creds' (when (not-empty (dissoc creds :db/id))
+                  (hash-map
+                   :ent-id   (get-in creds [:db/id])
+                   :username (get-in creds [:user/id])
+                   :password (get-in creds [:user/password])
+                   :teams    (get-in creds [:user/team])
+                   ;; NOTE: DEFAULT CURRENT TEAM is the user's
+                   ;; personal team. this should be changeable.
+                   :current-team (->> (get-in creds [:user/team])
+                                      (filter #(= (:user/id creds)
+                                                  (:team/id %)))
+                                      (first))
+                   ))]
+     (when (and validate? creds')
+       (assert (s/validate schema/Credentials creds') "Invalid credential map."))
+     creds') )
+  )
 
 (defrecord AuthenticationService [config init-data database user-lookup-fn]
 
   IAuthenticate
 
   (credentials [this username]
-    (let [db     (datomic/db database nil)
-          ent-id (-> (d/entity db [:user/id username]) :db/id)
-          ;; NOTE: this pull call and the following when/not-empty
-          ;; check belong in a lower-level ns. see kanopi.data vs
-          ;; kanopi.data.impl as example
-          creds  (d/pull db
-                        '[:db/id
-                          {:user/team [:db/id :team/id]}
-                          :user/id
-                          :user/password]
-                        ent-id) 
-          ;; NOTE: the shape of creds' is largely dictated by friend
-          creds' (when (not-empty (dissoc creds :db/id))
-                   (hash-map
-                    :ent-id   (get-in creds [:db/id])
-                    :username (get-in creds [:user/id])
-                    :password (get-in creds [:user/password])
-                    :teams    (get-in creds [:user/team])
-                    ;; NOTE: DEFAULT CURRENT TEAM is the user's
-                    ;; personal team. this should be changeable.
-                    :current-team (->> (get-in creds [:user/team])
-                                       (filter #(= (:user/id creds)
-                                                   (:team/id %)))
-                                       (first))
-                    ))]
-      (when creds'
-        (assert (s/validate schema/Credentials creds') "Invalid credential map."))
-      creds'))
+    (credentials* (datomic/db database nil) username))
 
   (verify-creds [this {:keys [username password]}]
     (verify-creds this username password))
@@ -93,13 +80,13 @@
              ent))
          init-data))
 
-  (-init-user-data [this username password user-ent-id user-team-id]
+  (-init-user-data [this username password user-temp-id team-temp-id]
     (vector
-     [:db/add user-team-id :team/id username]
-     [:db/add user-ent-id  :team/id username]
+     [:db/add team-temp-id :team/id username]
+     [:db/add user-temp-id :user/id username]
      (when password
-       [:db/add user-ent-id :user/password (creds/hash-bcrypt password)])
-     [:db/add user-ent-id  :user/team user-team-id]
+       [:db/add user-temp-id :user/password (creds/hash-bcrypt password)])
+     [:db/add user-temp-id :user/team team-temp-id]
      ))
 
   (register! [this username password]
@@ -110,13 +97,15 @@
     (assert (nil? (d/entid (datomic/db database nil) [:user/id username]))
             "This username is already taken. Please choose another.")
     ;; TODO: add audit datoms to the tx entity
-    (let [user-ent-id    (d/tempid :db.part/user -1)
-          user-team-id   (d/tempid :db.part/users -1000)
-          txdata (concat
-                  (-init-user-data this username password user-ent-id user-team-id)
-                  (-init-team-data this user-team-id)) 
+    (let [user-temp-id    (d/tempid :db.part/users -1)
+          team-temp-id    (d/tempid :db.part/users -1000)
+          txdata 
+          (->> (concat
+                (-init-user-data this username password user-temp-id team-temp-id)
+                (-init-team-data this team-temp-id)) 
+               (remove nil?))
           report @(datomic/transact database nil txdata)]
-      (d/resolve-tempid (:db-after report) (:tempids report) user-ent-id)))
+      (d/resolve-tempid (:db-after report) (:tempids report) user-temp-id)))
 
   (change-password! [this username current-password new-password]
     (assert (and (not= current-password new-password)

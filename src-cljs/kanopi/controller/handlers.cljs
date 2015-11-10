@@ -342,10 +342,12 @@
                       (assoc :datum {})
 
                       )))
-    (when (= :datum handler)
-      (let [datum-id (util/try-read-string (get-in msg [:noun :route-params :id]))]
-        (->> (msg/get-datum datum-id)
-             (aether/send! aether))))))
+    (cond
+     (= :datum handler)
+     (let [datum-id (util/try-read-string (get-in msg [:noun :route-params :id]))]
+       (->> (msg/get-datum datum-id)
+            (aether/send! aether)))
+     )))
 
 (defmethod local-event-handler :spa.register/success
   [aether history app-state {:keys [noun] :as msg}]

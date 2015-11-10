@@ -16,29 +16,26 @@
   '[
     ;; Datums
     [(readable ?team ?e)
-     [?e :datum/team ?team]]
+     [?e :datum/team ?team] ]
+
     ;; Facts
     [(readable ?team ?e)
      [?datum :datum/team ?team]
      [?datum :datum/fact ?e]]
-    ;; Fact parts
-    [(readable ?team ?e)
-     [?datum :datum/team ?team]
-     [?datum :datum/fact ?fact]
-     [?fact _ ?e]
-     (or
-      [?e :datum/team ?team]
-      [?e :literal/team ?team])
-     ]
-    ;; Transactions
-    [(readable ?team ?e)
-     (readable ?team ?ent)
-     [?ent _ _ ?e]]
 
-    ;; Attributes
-;;    [(readable ?team ?e)
-;;     (readable ?team ?ent)
-;;     [?ent ?e _]]
+    ;; Literals
+    [(readable ?team ?e)
+     [?e :literal/team ?team]]
+    [(readable ?team ?e)
+     [?literal :literal/team ?team]
+     [?literal _ ?e]]
+
+    ;; Transactions
+     [(readable ?team ?e)
+      [or
+       [?ent :datum/team ?team]
+       [?ent :literal/team ?team]]
+      [?ent _ _ ?e]]
 
     ])
 

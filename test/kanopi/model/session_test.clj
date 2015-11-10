@@ -9,6 +9,7 @@
 
             [kanopi.model.schema :as schema]
             [kanopi.model.session :as session]
+            [kanopi.model.storage.datomic :as datomic]
 
             [kanopi.controller.authenticator :as authenticator]
             
@@ -16,29 +17,12 @@
             [kanopi.test-util :as test-util]
             ))
 
-(deftest hypothetical-db
-  (let [{:keys [session-service authenticator] :as system}
-        (component/start (test-util/system-excl-web-server))
-
-        creds (authenticator/temp-user)
-        txdata (authenticator/-init-team-data
-                authenticator (get-in creds [:current-team :db/id]))
-        ]
-    (testing "can I access the user's stuff?"
-      (let [db (session/-hypothetical-db session-service creds txdata)
-            ]
-        (is (d/q '[:find ?e .
-                   :in $
-                   :where [?e :datum/label _]]
-                 db))))))
-
-(deftest init-session
+(deftest init-anonymous-session
   (let [{:keys [session-service authenticator] :as system}
         (component/start (test-util/system-excl-web-server))
         ]
     (testing "anonymous user"
-      (let [ses (session/init-session session-service)]
-        (pprint ses)
+      (let [ses (session/init-anonymous-session session-service)]
         (is (not-empty (get ses :user)))
         (is (s/check schema/Credentials (get ses :user)))
         (is (not-empty (get ses :cache)))
@@ -49,8 +33,10 @@
                  (every? empty?)))))
 
     (testing "registered user"
-      (let [creds (authenticator/register! authenticator "brian" "rubinton")
+      (let [creds (do (authenticator/register! authenticator "brian" "rubinton")
+                      (authenticator/credentials authenticator "brian"))
             ses   (session/init-session session-service creds)]
+        (pprint ses)
         (is (not-empty (get ses :user)))
         (is (= creds (get ses :user)))
         (is (->> ses
