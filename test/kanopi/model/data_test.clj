@@ -96,11 +96,18 @@
     (is (s/validate schema/Datum (data/get-datum (:data-service system) creds ent-id))
         "No longer valid!")
 
-    (testing "add-fact"
+    (testing "add-bad-fact"
+      (let [datum-id (data/init-datum (:data-service system) creds)]
+        (is (thrown? java.lang.AssertionError
+                     (data/add-fact (:data-service system) creds datum-id nil nil)))))
+
+    (testing "Add-good-fact"
       (let [datum-id (data/init-datum (:data-service system) creds)
-            datum'   (data/add-fact (:data-service system) creds datum-id nil nil)]
+            datum'   (data/add-fact (:data-service system)
+                                    creds datum-id "pattern" "skirt steak")]
         (is (not-empty datum'))
-        (is (not-empty (get datum' :datum/fact)))))
+        (is (= ["pattern" "skirt steak"]
+               (-> datum' :datum/fact (first) (util/fact-entity->tuple))))))
     
     (component/stop system)))
 

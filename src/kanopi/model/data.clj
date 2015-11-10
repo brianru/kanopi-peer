@@ -172,6 +172,8 @@
           (add-fact this creds ent-id (entity->input attribute) (entity->input value)))
 
 (add-fact [this creds ent-id attribute value]
+          (assert (every? identity [attribute value])
+                  "Must submit fact with both attribute and value.")
           (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)
                 txdata (conj (:txdata fact)
                              [:db/add ent-id :datum/fact (:ent-id fact)])
