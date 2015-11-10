@@ -44,7 +44,8 @@
   ([props depth id]
    ;; FIXME: there is a correct depth cut-off. I don't know if this is
    ;; it. I'm not thinking too clearly right now.
-   (if (> depth 10) id
+   (if (> depth 10)
+     id
      (->> (get-in props [:cache id])
           (reduce (fn [acc [k v]]
                     (cond
@@ -57,9 +58,7 @@
 
                      :default
                      (assoc acc k v)))
-                  {})
-          ))
-   ))
+                  {})))))
 
 (defn- references-datum? [props base-id ent]
   (->> ent
@@ -145,6 +144,11 @@
                 :new-referenced-value value'
                 :fact (assoc fact :fact/value [(get value' :db/id)])))))))
 
+(defmethod local-event-handler :datum.fact/add
+  [aether history app-state msg]
+  ;; TODO: this.
+  )
+
 (defmethod local-event-handler :datum.fact/update
   [aether history app-state msg]
   (om/transact! app-state
@@ -180,6 +184,16 @@
                         ]
                     app-state'
                     ))))
+
+(defmethod local-event-handler :datum.fact.update/success
+  [aether history app-state msg]
+  ;; TODO: this.
+  )
+
+(defmethod local-event-handler :datum.fact.update/failure
+  [aether history app-state msg]
+  ;; TODO this;
+  )
 
 (defmethod local-event-handler :datum.label/update
   [aether history app-state msg]

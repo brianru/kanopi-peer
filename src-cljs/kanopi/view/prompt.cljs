@@ -26,6 +26,8 @@
   [:a {}
    [:span (str p)]])
 
+;; TODO: dismiss feature -- x icon or a check icon? something more
+;; positive... hmm no. it's not a reminder. or is it?
 (defn prompt
   [props owner opts]
   (reify
