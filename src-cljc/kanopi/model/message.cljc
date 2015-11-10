@@ -8,7 +8,11 @@
   This is what will allow us to drive all major analytics. Every
   action the user takes stored for analysis and testing.
   
-  TODO: schematize all message creator fns
+  TODO: separate main message namespace from message.client and
+  message.server namespaces
+  local->remote and remote->local should not be here, simplifies
+  dependencies, makes it to any kanopi NS can depend on
+  kanopi.model.message
   "
   (:require #?@(:cljs [[om.core :as om]
                        [schema.core :as s :include-macros true]
@@ -127,6 +131,13 @@
   ([txt]
    (message :noun {:insight txt}
             :verb :insight/record)))
+
+(abstract-map/extend-schema Navigate Message
+  [:spa/navigate]
+  {:noun s/Any})
+(s/defn navigate :- Navigate
+  [match]
+  (message :noun match, :verb :spa/navigate))
 
 (abstract-map/extend-schema Search Message
   [:spa.navigate/search]

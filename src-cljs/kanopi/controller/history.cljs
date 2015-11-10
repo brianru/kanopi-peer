@@ -32,7 +32,10 @@
                           ;; Server
                           "api"      :api}])
 
-(defn- send-set-page-msg! [aether match]
+(defn- send-set-page-msg!
+  "NOTE: this should match kanopi.model.messsage/navigate but cannot
+  directly reference as it would create a circular dependency."
+  [aether match]
   (async/put! (get-in aether [:aether :publisher])
               {:noun match
                :verb :spa/navigate
