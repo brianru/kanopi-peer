@@ -10,15 +10,61 @@
             [kanopi.model.storage.datomic :as datomic]
             [kanopi.model.data.impl :refer :all]))
 
+(defn context-datums* [db datum-id]
+  (let [matches (->> (d/q
+                        '[:find ?subj ?attr
+                          :in $ ?ent-id
+                          :where
+                          [?subj :datum/fact ?fact]
+                          [?fact :fact/attribute ?attr]
+                          [?fact :fact/value ?ent-id]]
+                        db datum-id)
+                       (take 10))
+          ]
+      (mapv (fn [result]
+              (mapv (partial get-datum* db) result))
+            matches)))
+
+(defn similar-datums* [db datum-id]
+  ;; TODO: this should be more complex. sharing a fact is too
+  ;; strict. what about similar attrs in different facts? (diff vals?)
+  (let [datums-with-shared-facts []
+        datums-with-shared-attrs []
+        matches (->> (d/q
+                      '[:find ?subj ?attr ?valu
+                        :in $ ?ent-id
+                        :where
+                        [?ent-id :datum/fact ?fact]
+                        [?subj :datum/fact ?fact]
+                        [(!= ?ent-id ?subj)]
+                        [?fact :fact/attribute ?attr]
+                        [?fact :fact/value ?valu]
+
+                        ]
+                      db datum-id)
+                     (take 10))
+        ]
+    (mapv (fn [result]
+            (mapv (partial get-datum* db) result))
+          matches)))
+
+(defn user-datum* [db datum-id]
+  (hash-map :context-datums (context-datums* db datum-id)
+            :datum          (get-datum* db datum-id)
+            :similar-datums (similar-datums* db datum-id)))
+
 ;; TODO: implement remove-fact
 ;;(remove-fact   [this creds ent-id fact-id])
 (defprotocol IDataService
 
   (init-datum    [this creds])
   (update-datum-label [this creds datum-id label])
-  (get-datum     [this creds datum-id]
+  (get-datum [this creds datum-id]
              [this creds as-of datum-id])
-  (-get-fact [this creds fact-id])
+  (-get-fact [this creds fact-id]
+             "Not sure whether this should be here. Do any DataService
+             consumers call it or should this facility only be
+             available through the impl namespace as a helper fn?")
   (search-datums [this creds search])
 
   (context-datums [this creds datum-id])
@@ -85,53 +131,13 @@
       (or results [])))
 
   (context-datums [this creds ent-id]
-    (let [matches (->> (d/q
-                        '[:find ?subj ?attr
-                          :in $ ?ent-id
-                          :where
-                          [?subj :datum/fact ?fact]
-                          [?fact :fact/attribute ?attr]
-                          [?fact :fact/value ?ent-id]]
-                        (datomic/db datomic-peer creds)
-                        ent-id)
-                       (take 10))
-          ]
-      (mapv (fn [result]
-              (mapv (partial get-datum this creds) result))
-            matches)))
+    (context-datums* (datomic/db datomic-peer creds) ent-id))
 
   (similar-datums [this creds ent-id]
-    ;; TODO: this should be more complex. sharing a fact is too
-    ;; strict. what about similar attrs in different facts? (diff vals?)
-    (let [datums-with-shared-facts []
-          datums-with-shared-attrs []
-          matches (->> (d/q
-                        '[:find ?subj ?attr ?valu
-                          :in $ ?ent-id
-                          :where
-                          [?ent-id :datum/fact ?fact]
-                          [?subj :datum/fact ?fact]
-                          [(!= ?ent-id ?subj)]
-                          [?fact :fact/attribute ?attr]
-                          [?fact :fact/value ?valu]
-
-                          ]
-                        (datomic/db datomic-peer creds)
-                        ent-id)
-                       (take 10))
-          ]
-      (mapv (fn [result]
-              (mapv (partial get-datum this creds) result))
-            matches)))
+    (similar-datums* (datomic/db datomic-peer creds) ent-id))
 
   (user-datum [this creds datum-id]
-    (hash-map :context-datums
-              (context-datums this creds datum-id)
-              :datum
-              (get-datum this creds datum-id)
-              :similar-datums
-              (similar-datums this creds datum-id)
-              ))
+    (user-datum* (datomic/db datomic-peer creds) datum-id))
 
   (most-edited-datums [this creds]
     (let [user-teams (->> creds :teams (mapv :db/id))
