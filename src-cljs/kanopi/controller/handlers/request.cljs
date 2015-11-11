@@ -156,7 +156,7 @@
   {:pre [(or (integer? datum-id) (string? datum-id))]}
   (let [context (context-datums (-> props :cache vals) datum-id)
         similar (similar-datums (-> props :cache vals) datum-id)
-        datum (lookup-id props datum-id)]
+        datum   (lookup-id props datum-id)]
     (hash-map
      :context-datums [(lookup-id props -1008)]
      :datum datum
@@ -210,15 +210,12 @@
   [aether history app-state msg]
   (let [dtm {:datum/label (get-in msg [:noun :label])
              :datum/team  (get-in app-state [:user :current-team :db/id])
-             :db/id       (util/random-uuid)}]
-    (om/transact! app-state
-                  (fn [app-state]
-                    (let [st'   (assoc-in app-state [:cache (get dtm :db/id)] dtm)
-                          datum (build-datum-data st' (get dtm :db/id))]
-                      (assoc st' :datum datum))))
-    (history/navigate-to! history [:datum :id (get dtm :db/id)]))
-  ;; TODO: forward message to be preserved when user connects
-  )
+             :db/id       (util/random-uuid)}
+        st' (assoc-in @app-state [:cache (get dtm :db/id)] dtm)
+        user-datum (build-datum-data st' (get dtm :db/id))
+        ]
+    (->> (msg/create-datum-success user-datum)
+         (aether/send! aether))))
 
 (defn- handle-fact-add-or-update
   "NOTE: this is ugly."
@@ -257,10 +254,12 @@
                     app-state'
                     ))))
 
+;; FIXME: helper fn returns value, then mk into msg here
 (defmethod local-request-handler :datum.fact/add
   [aether history app-state msg]
   (handle-fact-add-or-update app-state msg))
 
+;; FIXME: helper fn returns value, then mk into msg here
 (defmethod local-request-handler :datum.fact/update
   [aether history app-state msg]
   (handle-fact-add-or-update app-state msg))
@@ -271,16 +270,12 @@
         new-label (get-in msg [:noun :new-label])
         datum    (get-in app-state [:cache datum-id])
         datum'   (assoc datum :datum/label new-label)]
-    (->> (hash-map :noun datum'
-                   :verb :datum.label.update/success
-                   :context {})
+    (->> (msg/update-datum-label-success datum')
          (aether/send! aether))))
 
 (defmethod local-request-handler :datum/get
   [aether history app-state msg]
   (let [user-datum (build-datum-data app-state (get msg :noun))]
-    (->> (hash-map :noun user-datum
-                   :verb :datum.get/success
-                   :context {})
+    (->> (msg/get-datum-success user-datum)
          (aether/send! aether))))
 

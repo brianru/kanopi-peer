@@ -56,6 +56,13 @@
 (s/defn get-datum :- GetDatum
   [datum-id]
   (message :noun datum-id :verb :datum/get))
+(abstract-map/extend-schema GetDatumSuccess Message
+  [:datum.get/success]
+  {:noun schema/CurrentDatum})
+(defn get-datum-success
+  [user-datum]
+  (message :noun user-datum
+           :verb :datum.get/success))
 
 (abstract-map/extend-schema AddFact Message
   [:datum.fact/add]
@@ -96,9 +103,19 @@
 ;   (message :noun {:existing-entity ent, :new-label new-label}
 ;            :verb :datum.label/update))
 
+(abstract-map/extend-schema UpdateDatumLabelSuccess Message
+  [:datum.label.update/success]
+  {:noun schema/Datum})
+(defn update-datum-label-success
+  [datum']
+  (message :noun datum'
+           :verb :datum.label.update/success))
+
 (abstract-map/extend-schema InitializeClientState Message
   [:spa.state/initialize]
   {:noun schema/Credentials})
+
+
 (s/defn initialize-client-state :- InitializeClientState
   [user]
   (message :noun user, :verb :spa.state/initialize))
@@ -109,6 +126,13 @@
 (s/defn create-datum :- CreateDatum
   ([]
    (message :verb :datum/create)))
+(abstract-map/extend-schema CreateDatumSuccess Message
+  [:datum.create/success]
+  {:noun schema/CurrentDatum})
+(defn create-datum-success
+  [user-datum]
+  (message :noun user-datum
+           :verb :datum.create/success))
 
 (defn create-goal
   ([]

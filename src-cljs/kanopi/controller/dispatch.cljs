@@ -83,8 +83,8 @@
              #{}
              }}})
 
-    (defrecord Dispatcher [config aether history app-state kill-channel]
-      component/Lifecycle
+(defrecord Dispatcher [config aether history app-state kill-channel]
+  component/Lifecycle
   (start [this]
     (info "start dispatcher" (get config :mode))
     (let [kill-ch  (async/chan 1)
