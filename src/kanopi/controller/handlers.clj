@@ -1,4 +1,6 @@
 (ns kanopi.controller.handlers
+  "NOTE: should really be kanopi.controller.handlers.request
+  but there are currently no response handlers in the server."
   (:require [kanopi.model.message :as msg]
             [kanopi.model.data :as data]
             [kanopi.util.core :as util]

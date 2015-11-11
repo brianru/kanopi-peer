@@ -29,12 +29,12 @@
   :post! (fn [ctx]
            (->> (get ctx ::message)
                 (handlers/request-handler ctx)
-                (hash-map ::result)))
+                (hash-map ::response)))
 
   :new? false
   :respond-with-entity? true
   :post-redirect? false
 
   :handle-ok (fn [ctx]
-               (get-in ctx [::result]))
+               (get-in ctx [::response]))
   )
