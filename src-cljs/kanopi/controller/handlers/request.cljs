@@ -1,6 +1,5 @@
 (ns kanopi.controller.handlers.request
   (:require [om.core :as om]
-            [kanopi.controller.handlers :as handlers :refer (local-event-handler)]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
 
@@ -12,7 +11,12 @@
             [kanopi.util.core :as util]
             ))
 
-(defmethod local-event-handler :spa/navigate
+(defmulti local-request-handler
+  (fn [_ _ _ msg]
+    (info msg)
+    (get msg :verb)))
+
+(defmethod local-request-handler :spa/navigate
   [aether history app-state msg]
   (let [handler (get-in msg [:noun :handler])]
     (om/transact! app-state
@@ -32,7 +36,7 @@
             (aether/send! aether)))
      )))
 
-(defmethod local-event-handler :spa/switch-team
+(defmethod local-request-handler :spa/switch-team
   [aether history app-state {team-id :noun :as msg}]
   (om/transact! app-state :user
                 (fn [user]
@@ -82,7 +86,7 @@
          (sort-by first)
          (vec))))
 
-(defmethod local-event-handler :spa.navigate/search
+(defmethod local-request-handler :spa.navigate/search
   [aether history app-state msg]
   (om/transact! app-state
                 (fn [app-state]
@@ -202,7 +206,7 @@
                 :new-referenced-value value'
                 :fact (assoc fact :fact/value [(get value' :db/id)])))))))
 
-(defmethod local-event-handler :datum/create
+(defmethod local-request-handler :datum/create
   [aether history app-state msg]
   (let [dtm {:datum/label (get-in msg [:noun :label])
              :datum/team  (get-in app-state [:user :current-team :db/id])
@@ -216,13 +220,9 @@
   ;; TODO: forward message to be preserved when user connects
   )
 
-(defmethod local-event-handler :datum.fact/add
-  [aether history app-state msg]
-  ;; TODO: this.
-  )
-
-(defmethod local-event-handler :datum.fact/update
-  [aether history app-state msg]
+(defn- handle-fact-add-or-update
+  "NOTE: this is ugly."
+  [app-state msg]
   (om/transact! app-state
                 (fn [app-state]
                   (let [datum-id (get-in msg [:noun :datum-id])
@@ -257,26 +257,30 @@
                     app-state'
                     ))))
 
-(defmethod local-event-handler :datum.label/update
+(defmethod local-request-handler :datum.fact/add
   [aether history app-state msg]
-  (om/transact! app-state
-                (fn [app-state]
-                  (let [ent-id (get-in msg [:noun :existing-entity :db/id])
-                        label' (get-in msg [:noun :new-label])]
-                    (-> app-state
-                        (assoc-in [:cache ent-id :datum/label] label')
-                        (ensure-current-datum-is-updated ent-id))))))
+  (handle-fact-add-or-update app-state msg))
 
-
-;; TODO: when handled locally, shouldn't I follow the same code path
-;; as performing action remotely? eg. send success/failure msgs?
-;; OR, should I purposely not do this and have a clear distinction b/w
-;; actions handled transactionally vs hypothetically
-;; FIXME: what about cache?
-(defmethod local-event-handler :datum/get
+(defmethod local-request-handler :datum.fact/update
   [aether history app-state msg]
-  (om/transact! app-state
-                (fn [app-state]
-                  (->> (get msg :noun)
-                       (build-datum-data app-state)
-                       (assoc app-state :datum)))))
+  (handle-fact-add-or-update app-state msg))
+
+(defmethod local-request-handler :datum.label/update
+  [aether history app-state msg]
+  (let [datum-id (get-in msg [:noun :existing-entity :db/id])
+        new-label (get-in msg [:noun :new-label])
+        datum    (get-in app-state [:cache datum-id])
+        datum'   (assoc datum :datum/label new-label)]
+    (->> (hash-map :noun datum'
+                   :verb :datum.label.update/success
+                   :context {})
+         (aether/send! aether))))
+
+(defmethod local-request-handler :datum/get
+  [aether history app-state msg]
+  (let [user-datum (build-datum-data app-state (get msg :noun))]
+    (->> (hash-map :noun user-datum
+                   :verb :datum.get/success
+                   :context {})
+         (aether/send! aether))))
+
