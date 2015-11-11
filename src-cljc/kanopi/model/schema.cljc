@@ -95,6 +95,8 @@
 (s/defschema UserId
   (s/conditional #(>= (count %) 3) s/Str))
 
+(s/defschema TeamId UserId)
+
 (s/defschema UserPassword
   (s/conditional #(>= (count %) 8) s/Str))
 
@@ -103,8 +105,8 @@
 
 (s/defschema UserTeam
   {
-   :db/id     (s/maybe DatomicId)
-   :team/id    UserId
+   :db/id   (s/maybe DatomicId)
+   :team/id TeamId
    })
 
 (s/defschema Credentials

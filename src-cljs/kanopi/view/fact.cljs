@@ -180,17 +180,18 @@
                                                 (update-mode))]
                                   (om/set-state! owner state')))
                    :on-submit (fn [v]
-                                (let [state  (om/get-state owner)
-                                      state' (-> state
-                                                (assoc-in [part :input-value] v)
-                                                (assoc :editing nil)
-                                                (update-mode))]
+                                (let [state' (-> (om/get-state owner)
+                                                 (assoc-in [part :input-value] v)
+                                                 (assoc :editing nil)
+                                                 (update-mode))]
                                   (when (= :complete (get state' :mode))
-                                    (->> (prepare-fact entity state')
-                                         (msg/update-fact (get state' :datum-id))
-                                         (msg/send! owner)))
-                                  (om/set-state! owner state'))
-                                ) 
+                                    (let [fact (prepare-fact entity state')
+                                          datum-id (get state' :datum-id)
+                                          msg  (if (:db/id fact)
+                                                 (msg/update-fact datum-id fact)
+                                                 (msg/add-fact    datum-id fact))]
+                                      (msg/send! owner msg)))
+                                  (om/set-state! owner state'))) 
                    ;                 :on-click  (partial handle-result-selection owner)
                    }
                   })

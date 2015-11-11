@@ -157,7 +157,6 @@
             {:keys [status headers body] :as resp} (handler req)
             cookie (-> (get headers "Set-Cookie") (first))
             ]
-        (is (re-find #"kanopi-init" (first cookie-zero)))
         (is (= 200 status))
         #_(is (= 303 status))
         #_(is (re-find #"welcome=true" (get-in headers ["Location"] "")))

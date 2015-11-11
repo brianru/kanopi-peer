@@ -16,6 +16,13 @@
     (info msg)
     (get msg :verb)))
 
+;; TODO: should this be in the response namespace? is there anything
+;; to be done here but fwd it?
+;; I could just pass it on, keeping the noun the same or transforming
+;; it into something more useful or annotate it.
+;; OR
+;; I could do the work of matching inputs to routes here, instead of
+;; passing the history component around via shared state.
 (defmethod local-request-handler :spa/navigate
   [aether history app-state msg]
   (let [handler (get-in msg [:noun :handler])]
@@ -38,19 +45,15 @@
 
 (defmethod local-request-handler :spa/switch-team
   [aether history app-state {team-id :noun :as msg}]
-  (om/transact! app-state :user
-                (fn [user]
-                  (if-let [team' (->> (get user :teams)
-                                      (filter #(= (:team/id %) team-id))
-                                      (first))]
-                    (assoc user :current-team team')
-                    user)))
-  ;; NOTE: user changed, therefore creds changed, therefore must
-  ;; reinitialize => could have a current-datum which is not
-  ;; accessible from the new creds
-  (->> (msg/initialize-client-state (get @app-state :user))
-       (aether/send! aether))
-  (history/navigate-to! history :home))
+  (let [user' (update @app-state :user
+                      (fn [user]
+                        (if-let [team' (->> (get user :teams)
+                                            (filter #(= (:team/id %) team-id))
+                                            (first))]
+                          (assoc user :current-team team')
+                          user)))]
+    (->> (msg/switch-team-success user')
+         (aether/send! aether))))
 
 (defn- fuzzy-search-entity [q ent]
   (let [base-string (->> ent
@@ -88,14 +91,11 @@
 
 (defmethod local-request-handler :spa.navigate/search
   [aether history app-state msg]
-  (om/transact! app-state
-                (fn [app-state]
-                  (let [{:keys [query-string entity-type]} (get msg :noun)
-                        results (local-fulltext-search app-state query-string entity-type)]
-                    ;; wipes out map with each new search.
-                    ;; not using this data structure very well
-                    (assoc-in app-state [:search-results] {query-string results})))))
-
+  (let [{:keys [query-string entity-type]} (get msg :noun)
+        results (local-fulltext-search @app-state query-string entity-type)
+        ]
+    (->> (msg/navigate-search-success query-string results)
+         (aether/send! aether))))
 
 (defn- current-datum [props]
   (get-in props [:datum :datum :db/id]))

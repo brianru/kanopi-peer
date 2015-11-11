@@ -66,10 +66,12 @@
 
 (abstract-map/extend-schema AddFact Message
   [:datum.fact/add]
-  {:noun {:datum-id schema/DatomicId}})
-(s/defn add-fact :- AddFact
-  [datum-id]
-  (message :noun {:datum-id datum-id}
+  {:noun {:datum-id schema/DatomicId
+          :fact     schema/Fact}})
+(defn add-fact
+  [datum-id fact]
+  (message :noun {:datum-id datum-id
+                  :fact fact}
            :verb :datum.fact/add))
 
 (abstract-map/extend-schema UpdateFact Message
@@ -165,13 +167,27 @@
   ([q tp]
    (message :noun {:query-string q, :entity-type tp}
             :verb :spa.navigate/search)))
+(abstract-map/extend-schema NavigateSearchSuccess Message
+  [:spa.navigate.search/success]
+  {:noun {:query-string s/Str
+          :results [s/Any]}})
+(defn navigate-search-success
+  [query-string results]
+  (message :noun {:query-string query-string
+                  :results results}
+           :verb :spa.navigate.search/success))
 
+(abstract-map/extend-schema SwitchTeam Message
+  [:spa/switch-team]
+  {:noun schema/TeamId})
 (defn switch-team [team-id]
   (message :noun team-id :verb :spa/switch-team))
+(abstract-map/extend-schema SwitchTeamSuccess Message
+  [:spa.switch-team/success]
+  {:noun schema/Credentials})
+(defn switch-team-success [user']
+  (message :noun user' :verb :spa.switch-team/success))
 
-(defn toggle-fact-mode [ent]
-  (message :noun [:fact (:db/id ent)]
-           :verb :toggle-mode))
 (defn register [creds]
   (message :noun creds :verb :spa/register))
 

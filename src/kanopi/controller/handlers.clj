@@ -61,18 +61,17 @@
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
-        data     (hash-map :search-results
-                           (data/search-datums data-svc creds
-                                               (get-in message [:noun :query-string])))
+        query-string (get-in message [:noun :query-string])
+        results  (data/search-datums data-svc creds query-string)
+        data     (hash-map :query-string query-string
+                           :results      results)
         ]
     (hash-map
      :noun    data
      ;; NOTE: really, I don't care if there are no search results.
      ;; that does not determine failure as in the other handlers. in
      ;; this case as long as the search ran let's return success.
-     ;; I think it makes sense to indicate that by checking for the
-     ;; search-results key in the response.
-     :verb    (if (find data :search-results)
+     :verb    (if-not (nil? results)
                 :spa.navigate.search/success
                 :spa.navigate.search/failure)
      :context {})))
@@ -134,14 +133,12 @@
 
 (defmethod request-handler :datum.fact/update
   [request-context message]
-  (let [data-svc  (util/get-data-service request-context)
-        creds     (get-in message [:context :creds])
-        datm-id   (get-in message [:noun :datum-id])
-        fact      (get-in message [:noun :fact])
-        result    (if (:db/id fact)
-                    (data/update-fact data-svc creds fact)
-                    (data/add-fact    data-svc creds datm-id fact)) 
-        data      (data/get-datum data-svc creds datm-id)
+  (let [data-svc (util/get-data-service request-context)
+        creds    (get-in message [:context :creds])
+        datm-id  (get-in message [:noun :datum-id])
+        fact     (get-in message [:noun :fact])
+        result   (data/update-fact data-svc creds fact)
+        data     (data/get-datum data-svc creds datm-id)
         ]
     (hash-map
      :noun data

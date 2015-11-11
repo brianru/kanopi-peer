@@ -108,7 +108,7 @@
       (let [test-ent (data/get-datum data-svc full-creds test-ent-id)
             fact' {:fact/attribute {:literal/text "age"}
                    :fact/value     {:literal/integer 42}}
-            message (msg/update-fact test-ent-id fact')
+            message (msg/add-fact test-ent-id fact')
             {:keys [body] :as resp}
             (test-util/mock-request! system :post "/api" (util/transit-write message)
                                      :creds creds
@@ -121,7 +121,7 @@
                  (into (list))) 
             ]
         (is (= 200 (:status resp)))
-        (is (= :datum.fact.update/success (get body :verb)))
+        (is (= :datum.fact.add/success (get body :verb)))
         (is (not-empty new-facts))
         (is (= 1 (count new-facts)))
         (is (= ["age" 42] (util/fact-entity->tuple new-fact)))

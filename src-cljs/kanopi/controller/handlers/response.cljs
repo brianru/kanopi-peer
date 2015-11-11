@@ -81,9 +81,10 @@
 
 (defmethod local-response-handler :spa.navigate.search/success
   [aether history app-state msg]
-  (om/transact! app-state
-                (fn [app-state]
-                  (merge app-state msg))))
+  (let [{:keys [query-string results]} (get msg :noun)]
+    (om/transact! app-state :search-results
+                  (fn [search-results]
+                    (assoc search-results query-string results)))))
 
 (defmethod local-response-handler :spa.navigate.search/failure
   [aether history app-state msg]
@@ -164,4 +165,16 @@
   [aether history app-state msg]
   (record-error-message app-state msg))
 
-
+(defmethod local-response-handler :spa.switch-team/success
+  [aether history app-state msg]
+  (let [user' (get msg :noun)]
+    (om/transact! app-state (fn [app-state]
+                              (assoc app-state :user (get msg :noun))))
+    ;; NOTE: user changed, therefore creds changed, therefore must
+    ;; reinitialize => could have a current-datum which is not
+    ;; accessible from the new creds
+    (->> (msg/initialize-client-state user')
+         (aether/send! aether))
+    (history/navigate-to! history :home)
+    )
+  )

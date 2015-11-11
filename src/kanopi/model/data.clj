@@ -28,21 +28,35 @@
 (defn similar-datums* [db datum-id]
   ;; TODO: this should be more complex. sharing a fact is too
   ;; strict. what about similar attrs in different facts? (diff vals?)
-  (let [datums-with-shared-facts []
-        datums-with-shared-attrs []
-        matches (->> (d/q
-                      '[:find ?subj ?attr ?valu
-                        :in $ ?ent-id
-                        :where
-                        [?ent-id :datum/fact ?fact]
-                        [?subj :datum/fact ?fact]
-                        [(!= ?ent-id ?subj)]
-                        [?fact :fact/attribute ?attr]
-                        [?fact :fact/value ?valu]
+  (let [datums-with-shared-facts (->> (d/q
+                                       '[:find ?subj ?attr ?valu
+                                         :in $ ?ent-id
+                                         :where
+                                         [?ent-id :datum/fact ?fact]
+                                         [?subj :datum/fact ?fact]
+                                         [(!= ?ent-id ?subj)]
+                                         [?fact :fact/attribute ?attr]
+                                         [?fact :fact/value ?valu]
 
-                        ]
-                      db datum-id)
-                     (take 10))
+                                         ]
+                                       db datum-id)
+                                      (take 10))
+        datums-with-shared-attrs (->> (d/q
+                                       '[:find ?subj ?attr ?valu
+                                         :in $ ?ent-id
+                                         :where
+                                         [?ent-id :datum/fact ?fact]
+                                         [?fact :fact/attribute ?attr]
+                                         [(!= ?ent-id ?subj)]
+                                         [?subj :datum/fact ?subj-fact]
+                                         [?subj-fact :fact/attribute ?attr]
+                                         [?subj-fact :fact/value ?valu]
+                                         ]
+                                       db datum-id)
+                                      (take 10))
+        datums-referenced-with-same-attr []
+        ;; only matches same facts
+        matches  (concat datums-with-shared-facts datums-with-shared-attrs)
         ]
     (mapv (fn [result]
             (mapv (partial get-datum* db) result))
@@ -122,6 +136,8 @@
       (get-fact* db ent-id)))
 
   (search-datums [this creds search]
+    ;; FIXME: return nil if something goes wrong, otherwise return a
+    ;; vector -- empty vector is considered a success because it ran
     (let [db (datomic/db datomic-peer creds)
           results (d/q '[:find ?score ?entity
                          :in $ ?search

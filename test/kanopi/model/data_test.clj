@@ -153,18 +153,17 @@
         (is (empty? results))))
 
     (testing "pale"
-      (let [results (data/search-datums data-svc creds "pale")]
+      (let [results (data/search-datums data-svc creds "Kanopi")]
         (is (not-empty results))))
 
     (component/stop system)))
 
-(defn- datums-with-titles [db]
+(defn- datums-with-patterns [db]
   (d/q '[:find [?datum ...]
          :where
          [?datum :datum/fact ?fact]
          [?fact :fact/attribute ?attr]
-         [?attr :datum/label "Title"]
-         ]
+         [?attr :datum/label "Pattern"]]
        db))
 
 (deftest context-datums
@@ -174,7 +173,7 @@
         creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
                    (auth/credentials (:authenticator system) "brian"))
         db     (get-db system creds)
-        datum-id (d/q '[:find ?s . :where [?s :datum/label "David Foster Wallace"]] db)
+        datum-id (d/q '[:find ?s . :where [?s :datum/label "Lantern in the fog"]] db)
         results (data/context-datums data-svc creds datum-id)
         ]
     (is (not-empty results))
@@ -196,7 +195,7 @@
         creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
                    (auth/credentials (:authenticator system) "brian"))
         db     (get-db system creds)
-        datum-ids (datums-with-titles db)
+        datum-ids (datums-with-patterns db)
         results (data/similar-datums data-svc creds (first datum-ids))
         ]
     (is (not-empty results))
