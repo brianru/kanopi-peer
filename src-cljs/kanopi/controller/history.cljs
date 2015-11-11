@@ -14,6 +14,7 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
+            [kanopi.model.message :as msg]
             [cljs.core.async :as async]
             [bidi.bidi :as bidi]
             [pushy.core :as pushy]))
@@ -36,10 +37,8 @@
   "NOTE: this should match kanopi.model.messsage/navigate but cannot
   directly reference as it would create a circular dependency."
   [aether match]
-  (async/put! (get-in aether [:aether :publisher])
-              {:noun match
-               :verb :spa/navigate
-               :context nil}))
+  (->> (msg/navigate match)
+       (async/put! (get-in aether [:aether :publisher]))))
 
 (defprotocol INavigator
   (navigate-to! [this path])

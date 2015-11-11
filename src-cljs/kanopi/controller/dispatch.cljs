@@ -9,6 +9,7 @@
             [kanopi.aether.core :as aether]
             [kanopi.controller.handlers :as handlers]
             [kanopi.model.message :as msg]
+            [kanopi.model.message.client :as client-msg]
             [om.core :as om]
             ))
 
@@ -98,7 +99,7 @@
                            (handlers/local-event-handler aether history root-crsr v))
                          (when (contains? remote-verbs verb)
                            (->> v
-                                (msg/local->remote history root-crsr)
+                                (client-msg/local->remote history root-crsr)
                                 (aether/send! aether))))
 
                        (recur (async/alts! [listener kill-ch]))))))

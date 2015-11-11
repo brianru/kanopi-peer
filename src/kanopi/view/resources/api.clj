@@ -7,7 +7,7 @@
             [cemerick.friend :as friend]
             [kanopi.model.data :as data]
             [kanopi.util.core :as util]
-            [kanopi.model.message :as msg]
+            [kanopi.model.message.server :as server-msg]
             [kanopi.controller.handlers :as handlers]
             ))
 
@@ -18,13 +18,8 @@
                           "application/json"]
 
   :processable? (fn [ctx]
-                  (hash-map ::message (msg/remote->local ctx))) 
+                  (hash-map ::message (server-msg/remote->local ctx))) 
   :handle-unprocessable-entity "The request is in some way incomplete or illogical."
-
-  ;; :exists? (fn [ctx]
-  ;;            (let [data-svc (util/get-data-service ctx)
-  ;;                  msg      (get ctx ::message)]
-  ;;              (hash-map ::entity (data/user-datum data-svc msg))))
 
   :post! (fn [ctx]
            (->> (get ctx ::message)

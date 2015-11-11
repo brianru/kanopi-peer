@@ -7,29 +7,21 @@
 
   This is what will allow us to drive all major analytics. Every
   action the user takes stored for analysis and testing.
-  
-  TODO: separate main message namespace from message.client and
-  message.server namespaces
-  local->remote and remote->local should not be here, simplifies
-  dependencies, makes it to any kanopi NS can depend on
-  kanopi.model.message
+
   "
   (:require #?@(:cljs [[om.core :as om]
                        [schema.core :as s :include-macros true]
                        [schema.experimental.abstract-map :as abstract-map
                         :include-macros true]
-                       [kanopi.controller.history :as history]
                        [taoensso.timbre :as timbre
                         :refer-macros (log trace debug info warn error fatal report)]
-                       [ajax.core :as ajax]
                        [cljs.core.async :as async] 
                        [kanopi.model.schema :as schema]
                        [kanopi.util.core :as util]
                        ]
-                :clj  [[clojure.string]
+                :clj  [
                        [schema.core :as s]
                        [schema.experimental.abstract-map :as abstract-map]
-                       [cemerick.friend :as friend]
                        [taoensso.timbre :as timbre
                         :refer (log trace debug info warn error fatal report)]
                        [kanopi.model.schema :as schema]
@@ -150,62 +142,40 @@
    (message :noun {:query-string q, :entity-type tp}
             :verb :spa.navigate/search)))
 
+(defn switch-team [team-id]
+  (message :noun team-id :verb :spa/switch-team))
 
-;; Server-only utilities for parsing messages out of ring request maps
-;; TODO: refactor this to a schema transformation
-;; https://github.com/Prismatic/schema/wiki/Writing-Custom-Transformations
-;; http://blog.getprismatic.com/schema-0-2-0-back-with-clojurescript-data-coercion/
-;; http://camdez.com/blog/2015/08/27/practical-data-coercion-with-prismatic-schema/
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#?(:clj
-   (defn- request->noun [ctx noun]
-     {:post [(or (integer? %) (keyword? %) (instance? java.lang.Long %) (map? %))]}
-     noun))
+(defn toggle-fact-mode [ent]
+  (message :noun [:fact (:db/id ent)]
+           :verb :toggle-mode))
+(defn register [creds]
+  (message :noun creds :verb :spa/register))
 
-#?(:clj
-   (defn- request->verb [ctx verb]
-     {:post [(keyword? %)]}
-     verb))
+(defn register-success [creds]
+  (message :noun creds :verb :spa.register/success))
 
-#?(:clj
-   (defn- request->context [request-context message-context]
-     {:post [(map? %)]}
-     (let [creds (-> (friend/current-authentication (:request request-context))
-                     :identity
-                     ((util/get-auth-fn request-context))
-                     )]
-       (s/validate schema/Credentials creds)
-       (assoc message-context :creds creds))))
+(defn register-failure [err]
+  (message :noun err :verb :spa.register/failure))
 
-#?(:clj
-   (s/defn remote->local :- schema/Message
-     "If for some reason the request is in some way logically incomplete,
-     here's the place to indicate that."
-     ([ctx]
-      (let [body        (util/transit-read (get-in ctx [:request :body]))
-            params      (get-in ctx [:request :params])
-            ;; NOTE: keyword namespaces are stripped out by transit
-            parsed-body (->> (merge body params)
-                             (reduce (fn [acc [k v]]
-                                       (cond
-                                        (contains? #{:message/id :id} k)
-                                        (assoc acc k v)
+(defn login [creds]
+  (message :noun creds :verb :spa/login))
 
-                                        (string? v)
-                                        (if (clojure.string/blank? v)
-                                          (assoc acc k {})
-                                          (assoc acc k (util/try-read-string v))) 
+(defn login-success [creds]
+  (message :noun creds :verb :spa.login/success))
 
-                                        :default
-                                        (assoc acc k v)))
-                                     {}))]
-        (hash-map
-         :noun    (request->noun    ctx (:noun    parsed-body))
-         :verb    (request->verb    ctx (:verb    parsed-body))
-         :context (request->context ctx (:context parsed-body)))))))
+(defn login-failure [err]
+  (message :noun err :verb :spa.login/failure))
 
-;; Client-only messages, aether helper fns, and local->remote
-;; transformers
+(defn logout []
+  (message :verb :spa/logout))
+
+(defn logout-success [foo]
+  (message :noun foo :verb :spa.logout/success))
+
+(defn logout-failure [err]
+  (message :noun err :verb :spa.logout/failure))
+
+;; Client only helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #?(:cljs
    (do
@@ -235,193 +205,3 @@
                             :verb :intent/register
                             :context (get msg :context))))
     ))
-
-#?(:cljs
-   (defn switch-team [team-id]
-     (message :noun team-id :verb :spa/switch-team)))
-
-#?(:cljs
-   (defn toggle-fact-mode [ent]
-     (message :noun [:fact (:db/id ent)]
-              :verb :toggle-mode))
-   )
-#?(:cljs
-   (defn select-fact-part-type [fact-id fact-part tp]
-     (message :noun [:fact fact-id]
-              :verb :select-fact-part-type
-              :context {:fact-part fact-part
-                        :value tp}))
-   )
-#?(:cljs
-   (defn input-fact-part-value [fact-id fact-part input-value]
-     (message :noun [:fact fact-id]
-              :verb :input-fact-part-value
-              :context {:fact-part fact-part
-                        :value input-value}))
-   )
-#?(:cljs
-   (defn select-fact-part-reference [fact-id fact-part selection]
-     (message :noun [:fact fact-id]
-              :verb :select-fact-part-reference
-              :context {:fact-part fact-part
-                        :selection selection}))
-   )
-#?(:cljs
-   (defn register [creds]
-     (message :noun creds :verb :spa/register)))
-#?(:cljs
-   (defn register-success [creds]
-     (message :noun creds :verb :spa.register/success))
-   )
-#?(:cljs
-   (defn register-failure [err]
-     (message :noun err :verb :spa.register/failure))
-   )
-#?(:cljs
-   (defn login [creds]
-     (message :noun creds :verb :spa/login))
-   )
-#?(:cljs
-   (defn login-success [creds]
-     (message :noun creds :verb :spa.login/success))
-   )
-#?(:cljs
-   (defn login-failure [err]
-     (message :noun err :verb :spa.login/failure))
-   )
-#?(:cljs
-   (defn logout []
-     (message :verb :spa/logout))
-   )
-#?(:cljs
-   (defn logout-success [foo]
-     (message :noun foo :verb :spa.logout/success))
-   )
-#?(:cljs
-   (defn logout-failure [err]
-     (message :noun err :verb :spa.logout/failure))
-   )
-
-#?(:cljs
-   (defn valid-remote-message?
-     "Some simple assertions on the shape of the remote message.
-     It's not as willy-nilly as local messages, though that must change
-     as well."
-     [msg]
-     (s/validate schema/RemoteMessage (get msg :noun)))
-   )
-
-#?(:cljs
-   (do
-    (defmulti local->remote
-      (fn [history app-state msg]
-        (info msg)
-        (get msg :verb))
-      :default :default)
-
-    (defn standard-api-post [history msg]
-      {:post [(valid-remote-message? %)]}
-      (hash-map
-       :noun {:uri             (history/get-route-for history :api)
-              :params          (select-keys msg [:noun :verb :context])
-              :method          :post
-              :format          :transit
-              :response-format :transit
-              :response-method :aether
-              :error-method    :aether}
-       :verb :request
-       :context {}))
-
-    (defmethod local->remote :spa/register
-      [history app-state msg]
-      {:post [(valid-remote-message? %)]}
-      (hash-map
-       :noun {:uri             (history/get-route-for history :register)
-              :params          (get msg :noun)
-              :method          :post
-              :response-format :transit
-              :response-method :aether
-              ;; NOTE: here xforms are specified because the server
-              ;; does not respond with a message, but we want to use
-              ;; aether so we must transform it to a message
-              :response-xform  register-success
-              :error-method    :aether
-              :error-xform     register-failure
-              }
-       :verb :request
-       :context {}))
-
-    (defmethod local->remote :spa/login
-      [history app-state msg]
-      {:post [(valid-remote-message? %)]}
-      (hash-map
-       :noun {
-              ;; NOTE: cljs-ajax parses params to req body for POST
-              ;; requests. friend auth lib requires username and password
-              ;; to appear in params or form-params, not body.
-              :uri             (ajax/uri-with-params
-                                (history/get-route-for history :login)
-                                (get msg :noun))
-              :method          :post
-              :response-format :transit
-              :response-method :aether
-              :response-xform  login-success
-              :error-method    :aether
-              :error-xform     login-failure
-              }
-       :verb :request
-       :context {}))
-
-    (defmethod local->remote :spa/logout
-      [history app-state msg]
-      {:post [(valid-remote-message? %)]}
-      (hash-map
-       :noun {:uri             (history/get-route-for history :logout)
-              :method          :post
-              :response-format :transit
-              :response-method :aether
-              :response-xform  logout-success
-              :error-method    :aether
-              :error-xform     logout-failure
-              }
-       :verb :request
-       :context {}))
-
-    (defmethod local->remote :default
-      [history app-state msg]
-      (hash-map 
-       :noun {:uri  (history/get-route-for history :api)
-              :body msg
-              :method :post
-              :response-format :transit
-              :response-method :aether
-              :error-method    :aether
-              }
-       :verb :request
-       :context {}))
-
-    (defmethod local->remote :spa.state/initialize
-      [history app-state msg]
-      (standard-api-post history msg))
-
-    (defmethod local->remote :search
-      [history app-state msg]
-      (standard-api-post history msg))
-
-    (defmethod local->remote :datum/create
-      [history app-state msg]
-      (standard-api-post history msg))
-
-    (defmethod local->remote :datum/get
-      [history app-state msg]
-      (standard-api-post history msg))
-
-(defmethod local->remote :datum.label/update
-  [history app-state msg]
-  (standard-api-post history msg))
-
-(defmethod local->remote :datum.fact/update
-  [history app-state msg]
-  (standard-api-post history msg))
-
-))
