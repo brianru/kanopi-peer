@@ -26,10 +26,14 @@
         ;; search.
         [:span.search
          (om/build typeahead/typeahead props
-                   {:init-state {:display-fn schema/display-entity
-                                 :href-fn    #(browser/route-for owner :datum :id (:db/id %))
-                                 :on-click   (constantly nil)
-                                 :tab-index  1}})]
+                   {:init-state
+                    {:display-fn schema/display-entity
+                     :placeholder "search"
+                     :href-fn    (fn [result]
+                                   (when-let [id (:db/id result)]
+                                     (browser/route-for owner :datum :id id))) 
+                     :on-click   (constantly nil)
+                     :tab-index  1}})]
         ]))))
 
 (defn- team->menu-item [owner team]

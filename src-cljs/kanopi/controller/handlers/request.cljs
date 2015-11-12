@@ -38,10 +38,9 @@
                       )))
     (cond
      (= :datum handler)
-     (let [datum-id (util/try-read-string (get-in msg [:noun :route-params :id]))]
+     (let [datum-id (util/read-entity-id (get-in msg [:noun :route-params :id]))]
        (->> (msg/get-datum datum-id)
-            (aether/send! aether)))
-     )))
+            (aether/send! aether))))))
 
 (defmethod local-request-handler :spa/switch-team
   [aether history app-state {team-id :noun :as msg}]
@@ -275,6 +274,7 @@
 
 (defmethod local-request-handler :datum/get
   [aether history app-state msg]
+  (println (type (get msg :noun)))
   (let [user-datum (build-datum-data app-state (get msg :noun))]
     (->> (msg/get-datum-success user-datum)
          (aether/send! aether))))

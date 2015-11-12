@@ -213,7 +213,7 @@
               (when (= idx (get state :selection-index))
                 [:span.dropdown-menu-item-marker])
               [:a {
-                   :href     #(href-fn res)
+                   :href     (href-fn res)
                    :on-click (partial handle-result-click owner res)
                    }
                [:span (display-fn res)]]])]

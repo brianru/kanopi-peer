@@ -56,3 +56,10 @@
    (cljs.reader/read-string string)
    (catch js/Object e
      string)))
+
+(defn read-entity-id
+  "Sometimes an integer, sometimes a string, never a symbol."
+  [string]
+  (if (= string (re-find #"[0-9]*" string))
+    (try-read-string string)
+    string))
