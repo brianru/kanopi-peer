@@ -79,7 +79,7 @@
   (or (get entity :input-value)
       (schema/get-value entity)))
 
-(defn update-mode [fact]
+(defn compute-mode [fact]
   (let [part-values (->> fact
                          ((juxt :fact/attribute :fact/value))
                          (map any-value))
@@ -95,7 +95,7 @@
 
                :default
                :error)]
-    (assoc fact :mode mode')))
+    mode'))
 
 (defn- handle-contents-group [& args]
   (let [{:keys [mode hovering editing] :or {mode :view, hovering false}}
@@ -156,6 +156,8 @@
   (let [current-value (->> entity
                            ((juxt :input-value :datum/label :literal/text))
                            (some identity))
+        ;; TODO: use available-types here because those have labels
+        ;; and values.
         ]
     [:div.fact-attribute
      [:div.view-fact-part.row
@@ -177,13 +179,13 @@
                                 (let [state  (om/get-state owner)
                                       state' (-> state
                                                 (assoc-in [part :input-value] v)
-                                                (update-mode))]
+                                                )]
                                   (om/set-state! owner state')))
                    :on-submit (fn [v]
                                 (let [state' (-> (om/get-state owner)
                                                  (assoc-in [part :input-value] v)
                                                  (assoc :editing nil)
-                                                 (update-mode))]
+                                                 )]
                                   (when (= :complete (get state' :mode))
                                     (let [fact (prepare-fact entity state')
                                           datum-id (get state' :datum-id)
@@ -223,8 +225,10 @@
     om/IInitState
     (init-state [_]
       {
-       ;Modes #{:empty :partial :complete}
-       :mode :empty
+       ; NOTE: this is not state, it's a derived value. It's in the
+       ; function's name!!! Compute with each call to render-state.
+       ; Modes #{:empty :partial :complete}
+       ; :mode (compute-mode props)
 
        ; Editing states #{nil :attribute :value}
        ; Only registers as editing that state if the current value is
@@ -238,11 +242,11 @@
        :fact/attribute (let [attr (get props :fact/attribute)]
                          (assoc attr
                                 :input-value (schema/get-value attr)
-                                :input-type  (schema/get-type  attr "Select a type"))) 
+                                :input-type  (schema/get-type  attr :datum))) 
        :fact/value     (let [valu (get props :fact/value)]
                          (assoc valu
                                 :input-value (schema/get-value valu)
-                                :input-type  (schema/get-type  valu "Select a type")))
+                                :input-type  (schema/get-type  valu :datum)))
 
        })
 
@@ -257,8 +261,8 @@
     ; TODO: Synchronize props with component state when component updates
 
     om/IRenderState
-    (render-state [_ {:keys [mode hovering editing fact/attribute fact/value] :as state}]
-      (let []
+    (render-state [_ {:keys [hovering editing fact/attribute fact/value] :as state}]
+      (let [mode (compute-mode state)]
         (html
          [:div.fact-container.container
           [:div.fact-body.row
