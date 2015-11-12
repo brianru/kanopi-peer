@@ -63,3 +63,13 @@
   (if (= string (re-find #"[0-9]*" string))
     (try-read-string string)
     string))
+
+(defn sort-by-ordering
+  "Similar signature as sort-by.
+  Lets the user supply an ordering instead of a comparator fn."
+  [keyfn ordering coll]
+  (let [vals->indexes (into {} (map-indexed (comp vec reverse list) ordering))
+        compfn (fn [v1 v2]
+                 (compare (get vals->indexes v1) (get vals->indexes v2)))
+        ]
+    (sort-by keyfn compfn coll)))

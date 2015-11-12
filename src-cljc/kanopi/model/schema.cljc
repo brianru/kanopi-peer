@@ -42,12 +42,24 @@
    })
 
 (def input-types
-  (-> (vals literal-types)
-      (conj {:ident :datum/label
-             :label "datum"
-             :predicate (fn [v]
-                          (or (string? v)
-                              ))})))
+  (assoc literal-types
+         :datum/label
+         {:ident :datum/label
+          :label "datum"
+          :predicate (fn [v]
+                       (or (string? v)))}))
+
+(def fact-attribute-input-ordering
+  (list :datum/label :literal/text))
+
+(def fact-value-input-ordering
+  (let [ordered-items   (list :datum/label :literal/text)
+        remaining-items (clojure.set/difference (set input-types) (set ordered-items))]
+    (concat ordered-items remaining-items)))
+
+(def input-types-ordered-by-fact-part-preference
+  {:fact/attribute (mapv #(get input-types %) fact-attribute-input-ordering) 
+   :fact/value     (mapv #(get input-types %) fact-value-input-ordering)})
 
 (defn describe-entity
   [m]

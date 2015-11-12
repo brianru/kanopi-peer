@@ -20,10 +20,12 @@
             [kanopi.model.text :as text]
             [kanopi.view.icons :as icons]
             [kanopi.aether.core :as aether]
-            [kanopi.util.browser :as browser]
             [kanopi.view.widgets.input-field :as input-field]
             [kanopi.view.widgets.dropdown :as dropdown]
             [kanopi.view.widgets.typeahead :as typeahead]
+
+            [kanopi.util.browser :as browser]
+            [kanopi.util.core :as util]
             ))
 
 (defn prepare-fact [entity state]
@@ -129,7 +131,7 @@
       
       :default
       false))
-   schema/input-types))
+   (vals schema/input-types)))
 
 (defn input-type->dropdown-menu-item
   [on-click-fn tp]
@@ -139,10 +141,11 @@
   [input-value item1 item2]
   true)
 
-(defn generate-menu-items [value on-click-fn]
+(defn generate-menu-items [value on-click-fn ordering]
   (->> (available-input-types value)
+       (util/sort-by-ordering :ident ordering)
        (mapv (partial input-type->dropdown-menu-item on-click-fn))
-       (sort-by :value (partial menu-item-comparator value))))
+       ))
 
 (defn handle [& args]
   (let [{:keys [mode hovering editing]} (apply hash-map args)]
@@ -156,9 +159,7 @@
   (let [current-value (->> entity
                            ((juxt :input-value :datum/label :literal/text))
                            (some identity))
-        ;; TODO: use available-types here because those have labels
-        ;; and values.
-        ]
+        ordered-input-types (get schema/input-types-ordered-by-fact-part-preference part [])]
     [:div.fact-attribute
      [:div.view-fact-part.row
       [:div.inline-90-percent.col-xs-11
@@ -202,13 +203,15 @@
         (om/build dropdown/dropdown entity
                   {:init-state {:caret? true}
                    :state {:toggle-label (let [tp (get entity :input-type)]
-                                           (if (keyword? tp)
-                                             (name tp)
-                                             tp)) 
+                                           (cond (keyword? tp)
+                                                 (name tp)
+                                                 (map? tp)
+                                                 (:label tp))) 
                            :menu-items (generate-menu-items
                                         current-value
                                         (fn [tp evt]
                                           (om/set-state! owner [part :input-type] tp))
+                                        ordered-input-types
                                         )}})
         ]
        ]
@@ -224,31 +227,44 @@
   (reify
     om/IInitState
     (init-state [_]
-      {
-       ; NOTE: this is not state, it's a derived value. It's in the
-       ; function's name!!! Compute with each call to render-state.
-       ; Modes #{:empty :partial :complete}
-       ; :mode (compute-mode props)
+      (let [default-attr-input-type (-> schema/input-types-ordered-by-fact-part-preference
+                                        :fact/attribute
+                                        (first)
+                                        )
+            default-value-input-type (-> schema/input-types-ordered-by-fact-part-preference
+                                         :fact/value
+                                         (first)
+                                         )]
+        {
+         ; NOTE: this is not state, it's a derived value. It's in the
+         ; function's name!!! Compute with each call to render-state.
+         ; Modes #{:empty :partial :complete}
+         ; :mode (compute-mode props)
 
-       ; Editing states #{nil :attribute :value}
-       ; Only registers as editing that state if the current value is
-       ; nil. It's the marginal editing state. If you're editing an
-       ; attribute where the fact already has an attribute, it does
-       ; not affect the viability of the current state.
-       :editing nil
+         ; Editing states #{nil :attribute :value}
+         ; Only registers as editing that state if the current value is
+         ; nil. It's the marginal editing state. If you're editing an
+         ; attribute where the fact already has an attribute, it does
+         ; not affect the viability of the current state.
+         :editing nil
 
-       ; I need computed attribute and value values.
-       ; Keep track of: input-value, input-matched-entity
-       :fact/attribute (let [attr (get props :fact/attribute)]
-                         (assoc attr
-                                :input-value (schema/get-value attr)
-                                :input-type  (schema/get-type  attr :datum))) 
-       :fact/value     (let [valu (get props :fact/value)]
-                         (assoc valu
-                                :input-value (schema/get-value valu)
-                                :input-type  (schema/get-type  valu :datum)))
+         ; I need computed attribute and value values.
+         ; Keep track of: input-value, input-matched-entity
+         :fact/attribute (let [attr (get props :fact/attribute)]
+                           (assoc attr
+                                  :input-value (schema/get-value attr)
+                                  ;; FIXME: default input-type must be
+                                  ;; conditional on stuff.
+                                  :input-type  (schema/get-type
+                                                attr default-attr-input-type))) 
+         :fact/value     (let [valu (get props :fact/value)]
+                           (assoc valu
+                                  :input-value (schema/get-value valu)
+                                  :input-type  (schema/get-type
+                                                valu default-value-input-type)))
 
-       })
+         })
+      )
 
     om/IWillReceiveProps
     (will-receive-props [_ next-props]
