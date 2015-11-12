@@ -73,6 +73,11 @@
   (message :noun {:datum-id datum-id
                   :fact fact}
            :verb :datum.fact/add))
+(defn add-fact-success
+  [datum new-entities]
+  (message :noun {:datum datum
+                  :new-entities new-entities}
+           :verb :datum.fact.add/success))
 
 (abstract-map/extend-schema UpdateFact Message
   [:datum.fact/update]
@@ -88,6 +93,11 @@
 ;   (message :noun {:datum-id datum-id
 ;                   :fact fact}
 ;            :verb :datum.fact/update))
+(defn update-fact-success
+  [datum new-entities]
+  (message :noun {:datum datum
+                  :new-entities new-entities}
+           :verb :datum.fact.update/success))
 
 (abstract-map/extend-schema UpdateDatumLabel Message
   [:datum.label/update]

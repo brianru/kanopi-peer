@@ -123,9 +123,10 @@
         datum-id  (get-in message [:noun :datum-id])
         fact      (get-in message [:noun :fact])
         result    (data/add-fact data-svc creds datum-id fact)
-        data      (data/get-datum data-svc creds datum-id)]
+        datum'    (data/get-datum data-svc creds datum-id)]
     (hash-map
-     :noun data
+     :noun {:datum datum'
+            :new-entites []}
      :verb (if result
              :datum.fact.add/success
              :datum.fact.add/failure)
@@ -138,10 +139,11 @@
         datm-id  (get-in message [:noun :datum-id])
         fact     (get-in message [:noun :fact])
         result   (data/update-fact data-svc creds fact)
-        data     (data/get-datum data-svc creds datm-id)
+        datum'   (data/get-datum data-svc creds datm-id)
         ]
     (hash-map
-     :noun data
+     :noun {:datum datum'
+            :new-entities []}
      :verb (if result
              :datum.fact.update/success
              :datum.fact.update/failure)

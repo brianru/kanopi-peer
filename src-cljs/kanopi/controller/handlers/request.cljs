@@ -178,6 +178,20 @@
    :default
    true))
 
+;; TODO: implement this!
+(defn- parse-input-fact
+  "
+  1 - ensure fact has a :db/id
+  2 - replace nested attr/value with refs and build new entities
+  "
+  [datum {:keys [fact/attribute fact/value] :as fact}]
+  (let [is-new-fact (new-ent? fact)
+        is-new-referenced-attribute (new-ent? attribute)
+        is-new-referenced-value     (new-ent? value)
+        ]
+    (hash-map :datum {}
+              :new-entities [])))
+
 (defn- prepare-fact [fact]
   (cond-> {:is-new-fact false
            :is-new-referenced-attribute false
@@ -217,51 +231,23 @@
          (aether/send! aether))))
 
 (defn- handle-fact-add-or-update
-  "NOTE: this is ugly."
-  [app-state msg]
-  (om/transact! app-state
-                (fn [app-state]
-                  (let [datum-id (get-in msg [:noun :datum-id])
-                        fact     (get-in msg [:noun :fact])
+  [aether app-state msg]
+  (let [datum nil
+        {:keys [datum new-entities] :as parsed-input}
+        (parse-input-fact datum (get-in msg [:noun :fact])) ]
+    parsed-input))
 
-                        {fact' :fact
-                         :keys [is-new-fact new-referenced-attribute new-referenced-value]
-                         :as prepared-info}
-                        (prepare-fact fact)
-
-                        app-state'
-
-                        (cond-> (assoc-in app-state [:cache (:db/id fact')] fact')
-
-                          is-new-fact
-                          (update-in [:cache datum-id :datum/fact] #(conj % (:db/id fact')))
-
-                          is-new-fact
-                          (assoc-in [:cache (:db/id fact')] fact')
-
-                          new-referenced-attribute
-                          (assoc-in [:cache (:db/id new-referenced-attribute)]
-                                    new-referenced-attribute)
-
-                          new-referenced-value
-                          (assoc-in [:cache (:db/id new-referenced-value)]
-                                    new-referenced-value)
-
-                          true
-                          (ensure-current-datum-is-updated datum-id))
-                        ]
-                    app-state'
-                    ))))
-
-;; FIXME: helper fn returns value, then mk into msg here
 (defmethod local-request-handler :datum.fact/add
   [aether history app-state msg]
-  (handle-fact-add-or-update app-state msg))
+  (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
+    (->> (msg/add-fact-success datum new-entities)
+         (aether/send! aether))))
 
-;; FIXME: helper fn returns value, then mk into msg here
 (defmethod local-request-handler :datum.fact/update
   [aether history app-state msg]
-  (handle-fact-add-or-update app-state msg))
+  (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
+    (->> (msg/update-fact-success datum new-entities)
+         (aether/send! aether))))
 
 (defmethod local-request-handler :datum.label/update
   [aether history app-state msg]
