@@ -26,31 +26,6 @@
        (or (integer? (second input))
            (describe-value-literal (second input)))))
 
-(def literal-types
-  {:literal/text
-   {:ident :literal/text
-    :predicate string?}
-
-   :literal/integer
-   {:ident :literal/integer
-    :predicate integer?}
-
-   :literal/decimal
-   {:ident :literal/decimal
-    :predicate (fn [v] (instance? java.lang.Double v))
-    }
-
-   ;; TODO: implement.
-   :literal/uri
-   {:ident :literal/uri
-    :predicate (constantly nil)}
-
-   ;; TODO: implement.
-   :literal/email-address
-   {:ident :literal/email-address
-    :predicate (constantly nil)
-    }
-   })
 
 (defn valid-tagged-literal? [literal]
   (when (vector? literal)
@@ -58,8 +33,8 @@
       (and
        (identity tp)
        (identity v)
-       (get literal-types tp)
-       ((get-in literal-types [tp :predicate]) v)))))
+       (get schema/literal-types tp)
+       ((get-in schema/literal-types [tp :predicate]) v)))))
 
 (defn describe-value-literal [value]
   (cond

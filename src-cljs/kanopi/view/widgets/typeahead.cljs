@@ -185,6 +185,7 @@
                                   ;; Not unfocused by previous event
                                   ;; handler! Must handle here!
                                   (when (om/get-state owner :focused)
+                                    (om/set-state! owner :focused false)
                                     ;; FIXME: anything else to do here?
                                     ;; submit or cancel?
                                     ;; I must choose one. It makes no
@@ -196,8 +197,9 @@
                    :value       (or (get state :input-value)
                                     (get state :initial-input-value))
                    :placeholder (get state :placeholder)
-                   ;; NOTE: debugging
-                   ;;:style {:color (when-not focused "red")}
+                   :style {:border-bottom-color
+                           (when (om/get-state owner :focused) "green")
+                           }
                    :on-change   (partial handle-typeahead-input owner) 
                    :on-key-down (partial handle-key-down owner search-results)
                    }))

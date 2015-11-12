@@ -9,6 +9,46 @@
                  )
             ))
 
+(def literal-types
+  {:literal/text
+   {:ident :literal/text
+    :label "text"
+    :predicate string?}
+
+   :literal/integer
+   {:ident :literal/integer
+    :label "integer"
+    :predicate integer?}
+
+   :literal/decimal
+   {:ident :literal/decimal
+    :label "decimal"
+    ;; FIXME: no good. number? is not right.
+    :predicate (fn [v]
+                 #?(:clj  (instance? java.lang.Double v)
+                    :cljs (number? v)))
+    }
+
+   ;; TODO: implement.
+   ; :literal/uri
+   ; {:ident :literal/uri
+   ;  :predicate (constantly nil)}
+
+   ;; TODO: implement.
+   ; :literal/email-address
+   ; {:ident :literal/email-address
+   ;  :predicate (constantly nil)
+   ;  }
+   })
+
+(def input-types
+  (-> (vals literal-types)
+      (conj {:ident :datum/label
+             :label "datum"
+             :predicate (fn [v]
+                          (or (string? v)
+                              ))})))
+
 (defn describe-entity
   [m]
   (if-not (map? m) :unknown

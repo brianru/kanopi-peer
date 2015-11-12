@@ -117,19 +117,19 @@
 (defn available-input-types
   "TODO: use argument to filter and sort return value to give user the
   best possible list of available input types for the value entered."
-  [value]
-  (vector
-   {:value :datum/label
-    :label "datum"}
+  [input-value]
+  (filter
+   (fn [{:keys [ident label predicate] :as tp}]
+     (cond
+      (empty? input-value)
+      true
 
-   {:value :literal/text
-    :label "text"}
-   
-   {:value :literal/integer
-    :label "integer"}
-   
-   {:value :literal/decimal
-    :lable "decimal"}))
+      (predicate input-value)
+      (predicate input-value)
+      
+      :default
+      false))
+   schema/input-types))
 
 (defn input-type->dropdown-menu-item
   [on-click-fn tp]
@@ -178,14 +178,12 @@
                    :on-change (fn [v]
                                 (let [state  (om/get-state owner)
                                       state' (-> state
-                                                (assoc-in [part :input-value] v)
-                                                )]
+                                                (assoc-in [part :input-value] v))]
                                   (om/set-state! owner state')))
                    :on-submit (fn [v]
                                 (let [state' (-> (om/get-state owner)
                                                  (assoc-in [part :input-value] v)
-                                                 (assoc :editing nil)
-                                                 )]
+                                                 (assoc :editing nil))]
                                   (when (= :complete (get state' :mode))
                                     (let [fact (prepare-fact entity state')
                                           datum-id (get state' :datum-id)
@@ -199,6 +197,8 @@
                   })
        ; NOTE: see edit-fact-part for example
        [:div.fact-part-metadata.container
+        ;; TODO: this should not be a dropdown. it's a horizontal
+        ;; sliding selector thing.
         (om/build dropdown/dropdown entity
                   {:init-state {:caret? true}
                    :state {:toggle-label (let [tp (get entity :input-type)]
