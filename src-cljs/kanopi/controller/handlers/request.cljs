@@ -178,7 +178,15 @@
    :default
    true))
 
-;; TODO: implement this!
+(defn- swap-nested-entity-in-fact-part
+  [fact-part {:keys [fact new-entities] :as m}]
+  (let [new-ent-id (util/next-id)
+        new-ent (assoc (get fact fact-part)
+                        :db/id new-ent-id)]
+    (-> m
+        (assoc-in [:fact fact-part] new-ent-id)
+        (update :new-entities #(conj % new-ent)))))
+
 (defn- parse-input-fact
   "
   1 - ensure fact has a :db/id
@@ -188,36 +196,28 @@
   (let [is-new-fact (new-ent? fact)
         is-new-referenced-attribute (new-ent? attribute)
         is-new-referenced-value     (new-ent? value)
+
+        {fact' :fact, new-entities :new-entities}
+        (cond-> {:fact fact, :new-entities []}
+          is-new-fact
+          (assoc-in [:fact :db/id] (util/next-id))
+
+          is-new-referenced-attribute
+          ((partial swap-nested-entity-in-fact-part :fact/attribute))
+
+          is-new-referenced-value
+          ((partial swap-nested-entity-in-fact-part :fact/value)))
+
+        datum' (if is-new-fact
+                 (update datum :datum/fact #(conj % fact'))
+                 (update datum :datum/fact
+                         (fn [facts]
+                           (->> facts
+                                (remove #(= (get fact' :db/id) (:db/id %)))
+                                (cons fact')))))
         ]
-    (hash-map :datum {}
-              :new-entities [])))
-
-(defn- prepare-fact [fact]
-  (cond-> {:is-new-fact false
-           :is-new-referenced-attribute false
-           :is-new-referenced-value false
-           :fact fact}
-
-    (new-ent? fact)
-    ((fn [{:keys [fact] :as existing}]
-       (let [fact' (assoc fact :db/id (util/next-id))]
-         (assoc existing
-                :is-new-fact true
-                :fact fact'))))
-    
-    (new-ent? (-> fact :fact/attribute first))
-    ((fn [{:keys [fact] :as existing}]
-       (let [attr' (-> fact :fact/attribute first (assoc :db/id (util/next-id)))]
-         (assoc existing
-                :new-referenced-attribute attr'
-                :fact (assoc fact :fact/attribute [(get attr' :db/id)])))))
-
-    (new-ent? (-> fact :fact/value first))
-    ((fn [{:keys [fact] :as existing}]
-       (let [value' (-> fact :fact/value first (assoc :db/id (util/next-id)))]
-         (assoc existing
-                :new-referenced-value value'
-                :fact (assoc fact :fact/value [(get value' :db/id)])))))))
+    (hash-map :datum datum'
+              :new-entities new-entities)))
 
 (defmethod local-request-handler :datum/create
   [aether history app-state msg]
@@ -231,7 +231,7 @@
          (aether/send! aether))))
 
 (defn- handle-fact-add-or-update
-  [aether app-state msg]
+  [app-state msg]
   (let [datum nil
         {:keys [datum new-entities] :as parsed-input}
         (parse-input-fact datum (get-in msg [:noun :fact])) ]
@@ -260,7 +260,6 @@
 
 (defmethod local-request-handler :datum/get
   [aether history app-state msg]
-  (println (type (get msg :noun)))
   (let [user-datum (build-datum-data app-state (get msg :noun))]
     (->> (msg/get-datum-success user-datum)
          (aether/send! aether))))

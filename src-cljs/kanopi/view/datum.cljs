@@ -51,7 +51,11 @@
 
     om/IRenderState
     (render-state [_ state]
-      (let [fact-count (count (get props :datum/fact))]
+      (let [fact-count (count (get props :datum/fact))
+            ;; TODO: if no idea, navigate away.
+            ;;_ (assert (get props :db/id)
+            ;;          "Gotta have an id to be here.")
+            ]
         (html
          [:div.row
           [:div.datum-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
@@ -72,7 +76,7 @@
             ;; Om Next.
             (om/build-all fact/fact-next
                           (get props :datum/fact [])
-                          {:key-fn :db/id
+                          {:key :db/id
                            :init-state {:datum-id (:db/id props)}
                            :state {:fact-count fact-count}})
             ;; NOTE: also build a special fact which is the trigger to
@@ -122,6 +126,14 @@
     om/IDisplayName
     (display-name [_]
       (str "datum" (get-in props [:datum :db/id])))
+
+    om/IWillMount
+    (will-mount [_]
+      (when-not (get-in props [:datum :db/id])
+        ;; TODO: either navigate to error page or navigate home and
+        ;; display an error that user tried to reach a datum that does
+        ;; not exist or we were unable to retrieve.
+        (browser/set-page! owner [:home])))
 
     om/IRender
     (render [_]

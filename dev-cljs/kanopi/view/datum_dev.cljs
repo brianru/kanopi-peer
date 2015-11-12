@@ -66,3 +66,6 @@
 
 (defcard edit-datum
   "TODO")
+
+(deftest update-fact
+  "TODO")

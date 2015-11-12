@@ -33,9 +33,9 @@
   (om/transact! app-state
                 (fn [app-state]
                   (let [datum-id (get datum :db/id)
-                        cache-delta (-> (conj new-entites datum)
-                                        (map (juxt :db/id identity))
-                                        (into {}))]
+                        cache-delta (->> (conj new-entities datum)
+                                         (map (comp vec (juxt :db/id identity)))
+                                         (into {}))]
                     (-> app-state
                         (assoc-in [:datum :datum] datum)
                         (update :cache #(merge % cache-delta)))))))
@@ -58,7 +58,8 @@
 
 (defmethod local-response-handler :datum.label.update/success
   [aether history app-state msg]
-  (incorporate-updated-datum! app-state {:datum (get msg :noun)}))
+  (incorporate-updated-datum! app-state {:datum (get msg :noun)
+                                         :new-entities []}))
 
 (defmethod local-response-handler :datum.label.update/failure
   [aether history app-state msg]

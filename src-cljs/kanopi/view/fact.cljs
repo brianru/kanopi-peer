@@ -172,6 +172,7 @@
                   :init-state
                   {:initial-input-value current-value
                    :input-value current-value
+                   :display-fn schema/display-entity
                    :on-focus  (fn [v]
                                 (om/set-state! owner :editing part)) 
 
