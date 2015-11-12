@@ -154,7 +154,14 @@
 
     (testing "pale"
       (let [results (data/search-datums data-svc creds "Kanopi")]
-        (is (not-empty results))))
+        (is (not-empty results))
+        (is (not-empty (data/search-datums data-svc creds "ano")))))
+
+    (is (not-empty (data/search-datums data-svc creds "Pattern")))
+
+    (testing "empty"
+      (let [results (data/search-datums data-svc creds "")]
+        (is (nil? results))))
 
     (component/stop system)))
 

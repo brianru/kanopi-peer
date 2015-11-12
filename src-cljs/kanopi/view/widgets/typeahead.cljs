@@ -8,11 +8,13 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
             [cljs.core.async :as async]
+            [goog.dom :as gdom]
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
             [kanopi.view.widgets.dropdown :as dropdown]
             [kanopi.util.browser :as browser]
             [kanopi.util.async :as async-util]
+            [kanopi.util.core :as util]
             [kanopi.aether.core :as aether]))
 
 (defn- handle-result-click
@@ -21,16 +23,17 @@
    owner
    (fn [state]
      (assoc state
-            ;:focused false
+            :focused false
             :input-value (schema/get-value res))))
-  ((om/get-state owner :on-click) res evt))
+  (if-let [href-fn (om/get-state owner :href-fn)]
+    (browser/set-page! owner (href-fn res))
+    ((om/get-state owner :on-click) res evt)))
 
 (defn- handle-submission [owner evt]
   (let [{submit-fn :on-submit value :input-value}
         (om/get-state owner)]
     (submit-fn value evt)
-    (om/set-state! owner :focused false)
-    ))
+    (om/set-state! owner :focused false)))
 
 (defn- handle-key-down
   [owner search-results evt]
@@ -163,15 +166,40 @@
        :placeholder "Placeholder"
        })
 
+    ;; NOTE: this plus the stopPropagation beyond the input element
+    ;; below are an extremely ugly hack to make it so clicking outside
+    ;; the typeahead removes focus, while clicking inside works
+    ;; without causing the field to blur.
+    ;;
+    ;; The problem: clicking items in the results dropdown menu.
+    ;; Those items would cause the input field to blur, in blur we'd
+    ;; remove focus from the input field, and then the click would not
+    ;; propagate. Blurs just don't propagate other events. It sucks.
+    ;;
+    ;; TODO: refactor with closure event lib
+    ;; FUCK: this breaks on page changes because the header unmounts
+    ;; and remounts, but not always in the right order or owner
+    ;; somehow changes.
+    ;; Terrible solution: set window.onclick on every render :(
+    om/IWillUnmount
+    (will-unmount [_]
+      (set! js/window.onclick nil))
+
     om/IRenderState
     (render-state [_ {:keys [focused input-ch input-value display-fn
-                             on-focus on-blur on-change href-fn]
+                             on-focus on-blur on-change href-fn
+                             ]
                       :as state}]
+      ;; NOTE: see NOTE above om/IWillMount for explanation
+      (set! js/window.onclick #(om/set-state! owner :focused false))
       (let [all-search-results (om/observe owner ((om/get-shared owner :search-results)))
             search-results (get all-search-results input-value (get state :empty-result []))
             ]
         (html
          [:div.typeahead
+          ;; NOTE: see NOTE above om/IWillMount for explanation
+          {:on-click (fn [evt]
+                       (. evt stopPropagation))}
           (vector
            ;; NOTE: this is insane. It may be better to have separate
            ;; blocks for each element type, though that would lead to
@@ -181,18 +209,6 @@
                   {:on-focus    (fn [_]
                                   (om/set-state! owner :focused true)
                                   (on-focus (get state :input-value))) 
-                   :on-blur     (fn [evt]
-                                  ;; Not unfocused by previous event
-                                  ;; handler! Must handle here!
-                                  (when (om/get-state owner :focused)
-                                    (om/set-state! owner :focused false)
-                                    ;; FIXME: anything else to do here?
-                                    ;; submit or cancel?
-                                    ;; I must choose one. It makes no
-                                    ;; sense to do neither.
-                                    (.. evt -target (blur)))
-
-                                  (on-blur (get state :input-value)))
                    :tab-index (get state :tab-index)
                    :value       (or (get state :input-value)
                                     (get state :initial-input-value))
@@ -208,15 +224,14 @@
                                       (not-empty input-value)
                                       (not-empty search-results))
                                "inherit"
-                               "none"
-                               )}}
+                               "none")}}
            (for [[idx [score res]] (map-indexed vector search-results)]
              [:li.dropdown-menu-item
               (when (= idx (get state :selection-index))
                 [:span.dropdown-menu-item-marker])
-              [:a {
-                   :href     (href-fn res)
-                   :on-click (partial handle-result-click owner res)
-                   }
+              [:a {:on-click (partial handle-result-click owner res)}
+               ; (if href-fn
+               ;   {:href (href-fn res)}
+               ;   {:on-click (partial handle-result-click owner res)})
                [:span (display-fn res)]]])]
           ])))))

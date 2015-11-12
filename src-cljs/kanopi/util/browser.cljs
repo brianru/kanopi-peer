@@ -1,10 +1,12 @@
 (ns kanopi.util.browser
-  (:require [om.core :as om]))
+  (:require [om.core :as om]
+            ))
 
 (defn route-for [owner & args]
   (apply (om/get-shared owner [:history :route-for]) args))
 
 (defn set-page! [owner path]
+  (println "set-page!" path)
   (cond
    (string? path)
    ((om/get-shared owner [:history :set-page!]) path)

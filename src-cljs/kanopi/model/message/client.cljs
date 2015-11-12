@@ -111,8 +111,7 @@
   [history app-state msg]
   (standard-api-post history msg))
 
-
-(defmethod local->remote :search
+(defmethod local->remote :spa.navigate/search
   [history app-state msg]
   (standard-api-post history msg))
 

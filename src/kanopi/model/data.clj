@@ -5,9 +5,11 @@
   datomic api for inspiration.
   "
   (:require [datomic.api :as d]
+            [schema.core :as s]
             [clojure.pprint :refer (pprint)]
             [kanopi.util.core :as util]
             [kanopi.model.storage.datomic :as datomic]
+            [kanopi.model.schema :as schema]
             [kanopi.model.data.impl :refer :all]))
 
 (defn context-datums* [db datum-id]
@@ -136,15 +138,29 @@
       (get-fact* db ent-id)))
 
   (search-datums [this creds search]
-    ;; FIXME: return nil if something goes wrong, otherwise return a
-    ;; vector -- empty vector is considered a success because it ran
-    (let [db (datomic/db datomic-peer creds)
-          results (d/q '[:find ?score ?entity
-                         :in $ ?search
-                         :where [(fulltext $ :datum/label ?search) [[?entity ?name ?tx ?score]]]
-                         ]
-                       db search)]
-      (or results [])))
+    (when-not (s/check schema/QueryString search)
+      (let [search (str search "*")
+            db (datomic/db datomic-peer creds)
+            datum-results
+            (d/q '[:find ?score ?entity
+                   :in $ ?search
+                   :where [(fulltext $ :datum/label ?search)
+                           [[?entity ?name ?tx ?score]]]
+                   ]
+                 db search)
+
+            literal-results
+            (d/q '[:find ?score ?entity
+                   :in $ ?search
+                   :where [(fulltext $ :literal/text ?search)
+                           [[?entity ?name ?tx ?score]]]]
+                 db search)
+            
+            results (->> (concat datum-results literal-results)
+                         (map (fn [[score ent-id]]
+                                (vector score (get-datum* db ent-id))))
+                         (sort-by first))]
+        (or results #{}))))
 
   (context-datums [this creds ent-id]
     (context-datums* (datomic/db datomic-peer creds) ent-id))

@@ -56,10 +56,8 @@
 
 (defn- fuzzy-search-entity [q ent]
   (let [base-string (->> ent
-                         ((juxt :datum/label :value/string))
-                         (apply str)
-                         (clojure.string/lower-case)
-                         )
+                         (schema/get-value)
+                         (clojure.string/lower-case))
         query-string (clojure.string/lower-case q)
         match-string (re-find (re-pattern query-string) base-string)]
     (when-not (or (clojure.string/blank? base-string)
@@ -83,7 +81,7 @@
     (->> (get-in app-state [:cache])
          (vals)
          (filter (partial matching-entity-type tp))
-         (map (partial fuzzy-search-entity q))
+         (map    (partial fuzzy-search-entity q))
          (remove nil?)
          (sort-by first)
          (vec))))
@@ -258,6 +256,7 @@
     (->> (msg/update-datum-label-success datum')
          (aether/send! aether))))
 
+;; FIXME: this does not work.
 (defmethod local-request-handler :datum/get
   [aether history app-state msg]
   (let [user-datum (build-datum-data app-state (get msg :noun))]

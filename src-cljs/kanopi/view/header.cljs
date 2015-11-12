@@ -78,7 +78,6 @@
                       :state
                       {
                        :button-on-click (fn [_]
-                                          (println "HERE")
                                           (->> (msg/switch-team (:team/id current-team))
                                                (msg/send! owner)))
                        :toggle-label (:team/id current-team)
