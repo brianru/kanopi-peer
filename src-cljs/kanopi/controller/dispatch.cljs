@@ -100,27 +100,40 @@
                            local-response-verbs (get-in mode-verbs [mode :local :response])
                            remote-request-verbs (get-in mode-verbs [mode :remote :request])]
                        ;; first run v is nil
+                       ;; TODO: considerably more sophisticated
+                       ;; exception handling. at least log them!
                        (when v
                          ;; NOTE: a verb can belong to both
                          ;; local-verbs and remote-verbs.
                          ;; In that case the message is handled twice:
                          ;; once locally, once remotely.
                          (when (contains? local-request-verbs verb)
-                           (request-handlers/local-request-handler
-                            aether history root-crsr v))
+                           (try
+                            (request-handlers/local-request-handler
+                             aether history root-crsr v)
+                            (catch js/Object e
+                              (println e))))
+
                          (when (contains? local-response-verbs verb)
-                           (response-handlers/local-response-handler
-                            aether history root-crsr v))
+                           (try
+                            (response-handlers/local-response-handler
+                             aether history root-crsr v)
+                            (catch js/Object e
+                              (println e))))
+
                          (when (contains? remote-request-verbs verb)
-                           (->> v
-                                (client-msg/local->remote history root-crsr)
-                                ;; NOTE: sent with special verb that
-                                ;; gets picked up by http spout
-                                ;;
-                                ;; spout can feed response back into
-                                ;; aether so it'll be picked up by
-                                ;; local-response-handler
-                                (aether/send! aether))))
+                           (try
+                            (->> (client-msg/local->remote history root-crsr v)
+                                 ;; NOTE: sent with special verb that
+                                 ;; gets picked up by http spout
+                                 ;;
+                                 ;; spout can feed response back into
+                                 ;; aether so it'll be picked up by
+                                 ;; local-response-handler
+                                 (aether/send! aether)) 
+                            (catch js/Object e
+                              (println e))))
+                         )
 
                        (recur (async/alts! [listener kill-ch]))))))
       (assoc this :kill-channel kill-ch)))

@@ -55,15 +55,18 @@
          (aether/send! aether))))
 
 (defn- fuzzy-search-entity [q ent]
-  (let [base-string (->> ent
-                         (schema/get-value)
-                         (clojure.string/lower-case))
-        query-string (clojure.string/lower-case q)
-        match-string (re-find (re-pattern query-string) base-string)]
-    (when-not (or (clojure.string/blank? base-string)
-                  (clojure.string/blank? match-string))
-      (list (/ (count base-string) (count match-string))
-            ent))))
+  (when (every? not-empty [q ent])
+    (let [base-string (-> ent
+                          (schema/get-value)
+                          ;(clojure.string/lower-case)
+                          (or ""))
+          query-string q;(clojure.string/lower-case q)
+          match-string (re-find (re-pattern query-string) base-string)]
+      (when-not (or (clojure.string/blank? base-string)
+                    (clojure.string/blank? match-string))
+        (list (/ (count base-string) (count match-string))
+              ent))))
+  )
 
 (defn- matching-entity-type [tp ent]
   (if-not tp true
@@ -80,7 +83,7 @@
   (let []
     (->> (get-in app-state [:cache])
          (vals)
-         (filter (partial matching-entity-type tp))
+         ;(filter (partial matching-entity-type tp))
          (map    (partial fuzzy-search-entity q))
          (remove nil?)
          (sort-by first)
@@ -238,6 +241,10 @@
 (defmethod local-request-handler :datum.fact/add
   [aether history app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
+    ;; FIXME: this is working, but coming back without doing
+    ;; build-datum-data!!! fact's are not expecting JUST the ent-id,
+    ;; they want more!
+    (println "ADD" datum)
     (->> (msg/add-fact-success datum new-entities)
          (aether/send! aether))))
 

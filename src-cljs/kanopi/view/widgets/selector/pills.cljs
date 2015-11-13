@@ -22,6 +22,8 @@
        :identity-fn identity
        :display-fn str
 
+       :start-idx 1
+
        :menu-items [{:type :link
                      :href ""
                      :label "Item 1"}
@@ -32,9 +34,10 @@
        })
 
     om/IRenderState
-    (render-state [_ {:keys [menu-items] :as state}]
-      (let [number-items-to-display 3
-            start-idx 1
+    (render-state [_ {:keys [menu-items start-idx] :as state}]
+      (let [
+            ;; TODO: make this smart!
+            number-items-to-display 3
             end-idx (dec (+ number-items-to-display start-idx))
             ]
         (html

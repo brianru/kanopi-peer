@@ -29,21 +29,29 @@
             [kanopi.util.core :as util]
             ))
 
-(defn prepare-fact [entity state]
-  (let [{:keys [fact/attribute fact/value]} state]
-    (assert (not-empty (get attribute :input-value))
+(defn parse-input
+  "First, identify compatible types.
+  Second, ask if current type is compatible
+  If possible, OK.
+  Else, set to preferred compatible type."
+  [raw-input]
+  )
+
+(defn prepare-fact [datum fact-state]
+  (let [{:keys [fact/attribute fact/value]} fact-state]
+    (assert (get attribute :parsed-value)
             "Must have a value!")
-    (assert (not-empty (get value     :input-value))
+    (assert (get value     :parsed-value)
             "Must have a value!")
     (cond-> {}
-      (get entity :db/id)
-      (assoc :db/id (get entity :db/id))
+      (get datum :db/id)
+      (assoc :db/id (get datum :db/id))
       
       true
-      (assoc :fact/attribute (hash-map (get attribute :input-type)
-                                       (get attribute :input-value))
-             :fact/value     (hash-map (get value :input-type)
-                                       (get value :input-value)))
+      (assoc :fact/attribute (hash-map (get-in attribute [:input-type :ident])
+                                       (get attribute :parsed-value))
+             :fact/value     (hash-map (get-in value [:input-type :ident])
+                                       (get value :parsed-value)))
       )))
 
 (def stroke-color "#dddddd")
@@ -85,7 +93,7 @@
 (defn compute-mode [fact]
   (let [part-values (->> fact
                          ((juxt :fact/attribute :fact/value))
-                         (map any-value))
+                         (map :input-value))
         mode' (cond
                (every? not-empty part-values)
                :complete
@@ -119,8 +127,6 @@
 
 
 (defn available-input-types
-  "TODO: use argument to filter and sort return value to give user the
-  best possible list of available input types for the value entered."
   [input-value]
   (filter
    (fn [{:keys [ident label predicate] :as tp}]
@@ -144,19 +150,9 @@
                       (schema/get-value)
                       (available-input-types)
                       (util/sort-by-ordering :ident ordering)
-                      (first)
-                      :ident)
-         res (case (schema/describe-entity ent)
-               :datum
-               :datum/label
-
-               :literal
-               (schema/get-value-key ent default)
-
-               :unknown
-               default)
+                      (first))
          ]
-     res)))
+     (or (schema/get-input-type ent) default))))
 
 (defn input-type->dropdown-menu-item
   [on-click-fn tp]
@@ -180,38 +176,63 @@
       (handle-contents-group :mode mode :hovering hovering :editing editing)
       ]]))
 
-(defn fact-part [owner part entity mode]
-  (let [current-value (->> entity
-                           ((juxt :input-value :datum/label :literal/text))
-                           (some identity))
-        ordered-input-types (get schema/input-types-ordered-by-fact-part-preference part [])
+(defn update-fact-part
+  "Fact parts driven by 3 pieces of data:
+  - input-value
+  - input-type
+  - parsed-value
+  "
+  ([fact part]
+   (update-fact-part fact part (or (get fact :input-value) (schema/get-value fact))))
+  ([fact part input-value]
+   (let [current-type   (get fact :input-type {})
+         type-predicate (get current-type :predicate (constantly nil))
+         input-type     (if (type-predicate input-value)
+                          current-type
+                          (entity->default-input-type
+                            (assoc fact :input-value input-value) part))
+         parsed-value   ((:parser input-type) input-value)]
+     (assoc fact
+            :input-value  input-value
+            :input-type   input-type
+            :parsed-value parsed-value))))
+
+(defn fact-part [owner part-key entity mode]
+  (let [ordered-input-types
+        (get schema/input-types-ordered-by-fact-part-preference part-key [])
         ]
     [:div.fact-attribute
      [:div.view-fact-part.row
       [:div.inline-90-percent.col-xs-11
        (om/build typeahead/typeahead entity
-                 {:react-key (str "view-fact-part" "-" part)
+                 {:react-key (str "view-fact-part" "-" part-key)
                   :state
                   {:element-type :input
-                   :fact-part part}
+                   :fact-part part-key}
 
                   :init-state
-                  {:initial-input-value current-value
-                   :input-value current-value
+                  {:initial-input-value (get entity :input-value)
+                   :input-value         (get entity :input-value)
+                   ;; NOTE: prevents typeahead dropdown from appearing
+                   ;; when there are no matches. it just gets in the
+                   ;; way and a no-match does not need to be
+                   ;; displayed.
+                   :empty-result nil
                    :display-fn schema/display-entity
                    :on-focus  (fn [v]
-                                (om/set-state! owner :editing part)) 
+                                (om/set-state! owner :editing part-key)) 
 
-                   :on-change (fn [v]
-                                ;; TODO: update input type here.
-                                ;; TODO: also, try parsing value into
-                                ;; different literal types.
-                                (om/set-state! owner [part :input-value] v))
+                   :on-change (fn [input-value]
+                                (om/update-state! owner part-key
+                                                  #(update-fact-part % part-key input-value)))
                    :on-submit (fn [v]
-                                (let [state' (-> (om/get-state owner)
-                                                 (assoc-in [part :input-value] v)
-                                                 (assoc :editing nil))]
-                                  (when (= :complete mode)
+                                (let [part'  (update-fact-part (om/get-state owner part-key)
+                                                               part-key v)
+                                      state' (assoc (om/get-state owner)
+                                                    part-key part'
+                                                    :editing nil)
+                                      mode'  (compute-mode state')]
+                                  (when (= :complete mode')
                                     (let [fact (prepare-fact entity state')
                                           datum-id (get state' :datum-id)
                                           msg  (if (:db/id fact)
@@ -222,37 +243,23 @@
                    ;                 :on-click  (partial handle-result-selection owner)
                    }
                   })
-       ; NOTE: see edit-fact-part for example
        [:div.fact-part-metadata
         (om/build pills/horizontal entity
-                  {:state {:current-item (om/get-state owner [part :input-type])
+                  {:state {:current-item (om/get-state owner [part-key :input-type :ident])
                            :menu-items (generate-menu-items
-                                        current-value
+                                        (get-in entity [:input-value]) 
                                         (fn [tp evt]
-                                          (om/set-state! owner [part :input-type] tp))
+                                          (om/set-state! owner [part-key :input-type]
+                                                         (get schema/input-types tp))
+                                          (om/update-state! owner part-key
+                                                            #(update-fact-part % part-key)))
                                         ordered-input-types)}})
-        ;; TODO: this should not be a dropdown. it's a horizontal
-        ;; sliding selector thing.
-        #_(om/build dropdown/dropdown entity
-                    {:init-state {:caret? true}
-                     :state {:toggle-label (let [tp (get entity :input-type)]
-                                             (cond (keyword? tp)
-                                                   (name tp)
-                                                   (map? tp)
-                                                   (:label tp))) 
-                             :menu-items (generate-menu-items
-                                          current-value
-                                          (fn [tp evt]
-                                            (om/set-state! owner [part :input-type] tp))
-                                          ordered-input-types
-                                          )}})
         ]
        ]
       [:div.inline-10-percent.col-xs-1
        (when-let [id (get entity :db/id)]
          (->> (icons/open {})
-              (icons/link-to owner [:datum :id id])))]]]  )
-  )
+              (icons/link-to owner [:datum :id id])))]]]))
 
 
 (defn fact-next
@@ -283,16 +290,8 @@
 
          ; I need computed attribute and value values.
          ; Keep track of: input-value, input-matched-entity
-         :fact/attribute (let [attr (get props :fact/attribute)]
-                           (assoc attr
-                                  :input-value (schema/get-value attr)
-                                  ;; FIXME: default input-type must be
-                                  ;; conditional on stuff.
-                                  :input-type  (entity->default-input-type attr :fact/attribute))) 
-         :fact/value     (let [valu (get props :fact/value)]
-                           (assoc valu
-                                  :input-value (schema/get-value valu)
-                                  :input-type  (entity->default-input-type valu :fact/value)))
+         :fact/attribute (update-fact-part (get props :fact/attribute) :fact/attribute) 
+         :fact/value     (update-fact-part (get props :fact/value) :fact/value)
 
          }))
 
@@ -308,7 +307,8 @@
 
     om/IRenderState
     (render-state [_ {:keys [hovering editing fact/attribute fact/value] :as state}]
-      (let [mode (compute-mode state)]
+      (let [mode (compute-mode state)
+            ]
         (html
          [:div.fact-container.container
           [:div.fact-body.row

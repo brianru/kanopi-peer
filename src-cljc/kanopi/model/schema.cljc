@@ -5,28 +5,39 @@
                         [schema.experimental.generators :as g]
                         [schema.experimental.abstract-map :as m]]
                  :cljs [[schema.core :as s :include-macros true]
-                        [schema.experimental.abstract-map :as m :include-macros true]]
+                        [schema.experimental.abstract-map :as m :include-macros true]
+                        cljs.reader]
                  )
             ))
 
+;; TODO: can I use transit to improve my parsing of these values?
 (def literal-types
   {:literal/text
    {:ident :literal/text
     :label "text"
-    :predicate string?}
+    :predicate string?
+    :parser identity}
 
    :literal/integer
    {:ident :literal/integer
     :label "integer"
-    :predicate integer?}
+    :predicate (fn [v]
+                (or (integer? v)
+                    (re-find #"^[0-9]*$" v)))
+    :parser    (comp int #?(:clj  read-string
+                            :cljs cljs.reader/read-string))}
 
    :literal/decimal
    {:ident :literal/decimal
     :label "decimal"
-    ;; FIXME: no good. number? is not right.
     :predicate (fn [v]
-                 #?(:clj  (instance? java.lang.Double v)
-                    :cljs (number? v)))
+                 (or
+                  #?(:clj  (instance? java.lang.Double v)
+                     :cljs (number? v))
+                  (re-find #"^[0-9]?[0-9]*\.+[0-9]*$" v)))
+    :parser (comp double #?(:clj  read-string
+                            :cljs cljs.reader/read-string))
+  
     }
 
    ;; TODO: implement.
@@ -46,8 +57,8 @@
          :datum/label
          {:ident :datum/label
           :label "datum"
-          :predicate (fn [v]
-                       (or (string? v)))}))
+          :predicate string?
+          :parser identity}))
 
 (def fact-attribute-input-ordering
   (list :datum/label :literal/text))
@@ -106,12 +117,16 @@
     :unknown
     default)))
 
+(defn get-input-type [ent]
+  (let [value-key-id (get-value-key ent)]
+    (get input-types value-key-id)))
+
 (defn get-value
   ([m]
    (get-value m ""))
   ([m default-value]
-   (if-let [k (get-value-key m)]
-     (get m k)
+   (if-let [k (get-value-key m default-value)]
+     (get m k default-value)
      default-value)
    ))
 
