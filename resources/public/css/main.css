@@ -284,12 +284,31 @@ a.navbar-brand:focus {
     text-overflow: ellipsis;
     */
 }
-.fact-part-metadata-container {
+.fact-part-metadata {
     font-size: 0.75rem;
-    line-height: 2rem;
-    text-transform: uppercase;
+    line-height: 1rem;
+    /* text-transform: uppercase; */
     margin: 0 0.5rem;
-    padding: 1px;
+}
+.horizontal-selector {
+    display: inline-block;
+    margin: 10px 0 !important;
+}
+.horizontal-selector-item {
+    /* font-size: 1rem; */
+    background-color: lightgrey !important;
+    vertical-align: middle;
+    color: white !important;
+    letter-spacing: 0.1rem;
+    margin-right: 1rem;
+    border: none !important;
+}
+.horizontal-selector-item.selected,
+.horizontal-selector-item:hover {
+    background-color: grey !important;
+}
+.disabled > .horizontal-selector-item:hover {
+    background-color: lightgrey !important;
 }
 .type-input-label, .value-input-label {
     display: inline-block;

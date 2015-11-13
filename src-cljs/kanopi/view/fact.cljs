@@ -22,6 +22,7 @@
             [kanopi.aether.core :as aether]
             [kanopi.view.widgets.input-field :as input-field]
             [kanopi.view.widgets.selector.dropdown :as dropdown]
+            [kanopi.view.widgets.selector.pills :as pills]
             [kanopi.view.widgets.typeahead :as typeahead]
 
             [kanopi.util.browser :as browser]
@@ -159,7 +160,7 @@
 
 (defn input-type->dropdown-menu-item
   [on-click-fn tp]
-  (assoc tp :type :link, :on-click (partial on-click-fn (:value tp))))
+  (assoc tp :type :link, :on-click (partial on-click-fn (:ident tp))))
 
 (defn menu-item-comparator
   [input-value item1 item2]
@@ -203,6 +204,8 @@
 
                    :on-change (fn [v]
                                 ;; TODO: update input type here.
+                                ;; TODO: also, try parsing value into
+                                ;; different literal types.
                                 (om/set-state! owner [part :input-value] v))
                    :on-submit (fn [v]
                                 (let [state' (-> (om/get-state owner)
@@ -220,23 +223,29 @@
                    }
                   })
        ; NOTE: see edit-fact-part for example
-       [:div.fact-part-metadata.container
-        ;; TODO: this should not be a dropdown. it's a horizontal
-        ;; sliding selector thing.
-        (om/build dropdown/dropdown entity
-                  {:init-state {:caret? true}
-                   :state {:toggle-label (let [tp (get entity :input-type)
-                                               _ (println "entity input-type" tp)]
-                                           (cond (keyword? tp)
-                                                 (name tp)
-                                                 (map? tp)
-                                                 (:label tp))) 
+       [:div.fact-part-metadata
+        (om/build pills/horizontal entity
+                  {:state {:current-item (om/get-state owner [part :input-type])
                            :menu-items (generate-menu-items
                                         current-value
                                         (fn [tp evt]
                                           (om/set-state! owner [part :input-type] tp))
-                                        ordered-input-types
-                                        )}})
+                                        ordered-input-types)}})
+        ;; TODO: this should not be a dropdown. it's a horizontal
+        ;; sliding selector thing.
+        #_(om/build dropdown/dropdown entity
+                    {:init-state {:caret? true}
+                     :state {:toggle-label (let [tp (get entity :input-type)]
+                                             (cond (keyword? tp)
+                                                   (name tp)
+                                                   (map? tp)
+                                                   (:label tp))) 
+                             :menu-items (generate-menu-items
+                                          current-value
+                                          (fn [tp evt]
+                                            (om/set-state! owner [part :input-type] tp))
+                                          ordered-input-types
+                                          )}})
         ]
        ]
       [:div.inline-10-percent.col-xs-1
@@ -299,9 +308,7 @@
 
     om/IRenderState
     (render-state [_ {:keys [hovering editing fact/attribute fact/value] :as state}]
-      (let [mode (compute-mode state)
-            _ (println "Attribute:" attribute)
-            _ (println "Value:" value)]
+      (let [mode (compute-mode state)]
         (html
          [:div.fact-container.container
           [:div.fact-body.row
