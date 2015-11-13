@@ -10,7 +10,6 @@
             [kanopi.view.datum-dev]
             [kanopi.view.header-dev]
             [kanopi.view.widgets.typeahead-dev]
-            [kanopi.view.widgets.dropdown-dev]
             [kanopi.view.widgets.input-field-dev]
 
             [kanopi.controller.history-dev]

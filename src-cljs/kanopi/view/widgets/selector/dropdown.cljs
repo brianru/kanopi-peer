@@ -1,4 +1,4 @@
-(ns kanopi.view.widgets.dropdown
+(ns kanopi.view.widgets.selector.dropdown
   "Generic dropdown widget."
   (:require-macros [cljs.core.async.macros :as asyncm])
   (:require [om.core :as om]

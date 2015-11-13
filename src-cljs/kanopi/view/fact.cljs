@@ -21,7 +21,7 @@
             [kanopi.view.icons :as icons]
             [kanopi.aether.core :as aether]
             [kanopi.view.widgets.input-field :as input-field]
-            [kanopi.view.widgets.dropdown :as dropdown]
+            [kanopi.view.widgets.selector.dropdown :as dropdown]
             [kanopi.view.widgets.typeahead :as typeahead]
 
             [kanopi.util.browser :as browser]
@@ -116,6 +116,7 @@
 
      ]))
 
+
 (defn available-input-types
   "TODO: use argument to filter and sort return value to give user the
   best possible list of available input types for the value entered."
@@ -128,10 +129,33 @@
 
       (predicate input-value)
       (predicate input-value)
-      
+
       :default
       false))
    (vals schema/input-types)))
+
+(defn entity->default-input-type
+  ([ent]
+   (entity->default-input-type ent nil))
+  ([ent part]
+   (let [ordering (get schema/input-types-ordered-by-fact-part-preference part [])
+         default (->> ent
+                      (schema/get-value)
+                      (available-input-types)
+                      (util/sort-by-ordering :ident ordering)
+                      (first)
+                      :ident)
+         res (case (schema/describe-entity ent)
+               :datum
+               :datum/label
+
+               :literal
+               (schema/get-value-key ent default)
+
+               :unknown
+               default)
+         ]
+     res)))
 
 (defn input-type->dropdown-menu-item
   [on-click-fn tp]
@@ -155,11 +179,12 @@
       (handle-contents-group :mode mode :hovering hovering :editing editing)
       ]]))
 
-(defn fact-part [owner part entity]
+(defn fact-part [owner part entity mode]
   (let [current-value (->> entity
                            ((juxt :input-value :datum/label :literal/text))
                            (some identity))
-        ordered-input-types (get schema/input-types-ordered-by-fact-part-preference part [])]
+        ordered-input-types (get schema/input-types-ordered-by-fact-part-preference part [])
+        ]
     [:div.fact-attribute
      [:div.view-fact-part.row
       [:div.inline-90-percent.col-xs-11
@@ -176,17 +201,14 @@
                    :on-focus  (fn [v]
                                 (om/set-state! owner :editing part)) 
 
-                   ;; TODO: focus on value input if editing attribute.
                    :on-change (fn [v]
-                                (let [state  (om/get-state owner)
-                                      state' (-> state
-                                                (assoc-in [part :input-value] v))]
-                                  (om/set-state! owner state')))
+                                ;; TODO: update input type here.
+                                (om/set-state! owner [part :input-value] v))
                    :on-submit (fn [v]
                                 (let [state' (-> (om/get-state owner)
                                                  (assoc-in [part :input-value] v)
                                                  (assoc :editing nil))]
-                                  (when (= :complete (get state' :mode))
+                                  (when (= :complete mode)
                                     (let [fact (prepare-fact entity state')
                                           datum-id (get state' :datum-id)
                                           msg  (if (:db/id fact)
@@ -203,7 +225,8 @@
         ;; sliding selector thing.
         (om/build dropdown/dropdown entity
                   {:init-state {:caret? true}
-                   :state {:toggle-label (let [tp (get entity :input-type)]
+                   :state {:toggle-label (let [tp (get entity :input-type)
+                                               _ (println "entity input-type" tp)]
                                            (cond (keyword? tp)
                                                  (name tp)
                                                  (map? tp)
@@ -256,16 +279,13 @@
                                   :input-value (schema/get-value attr)
                                   ;; FIXME: default input-type must be
                                   ;; conditional on stuff.
-                                  :input-type  (schema/get-type
-                                                attr default-attr-input-type))) 
+                                  :input-type  (entity->default-input-type attr :fact/attribute))) 
          :fact/value     (let [valu (get props :fact/value)]
                            (assoc valu
                                   :input-value (schema/get-value valu)
-                                  :input-type  (schema/get-type
-                                                valu default-value-input-type)))
+                                  :input-type  (entity->default-input-type valu :fact/value)))
 
-         })
-      )
+         }))
 
     om/IWillReceiveProps
     (will-receive-props [_ next-props]
@@ -279,7 +299,9 @@
 
     om/IRenderState
     (render-state [_ {:keys [hovering editing fact/attribute fact/value] :as state}]
-      (let [mode (compute-mode state)]
+      (let [mode (compute-mode state)
+            _ (println "Attribute:" attribute)
+            _ (println "Value:" value)]
         (html
          [:div.fact-container.container
           [:div.fact-body.row
@@ -288,7 +310,7 @@
            [:div.inline-10-percent.col-xs-1
             (handle :mode mode :hovering hovering :editing editing)]
            [:div.inline-90-percent.col-xs-11
-            (fact-part owner :fact/attribute attribute)
-            (fact-part owner :fact/value value)
+            (fact-part owner :fact/attribute attribute mode)
+            (fact-part owner :fact/value value mode)
             ]]])))))
 

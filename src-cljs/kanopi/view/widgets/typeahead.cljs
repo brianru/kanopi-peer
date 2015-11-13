@@ -11,7 +11,7 @@
             [goog.dom :as gdom]
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
-            [kanopi.view.widgets.dropdown :as dropdown]
+            [kanopi.view.widgets.selector.dropdown :as dropdown]
             [kanopi.util.browser :as browser]
             [kanopi.util.async :as async-util]
             [kanopi.util.core :as util]

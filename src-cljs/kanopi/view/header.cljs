@@ -3,7 +3,7 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.util.browser :as browser]
-            [kanopi.view.widgets.dropdown :as dropdown]
+            [kanopi.view.widgets.selector.dropdown :as dropdown]
             [kanopi.view.widgets.typeahead :as typeahead]
             [kanopi.model.schema :as schema]
             [kanopi.model.message :as msg]

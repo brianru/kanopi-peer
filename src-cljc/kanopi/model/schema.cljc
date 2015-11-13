@@ -85,47 +85,38 @@
 (defn literal? [m]
   (= :literal (describe-entity m)))
 
-(def default-value-key
-  {:datum :datum/label
-   :literal :literal/text})
-
 (def literal-meta-keys
   #{:db/id :literal/team})
+
+
+(defn get-value-key
+  ([ent]
+   (get-value-key ent nil))
+  ([ent default]
+   (case (describe-entity ent)
+    :datum
+    :datum/label
+
+    :fact
+    :fact
+
+    :literal
+    (-> (apply dissoc ent literal-meta-keys) (keys) (first) (or default))
+    
+    :unknown
+    default)))
 
 (defn get-value
   ([m]
    (get-value m ""))
   ([m default-value]
-   (case (describe-entity m)
-     :datum
-     (get m :datum/label default-value)
-     :literal
-     (-> (apply dissoc m literal-meta-keys) (vals) (first) (or default-value))
-     :unknown
-     default-value)))
-
-(defn get-type
-  [m default-type]
-  (case (describe-entity m)
-    :datum
-    :datum
-    
-    :fact
-    :fact
-    
-    :literal
-    (-> (apply dissoc m literal-meta-keys) (keys) (first))
-    
-    :unknown
-    default-type))
+   (if-let [k (get-value-key m)]
+     (get m k)
+     default-value)
+   ))
 
 (defn display-entity [m]
   (get-value m))
-
-(defn create-entity [tp value]
-  (hash-map
-   :db/id nil
-   (get default-value-key tp) value))
 
 (defn user-default-team [creds]
   (let [username (get creds :username)]
