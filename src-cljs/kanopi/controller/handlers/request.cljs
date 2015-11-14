@@ -58,6 +58,7 @@
   (when (every? not-empty [q ent])
     (let [base-string (-> ent
                           (schema/get-value)
+                          (str)
                           ;(clojure.string/lower-case)
                           (or ""))
           query-string q;(clojure.string/lower-case q)
@@ -147,6 +148,7 @@
    :fact/attribute [{:db/id nil}]
    :fact/value     [{:db/id nil}]})
 
+;; FIXME: this does not work.
 (defn- build-datum-data
   "Data is stored as flat maps locally and on server, but to simplify
   datum component model we must nest entities as follows:
@@ -154,6 +156,8 @@
   -> values     (literals or datums)"
   [props datum-id]
   {:pre [(or (integer? datum-id) (string? datum-id))]}
+  (println "build-datum-data")
+  (println (get props :cache))
   (let [context (context-datums (-> props :cache vals) datum-id)
         similar (similar-datums (-> props :cache vals) datum-id)
         datum   (lookup-id props datum-id)]
@@ -185,7 +189,7 @@
         new-ent (assoc (get fact fact-part)
                         :db/id new-ent-id)]
     (-> m
-        (assoc-in [:fact fact-part] new-ent-id)
+        (assoc-in [:fact fact-part] new-ent)
         (update :new-entities #(conj % new-ent)))))
 
 (defn- parse-input-fact
@@ -231,6 +235,7 @@
     (->> (msg/create-datum-success user-datum)
          (aether/send! aether))))
 
+;; TODO: implement.
 (defn- handle-fact-add-or-update
   [app-state msg]
   (let [datum nil
@@ -241,16 +246,14 @@
 (defmethod local-request-handler :datum.fact/add
   [aether history app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
-    ;; FIXME: this is working, but coming back without doing
-    ;; build-datum-data!!! fact's are not expecting JUST the ent-id,
-    ;; they want more!
-    (println "ADD" datum)
+    (println "ADD FACT" datum)
     (->> (msg/add-fact-success datum new-entities)
          (aether/send! aether))))
 
 (defmethod local-request-handler :datum.fact/update
   [aether history app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
+    (println "UPDATE FACT" datum)
     (->> (msg/update-fact-success datum new-entities)
          (aether/send! aether))))
 
@@ -263,7 +266,6 @@
     (->> (msg/update-datum-label-success datum')
          (aether/send! aether))))
 
-;; FIXME: this does not work.
 (defmethod local-request-handler :datum/get
   [aether history app-state msg]
   (let [user-datum (build-datum-data app-state (get msg :noun))]

@@ -6,7 +6,6 @@
   (apply (om/get-shared owner [:history :route-for]) args))
 
 (defn set-page! [owner path]
-  (println "set-page!" path)
   (cond
    (string? path)
    ((om/get-shared owner [:history :set-page!]) path)

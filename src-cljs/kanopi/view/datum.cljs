@@ -81,10 +81,12 @@
                            :state {:fact-count fact-count}})
             ;; NOTE: also build a special fact which is the trigger to
             ;; add new facts
+            ;; TODO: reset this template fact when a fact is
+            ;; successfully added.
             (om/build fact/fact-next {}
-                      {:react-key "nil-fact"
+                      {:react-key  "nil-fact"
                        :init-state {:datum-id (:db/id props)}
-                       :state {:fact-count fact-count}})
+                       :state      {:fact-count fact-count}})
             ]]])))
     ))
 
@@ -130,6 +132,8 @@
     om/IWillMount
     (will-mount [_]
       (when-not (get-in props [:datum :db/id])
+        (println "Datum going to mount without enough data.")
+        (println props)
         ;; TODO: either navigate to error page or navigate home and
         ;; display an error that user tried to reach a datum that does
         ;; not exist or we were unable to retrieve.
