@@ -207,20 +207,39 @@
             :input-type   input-type
             :parsed-value parsed-value))))
 
+ (defn reset-fact-state [props state]
+   (assoc state
+          :editing nil
+          :submitting nil
+          :fact/attribute (update-fact-part nil :fact/attribute)
+          :fact/value (update-fact-part nil :fact/value)
+          ))
+
+;; FIXME: this is very hard to follow.
 (defn handle-submission!
-  "TODO: how do I want to reset owner's state?"
   [owner part-key fact-part & args]
-  (let [state' (apply assoc (om/get-state owner) part-key fact-part
+  (let [state' (apply assoc (om/get-state owner) part-key fact-part :submitting true
                       args)
         mode   (compute-mode state')]
-    (when (= :complete mode)
+    (if-not (= :complete mode)
+      (om/set-state! owner state')
       (let [fact     (prepare-fact state')
             datum-id (get state' :datum-id)
             msg      (if (:db/id fact)
                        (msg/update-fact datum-id fact)
                        (msg/add-fact    datum-id fact))]
-        (msg/send! owner msg)))
-    (om/set-state! owner state')))
+        (msg/send! owner msg)
+        (if (:db/id fact)
+          (do
+           (println "UPDATE FACT")
+           (->> (msg/update-fact datum-id fact)
+                (msg/send! owner))
+           (om/set-state! owner state'))
+          (do
+           (println "ADD FACT")
+           (->> (msg/add-fact datum-id fact)
+                (msg/send! owner))
+           (om/set-state! owner (reset-fact-state (om/get-props owner) state'))))))))
 
 (defn fact-part [owner part-key fact-part mode]
   (let [ordered-input-types
@@ -233,11 +252,12 @@
                  {:react-key (str "view-fact-part" "-" part-key)
                   :state
                   {:element-type :input
-                   :fact-part part-key}
+                   :fact-part part-key
+                   :input-value (get fact-part :input-value)
+                   }
 
                   :init-state
                   {:initial-input-value (get fact-part :input-value)
-                   :input-value         (get fact-part :input-value)
                    ;; NOTE: prevents typeahead dropdown from appearing
                    ;; when there are no matches. it just gets in the
                    ;; way and a no-match does not need to be
@@ -255,11 +275,8 @@
                                                     (update-fact-part
                                                      (om/get-state owner part-key)
                                                      part-key v)
-                                                    :editing nil)
-                                )
-                   ;                 :on-click  (partial handle-result-selection owner)
-                   }
-                  })
+                                                    :editing nil))
+                   }})
        [:div.fact-part-metadata
         (om/build pills/horizontal fact-part
                   {:state {:current-item
@@ -289,14 +306,16 @@
   (reify
     om/IInitState
     (init-state [_]
-      (let [default-attr-input-type (-> schema/input-types-ordered-by-fact-part-preference
-                                        :fact/attribute
-                                        (first)
-                                        )
-            default-value-input-type (-> schema/input-types-ordered-by-fact-part-preference
-                                         :fact/value
-                                         (first)
-                                         )]
+      (let [
+            ; default-attr-input-type (-> schema/input-types-ordered-by-fact-part-preference
+            ;                             :fact/attribute
+            ;                             (first)
+            ;                             )
+            ; default-value-input-type (-> schema/input-types-ordered-by-fact-part-preference
+            ;                              :fact/value
+            ;                              (first)
+            ;                              )
+            ]
         {
          ; NOTE: this is not state, it's a derived value. It's in the
          ; function's name!!! Compute with each call to render-state.
@@ -316,14 +335,6 @@
          :fact/value     (update-fact-part (get props :fact/value)     :fact/value)
 
          }))
-
-    om/IWillReceiveProps
-    (will-receive-props [_ next-props]
-      (let [curr-props (om/get-props owner)]
-        (when (not= (:fact/attribute next-props) (:fact/attribute curr-props))
-          (info "changed fact/attribute"))
-        (when (not= (:fact/value next-props) (:fact/value curr-props))
-          (info "changed fact/value"))))
 
     ; TODO: Synchronize props with component state when component updates
 

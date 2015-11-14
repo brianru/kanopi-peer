@@ -22,10 +22,11 @@
 
   ;; TODO: session storage component.
   ;; in-memory riak? atom for dev move?
-  (get-session! [this creds]
-                "Retrieve session from session storage.")
-  (put-session! [this creds session]
-                "Persist session to session storage."))
+  ; (get-session! [this creds]
+  ;               "Retrieve session from session storage.")
+  ; (put-session! [this creds session]
+  ;               "Persist session to session storage.")
+  )
 
 
 (defrecord SessionService [config datomic-peer data-service authenticator]
