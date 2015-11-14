@@ -33,6 +33,7 @@
                                    (when-let [id (:db/id result)]
                                      (browser/route-for owner :datum :id id))) 
                      :on-click   (constantly nil)
+                     :clear-on-click true
                      :tab-index  1}})]
         ]))))
 

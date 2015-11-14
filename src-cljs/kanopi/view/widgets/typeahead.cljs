@@ -24,7 +24,9 @@
    (fn [state]
      (assoc state
             :focused false
-            :input-value (schema/get-value res))))
+            :input-value (if (get state :clear-on-click)
+                           nil
+                           (schema/get-value res)))))
   (if-let [href-fn (om/get-state owner :href-fn)]
     (browser/set-page! owner (href-fn res))
     ((om/get-state owner :on-click) res evt)))
@@ -124,6 +126,7 @@
     (init-state [_]
       {:element-type :input ;; supported values are #{:input :textarea}
        :tab-index 0 ;; decided by platform convention by default
+       :clear-on-click false ;; used in `handle-result-click'
 
        ;; Used to render search results into strings for display.
        :display-fn str
@@ -230,8 +233,5 @@
               (when (= idx (get state :selection-index))
                 [:span.dropdown-menu-item-marker])
               [:a {:on-click (partial handle-result-click owner res)}
-               ; (if href-fn
-               ;   {:href (href-fn res)}
-               ;   {:on-click (partial handle-result-click owner res)})
                [:span (display-fn res)]]])]
           ])))))
