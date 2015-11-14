@@ -157,7 +157,7 @@
   [props datum-id]
   {:pre [(or (integer? datum-id) (string? datum-id))]}
   (println "build-datum-data")
-  (println (get props :cache))
+  (println (vals (get props :cache)))
   (let [context (context-datums (-> props :cache vals) datum-id)
         similar (similar-datums (-> props :cache vals) datum-id)
         datum   (lookup-id props datum-id)]
@@ -165,12 +165,6 @@
      :context-datums [(lookup-id props -1008)]
      :datum datum
      :similar-datums [(lookup-id props -1016)])))
-
-(defn- ensure-current-datum-is-updated [props edited-ent-id]
-  (if (= edited-ent-id (current-datum props))
-    (let [datum' (build-datum-data props edited-ent-id)]
-      (assoc props :datum datum'))
-    props))
 
 (defn new-ent? [ent]
   (cond
@@ -235,13 +229,13 @@
     (->> (msg/create-datum-success user-datum)
          (aether/send! aether))))
 
-;; TODO: implement.
 (defn- handle-fact-add-or-update
   [app-state msg]
-  (let [datum nil
-        {:keys [datum new-entities] :as parsed-input}
-        (parse-input-fact datum (get-in msg [:noun :fact])) ]
-    parsed-input))
+  (let [datum (get-in app-state [:datum :datum])
+        fact  (get-in msg [:noun :fact])]
+    (assert (= (:db/id datum) (get-in msg [:noun :datum-id]))
+            "Can only add or update fact for current datum.")
+    (parse-input-fact datum fact)))
 
 (defmethod local-request-handler :datum.fact/add
   [aether history app-state msg]
