@@ -64,6 +64,20 @@
   (message :noun user-datum
            :verb :datum.get/success))
 
+(abstract-map/extend-schema GetLiteral Message
+  [:literal/get]
+  {:noun schema/DatomicId})
+(s/defn get-literal :- GetLiteral
+  [literal-id]
+  (message :noun literal-id :verb :literal/get))
+(abstract-map/extend-schema GetLiteralSuccess Message
+  [:literal.get/success]
+  {:noun schema/Literal})
+(defn get-literal-success
+  [literal]
+  (message :noun literal
+           :verb :literal.get/success))
+
 (abstract-map/extend-schema AddFact Message
   [:datum.fact/add]
   {:noun {:datum-id schema/DatomicId
@@ -123,11 +137,28 @@
   (message :noun datum'
            :verb :datum.label.update/success))
 
+(abstract-map/extend-schema UpdateLiteral Message
+  [:literal/update]
+  {:noun {:literal-id schema/DatomicId
+          :new-type   s/Keyword
+          :new-value  s/Any}})
+(defn update-literal
+  [literal-id tp value]
+  (message :noun {:literal-id literal-id
+                  :new-type   tp
+                  :new-value  value}
+           :verb :literal/update))
+(abstract-map/extend-schema UpdateLiteralSuccess Message
+  [:literal.update/success]
+  {:noun schema/Literal})
+(defn update-literal-success
+  [literal]
+  (message :noun literal
+           :verb :literal.update/success))
+
 (abstract-map/extend-schema InitializeClientState Message
   [:spa.state/initialize]
   {:noun schema/Credentials})
-
-
 (s/defn initialize-client-state :- InitializeClientState
   [user]
   (message :noun user, :verb :spa.state/initialize))

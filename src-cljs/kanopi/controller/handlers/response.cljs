@@ -180,22 +180,28 @@
     ;; accessible from the new creds
     (->> (msg/initialize-client-state user')
          (aether/send! aether))
-    (history/navigate-to! history :home)
-    )
-  )
+    (history/navigate-to! history :home)))
+
+(defn incorporate-literal! [app-state literal]
+  (om/transact! app-state
+                (fn [app-state]
+                  (let [literal-id (get-in literal :db/id)]
+                    (-> app-state
+                        (assoc :literal literal)
+                        (assoc-in [:cache literal-id] literal))))))
 
 (defmethod local-response-handler :literal.get/success
   [aether history app-state msg]
-  (let []
-    ))
+  (let [literal (get-in msg [:noun])]
+    (incorporate-literal! app-state literal)))
 (defmethod local-response-handler :literal.get/failure
   [aether history app-state msg]
   (record-error-message app-state msg))
 
 (defmethod local-response-handler :literal.update/success
   [aether history app-state msg]
-  (let []
-    ))
+  (let [literal' (get-in msg [:noun])]
+    (incorporate-literal! app-state literal)))
 (defmethod local-response-handler :literal.update/failure
   [aether history app-state msg]
   (record-error-message app-state msg))

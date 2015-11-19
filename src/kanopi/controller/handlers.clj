@@ -151,12 +151,22 @@
 
 (defmethod request-handler :literal/get
   [request-context message]
-  (let []
+  (let [data (data/get-literal data-svc creds (get message :noun))]
     (hash-map
-     )))
+     :noun (or data {})
+     :verb (if (not-empty data)
+             :literal.get/success
+             :literal.get/failure)
+     :context {})))
 
 (defmethod request-handler :literal/update
   [request-context message]
-  (let []
+  (let [data (data/update-literal data-svc creds (get-in message [:noun :literal-id])
+                                  (get-in message [:noun :new-type])
+                                  (get-in message [:noun :new-value]))]
     (hash-map
-     )))
+     :noun nil
+     :verb (if (not-empty data)
+             :literal.update/success
+             :literal.update/failure)
+     :context {})))

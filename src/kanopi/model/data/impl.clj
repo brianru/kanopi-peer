@@ -265,7 +265,6 @@
 
 (defn update-fact-part->txdata
   [datomic-peer creds fact-id part input]
-  (println "update-fact-part->txdata" part input (describe-input datomic-peer creds input))
   (case (describe-input datomic-peer creds input)
     ::entity-id
     (let [[_ input-ent-arg] input

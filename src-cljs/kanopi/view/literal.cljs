@@ -112,7 +112,15 @@
       (let []
         (html
          [:div.literal-container.container-fluid
-          (om/build literal-editor props)
+          [:div.row
+           [:div.col-md-2.literal-context
+            ]
+           [:div.col-md-8.literal-content
+            (om/build literal-editor props)]
+           [:div.col-md-2.literal-types
+            ]
+           ]
+          
           ]))))
   )
 

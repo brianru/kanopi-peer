@@ -277,11 +277,19 @@
 
 (defmethod local-request-handler :literal/get
   [aether history app-state msg]
-  (let []
-    ))
+  (let [literal (lookup-id app-state (get-in msg [:noun]))]
+      (->> (msg/get-literal-success literal)
+           (aether/send! aether))))
 
 (defmethod local-request-handler :literal/update
   [aether history app-state msg]
-  (let []
-    ))
+  (let [literal-id (get-in msg [:noun :literal-id])
+        {:keys [new-type new-value]} (get msg :noun)
+        literal (get-in app-state [:cache literal-id])
+        literal' (-> literal
+                     (select-keys schema/literal-meta-keys)
+                     (assoc new-type new-value)
+                     )]
+    (->> (msg/update-literal-success literal')
+         (aether/send! aether))))
 
