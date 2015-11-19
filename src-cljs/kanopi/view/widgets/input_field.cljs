@@ -4,7 +4,7 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.view.icons :as icons]
             [kanopi.util.browser :as browser]
-            [sablono.core :refer-macros [html] :include-macros true]
+            [sablono.core :refer-macros (html) :include-macros true]
             ))
 
 (defn- start-edit [e owner korks]
