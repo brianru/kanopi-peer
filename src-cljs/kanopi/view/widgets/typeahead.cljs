@@ -1,6 +1,7 @@
 (ns kanopi.view.widgets.typeahead
   "What do I want from typeahead search?
   
+  A fair amount, apparently.
   "
   (:require-macros [cljs.core.async.macros :as asyncm])
   (:require [om.core :as om]

@@ -16,6 +16,7 @@
    :default
    nil))
 
+;; FIXME: this should not be here!
 (defn input-element-for-entity-type [tp]
   (case tp
     :datum

@@ -29,13 +29,20 @@
             [kanopi.util.core :as util]
             ))
 
-(defn parse-input
-  "First, identify compatible types.
-  Second, ask if current type is compatible
-  If possible, OK.
-  Else, set to preferred compatible type."
-  [raw-input]
-  )
+(defn fact-part-link [owner fact-part]
+  (when-let [id (get fact-part :db/id)]
+    (println "fact-part-link" (schema/describe-entity fact-part))
+    (case (schema/describe-entity fact-part)
+      :datum
+      (->> (icons/open {})
+           (icons/link-to owner [:datum :id id]))
+      
+      :literal
+      (->> (icons/edit {})
+           (icons/link-to owner [:literal :id id]))
+      
+      ; default
+      nil)))
 
 (defn prepare-fact [fact-state]
   (let [{:keys [fact/attribute fact/value]} fact-state]
@@ -296,9 +303,10 @@
         ]
        ]
       [:div.inline-10-percent.col-xs-1
-       (when-let [id (get fact-part :db/id)]
-         (->> (icons/open {})
-              (icons/link-to owner [:datum :id id])))]]]))
+       (fact-part-link owner fact-part)
+       #_(when-let [id (get fact-part :db/id)]
+           (->> (icons/open {})
+                (icons/link-to owner [:datum :id id])))]]]))
 
 
 (defn fact-next
@@ -306,16 +314,7 @@
   (reify
     om/IInitState
     (init-state [_]
-      (let [
-            ; default-attr-input-type (-> schema/input-types-ordered-by-fact-part-preference
-            ;                             :fact/attribute
-            ;                             (first)
-            ;                             )
-            ; default-value-input-type (-> schema/input-types-ordered-by-fact-part-preference
-            ;                              :fact/value
-            ;                              (first)
-            ;                              )
-            ]
+      (let []
         {
          ; NOTE: this is not state, it's a derived value. It's in the
          ; function's name!!! Compute with each call to render-state.

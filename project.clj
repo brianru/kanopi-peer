@@ -34,7 +34,9 @@
                  [com.cemerick/url "0.1.1"]
                  [sablono "0.4.0"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
-                 [jamesmacaulay/zelkova "0.4.0"]
+                 [cljsjs/codemirror "5.7.0-3"]
+                 ; [jamesmacaulay/zelkova "0.4.0"]
+                 ; Dev
                  [devcards "0.2.0-8"]
 
                  ;; Database

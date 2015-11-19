@@ -1,10 +1,14 @@
 (ns kanopi.view.icons
-  (:require [kanopi.util.browser :as browser]))
+  (:require [kanopi.util.browser :as browser]
+            [kanopi.model.message :as msg]))
 
 (defn open [m]
   [:div.glyphicon.glyphicon-chevron-right
    (merge {} m)])
 
+(defn edit [m]
+  [:div.glyphicon.glyphicon-pencil
+   (merge {} m)])
 
 (defn edit-in-place [m]
   [:div.glyphicon.glyphicon-pencil
@@ -58,6 +62,11 @@
    [:a (merge m {:on-click click-fn})
     icon-markup]))
 
+(defn trigger-msg
+  ([owner msg icon-markup]
+   [:a {:on-click #(msg/send! owner msg)}
+    icon-markup]))
+
 (defn transform-scale
   ([& args]
    (let [{:keys [from to]
@@ -86,6 +95,7 @@
    (merge {:d "M25.99 6C16.04 6 8 14.06 8 24H2l7.79 7.79.14.29L18 24h-6c0-7.73 6.27-14 14-14s14 6.27 14 14-6.27 14-14 14c-3.87 0-7.36-1.58-9.89-4.11l-2.83 2.83C16.53 39.98 21.02 42 25.99 42 35.94 42 44 33.94 44 24S35.94 6 25.99 6zM24 16v10l8.56 5.08L34 28.65l-7-4.15V16h-3z"}
           m)])
 
+(comment
 (defn edit
   "Google Material Design: "
   [m]
@@ -94,3 +104,4 @@
           m)]
   ;; <svg xmlns="http://www.w3.org/2000/svg" width="48" height="48" viewBox="0 0 48 48"><path d="M6 34.5V42h7.5l22.13-22.13-7.5-7.5L6 34.5zm35.41-20.41c.78-.78.78-2.05 0-2.83l-4.67-4.67c-.78-.78-2.05-.78-2.83 0l-3.66 3.66 7.5 7.5 3.66-3.66z"/></svg> 
   )
+ )

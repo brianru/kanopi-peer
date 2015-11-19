@@ -4,8 +4,6 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
             [kanopi.view.fact :as fact]
-            [cljs.core.async :as async]
-            [ajax.core :as http]
             [kanopi.util.browser :as browser]
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]

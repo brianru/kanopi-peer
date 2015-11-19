@@ -25,6 +25,9 @@
                :datum.fact/add
                :datum.fact/update
                :datum.label/update
+
+               :literal/get
+               :literal/update
                }
              :response
              #{
@@ -39,6 +42,9 @@
                :datum.fact.add/success          :datum.fact.add/failure
                :datum.fact.update/success       :datum.fact.update/failure
                :datum.label.update/success      :datum.label.update/failure
+
+               :literal.get/success             :literal.get/failure
+               :literal.update/success          :literal.update/failure
                }}
     :remote {:request
              #{:spa/login :spa/logout :spa/register
@@ -64,7 +70,11 @@
                :datum.fact.add/success          :datum.fact.add/failure
                :datum.fact.update/success       :datum.fact.update/failure
                :datum.label.update/success      :datum.label.update/failure
+
                :spa.state.initialize/success    :spa.state.initialize/failure
+
+               :literal.get/success             :literal.get/failure
+               :literal.update/success          :literal.update/failure
                }}
     :remote {:request
              #{
@@ -77,6 +87,10 @@
                :datum.fact/add
                :datum.fact/update
                :datum.label/update
+
+               :literal/get
+               :literal/update
+
                :spa.state/initialize
                }
              :response

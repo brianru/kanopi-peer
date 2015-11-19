@@ -26,9 +26,10 @@
     (ANY "/api"       [] api-resource)
 
     ;; spa
-    (GET "/"          [] spa-resource)
-    (GET "/settings"  [] spa-resource)
-    (GET "/datum/:id" [] spa-resource)
+    (GET "/"            [] spa-resource)
+    (GET "/settings"    [] spa-resource)
+    (GET "/datum/:id"   [] spa-resource)
+    (GET "/literal/:id" [] spa-resource)
 
     ;; static assets
     (route/files "" {:root "target/public"})

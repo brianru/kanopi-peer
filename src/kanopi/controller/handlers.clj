@@ -148,3 +148,15 @@
              :datum.fact.update/success
              :datum.fact.update/failure)
      :context {})))
+
+(defmethod request-handler :literal/get
+  [request-context message]
+  (let []
+    (hash-map
+     )))
+
+(defmethod request-handler :literal/update
+  [request-context message]
+  (let []
+    (hash-map
+     )))

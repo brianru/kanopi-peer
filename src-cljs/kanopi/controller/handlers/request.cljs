@@ -40,7 +40,12 @@
      (= :datum handler)
      (let [datum-id (util/read-entity-id (get-in msg [:noun :route-params :id]))]
        (->> (msg/get-datum datum-id)
-            (aether/send! aether))))))
+            (aether/send! aether)))
+     
+     (= :literal handler)
+     (let [literal-id (util/read-entity-id (get-in msg [:noun :route-params :id]))]
+       #_(->> (msg/get-literal literal-id)
+              (aether/send! aether))))))
 
 (defmethod local-request-handler :spa/switch-team
   [aether history app-state {team-id :noun :as msg}]
@@ -149,6 +154,8 @@
    :fact/value     [{:db/id nil}]})
 
 ;; FIXME: this does not work.
+;; NOTE: or, the facts are not making their way to the cache and
+;; that's actually important. that's probably it.
 (defn- build-datum-data
   "Data is stored as flat maps locally and on server, but to simplify
   datum component model we must nest entities as follows:
@@ -215,6 +222,8 @@
                                 (remove #(= (get fact' :db/id) (:db/id %)))
                                 (cons fact')))))
         ]
+    ;; NOTE: the facts make it here. but the datum cache may not have
+    ;; the latest facts.
     (hash-map :datum datum'
               :new-entities new-entities)))
 
@@ -265,4 +274,14 @@
   (let [user-datum (build-datum-data app-state (get msg :noun))]
     (->> (msg/get-datum-success user-datum)
          (aether/send! aether))))
+
+(defmethod local-request-handler :literal/get
+  [aether history app-state msg]
+  (let []
+    ))
+
+(defmethod local-request-handler :literal/update
+  [aether history app-state msg]
+  (let []
+    ))
 

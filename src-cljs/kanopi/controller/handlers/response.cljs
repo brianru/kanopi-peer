@@ -32,6 +32,7 @@
   [app-state {:keys [datum new-entities]}]
   (om/transact! app-state
                 (fn [app-state]
+                  (println "incorporate updated datum" (get datum :datum/facts))
                   (let [datum-id (get datum :db/id)
                         cache-delta (->> (conj new-entities datum)
                                          (map (comp vec (juxt :db/id identity)))
@@ -182,3 +183,19 @@
     (history/navigate-to! history :home)
     )
   )
+
+(defmethod local-response-handler :literal.get/success
+  [aether history app-state msg]
+  (let []
+    ))
+(defmethod local-response-handler :literal.get/failure
+  [aether history app-state msg]
+  (record-error-message app-state msg))
+
+(defmethod local-response-handler :literal.update/success
+  [aether history app-state msg]
+  (let []
+    ))
+(defmethod local-response-handler :literal.update/failure
+  [aether history app-state msg]
+  (record-error-message app-state msg))

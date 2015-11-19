@@ -11,6 +11,7 @@
             [kanopi.view.footer :as footer]
             [kanopi.view.datum :as datum]
             [kanopi.view.datum-search :as datum-search]
+            [kanopi.view.literal :as literal]
             [kanopi.view.pages.settings :as settings]
             [kanopi.view.pages.user :as user]
             [kanopi.aether.core :as aether]
@@ -48,7 +49,7 @@
            (om/build datum/container (get props :datum))
 
            :literal
-           (om/build datum/container (get props :literal))
+           (om/build literal/container (get props :literal))
 
            :settings
            (om/build settings/settings props)
