@@ -133,21 +133,6 @@
      ]))
 
 
-(defn available-input-types
-  [input-value]
-  (filter
-   (fn [{:keys [ident label predicate] :as tp}]
-     (cond
-      (empty? input-value)
-      true
-
-      (predicate input-value)
-      (predicate input-value)
-
-      :default
-      false))
-   (vals schema/input-types)))
-
 (defn entity->default-input-type
   ([ent]
    (entity->default-input-type ent nil))
@@ -155,7 +140,7 @@
    (let [ordering (get schema/input-types-ordered-by-fact-part-preference part [])
          default (->> ent
                       (schema/get-value)
-                      (available-input-types)
+                      (schema/compatible-input-types)
                       (util/sort-by-ordering :ident ordering)
                       (first))
          ]
@@ -170,7 +155,7 @@
   true)
 
 (defn generate-menu-items [value on-click-fn ordering]
-  (->> (available-input-types value)
+  (->> (schema/compatible-input-types value)
        (util/sort-by-ordering :ident ordering)
        (mapv (partial input-type->dropdown-menu-item on-click-fn))
        ))

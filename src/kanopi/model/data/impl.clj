@@ -38,6 +38,9 @@
 
 (defn describe-value-literal [value]
   (cond
+   (nil? value)
+   value
+
    (string? value)
    [:literal/text value]
    
@@ -45,7 +48,8 @@
    value
    
    :default
-   nil))
+   [(-> value schema/compatible-input-types first :ident)
+    value]))
 
 (defn value-literal? [input]
   (describe-value-literal input))
@@ -156,6 +160,18 @@
       :txdata [[:db/add value-id :literal/team   (schema/current-team creds)]
                [:db/add value-id value-attribute parsed-value]]))))
 
+(defn get-literal*
+  ""
+  [db ent-id]
+  (let [ent (d/pull db
+                    '[:db/id
+                      :literal/team
+                      *]
+                    ent-id)]
+    (if (empty? (dissoc ent :db/id))
+      nil
+      ent)))
+
 (defn mk-fact
   ([datomic-peer creds attribute-id value-id]
    (let [fact-id (d/tempid :db.part/structure)]
@@ -207,14 +223,6 @@
                             (get fact-coll :ent-ids))
                       (get fact-coll :txdata))))))
 
-(defn update-datum->txdata
-  [datomic-peer creds datum']
-  (let [datum-id (-> datum' (get :db/id))]
-    (hash-map
-     :ent-id datum-id
-     :txdata [
-              ])))
-
 (defmethod add-fact->txdata [::entity-id ::entity-id]
   [datomic-peer creds ent-id [_ attribute-id] [_ value-id]]
   (let [fact (mk-fact datomic-peer creds attribute-id value-id)]
@@ -257,6 +265,7 @@
 
 (defn update-fact-part->txdata
   [datomic-peer creds fact-id part input]
+  (println "update-fact-part->txdata" part input (describe-input datomic-peer creds input))
   (case (describe-input datomic-peer creds input)
     ::entity-id
     (let [[_ input-ent-arg] input
@@ -294,3 +303,21 @@
                   (mapcat :txdata)
                   (vec)))))
 
+(defn- retract-literal-value-datoms [literal]
+  (let [tp (:ident (schema/get-input-type literal))
+        old-value (get literal tp)]
+    (vector
+     [:db/retract (:db/id literal) tp old-value])))
+
+(defn- add-literal-value-datoms [literal tp value]
+  (vector
+   [:db/add (:db/id literal) tp value]))
+
+(defn update-literal->txdata
+  [datomic-peer creds literal-id tp value]
+  (let [literal (get-literal* (datomic/db datomic-peer creds) literal-id)]
+    (hash-map
+     :ent-id literal-id
+     :txdata (vec (concat
+                   (retract-literal-value-datoms literal)
+                   (add-literal-value-datoms literal tp value))))))

@@ -98,9 +98,13 @@
   )
 
 (defprotocol ILiteralService
-  (get-literal [this creds literal-id]
-               )
-  (update-literal [this creds]))
+  (-init-literal [this creds]
+                 "I don't know if we actually want this. Currently,
+                 all literals are created when creating fact parts
+                 with a literal type.")
+  (get-literal [this creds literal-id])
+  (update-literal [this creds literal-id input]
+                  [this creds literal-id tp value]))
 
 (defprotocol IUserDataService
   (context-datums [this creds datum-id])
@@ -194,6 +198,26 @@
     (let [{:keys [txdata]} (retract-entity->txdata datomic-peer creds ent-id)
           report @(datomic/transact datomic-peer creds txdata)]
       report))
+
+  ILiteralService
+  (-init-literal [this creds]
+    (let [literal (mk-literal datomic-peer creds "")
+          report @(datomic/transact datomic-peer creds (get literal :txdata))]
+      (d/resolve-tempid (:db-after report) (:tempids report) (get literal :ent-id))))
+
+  (get-literal [this creds literal-id]
+    (let [db (datomic/db datomic-peer creds)]
+      (get-literal* db literal-id)))
+
+  (update-literal [this creds literal-id input]
+    (apply update-literal this creds literal-id (describe-value-literal input)))
+  (update-literal [this creds literal-id tp value]
+    (assert (get schema/input-types tp)
+            "Must provide a known input type.")
+    (let [{:keys [txdata ent-id]}
+          (update-literal->txdata datomic-peer creds literal-id tp value)
+          report   @(datomic/transact datomic-peer creds txdata)]
+      (get-literal* (:db-after report) literal-id)))
 
   IUserDataService
   (context-datums [this creds ent-id]

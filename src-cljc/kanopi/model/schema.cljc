@@ -23,7 +23,7 @@
     :label "integer"
     :predicate (fn [v]
                 (or (integer? v)
-                    (re-find #"^[0-9]*$" v)))
+                    (and (string? v) (re-find #"^[0-9]*$" v))))
     :parser    (comp int #?(:clj  read-string
                             :cljs cljs.reader/read-string))}
 
@@ -34,7 +34,8 @@
                  (or
                   #?(:clj  (instance? java.lang.Double v)
                      :cljs (number? v))
-                  (re-find #"^[0-9]?[0-9]*\.+[0-9]*$" v)))
+                  (and (string? v)
+                       (re-find #"^[0-9]?[0-9]*\.+[0-9]*$" v))))
     :parser (comp double #?(:clj  read-string
                             :cljs cljs.reader/read-string))
   
@@ -129,6 +130,21 @@
      (get m k default-value)
      default-value)
    ))
+
+(defn compatible-input-types
+  [input-value]
+  (filter
+   (fn [{:keys [ident label predicate] :as tp}]
+     (cond
+      (and (coll? input-value) (empty? input-value))
+      true
+
+      (predicate input-value)
+      (predicate input-value)
+
+      :default
+      false))
+   (vals input-types)))
 
 (defn display-entity [m]
   (get-value m))
