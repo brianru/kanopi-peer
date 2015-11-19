@@ -52,7 +52,6 @@
         ]
 
     (testing "assert fact"
-      (clojure.pprint/pprint ent-1)
       (let [new-fact (->> (clojure.set/difference (set (get ent-1 :datum/fact))
                                                   (set (get ent-0 :datum/fact)))
                           (first))]
@@ -247,8 +246,3 @@
       ; (is (not-empty results))
       (component/stop system)))
 
-;;(deftest authorization-controls
-;;  (let [creds-a nil
-;;        creds-b nil
-;;        creds-c nil]
-;;    ))

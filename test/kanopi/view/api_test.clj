@@ -113,7 +113,7 @@
             (test-util/mock-request! system :post "/api" (util/transit-write message)
                                      :creds creds
                                      :content-type "application/transit+json")
-            test-ent' (get-in body [:noun])
+            test-ent' (get-in body [:noun :datum])
             old-facts (-> test-ent :datum/fact set)
 
             [new-fact & _ :as new-facts]
