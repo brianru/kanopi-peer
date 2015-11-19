@@ -183,9 +183,10 @@
     (history/navigate-to! history :home)))
 
 (defn incorporate-literal! [app-state literal]
+  (println "incorporate-literal:" literal)
   (om/transact! app-state
                 (fn [app-state]
-                  (let [literal-id (get-in literal :db/id)]
+                  (let [literal-id (get literal :db/id)]
                     (-> app-state
                         (assoc :literal literal)
                         (assoc-in [:cache literal-id] literal))))))
@@ -200,7 +201,7 @@
 
 (defmethod local-response-handler :literal.update/success
   [aether history app-state msg]
-  (let [literal' (get-in msg [:noun])]
+  (let [literal (get-in msg [:noun])]
     (incorporate-literal! app-state literal)))
 (defmethod local-response-handler :literal.update/failure
   [aether history app-state msg]

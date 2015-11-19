@@ -10,7 +10,10 @@
   hide the more involved edits from the user when the user is reading.
   Reading, writing (quick edits) and full-on constructing are
   different things. Think outlines or storyboarding vs a text editor
-  vs a piece of paper."
+  vs a piece of paper.
+  
+  TODO: keyboard shortcuts for navigating between facts and fact-parts.
+  GOAL: rely on tabindex as much as possible."
   (:require [om.core :as om :include-macros true]
             [sablono.core :refer-macros [html] :include-macros true]
             [taoensso.timbre :as timbre
@@ -31,7 +34,6 @@
 
 (defn fact-part-link [owner fact-part]
   (when-let [id (get fact-part :db/id)]
-    (println "fact-part-link" (schema/describe-entity fact-part))
     (case (schema/describe-entity fact-part)
       :datum
       (->> (icons/open {})

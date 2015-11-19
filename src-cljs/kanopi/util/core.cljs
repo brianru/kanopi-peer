@@ -58,9 +58,10 @@
      string)))
 
 (defn read-entity-id
-  "Sometimes an integer, sometimes a string, never a symbol."
+  "Sometimes an integer, sometimes a string, never a symbol.
+  Negative numbers are allowed because they represent temp ids."
   [string]
-  (if (= string (re-find #"[0-9]*" string))
+  (if (= string (re-find #"-?[0-9]*" string))
     (try-read-string string)
     string))
 

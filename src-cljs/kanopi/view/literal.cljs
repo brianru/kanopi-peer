@@ -32,9 +32,10 @@
 (defmulti literal-editor
   (fn [literal _ _]
     (println "LITERAL EDITOR" literal)
-    (-> (schema/get-input-type literal)
-        (name)
-        (keyword)))
+    (some-> (schema/get-input-type literal)
+            (get :ident)
+            (name)
+            (keyword)))
   :default :text)
 
 ; Medium-style text editor?
@@ -47,13 +48,14 @@
 
     om/IDidMount
     (did-mount [_]
-      (println "did mount" js/CodeMirror))
+      #_(println "did mount" js/CodeMirror))
     
     om/IRenderState
     (render-state [_ state]
       (let []
         (html
          [:textarea
+          {:value (schema/get-value props)}
           ])))))
 
 (defmethod literal-editor :math
@@ -98,17 +100,19 @@
    )
  )
 
-; etc...
+(defn literal-context [owner])
+(defn literal-types [owner])
 
 (defn container
   [props owner opts]
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "literal-" (get-in props [:literal])))
+      (str "literal-" (:db/id props)))
     
     om/IRender
     (render [_]
+      (println "RENDER LITERAL")
       (let []
         (html
          [:div.literal-container.container-fluid

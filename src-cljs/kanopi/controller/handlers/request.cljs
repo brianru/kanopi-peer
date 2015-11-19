@@ -44,8 +44,8 @@
      
      (= :literal handler)
      (let [literal-id (util/read-entity-id (get-in msg [:noun :route-params :id]))]
-       #_(->> (msg/get-literal literal-id)
-              (aether/send! aether))))))
+       (->> (msg/get-literal literal-id)
+            (aether/send! aether))))))
 
 (defmethod local-request-handler :spa/switch-team
   [aether history app-state {team-id :noun :as msg}]
