@@ -25,7 +25,7 @@
 
 (defn render-prompt [p]
   [:a {}
-   [:span (str p)]])
+   [:span (str p " ")]])
 
 ;; TODO: dismiss feature -- x icon or a check icon? something more
 ;; positive... hmm no. it's not a reminder. or is it?

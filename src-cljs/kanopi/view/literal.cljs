@@ -81,7 +81,7 @@
   link to that entity and maybe hovering renders a popover with more
   information. The font size is relatively small."
   [owner context-entities]
-  [:div
+  [:div.literal-context
    (for [{:keys [datum/label fact/attribute]} context-entities]
      [:div {:react-key label}
       [:a {:href nil}
@@ -96,7 +96,7 @@
 (defn literal-types
   ""
   [owner current-type available-types]
-  [:div
+  [:div.literal-types
    (for [{:keys [ident label] :as tp} available-types]
      [:div {:react-key ident}
       [:a {:href nil}

@@ -25,9 +25,9 @@ input {
     line-height: 2rem !important;
     margin: 0 0.5rem !important;
 }
-.btn {
-    -webkit-transition: opacity 0.3s;
-    transition: opacity 0.3s;
+*, .btn {
+    -webkit-transition: opacity 0.3s, border-color 0.3s, fill 0.3s;
+    transition: opacity 0.3s, border-color 0.3s, fill 0.3s;
 }
 .header button {
     background-color: inherit !important;
@@ -197,6 +197,7 @@ a.navbar-brand:focus {
     text-align: center;
     font-size: 14px;
     cursor: pointer;
+    height: 20px;
     -webkit-touch-callout: none;
     -webkit-user-select: none;
     -khtml-user-select: none;
@@ -332,4 +333,19 @@ a.navbar-brand:focus {
 }
 .edit-fact-part {
     margin-bottom: 1rem;
+}
+.literal-context,
+.literal-types {
+    opacity: 0.7;
+}
+.literal-context:hover,
+.literal-types:hover {
+    opacity: 1.0;
+}
+.literal-context {
+    text-align: left;
+}
+/* should this be right aligned? */
+.literal-types {
+    text-align: left;
 }
