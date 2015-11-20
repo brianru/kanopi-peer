@@ -17,9 +17,10 @@
     :type :error)
 
    :default
-   (hash-map
-    :message "Try making your goals explicit by setting a prompt."
-    :type :nudge)
+   nil
+   #_(hash-map
+      :message "Try making your goals explicit by setting a prompt."
+      :type :nudge)
    ))
 
 (defn render-prompt [p]

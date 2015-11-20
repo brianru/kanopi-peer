@@ -28,6 +28,8 @@
 
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
+
+            [kanopi.util.core :as util]
             ))
 
 (defmulti literal-editor
@@ -74,8 +76,31 @@
    )
  )
 
-(defn literal-context [owner context-entities])
-(defn literal-types [owner available-types])
+(defn literal-context
+  "A vertical list of somewhat stylized relating entities. Each is a
+  link to that entity and maybe hovering renders a popover with more
+  information. The font size is relatively small."
+  [owner context-entities]
+  [:div
+   (for [{:keys [datum/label fact/attribute]} context-entities]
+     [:div {:react-key label}
+      [:a {:href nil}
+       [:div.context-entity-label
+        [:span label]]
+       [:div.context-entity-fact
+        [:span.handle]
+        [:span.context-entity-attribute
+         attribute]]]
+      ])])
+
+(defn literal-types
+  ""
+  [owner current-type available-types]
+  [:div
+   (for [{:keys [ident label] :as tp} available-types]
+     [:div {:react-key ident}
+      [:a {:href nil}
+       [:span label]]])])
 
 (defn container
   "The whole page. Splitting it into three columns. I might allow the
@@ -89,17 +114,24 @@
     
     om/IRender
     (render [_]
-      (println "RENDER LITERAL")
-      (let [available-types []]
+      (println "RENDER LITERAL" props)
+      (let [type-ordering (get schema/input-types-ordered-by-fact-part-preference :fact/attribute)
+            available-types (->> props
+                                 schema/get-value
+                                 schema/compatible-input-types
+                                 (util/sort-by-ordering :ident type-ordering))
+            current-type (schema/get-input-type props)]
         (html
          [:div.literal-container.container-fluid
           [:div.row
+           ; TODO: consider adjusted design for narrow screens.
            [:div.col-md-2.literal-context
-            (literal-context owner (get props :context))]
+            (literal-context owner (get props :context [{:datum/label "Test label"
+                                                         :fact/attribute "the attribute"}]))]
            [:div.col-md-8.literal-content
             (literal-editor owner (get props :literal))]
            [:div.col-md-2.literal-types
-            (literal-types owner available-types)]]
+            (literal-types owner current-type available-types)]]
           
           ])))))
 

@@ -35,6 +35,8 @@
                       (not= :datum handler)
                       (assoc :datum {})
 
+                      (not= :literal handler)
+                      (assoc :literal {})
                       )))
     (cond
      (= :datum handler)
@@ -249,14 +251,12 @@
 (defmethod local-request-handler :datum.fact/add
   [aether history app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
-    (println "ADD FACT" datum)
     (->> (msg/add-fact-success datum new-entities)
          (aether/send! aether))))
 
 (defmethod local-request-handler :datum.fact/update
   [aether history app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
-    (println "UPDATE FACT" datum)
     (->> (msg/update-fact-success datum new-entities)
          (aether/send! aether))))
 
@@ -288,8 +288,8 @@
         literal (get-in app-state [:cache literal-id])
         literal' (-> literal
                      (select-keys schema/literal-meta-keys)
-                     (assoc new-type new-value)
-                     )]
+                     (assoc new-type new-value))
+        ]
     (->> (msg/update-literal-success literal')
          (aether/send! aether))))
 

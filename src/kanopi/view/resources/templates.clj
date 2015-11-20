@@ -23,7 +23,15 @@
                   :type "image/png"
                   :href "/favicon.png"}]
           (include-css "/css/main.css")
-          (include-bootstrap)))
+          (include-bootstrap)
+          ; CodeMirror
+          ; This is not how I want to pull in JS/CSS dependencies.
+          ; TODO: figure out a better way. CLJS/JS does not work with
+          ; CSS when using Leiningen.
+          (include-js "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.js")
+          (include-css "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css")
+          
+          ))
 
 (defn om-page
   "TODO: set cookie with no expiration (expire at end of session)

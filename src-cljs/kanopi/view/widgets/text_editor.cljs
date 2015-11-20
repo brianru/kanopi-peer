@@ -3,7 +3,7 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros (html) :include-macros true]
-            cljsjs.codemirror
+            ; cljsjs.codemirror
 
             [kanopi.model.message :as msg]
             [kanopi.util.browser :as browser]
@@ -14,7 +14,20 @@
   (reify
     om/IDisplayName
     (display-name [_]
-      (str "rich-text-editor-" props))))
+      (str "rich-text-editor-" props))
+    
+    om/IDidMount
+    (did-mount [_]
+      #_(.fromTextArea js/ProseMirror
+                       (om/get-node owner)
+                       ))
+
+    om/IRenderState
+    (render-state [_ state]
+      (let []
+        (html
+         [:textarea
+          {}])))))
 
 (defn code
   [props owner opts]
@@ -28,11 +41,12 @@
       (.fromTextArea js/CodeMirror
                      (om/get-node owner)
                      #js {:mode "clojure"
-                          :lineNumbers false}))
+                          :lineNumbers true}))
     
     om/IRenderState
     (render-state [_ state]
       (let []
         (html
          [:textarea
+          {:default-value ""}
           ])))))
