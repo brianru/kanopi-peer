@@ -45,6 +45,11 @@
             :label    (get team :team/id)
             ))
 
+(defn- manage-teams-menu-item [owner]
+  (hash-map :type :link
+            :href (browser/route-for owner :teams)
+            :label "Manage Teams" ))
+
 (defn header-intent-dispatcher [props _]
   (get-in props [:intent :id] :spa.unauthenticated/navigate))
 
@@ -82,8 +87,10 @@
                                           (->> (msg/switch-team (:team/id current-team))
                                                (msg/send! owner)))
                        :toggle-label (:team/id current-team)
-                       :menu-items (mapv (partial team->menu-item owner)
-                                         (get-in props [:user :teams]))}
+                       :menu-items (conj
+                                    (mapv (partial team->menu-item owner)
+                                          (get-in props [:user :teams]))
+                                    (manage-teams-menu-item owner))}
                       })]
           ]))
       )))
@@ -102,14 +109,14 @@
              (icons/on-click #(->> (msg/create-datum)
                                    (msg/send! owner))
                              {:class ["navbar-brand"]}))
-        (->> (icons/goal {})
-             (icons/on-click #(->> (msg/create-goal)
-                                   (msg/send! owner))
-                             {:class ["navbar-brand"]}))
-        (->> (icons/insights {})
-             (icons/on-click #(->> (msg/record-insight)
-                                   (msg/send! owner))
-                             {:class ["navbar-brand"]}))
+        #_(->> (icons/goal {})
+               (icons/on-click #(->> (msg/create-goal)
+                                     (msg/send! owner))
+                               {:class ["navbar-brand"]}))
+        #_(->> (icons/insights {})
+               (icons/on-click #(->> (msg/record-insight)
+                                     (msg/send! owner))
+                               {:class ["navbar-brand"]}))
         (->> (icons/log-in {})
                (icons/link-to owner :enter {:class "navbar-brand", :tab-index -1}))
         ]))))

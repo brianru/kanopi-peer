@@ -27,6 +27,7 @@
 
     ;; spa
     (GET "/"            [] spa-resource)
+    (GET "/teams"       [] spa-resource)
     (GET "/settings"    [] spa-resource)
     (GET "/datum/:id"   [] spa-resource)
     (GET "/literal/:id" [] spa-resource)

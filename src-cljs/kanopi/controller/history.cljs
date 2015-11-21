@@ -19,6 +19,7 @@
             [bidi.bidi :as bidi]
             [pushy.core :as pushy]))
 
+; TODO: first part indicates team
 (def default-routes ["/" {
                           ;; SPA
                           ""         :home
@@ -26,6 +27,7 @@
                           "login"    :login
                           "logout"   :logout
                           "register" :register
+                          "teams"    :teams
                           "settings" :settings
                           "datum/"   {[:id ""] :datum}
                           "literal/" {[:id ""] :literal}

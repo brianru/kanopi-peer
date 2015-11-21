@@ -13,6 +13,7 @@
             [kanopi.view.datum-search :as datum-search]
             [kanopi.view.literal :as literal]
             [kanopi.view.pages.settings :as settings]
+            [kanopi.view.pages.teams :as teams]
             [kanopi.view.pages.user :as user]
             [kanopi.aether.core :as aether]
             [kanopi.controller.handlers :as handlers]
@@ -51,11 +52,14 @@
            :literal
            (om/build literal/container (get props :literal))
 
-           :settings
-           (om/build settings/settings props)
-
            (:enter :login :logout :register)
            (om/build user/authentication props)
+
+           :settings
+           (om/build settings/settings (get props :user))
+
+           :teams 
+           (om/build teams/manage-teams (get props :user))
 
            ;; default
            (om/build datum-search/suggestions props))

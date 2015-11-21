@@ -59,7 +59,8 @@
                           (assoc user :current-team team')
                           user)))]
     (->> (msg/switch-team-success user')
-         (aether/send! aether))))
+         (aether/send! aether))
+    ))
 
 (defn- fuzzy-search-entity [q ent]
   (when (every? not-empty [q ent])
@@ -178,7 +179,7 @@
 (defn- build-literal-data
   ""
   [props literal-id]
-  (let [literal (lookup-id app-state literal-id)
+  (let [literal (lookup-id props literal-id)
         context (context-datums (-> props :cache vals) literal-id)]
     (hash-map
      :literal literal
