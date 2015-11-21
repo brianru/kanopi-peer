@@ -175,6 +175,15 @@
      :datum datum
      :similar-datums [(lookup-id props -1016)])))
 
+(defn- build-literal-data
+  ""
+  [props literal-id]
+  (let [literal (lookup-id app-state literal-id)
+        context (context-datums (-> props :cache vals) literal-id)]
+    (hash-map
+     :literal literal
+     :context-datums context)))
+
 (defn new-ent? [ent]
   (cond
    (map? ent)
@@ -277,8 +286,8 @@
 
 (defmethod local-request-handler :literal/get
   [aether history app-state msg]
-  (let [literal (lookup-id app-state (get-in msg [:noun]))]
-      (->> (msg/get-literal-success literal)
+  (let [user-literal (build-literal-data app-state (get msg :noun))]
+      (->> (msg/get-literal-success user-literal)
            (aether/send! aether))))
 
 (defmethod local-request-handler :literal/update

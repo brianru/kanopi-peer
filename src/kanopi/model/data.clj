@@ -69,6 +69,10 @@
             :datum          (get-datum* db datum-id)
             :similar-datums (similar-datums* db datum-id)))
 
+(defn user-literal* [db literal-id]
+  (hash-map :literal        (get-literal* db literal-id)
+            :context-datums (context-datums* db literal-id)))
+
 (defprotocol IDatumService
   (init-datum [this creds])
   (update-datum-label [this creds datum-id label])
@@ -113,6 +117,7 @@
   (most-edited-datums [this creds])
   (most-viewed-datums [this creds])
   (recent-datums [this creds])
+  (user-literal [this creds literal-id])
   )
 
 
@@ -226,26 +231,26 @@
   (similar-datums [this creds ent-id]
     (similar-datums* (datomic/db datomic-peer creds) ent-id))
 
-  (user-datum [this creds datum-id]
-    (user-datum* (datomic/db datomic-peer creds) datum-id))
+(user-datum [this creds datum-id]
+            (user-datum* (datomic/db datomic-peer creds) datum-id))
 
-  (most-edited-datums [this creds]
-    (let [user-teams (->> creds :teams (mapv :db/id))
-          results (->> (d/q '[:find ?e (count-distinct ?tx)
-                              :in $ [?user-team ...]
-                              :where
-                              [?e :datum/team ?user-team]
-                              [?e _ _ ?tx]]
-                            (datomic/db datomic-peer creds)
-                            user-teams)
-                       (take 10))]
-      (mapv (fn [[datum-id cnt]]
-              (vector (get-datum this creds datum-id) cnt))
-            results)))
+(most-edited-datums [this creds]
+                    (let [user-teams (->> creds :teams (mapv :db/id))
+                          results (->> (d/q '[:find ?e (count-distinct ?tx)
+                                              :in $ [?user-team ...]
+                                              :where
+                                              [?e :datum/team ?user-team]
+                                              [?e _ _ ?tx]]
+                                            (datomic/db datomic-peer creds)
+                                            user-teams)
+                                       (take 10))]
+                      (mapv (fn [[datum-id cnt]]
+                              (vector (get-datum this creds datum-id) cnt))
+                            results)))
 
-  (most-viewed-datums [this creds]
-    (let []
-      []))
+(most-viewed-datums [this creds]
+                    (let []
+                      []))
 
 ;; TODO: filter by recency
 (recent-datums [this creds]
@@ -263,6 +268,8 @@
                  (mapv (fn [[datum-id tm tx]]
                          (vector (get-datum this creds datum-id) tm tx))
                        results)))
+(user-literal [this creds literal-id]
+              (user-literal* (datomic/db datomic-peer creds) literal-id))
 )
 
 (defn data-service []

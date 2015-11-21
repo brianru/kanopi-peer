@@ -153,10 +153,10 @@
   [request-context message]
   (let [data-svc (util/get-data-service request-context)
         creds    (get-in message [:context :creds])
-        data (data/get-literal data-svc creds (get message :noun))]
+        data     (data/user-literal data-svc creds (get message :noun))]
     (hash-map
      :noun (or data {})
-     :verb (if (not-empty data)
+     :verb (if (not-empty (get data :literal))
              :literal.get/success
              :literal.get/failure)
      :context {})))

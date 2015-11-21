@@ -228,6 +228,10 @@
    :context-datums [Datum]
    :similar-datums [Datum]})
 
+(s/defschema CurrentLiteral
+  {:literal Literal
+   :context-datums [Datum]})
+
 ;; NOTE: my expression of Literal types is not pretty, abstract-maps
 ;; look helpful, but I do not want an explcit type encoded in the map
 ;; besides the presence of the literal/<tp> key. there's no reason to

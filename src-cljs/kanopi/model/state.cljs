@@ -57,7 +57,8 @@
                              {:context-datums []
                               :similar-datums []
                               :datum          {}}) 
-                 :literal {}
+                 :literal {:literal {}
+                           :context-datums []}
 
                  :most-viewed-datums []
                  :most-edited-datums []

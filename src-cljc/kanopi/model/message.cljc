@@ -72,10 +72,10 @@
   (message :noun literal-id :verb :literal/get))
 (abstract-map/extend-schema GetLiteralSuccess Message
   [:literal.get/success]
-  {:noun schema/Literal})
+  {:noun schema/CurrentLiteral})
 (defn get-literal-success
-  [literal]
-  (message :noun literal
+  [user-literal]
+  (message :noun user-literal
            :verb :literal.get/success))
 
 (abstract-map/extend-schema AddFact Message

@@ -97,9 +97,12 @@
   ""
   [owner current-type available-types]
   [:div.literal-types
-   (for [{:keys [ident label] :as tp} available-types]
+   (for [{:keys [ident label] :as tp} available-types
+         :let [current? (= (:ident current-type) ident)]]
      [:div {:react-key ident}
-      [:a {:href nil}
+      [:a.available-literal-type
+       {:href nil
+        :class [(when current? "current")]}
        [:span label]]])])
 
 (defn container
