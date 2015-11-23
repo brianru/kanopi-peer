@@ -124,3 +124,38 @@
            :on-blur     #(end-edit % owner :editing submit-value)
            }
           ])))))
+
+(defn integer [props owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:on-submit (constantly nil)
+       :placeholder nil
+       :tab-index 0
+       :new-value nil
+       })
+    
+    om/IRenderState
+    (render-state [_ {:keys [on-submit] :as state}]
+      (html
+       [:input.validated
+        {
+         ; TODO: get pattern from kanopi.model.schema/literal-types
+         :pattern "^[0-9]*$"}]))))
+
+(defn decimal [props owner opts]
+  (reify
+    om/IInitState
+    (init-state [_]
+      {:on-submit (constantly nil)
+       :placeholder nil
+       :tab-index 0
+       :new-value nil
+       })
+    om/IRenderState
+    (render-state [_ {:keys [on-submit] :as state}]
+      (html
+       [:input.validated
+        {
+         :pattern "^[0-9]?[0-9]*.+[0-9]*$"}]
+       ))))

@@ -27,6 +27,13 @@
     (.on "keyHandled" (partial key-handled state))
     (.on "blur"       (partial blur state))))
 
+(defn- handle-change [e owner korks]
+  (om/set-state! owner korks (.. e -target -value)))
+
+(defn- end-edit [e owner handlerfn]
+  (handlerfn (.. e -target -value))
+  (om/set-state! owner :new-value nil))
+
 (defn rich-text
   [props owner opts]
   (reify
@@ -34,6 +41,13 @@
     (display-name [_]
       (str "rich-text-editor-" props))
     
+    om/IInitState
+    (init-state [_]
+      {:placeholder nil
+       :tab-index 0 
+       :new-value nil 
+       :on-submit (constantly nil)}
+      )
     om/IDidMount
     (did-mount [_]
       #_(.fromTextArea js/ProseMirror
@@ -41,11 +55,17 @@
                        ))
 
     om/IRenderState
-    (render-state [_ state]
-      (let []
+    (render-state [_ {:keys [edit-key new-value on-submit] :as state}]
+      (let [current-value (or new-value (get props edit-key))]
         (html
          [:textarea
-          {}])))))
+          {:value current-value
+           :placeholder (get state :placeholder)
+           :tab-index   (get state :tab-index)
+           :on-change   #(handle-change % owner :new-value)
+           :on-key-down #(when (= (.-key %) "Enter")
+                           (.blur (.-target %)))
+           :on-blur     #(end-edit % owner on-submit)}])))))
 
 (defn code
   [props owner opts]

@@ -25,6 +25,7 @@
              :refer-macros (log trace debug info warn error fatal report)]
 
             [kanopi.view.widgets.text-editor :as text-editor]
+            [kanopi.view.widgets.input-field :as input-field]
 
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
@@ -53,23 +54,40 @@
     (some-> (schema/get-input-type literal)
             (get :ident)
             (name)
-            (keyword))
-    :code)
-  :default :code)
+            (keyword)))
+  :default :text)
 
 (defmethod literal-editor :code
   [owner literal]
-  (om/build text-editor/code literal))
+  (om/build text-editor/code literal
+            {:init-state
+             {:edit-key :literal/code
+              :on-submit (fn [value]
+                           (->> (msg/update-literal (:db/id literal) :literal/code value)
+                                (msg/send! owner)))
+              }}))
 
 (defmethod literal-editor :text
   [owner literal]
-  )
+  (om/build text-editor/rich-text literal
+            {:init-state
+             {:edit-key :literal/text
+              :on-submit (fn [value]
+                           (->> (msg/update-literal (:db/id literal) :literal/text value)
+                                (msg/send! owner)))}}))
+
 (defmethod literal-editor :integer
   [owner literal]
-  )
+  (om/build input-field/integer literal
+            {:init-state
+             {:on-submit (fn [value]
+                           (->> (msg/update-literal (:db/id literal) :literal/integer value)
+                                (msg/send! owner)))}}))
+
 (defmethod literal-editor :decimal
   [owner literal]
   )
+
 (comment
  
  ; https://github.com/Khan/KaTeX
@@ -126,7 +144,8 @@
     om/IRender
     (render [_]
       (println "RENDER LITERAL" props)
-      (let [type-ordering (get schema/input-types-ordered-by-fact-part-preference :fact/attribute)
+      (let [type-ordering (get schema/input-types-ordered-by-fact-part-preference
+                               :fact/attribute)
             available-types (->> props
                                  schema/get-value
                                  schema/compatible-input-types

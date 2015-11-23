@@ -132,14 +132,14 @@
              (icons/on-click #(->> (msg/create-datum)
                                    (msg/send! owner))
                              {:class ["navbar-brand"]}))
-        (->> (icons/goal {})
-             (icons/on-click #(->> (msg/create-goal)
-                                   (msg/send! owner))
-                             {:class ["navbar-brand"]}))
-        (->> (icons/insights {})
-             (icons/on-click #(->> (msg/record-insight)
-                                   (msg/send! owner))
-                             {:class ["navbar-brand"]}))
+        #_(->> (icons/goal {})
+               (icons/on-click #(->> (msg/create-goal)
+                                     (msg/send! owner))
+                               {:class ["navbar-brand"]}))
+        #_(->> (icons/insights {})
+               (icons/on-click #(->> (msg/record-insight)
+                                     (msg/send! owner))
+                               {:class ["navbar-brand"]}))
 
         (om/build dropdown/dropdown props
                   {:init-state

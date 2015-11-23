@@ -24,6 +24,14 @@ input {
     display: inline-block;
     line-height: 2rem !important;
     margin: 0 0.5rem !important;
+    -webkit-transition: border-bottom-color: 0.3s;
+    transition: border-bottom-color: 0.3s;
+}
+input.validated:invalid {
+    border-bottom-color: red;
+}
+input.validated:valid {
+    border-bottom-color: green;
 }
 *, .btn {
     -webkit-transition: opacity 0.3s, border-color 0.3s, fill 0.3s;

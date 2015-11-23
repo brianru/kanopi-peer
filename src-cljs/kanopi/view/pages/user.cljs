@@ -46,7 +46,7 @@
   )
 
 (defn register-button [submit-fn submittable]
-  [:button.btn.btn-warning.btn-block
+  [:button.btn.btn-success.btn-block
    {:on-click submit-fn
     :disabled (not submittable)}
    "Register"])
@@ -113,9 +113,12 @@
 
               (case mode
                 :enter
-                [:div
-                 (login-button login-fn submittable)
-                 (register-button register-fn submittable)]
+                [:div.row
+                 [:div.col-xs-6
+                  (login-button login-fn submittable)]
+                 [:div.col-xs-6
+                  (register-button register-fn submittable)]
+                 ]
 
                 :login
                 (login-button login-fn submittable)
