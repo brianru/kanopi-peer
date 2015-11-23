@@ -37,7 +37,8 @@
    {:noun    schema/Noun
     :verb    schema/Verb
     :context schema/Context
-    :tx/id   s/Str}))
+    ; :tx/id   s/Str
+    }))
 
 (s/defn message :- Message
   [& args]
@@ -45,7 +46,7 @@
          :or {noun {} context {}}}
         (apply hash-map args)]
     (hash-map
-     :tx/id (util/random-uuid)
+     ; :tx/id (util/random-uuid)
      :noun noun
      :verb verb
      :context context)))

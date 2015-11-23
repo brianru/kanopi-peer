@@ -1,4 +1,5 @@
 (ns kanopi.util.core
+  (:refer-clojure :exclude [random-uuid])
   (:require [cognitect.transit :as transit]
             [clojure.string])
   (:import java.util.UUID

@@ -1,4 +1,5 @@
 (ns kanopi.util.core
+  (:refer-clojure :exclude [random-uuid])
   (:require [cljs-uuid-utils.core :as uuid]
             cljs.reader))
 

@@ -16,7 +16,7 @@
      {:title  "kanopi"
       :session-state (if user-data
                        (session/init-session session-svc user-data)
-                       (session/init-anonymous-session session-svc)) 
+                       (session/init-anonymous-session session-svc))
       })))
 
 (defresource spa-resource
