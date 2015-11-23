@@ -135,6 +135,8 @@
 
     om/IWillMount
     (will-mount [_]
+      (println "WILL MOUNT DATUM")
+      (println props)
       (when-not (get-in props [:datum :db/id])
         (println "Datum going to mount without enough data.")
         (println props)

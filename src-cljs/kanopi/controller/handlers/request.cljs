@@ -113,11 +113,20 @@
   ([props id]
    (lookup-id props 0 id))
   ([props depth id]
+   (println "LOOKUP-ID" id)
    ;; FIXME: there is a correct depth cut-off. I don't know if this is
    ;; it. I'm not thinking too clearly right now.
-   (if (> depth 10)
-     id
-     (->> (get-in props [:cache id])
+   (cond
+    (> depth 10)
+    id
+    
+    ; NOTE: this is ugly. essentially, denormalized data gets into the
+    ; cache, which is bad.
+    (map? id)
+    id
+    
+    :default
+    (->> (get-in props [:cache id])
           (reduce (fn [acc [k v]]
                     (cond
                      (= k :datum/fact)
@@ -129,7 +138,8 @@
 
                      :default
                      (assoc acc k v)))
-                  {})))))
+                  {})))
+   ))
 
 (defn- references-datum? [props base-id ent]
   (->> ent
@@ -236,6 +246,7 @@
         ]
     ;; NOTE: the facts make it here. but the datum cache may not have
     ;; the latest facts.
+    (println "parse-input-fact" datum' new-entities)
     (hash-map :datum datum'
               :new-entities new-entities)))
 

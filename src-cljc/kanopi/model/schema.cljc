@@ -129,6 +129,7 @@
 
 (defn get-input-type [ent]
   (let [value-key-id (get-value-key ent)]
+    (println "HERE" value-key-id)
     (get input-types value-key-id)))
 
 (defn get-value

@@ -67,7 +67,6 @@
 
   "
   (fn [_ literal]
-    (println "LITERAL EDITOR" literal)
     (some-> (schema/get-input-type literal)
             (get :ident)
             (name)
@@ -103,7 +102,11 @@
 
 (defmethod literal-editor :decimal
   [owner literal]
-  )
+  (om/build input-field/decimal literal
+            {:init-state
+             {:on-submit (fn [value]
+                           (->> (msg/update-literal (:db/id literal) :literal/integer value)
+                                (msg/send! owner)))}}))
 
 (comment
  
@@ -137,16 +140,22 @@
 (defn literal-types
   "Triggers for switching the current literal's type."
   [literal owner current-type available-types]
-  [:div.literal-types
-   (for [{:keys [ident label] :as tp} available-types
-         :let [current? (= (:ident current-type) ident)]]
-     [:div {:react-key ident}
-      [:a.available-literal-type
-       {:on-click (fn [_]
-                    (->> (msg/update-literal (:db/id literal) ident (schema/get-value literal))
-                         (msg/send! owner)))
-        :class [(when current? "current")]}
-       [:span label]]])])
+  (let [type-list 
+        (->> available-types
+             (remove #(contains? #{(:ident current-type) :datum/label} (:ident %)))
+             (cons current-type)) 
+        ]
+    [:div.literal-types
+     (for [{:keys [ident label] :as tp} type-list
+           :let [current? (= (:ident current-type) ident)]]
+       [:div {:react-key ident}
+        [:a.available-literal-type
+         {:on-click (fn [_]
+                      (->> (msg/update-literal (:db/id literal) ident (schema/get-value literal))
+                           (msg/send! owner)))
+          :class [(when current? "current")]}
+         [:span label]]])])
+  )
 
 (defn container
   "The whole page. Splitting it into three columns. I might allow the
@@ -157,17 +166,18 @@
     om/IDisplayName
     (display-name [_]
       (str "literal-" (:db/id props)))
-    
+
     om/IRender
     (render [_]
       (println "RENDER LITERAL" props)
       (let [type-ordering (get schema/input-types-ordered-by-fact-part-preference
                                :fact/attribute)
-            available-types (->> props
+            available-types (->> props :literal
                                  schema/get-value
                                  schema/compatible-input-types
                                  (util/sort-by-ordering :ident type-ordering))
-            current-type (schema/get-input-type props)]
+            current-type (schema/get-input-type (:literal props))
+            ]
         (html
          [:div.literal-container.container-fluid
           [:div.row
@@ -181,7 +191,7 @@
               (literal-renderer owner (get props :literal))) ]
 
            [:div.col-md-2.literal-types
-            (literal-types props owner current-type available-types)]]
-          
+            (literal-types (get props :literal) owner current-type available-types)]]
+
           ])))))
 
