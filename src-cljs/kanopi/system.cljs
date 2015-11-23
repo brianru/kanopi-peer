@@ -3,7 +3,7 @@
   modal parameters. Generally this component would facilitate in
   switching other components' behavior between online and offline
   modes or demonstration and authenticated modes."
-  (:require [quile.component :as component]
+  (:require [com.stuartsierra.component :as component]
             [kanopi.view.core :as view]
             [kanopi.model.state :as state]
             [kanopi.controller.dispatch :as dispatch]

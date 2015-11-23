@@ -1,5 +1,5 @@
 (ns kanopi.util.local-storage
-  (:require [quile.component :as component]
+  (:require [com.stuartsierra.component :as component]
             [cognitect.transit :as transit]))
 
 (defprotocol IPersistentStorage

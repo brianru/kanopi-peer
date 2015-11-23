@@ -22,7 +22,6 @@
 
                  ;; Client
                  [org.clojure/clojurescript "1.7.170"]
-                 [quile/component-cljs "0.2.4" :exclusions [org.clojure/clojure]]
                  [org.omcljs/om "1.0.0-alpha14"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [cljsjs/react-with-addons "0.14.0-0"]

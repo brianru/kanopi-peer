@@ -83,7 +83,7 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [om.core :as om]
-            [quile.component :as component]))
+            [com.stuartsierra.component :as component]))
 
 (defn- deref-cursor
   "Transducer to let xform fns not worry about dereferencing cursors."

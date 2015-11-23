@@ -20,7 +20,7 @@
             [cljs-uuid-utils.core :refer (make-random-uuid)]
             [cljs-time.core :as time]
             [cljs-time.coerce :as time-coerce]
-            [quile.component :as component]
+            [com.stuartsierra.component :as component]
             [cljs.core.async :as async :refer (<! >!)]))
 
 (defn k-comparator [k]

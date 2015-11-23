@@ -1,11 +1,13 @@
 (ns kanopi.model.state
   "This is session state. Outside the client it is always referred to as session data."
-  (:require [quile.component :as component]
+  (:require [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [goog.net.cookies :as cookies]
             [cemerick.url :as url]
             [cognitect.transit :as transit]
+            [schema.core :as s]
+            [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
             [kanopi.util.local-storage :as local-storage]
             ))
@@ -76,8 +78,20 @@
                  :error-messages []
                  :log []
                  }
-                stored-app-state
+                ; stored-app-state
                 ))]
+      #_(add-watch atm :validator (fn [_key _ref old-value new-value]
+                                  (println "HERE")
+                                  (when-let [errors (s/check schema/AppState new-value)]
+                                    (println "App-state validation error!")
+                                    (println errors)
+                                    (println (keys new-value))
+                                    )
+                                  ; #_(try
+                                  ;    (s/validate schema/AppState new-value)
+                                  ;    (catch js/Object e
+                                  ;      (println e)))
+                                  ))
       (info "create ephemeral app state" @atm)
       (assoc this :app-state atm)))
 

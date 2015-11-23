@@ -113,7 +113,6 @@
   ([props id]
    (lookup-id props 0 id))
   ([props depth id]
-   (println "LOOKUP-ID" id)
    ;; FIXME: there is a correct depth cut-off. I don't know if this is
    ;; it. I'm not thinking too clearly right now.
    (cond
@@ -161,11 +160,6 @@
 (defn- similar-datums [data base-id]
   )
 
-(def placeholder-fact
-  {:db/id nil
-   :fact/attribute [{:db/id nil}]
-   :fact/value     [{:db/id nil}]})
-
 ;; FIXME: this does not work.
 ;; NOTE: or, the facts are not making their way to the cache and
 ;; that's actually important. that's probably it.
@@ -176,8 +170,6 @@
   -> values     (literals or datums)"
   [props datum-id]
   {:pre [(or (integer? datum-id) (string? datum-id))]}
-  (println "build-datum-data")
-  (println (vals (get props :cache)))
   (let [context (context-datums (-> props :cache vals) datum-id)
         similar (similar-datums (-> props :cache vals) datum-id)
         datum   (lookup-id props datum-id)]
@@ -246,7 +238,6 @@
         ]
     ;; NOTE: the facts make it here. but the datum cache may not have
     ;; the latest facts.
-    (println "parse-input-fact" datum' new-entities)
     (hash-map :datum datum'
               :new-entities new-entities)))
 

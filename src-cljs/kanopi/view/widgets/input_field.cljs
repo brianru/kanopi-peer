@@ -13,10 +13,15 @@
 (defn- handle-change [e owner korks]
   (om/set-state! owner korks (.. e -target -value)))
 
-(defn- end-edit [e owner editing-state-korks handler-fn]
-  (om/set-state! owner editing-state-korks false)
-  (handler-fn (.. e -target -value))
-  (om/set-state! owner :new-value nil))
+(defn- end-edit
+  ([e owner handler-fn]
+   (end-edit e owner nil handler-fn))
+
+  ([e owner editing-state-korks handler-fn]
+   (when editing-state-korks
+     (om/set-state! owner editing-state-korks false)) 
+   (handler-fn (.. e -target -value))
+   (om/set-state! owner :new-value nil)))
 
 (defn editable-value
   "Required initial state:
@@ -86,7 +91,7 @@
 
           ])))))
 
-(defn input-field [props owner opts]
+#_(defn input-field [props owner opts]
   (reify
     om/IInitState
     (init-state [_]
@@ -107,7 +112,7 @@
            :on-blur     #(end-edit % owner :editing submit-value)
            }])))))
 
-(defn textarea [props owner opts]
+#_(defn textarea [props owner opts]
   (reify
     om/IRenderState
     (render-state [_ {:keys [submit-value] :as state}]
@@ -140,6 +145,12 @@
       (html
        [:input.validated
         {
+         :on-change #(handle-change % owner :new-value)
+         :tab-index (get state :tab-index)
+         :placeholder (get state :placeholder)
+         :on-key-down #(when (= (.-key %) "Enter")
+                         (.blur (.-target %)))
+         :on-blur     #(end-edit % owner on-submit)
          ; TODO: get pattern from kanopi.model.schema/literal-types
          :pattern "^[0-9]*$"}]))))
 
@@ -157,5 +168,11 @@
       (html
        [:input.validated
         {
+         :on-change #(handle-change % owner :new-value)
+         :tab-index (get state :tab-index)
+         :placeholder (get state :placeholder)
+         :on-key-down #(when (= (.-key %) "Enter")
+                         (.blur (.-target %)))
+         :on-blur     #(end-edit % owner on-submit)
          :pattern "^[0-9]?[0-9]*.+[0-9]*$"}]
        ))))

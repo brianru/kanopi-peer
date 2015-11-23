@@ -233,6 +233,18 @@
    (s/optional-key :datum/fact)  [(s/recursive #'Fact)]
    })
 
+(s/defschema NormalizedFact
+  {:db/id DatomicId
+   :fact/attribute DatomicId
+   :fact/value DatomicId})
+
+(s/defschema NormalizedDatum
+  {:db/id (s/maybe DatomicId)
+   :datum/team DatomicId
+   :datum/label (s/maybe s/Str)
+   :datum/fact [DatomicId]
+   })
+
 (s/defschema CurrentDatum
   ""
   {:datum Datum
@@ -253,15 +265,27 @@
    :literal/team UserTeam
    :literal/text s/Str})
 
+(s/defschema CodeLiteral
+  {:db/id (s/maybe DatomicId)
+   :literal/team UserTeam
+   :literal/code s/Str})
+
 (s/defschema IntegerLiteral
   {:db/id (s/maybe DatomicId)
    :literal/team UserTeam
    :literal/integer s/Int})
 
+(s/defschema DecimalLiteral
+  {:db/id (s/maybe DatomicId)
+   :literal/team UserTeam
+   :literal/decimal s/Num})
+
 (s/defschema Literal
   (s/conditional
    #(find % :literal/text)    TextLiteral
-   #(find % :literal/integer) IntegerLiteral))
+   #(find % :literal/code)    CodeLiteral
+   #(find % :literal/integer) IntegerLiteral
+   #(find % :literal/decimal) DecimalLiteral))
 
 (s/defschema Noun s/Any)
 
@@ -289,3 +313,21 @@
    :tx/id s/Str
    })
 
+(s/defschema AppState
+  {
+   :mode    s/Keyword
+   :user    User
+   :page    s/Any
+   :intent  s/Any
+   :datum   CurrentDatum
+   :literal CurrentLiteral
+   :most-viewed-datums [s/Any]
+   :most-edited-datums [s/Any]
+   :recent-datums      [s/Any]
+   :cache {s/Any s/Any}
+   ; :cache {DatomicId (s/cond-pre NormalizedDatum NormalizedFact Literal}
+
+   :search-results {s/Str s/Any}
+   :error-messages [s/Any]
+   :log [s/Any]
+   })

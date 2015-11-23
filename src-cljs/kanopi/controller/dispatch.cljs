@@ -2,7 +2,7 @@
   "Route messages traveling in the aether to local event handlers
   and/or spouts for external processing."
   (:require-macros [cljs.core.async.macros :as asyncm])
-  (:require [quile.component :as component]
+  (:require [com.stuartsierra.component :as component]
             [cljs.core.async :as async]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
