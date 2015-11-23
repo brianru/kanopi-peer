@@ -76,7 +76,7 @@
   :plugins [[lein-marginalia "0.8.0"
              :exclusions [org.clojure/clojurescript org.clojure/clojure]
              ]
-            [lein-cljsbuild "1.1.0"]
+            [lein-cljsbuild "1.1.1"]
             [lein-figwheel "0.5.0-1"
              ; :exclusions [org.clojure/core.async]
              ]]
