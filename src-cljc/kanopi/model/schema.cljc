@@ -67,6 +67,9 @@
           :predicate string?
           :parser identity}))
 
+(def renderable-types
+  #{:literal/math :literal/code})
+
 (def fact-attribute-input-ordering
   (list :datum/label :literal/text))
 

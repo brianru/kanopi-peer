@@ -24,6 +24,10 @@
                   :href "/favicon.png"}]
           (include-css "/css/main.css")
           (include-bootstrap)
+          ; Katex
+          (include-js "//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.js")
+          (include-css "//cdnjs.cloudflare.com/ajax/libs/KaTeX/0.5.1/katex.min.css")
+
           ; CodeMirror
           ; This is not how I want to pull in JS/CSS dependencies.
           ; TODO: figure out a better way. CLJS/JS does not work with

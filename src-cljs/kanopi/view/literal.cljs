@@ -34,6 +34,23 @@
             [kanopi.util.core :as util]
             ))
 
+(defmulti literal-renderer
+  "Some renderers take advantage of persisted as part of the literal
+  entity, others use only the raw value."
+  (fn [_ literal]
+    (some-> (schema/get-input-type literal)
+            (get :ident)
+            (name)
+            (keyword))))
+
+(defmethod literal-renderer :literal/math
+  [owner literal]
+  )
+
+(defmethod literal-renderer :literal/code
+  [owner literal]
+  )
+
 (defmulti literal-editor
   "
   Strategy:
@@ -159,7 +176,10 @@
             (literal-context owner (get props :context [{:datum/label "Test label"
                                                          :fact/attribute "the attribute"}]))]
            [:div.col-md-8.literal-content
-            (literal-editor owner (get props :literal))]
+            (literal-editor owner (get props :literal))
+            (when (contains? schema/renderable-types current-type)
+              (literal-renderer owner (get props :literal))) ]
+
            [:div.col-md-2.literal-types
             (literal-types props owner current-type available-types)]]
           

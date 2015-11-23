@@ -59,6 +59,7 @@
       (let [current-value (or new-value (get props edit-key))]
         (html
          [:textarea
+          ; TODO: save periodically, without the user exiting.
           {:value current-value
            :placeholder (get state :placeholder)
            :tab-index   (get state :tab-index)
