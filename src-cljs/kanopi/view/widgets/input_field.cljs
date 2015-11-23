@@ -46,6 +46,11 @@
         (html
          [:span.editable-text-container
           {:style {:border-bottom-color (when editing "green")}}
+          ; NOTE: this design is problematic.
+          ; the user cannot user 'TAB' to navigate to the input field
+          ; because it is not in the DOM when the user presses that
+          ; button. is there a way to just use an INPUT and heavily
+          ; alter its interactions when not 'editing'?
           [:span.view-editable-text
              {:style {:color (when (empty? current-value)
                                "#dddddd")
@@ -57,14 +62,19 @@
                default-value)]
 
           [:input.edit-editable-text
-           {:style       {:display (when-not editing "none")}
+           {:style       {
+                          :display (when-not editing "none")
+                          }
             :ref         "text-field"
             :type        "text"
             :value       (or (get state :new-value) current-value)
+            :tab-index   (get state :tab-index)
             :placeholder (get state :placeholder)
+            :on-focus    #(println "focus input")
             :on-change   #(handle-change % owner :new-value)
             :on-key-down #(when (= (.-key %) "Enter")
-                            ;; NOTE: this triggers on-blur.
+                            ;; NOTE: this triggers on-blur, which
+                            ;; calls the submit-value handler fn.
                             (om/set-state! owner :editing false))
             :on-blur     #(end-edit % owner :editing submit-value)}]
           #_(when (get state :edit-icon-enabled)
@@ -89,6 +99,7 @@
          [:input.edit-editable-text
           {:ref         "text-field"
            :type        "text"
+           :tab-index   (get state :tab-index -1)
            :value       (get state :new-value)
            :placeholder (get state :placeholder)
            :on-change   #(handle-change % owner :new-value)
@@ -104,6 +115,7 @@
         (html
          [:textarea.input-textarea
           {:value       (get state :new-value)
+           :tab-index   (get state :tab-index -1)
            :rows 3
            :cols 32
            :placeholder (get state :placeholder)

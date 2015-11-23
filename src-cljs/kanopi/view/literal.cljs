@@ -29,6 +29,7 @@
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
 
+            [kanopi.util.browser :as browser]
             [kanopi.util.core :as util]
             ))
 
@@ -60,10 +61,15 @@
   [owner literal]
   (om/build text-editor/code literal))
 
-(defmethod literal-editor :math
+(defmethod literal-editor :text
   [owner literal]
   )
-
+(defmethod literal-editor :integer
+  [owner literal]
+  )
+(defmethod literal-editor :decimal
+  [owner literal]
+  )
 (comment
  
  ; https://github.com/Khan/KaTeX
@@ -82,9 +88,9 @@
   information. The font size is relatively small."
   [owner context-entities]
   [:div.literal-context
-   (for [{:keys [datum/label fact/attribute]} context-entities]
+   (for [{:keys [datum/id datum/label fact/attribute]} context-entities]
      [:div {:react-key label}
-      [:a {:href nil}
+      [:a {:href (when id (browser/route-for owner :datum :id id))}
        [:div.context-entity-label
         [:span label]]
        [:div.context-entity-fact
@@ -94,14 +100,16 @@
       ])])
 
 (defn literal-types
-  ""
-  [owner current-type available-types]
+  "Triggers for switching the current literal's type."
+  [literal owner current-type available-types]
   [:div.literal-types
    (for [{:keys [ident label] :as tp} available-types
          :let [current? (= (:ident current-type) ident)]]
      [:div {:react-key ident}
       [:a.available-literal-type
-       {:href nil
+       {:on-click (fn [_]
+                    (->> (msg/update-literal (:db/id literal) ident (schema/get-value literal))
+                         (msg/send! owner)))
         :class [(when current? "current")]}
        [:span label]]])])
 
@@ -134,7 +142,7 @@
            [:div.col-md-8.literal-content
             (literal-editor owner (get props :literal))]
            [:div.col-md-2.literal-types
-            (literal-types owner current-type available-types)]]
+            (literal-types props owner current-type available-types)]]
           
           ])))))
 

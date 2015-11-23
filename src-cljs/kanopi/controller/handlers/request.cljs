@@ -291,6 +291,7 @@
       (->> (msg/get-literal-success user-literal)
            (aether/send! aether))))
 
+; FIXME: what if update converts literal to datum?
 (defmethod local-request-handler :literal/update
   [aether history app-state msg]
   (let [literal-id (get-in msg [:noun :literal-id])

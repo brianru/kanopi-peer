@@ -277,8 +277,15 @@
       (let [literal' (data/update-literal data-svc creds literal-id
                                           :literal/decimal 4.0)]
         (is (= 4.0 (get literal' :literal/decimal))))
+
       (let [literal' (data/update-literal data-svc creds literal-id
                                           :literal/text "DIZZLE")]
-        (is (= "DIZZLE" (get literal' :literal/text)))))
+        (is (= "DIZZLE" (get literal' :literal/text))))
+
+      (let [literal' (data/update-literal data-svc creds literal-id
+                                          :datum/label "DIZZLE")]
+        (is (= "DIZZLE" (get literal' :datum/label)))
+        (is (= :datum (schema/describe-entity literal')))
+        (is (empty? (-> literal' keys (map namespace) (filter #(= "literal"))))))
     (component/stop system)))
 

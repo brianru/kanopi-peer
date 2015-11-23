@@ -18,6 +18,12 @@
     :predicate string?
     :parser identity}
 
+   :literal/code
+   {:ident :literal/code
+    :label "code"
+    :predicate string?
+    :parser identity}
+
    :literal/integer
    {:ident :literal/integer
     :label "integer"

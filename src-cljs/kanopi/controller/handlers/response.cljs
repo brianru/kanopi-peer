@@ -208,6 +208,7 @@
   [aether history app-state msg]
   (record-error-message app-state msg))
 
+; FIXME: what if update converts literal to datum?
 (defmethod local-response-handler :literal.update/success
   [aether history app-state msg]
   (let [literal (get-in msg [:noun])]

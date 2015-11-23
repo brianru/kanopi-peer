@@ -60,6 +60,7 @@
            [:div.datum-label
             (om/build input/editable-value props
                       {:init-state {:editing (get state :editing-label)
+                                    :tab-index (get state :initial-tab-index)
                                     :edit-key :datum/label
                                     :submit-value
                                     (fn [label']
@@ -75,7 +76,10 @@
             (om/build-all fact/fact-next
                           (get props :datum/fact [])
                           {:key :db/id
-                           :init-state {:datum-id (:db/id props)}
+                           :init-state
+                           {:datum-id (:db/id props)
+                            :initial-tab-index (inc (get state :initial-tab-index))}
+
                            :state {:fact-count fact-count}})
             ;; NOTE: also build a special fact which is the trigger to
             ;; add new facts
@@ -83,7 +87,9 @@
             ;; successfully added.
             (om/build fact/fact-next {}
                       {:react-key  "nil-fact"
-                       :init-state {:datum-id (:db/id props)}
+                       :init-state {:datum-id (:db/id props)
+                                    :initial-tab-index
+                                    (inc (+ fact-count (get state :initial-tab-index)))}
                        :state      {:fact-count fact-count}})
             ]]])))
     ))
@@ -143,7 +149,7 @@
         (html
          [:div.datum-container.container-fluid
           (om/build context-datums (get props :context-datums))
-          (om/build body (get props :datum))
+          (om/build body (get props :datum) {:init-state {:initial-tab-index 2}})
           (om/build similar-datums (get props :similar-datums))
           ])))
     ))
