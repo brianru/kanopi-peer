@@ -11,8 +11,8 @@
                  [com.cognitect/transit-clj "0.8.285"]
 
                  ;; Core libraries
-                 [org.clojure/core.async "0.2.371"]
-                 [com.cognitect/transit-cljs "0.8.225"]
+                 [org.clojure/core.async "0.2.374"]
+                 [com.cognitect/transit-cljs "0.8.232"]
                  ;; resolves a dependency issue with figwheel and
                  ;; core.async
                  [org.clojure/core.memoize "0.5.8"]
@@ -21,12 +21,12 @@
                  [clj-fuzzy "0.3.1"]
 
                  ;; Client
-                 [org.clojure/clojurescript "1.7.145"]
+                 [org.clojure/clojurescript "1.7.170"]
                  [quile/component-cljs "0.2.4" :exclusions [org.clojure/clojure]]
                  [org.omcljs/om "1.0.0-alpha14"
                   :exclusions [cljsjs/react cljsjs/react-with-addons]]
                  [cljsjs/react-with-addons "0.14.0-0"]
-                 [bidi "1.22.0"]
+                 [bidi "1.22.1"]
                  [kibu/pushy "0.3.6"]
                  [cljs-ajax "0.5.1"]
                  [com.andrewmcveigh/cljs-time "0.3.14"]
@@ -37,14 +37,14 @@
                  ; [cljsjs/codemirror "5.7.0-3"]
                  ; [jamesmacaulay/zelkova "0.4.0"]
                  ; Dev
-                 [devcards "0.2.0-8"]
+                 [devcards "0.2.1"]
 
                  ;; Database
                  [com.datomic/datomic-pro "0.9.5327"
                   :exclusions [joda-time]]
 
                  ;; Web
-                 [org.immutant/web "2.1.0"]
+                 [org.immutant/web "2.1.1"]
                  [compojure "1.4.0"]
                  [liberator "0.13"]
                  ;; NOTE: this is installed in my local maven
@@ -62,7 +62,7 @@
 
                  [prismatic/schema "1.0.3"]
                  ;; Test
-                 [org.clojure/test.check "0.8.2"]
+                 [org.clojure/test.check "0.9.0"]
                  ]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
@@ -73,10 +73,13 @@
   :test-paths ["src-cljc" "src" "test-cljc" "test"]
   :main kanopi.main
 
-  :plugins [[lein-marginalia "0.8.0"]
+  :plugins [[lein-marginalia "0.8.0"
+             :exclusions [org.clojure/clojurescript org.clojure/clojure]
+             ]
             [lein-cljsbuild "1.1.0"]
-            [lein-figwheel "0.4.1"
-             :exclusions [org.clojure/core.async]]]
+            [lein-figwheel "0.5.0-1"
+             ; :exclusions [org.clojure/core.async]
+             ]]
 
   :clean-targets ^{:protect false} [:target-path "resources/public/js/out" "resources/public/js/out_devcards"]
 
@@ -114,8 +117,8 @@
               :source-paths ["dev"]
               :repl-options {:init-ns user}}}
 
-  :figwheel {:server-logfile "target/logs/figwheel.log"
-             :css-dirs "resources/public/css"}
+  :figwheel {;:server-logfile "target/logs/figwheel.log"
+             :css-dirs ["resources/public/css"]}
 
   :cljsbuild {:builds
               [

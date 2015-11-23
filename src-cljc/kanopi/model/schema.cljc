@@ -3,9 +3,11 @@
              #?@(:clj  [[schema.core :as s]
                         [schema.experimental.complete :as c]
                         [schema.experimental.generators :as g]
+                        clojure.set
                         [schema.experimental.abstract-map :as m]]
                  :cljs [[schema.core :as s :include-macros true]
                         [schema.experimental.abstract-map :as m :include-macros true]
+                        clojure.set
                         cljs.reader]
                  )
             ))
