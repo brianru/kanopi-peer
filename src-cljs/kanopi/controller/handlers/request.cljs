@@ -75,6 +75,8 @@
         (list (/ (count base-string) (count match-string))
               ent)))))
 
+; TODO: refactor "entity-type" to "input-type" and use
+; schema/get-input-type to pull that from each entity
 (defn- matching-entity-type [tp ent]
   (if-not tp true
     (= tp (schema/describe-entity ent))))
@@ -93,6 +95,7 @@
          ;(filter (partial matching-entity-type tp))
          (map    (partial fuzzy-search-entity q))
          (remove nil?)
+         (distinct)
          (sort-by first)
          (vec))))
 

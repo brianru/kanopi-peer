@@ -145,11 +145,13 @@ a.navbar-brand:focus {
     height: 50px;
     line-height: 50px;
     font-size: 18px;
-    left: 30%;
+/* when using magnifying glass icon, adjust centering */
+    left: calc(30% - 9px);
 }
 .search {
     display: inline-block;
-    width: 90%;
+/* when using magnifying glass icon, adjust centering */
+    width: calc(100% - 18px);
 }
 .typeahead {
     display: inline-block;
@@ -230,6 +232,10 @@ a.navbar-brand:focus {
     height: 40px;
 }
 .context-datums {
+}
+
+.datum-shallow-search {
+    padding-bottom: 3rem;
 }
 
 

@@ -36,6 +36,14 @@
    (into [:div.panel-body]
          (doall (map (partial datum-list-entry owner) datums)))])
 
+(defn datum-finder [owner props]
+  (let []
+    [:div.panel.panel-default
+     [:div.panel-heading
+      [:h3.panel-title "Datum Finder"]]
+     [:div.panel-body
+      ]]))
+
 (defn suggestions
   [props owner opts]
   (reify
@@ -52,15 +60,14 @@
             ]
         (html
          [:div.container-fluid
-          [:div.row
+          [:div.row.datum-shallow-search
            [:div.col-md-4
             (most-viewed-datums owner (get props :most-viewed-datums))]
            [:div.col-md-4
             (most-edited-datums owner (get props :most-edited-datums))]
            [:div.col-md-4
             (recently-touched-datums owner recent-datums)]]
-          [:div.row
-           [:h3 "Datum finder"]
-           [:span "TODO"]
-           ]
+          [:div.row.datum-deep-search
+           [:div.col-md-12
+            (datum-finder owner props)]]
           ])))))
