@@ -38,7 +38,9 @@
    (new-request-queue :timestamp))
   ([k]
    (atom
-    (sorted-set-by (k-comparator k)))))
+    (sorted-set-by (k-comparator k))
+    :validator (fn [new-value]
+                 (set? new-value)))))
 
 (defn dequeue-set! [s]
   (let [itm (first @s)]
@@ -132,7 +134,7 @@
 (defrecord HTTPWorker [id aether kill-ch notify-ch queue]
   component/Lifecycle
   (start [this]
-    (debug id "start worker")
+    #_(debug id "start worker")
     (assert (not (nil? queue)))
     (let [kill-ch  (async/chan 100)
           recur-ch (async/chan 100)]
@@ -157,7 +159,7 @@
                                                   :handler :error-handler
                                                   :format :response-format
                                                   ]))]
-                  #_(debug id "ACTIVE")
+                  (debug id "ACTIVE")
                   (info req-map)
                   (req-fn (:uri next-item) req-map)
                   (<! recur-ch)
@@ -165,13 +167,13 @@
 
                 ;; IDLE Recur Branch
                 (let []
-                  #_(debug id "IDLE")
+                  (debug id "IDLE")
                   (recur (async/alts! [kill-ch notify-ch])))))))
 
       (assoc this :kill-ch kill-ch)))
 
   (stop [this]
-    (debug id "stop worker")
+    #_(debug id "stop worker")
     (async/put! kill-ch :kill)
     (assoc this :kill-ch nil)))
 
@@ -238,10 +240,12 @@
 
   (stop [this]
     #_(info "stop spout" (get config :dimension) (get config :value))
+    (doall (map component/stop workers))
+    (async/put! kill-ch :kill!)
     (assoc this
-           :queue     (swap! queue (constantly {}))
+           :queue     (swap! queue #(set {}))
            :notify-ch (async/close! notify-ch)
-           :kill-ch   (async/put! kill-ch :kill!)
+           :kill-ch   (async/close! kill-ch)
            :workers   (doall (map component/stop workers))))
   )
 

@@ -29,6 +29,7 @@
                    {:init-state
                     {:display-fn schema/display-entity
                      :placeholder "search"
+                     :empty-result []
                      :href-fn  (fn [result]
                                    (when-let [id (:db/id result)]
                                      (browser/route-for owner :datum :id id))) 
