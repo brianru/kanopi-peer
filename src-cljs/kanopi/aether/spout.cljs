@@ -159,7 +159,7 @@
                                                   :handler :error-handler
                                                   :format :response-format
                                                   ]))]
-                  (debug id "ACTIVE")
+                  #_(debug id "ACTIVE")
                   (info req-map)
                   (req-fn (:uri next-item) req-map)
                   (<! recur-ch)
@@ -167,7 +167,7 @@
 
                 ;; IDLE Recur Branch
                 (let []
-                  (debug id "IDLE")
+                  #_(debug id "IDLE")
                   (recur (async/alts! [kill-ch notify-ch])))))))
 
       (assoc this :kill-ch kill-ch)))

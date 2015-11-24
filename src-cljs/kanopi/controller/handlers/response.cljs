@@ -41,8 +41,6 @@
                         app-state' (-> app-state
                                        (assoc-in [:datum :datum] datum)
                                        (update :cache #(merge % cache-delta)))]
-                    (println "NEW CACHE")
-                    (println (keys (get app-state' :cache)))
                     app-state'))))
 
 (defmethod local-response-handler :datum.fact.add/success

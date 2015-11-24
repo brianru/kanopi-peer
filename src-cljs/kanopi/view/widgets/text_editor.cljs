@@ -83,6 +83,11 @@
         (register-event-handlers! editor (om/get-state owner))
         (om/set-state! owner :editor editor)))
 
+    om/IWillUnmount
+    (will-unmount [_]
+      ; removes CodeMirror from DOM
+      (.toTextArea (om/get-state owner :editor)))
+
     om/IRenderState
     (render-state [_ state]
       (let []
