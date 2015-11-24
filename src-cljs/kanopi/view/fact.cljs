@@ -260,6 +260,11 @@
                    :display-fn schema/display-entity
                    :on-focus  (fn [v]
                                 (om/set-state! owner :editing part-key)) 
+                   :on-blur   (fn [v]
+                                (om/update-state! owner :editing
+                                                  (fn [existing]
+                                                    (if (= part-key existing)
+                                                      nil existing))))
 
                    :on-change (fn [input-value]
                                 (om/update-state! owner part-key

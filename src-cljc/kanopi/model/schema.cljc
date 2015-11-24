@@ -327,7 +327,7 @@
    :cache {s/Any s/Any}
    ; :cache {DatomicId (s/cond-pre NormalizedDatum NormalizedFact Literal}
 
-   :search-results {s/Str s/Any}
+   :search-results {s/Str [s/Any]}
    :error-messages [s/Any]
    :log [s/Any]
    })

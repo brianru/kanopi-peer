@@ -195,7 +195,9 @@
                              ]
                       :as state}]
       ;; NOTE: see NOTE above om/IWillMount for explanation
-      (set! js/window.onclick #(om/set-state! owner :focused false))
+      (set! js/window.onclick (fn [_]
+                                (on-blur (get state :input-value))
+                                (om/set-state! owner :focused false)))
       (let [all-search-results (om/observe owner ((om/get-shared owner :search-results)))
             search-results (get all-search-results input-value (get state :empty-result []))
             ]
@@ -213,6 +215,11 @@
                   {:on-focus    (fn [_]
                                   (om/set-state! owner :focused true)
                                   (on-focus (get state :input-value))) 
+                   ; NOTE: see notes above. faking on-blur with a
+                   ; window on-click event.
+                   ; :on-blur (fn [_]
+                   ;            (on-blur (get state :input-value))
+                   ;            (om/set-state! owner :focused false))
                    :tab-index (get state :tab-index)
                    :value       (or (get state :input-value)
                                     (get state :initial-input-value))

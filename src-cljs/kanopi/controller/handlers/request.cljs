@@ -67,15 +67,13 @@
     (let [base-string (-> ent
                           (schema/get-value)
                           (str)
-                          ;(clojure.string/lower-case)
                           (or ""))
-          query-string q;(clojure.string/lower-case q)
+          query-string (clojure.string/lower-case q)
           match-string (re-find (re-pattern query-string) base-string)]
       (when-not (or (clojure.string/blank? base-string)
                     (clojure.string/blank? match-string))
         (list (/ (count base-string) (count match-string))
-              ent))))
-  )
+              ent)))))
 
 (defn- matching-entity-type [tp ent]
   (if-not tp true
