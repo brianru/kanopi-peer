@@ -46,6 +46,7 @@
                :spa.logout/success   :spa.logout/failure
                :spa.register/success :spa.register/failure
 
+               :spa.navigate/success            :spa.navigate/failure
                :spa.navigate.search/success     :spa.navigate.search/failure
 
                :datum.create/success            :datum.create/failure
@@ -74,6 +75,7 @@
                :spa.register/success :spa.register/failure
 
 
+               :spa.navigate/success            :spa.navigate/failure
                :spa.navigate.search/success     :spa.navigate.search/failure
 
                :datum.create/success            :datum.create/failure
@@ -114,7 +116,7 @@
     (info "start dispatcher" (get config :mode))
     (let [kill-ch  (async/chan 1)
           listener (aether/replicate! aether)]
-      (asyncm/go (loop [[v ch] nil]
+      (asyncm/go (loop [[v ch] (repeat nil)]
                    (if (= ch kill-ch)
                      (do
                       (async/close! kill-ch))

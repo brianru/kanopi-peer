@@ -1,8 +1,6 @@
 (ns kanopi.controller.handlers.request
-  (:require [om.core :as om]
-            [taoensso.timbre :as timbre
+  (:require [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
-
             [kanopi.aether.core :as aether]
             [kanopi.controller.history :as history]
             [kanopi.model.message :as msg]
@@ -25,19 +23,9 @@
 ;; passing the history component around via shared state.
 (defmethod local-request-handler :spa/navigate
   [aether history app-state msg]
-  (let [handler (get-in msg [:noun :handler])]
-    (om/transact! app-state
-                  (fn [app-state]
-                    (cond-> app-state
-                      true
-                      (assoc :page (get msg :noun))
-
-                      (not= :datum handler)
-                      (assoc :datum {})
-
-                      (not= :literal handler)
-                      (assoc :literal {})
-                      )))
+  (let [{:keys [handler] :as page'} (get-in msg [:noun])]
+    (->> (msg/navigate-success page')
+         (aether/send! aether))
     (cond
      (= :datum handler)
      (let [datum-id (util/read-entity-id (get-in msg [:noun :route-params :id]))]

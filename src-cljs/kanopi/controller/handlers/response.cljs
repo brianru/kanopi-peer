@@ -19,6 +19,10 @@
   [app-state msg]
   (om/transact! app-state :error-messages #(conj % msg)))
 
+(defmethod local-response-handler :spa.navigate/success
+  [aether history app-state msg]
+  (om/update! app-state :page (get msg :noun)))
+
 (defn- incorporate-user-datum!
   [app-state user-datum]
   (om/transact! app-state

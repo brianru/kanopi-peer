@@ -198,6 +198,9 @@
 (s/defn navigate :- Navigate
   [match]
   (message :noun match, :verb :spa/navigate))
+(defn navigate-success
+  [page]
+  (message :noun page, :verb :spa.navigate/success))
 
 (abstract-map/extend-schema Search Message
   [:spa.navigate/search]
