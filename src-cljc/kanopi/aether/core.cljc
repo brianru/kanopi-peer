@@ -78,18 +78,12 @@
 ;; publication with its custom topicfn.
 ;;
 (ns kanopi.aether.core
-  (:require-macros [cljs.core.async.macros :as asyncm :refer [go]])
-  (:require [cljs.core.async :as async]
+  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go)])) 
+  (:require #?(:clj  [clojure.core.async :as async :refer (go)]
+               :cljs [cljs.core.async :as async])
             [taoensso.timbre :as timbre
-             :refer-macros (log trace debug info warn error fatal report)]
-            [om.core :as om]
+             #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
             [com.stuartsierra.component :as component]))
-
-(defn- deref-cursor
-  "Transducer to let xform fns not worry about dereferencing cursors."
-  [x]
-  (if (om/cursor? x)
-    (deref x) x))
 
 (defn- mk-tap
   "TODO: think carefully about the tap's buffer"
@@ -134,7 +128,7 @@
          listener    (async/chan 100)
          publication (get-publication aether dimension)]
      (async/sub publication value listener)
-     (go (loop [[v ch] nil]
+     (go (loop [[v ch] (repeat nil)]
            (if (= ch kill-ch)
              (do
               (async/unsub publication value listener)
@@ -152,43 +146,6 @@
    (listen* aether dimension value
             {:handlerfn (partial async/put! recipient-ch)
              :logfn (constantly nil)})))
-
-(defn listen!
-  "Pass messages matching the supplied dimension and value to a
-  callback function
-
-  FIXME: This function is not well-named. It's only valuable when used
-  within an Om component.
-  "
-  ([owner dimension value handlerfn]
-   (listen! owner dimension value handlerfn (constantly nil)))
-  ([owner dimension value handlerfn logfn]
-   (let [kill-ch (listen* (om/get-shared owner :aether)
-                          dimension value
-                          {:handlerfn handlerfn
-                           :logfn     logfn})]
-     (om/set-state! owner [::kill-ch value] kill-ch))))
-
-(defn trigger-kill-chans!
-  ([owner]
-   (->> (om/get-state owner ::kill-ch)
-        (vals)
-        (map #(async/put! % :kill))
-        (doall))))
-
-(defn stop-spouts!
-  ([owner]
-   (->> (om/get-state owner :spouts)
-        (vals)
-        (map component/stop)
-        (doall))))
-
-(defn shutdown-component! [owner]
-  ((juxt trigger-kill-chans!
-         stop-spouts!)
-   owner))
-
-(def stop-listening! shutdown-component!)
 
 (defprotocol IBroadcast
   (send! [this msg])

@@ -10,18 +10,18 @@
   done per message -- and thus requires a controlled, potentially
   parallel, priority-aware mechanism for performing said work.
   "
-  (:require-macros [cljs.core.async.macros :refer (go go-loop)])
-  (:require [om.core :as om]
+  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go)]))
+  (:require #? (:clj  [clojure.core.async :as async :refer (go <! >!)]
+                :cljs [cljs.core.async :as async :refer (<! >!)])
             [taoensso.timbre :as timbre
-             :refer-macros (log trace debug info warn error fatal report)]
+             #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
             [ajax.core :as http]
             [clojure.set]
-            [cljs-uuid-utils.core :refer (make-random-uuid)]
-            [cljs-time.core :as time]
-            [cljs-time.coerce :as time-coerce]
+            #? (:clj  [kanopi.util.core :as util]
+                :cljs [kanopi.util.core :as util])
             [com.stuartsierra.component :as component]
-            [cljs.core.async :as async :refer (<! >!)]))
+            ))
 
 (defn k-comparator [k]
   (fn [x y]
@@ -139,7 +139,7 @@
     (let [kill-ch  (async/chan 100)
           recur-ch (async/chan 100)]
 
-      (go (loop [[v ch] nil]
+      (go (loop [[v ch] (repeat nil)]
             ;; Stay alive?
             (when (not= ch kill-ch)
 
@@ -182,7 +182,7 @@
    (map->HTTPWorker
     {:aether    aether
      :notify-ch notify-ch
-     :id        (make-random-uuid)
+     :id        (util/random-uuid)
      :queue     queue}
     )))
 

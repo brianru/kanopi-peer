@@ -27,7 +27,11 @@
                  [cljsjs/react-with-addons "0.14.0-0"]
                  [bidi "1.22.1"]
                  [kibu/pushy "0.3.6"]
+
                  [cljs-ajax "0.5.1"]
+                 [org.apache.httpcomponents/httpasyncclient "4.1"]
+                 [org.apache.httpcomponents/httpcore "4.4.3"]
+
                  [com.andrewmcveigh/cljs-time "0.3.14"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.cemerick/url "0.1.1"]
@@ -85,7 +89,8 @@
   :profiles {:dev
              {:jvm-opts ["-XX:MaxPermSize=128M"]
               :plugins [[lein-environ "1.0.1"]
-                        [lein-ancient "0.6.6"]]
+                        [lein-ancient "0.6.6"
+                         :exclusions [org.clojure/tools.reader]]]
               :dependencies [[org.clojure/tools.nrepl "0.2.12"]
                              [org.clojure/tools.namespace "0.2.11"]
                              [ring/ring-devel "1.4.0"]
