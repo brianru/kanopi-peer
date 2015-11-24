@@ -15,7 +15,18 @@
             [om.core :as om]
             ))
 
-(def mode-verbs
+(defn- same-verbs-in-each-mode [modal-verbs]
+  (let []
+    true))
+
+(defn- every-verb-has-matching-success-and-failure-verbs [modal-verbs]
+  (let []
+    true))
+
+(defn mode-verbs []
+  {:post [(same-verbs-in-each-mode %)
+          (every-verb-has-matching-success-and-failure-verbs %)
+          ]}
   {:spa.unauthenticated/online
    {:local  {:request
              #{:spa/navigate
@@ -110,9 +121,10 @@
                      (let [{:keys [noun verb context]} v
                            root-crsr    (om/root-cursor (:app-state app-state))
                            mode         (get @root-crsr :mode)
-                           local-request-verbs  (get-in mode-verbs [mode :local :request])
-                           local-response-verbs (get-in mode-verbs [mode :local :response])
-                           remote-request-verbs (get-in mode-verbs [mode :remote :request])]
+                           verbs        (mode-verbs)
+                           local-request-verbs  (get-in verbs [mode :local :request])
+                           local-response-verbs (get-in verbs [mode :local :response])
+                           remote-request-verbs (get-in verbs [mode :remote :request])]
                        ;; first run v is nil
                        ;; TODO: considerably more sophisticated
                        ;; exception handling. at least log them!
