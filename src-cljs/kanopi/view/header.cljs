@@ -18,7 +18,7 @@
       (html
        [:div.navbar-center
         ;; NOTE: do I need the icon?
-        ;; (icons/search {})
+        (icons/search {})
 
         ;; FIXME: this breaks when screen width <= 544px
         ;; Consider a clever interface, maybe only the searchglass
@@ -28,11 +28,18 @@
          (om/build typeahead/typeahead props
                    {:init-state
                     {:display-fn schema/display-entity
-                     :placeholder "search"
+                     :placeholder "" ; "search"
                      :empty-result []
                      :href-fn  (fn [result]
                                    (when-let [id (:db/id result)]
-                                     (browser/route-for owner :datum :id id))) 
+                                     (case (schema/describe-entity result)
+                                       :datum
+                                       (browser/route-for owner :datum :id id)
+                                       :literal
+                                       (browser/route-for owner :literal :id id)
+                                       ; default
+                                       nil
+                                       ))) 
                      :on-click (constantly nil)
                      :clear-on-click true
                      :tab-index 1}})]
