@@ -6,9 +6,7 @@
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [environ.core :refer [env]]
             [kanopi.controller.system :as sys]
-            [kanopi.main]
-
-            ))
+            [kanopi.main]))
 
 (defonce system nil)
 

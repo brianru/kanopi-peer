@@ -57,10 +57,12 @@
           ; button. is there a way to just use an INPUT and heavily
           ; alter its interactions when not 'editing'?
           [:span.view-editable-text
-             {:style {:color (when (empty? current-value)
-                               "#dddddd")
+             {:style {
+                      ; :color (when (empty? current-value)
+                      ;          "#dddddd")
                       :display (when editing "none")}
-              :class [(when hovering "bold-text")]
+              :class [(when hovering "bold-text")
+                      (when (empty? current-value) "placeholder")]
               :on-click #(start-edit % owner :editing)}
              (if (not-empty current-value)
                current-value

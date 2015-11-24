@@ -248,6 +248,7 @@
                   {:element-type :input
                    :fact-part part-key
                    :input-value (get fact-part :input-value)
+                   :classes []
                    }
 
                   :init-state
@@ -257,6 +258,7 @@
                    ;; way and a no-match does not need to be
                    ;; displayed.
                    :empty-result nil
+                   :placeholder (name part-key) 
                    :display-fn schema/display-entity
                    :on-focus  (fn [v]
                                 (om/set-state! owner :editing part-key)) 
@@ -269,6 +271,10 @@
                    :on-change (fn [input-value]
                                 (om/update-state! owner part-key
                                                   #(update-fact-part % part-key input-value)))
+                   :on-click  (fn [result]
+                                (println "HANDLE THIS!!!" result)
+                                (println "MUST extend fact-part to take datums as inputs")
+                                )
                    :on-submit (fn [v]
                                 (handle-submission! owner part-key
                                                     (update-fact-part

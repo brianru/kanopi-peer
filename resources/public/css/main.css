@@ -27,6 +27,13 @@ input {
     -webkit-transition: border-bottom-color: 0.3s;
     transition: border-bottom-color: 0.3s;
 }
+input[placeholder],
+:-moz-placeholder,
+::-moz-placeholder,
+:-ms-input-placeholder,
+::-webkit-input-placeholder {
+    color: #ddd !important;
+}
 input.validated:invalid {
     border-bottom-color: red;
 }
@@ -60,6 +67,9 @@ button.dropdown-toggle > .caret {
 }
 span.view-editable-text {
     margin: 0 0.5rem !important;
+}
+.view-editable-text.placeholder {
+    color: #dddddd;
 }
 input.edit-editable-text {
     border-bottom: none;
@@ -145,12 +155,12 @@ a.navbar-brand:focus {
     height: 50px;
     line-height: 50px;
     font-size: 18px;
-/* when using magnifying glass icon, adjust centering */
+    /* when using magnifying glass icon, adjust centering */
     left: calc(30% - 9px);
 }
 .search {
     display: inline-block;
-/* when using magnifying glass icon, adjust centering */
+    /* when using magnifying glass icon, adjust centering */
     width: calc(100% - 18px);
 }
 .typeahead {

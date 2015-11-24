@@ -23,13 +23,17 @@
   (om/update-state!
    owner
    (fn [state]
+     (println "HANDLE_RESULT_CLICK" (schema/get-value res))
      (assoc state
             :focused false
             :input-value (if (get state :clear-on-click)
                            nil
                            (schema/get-value res)))))
-  (if-let [href-fn (om/get-state owner :href-fn)]
-    (browser/set-page! owner (href-fn res))
+  ;; href-fn always exists, but should only be used when it
+  ;; produces a truthy value. by default it always evaluates to
+  ;; nil.
+  (if-let [href ((om/get-state owner :href-fn) res)]
+    (browser/set-page! owner href)
     ((om/get-state owner :on-click) res evt)))
 
 (defn- handle-submission [owner evt]
@@ -166,6 +170,8 @@
        ; initial-input-value should be set externally
        :initial-input-value nil
        ; input-value should be kept internal
+       ; NOTE: currently being overridden by some users so they can
+       ; control state.
        :input-value nil
        :placeholder "Placeholder"
        })
@@ -212,7 +218,8 @@
            ;; more duplicated code.
            (get state :element-type)
            (merge (element-specific-attrs state)
-                  {:on-focus    (fn [_]
+                  {:class (concat (get state :classes []) [])
+                   :on-focus    (fn [_]
                                   (om/set-state! owner :focused true)
                                   (on-focus (get state :input-value))) 
                    ; NOTE: see notes above. faking on-blur with a
