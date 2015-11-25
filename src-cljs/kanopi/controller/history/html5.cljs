@@ -1,4 +1,4 @@
-(ns kanopi.controller.history
+(ns kanopi.controller.history.html5
   "
   0) do not use URI as local state
      Only synchronize browser URI with app-state page data.

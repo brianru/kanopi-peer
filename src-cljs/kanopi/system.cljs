@@ -7,7 +7,7 @@
             [kanopi.view.core :as view]
             [kanopi.model.state.web :as state]
             [kanopi.controller.dispatch :as dispatch]
-            [kanopi.controller.history :as history]
+            [kanopi.controller.history.html5 :as history]
             [kanopi.aether.core :as aether]
             [kanopi.aether.spout :as aether-spout]
             [kanopi.util.local-storage :as local-storage]

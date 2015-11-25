@@ -7,7 +7,7 @@
 
             [ajax.core :as ajax]
 
-            [kanopi.controller.history :as history]
+            [kanopi.controller.history.html5 :as history]
             [kanopi.model.schema :as schema]
             [kanopi.model.message :as msg]))
 

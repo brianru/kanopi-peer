@@ -1,7 +1,7 @@
 (ns kanopi.util-dev
   (:require [com.stuartsierra.component :as component]
             [kanopi.aether.core :as aether]
-            [kanopi.controller.history :as history]
+            [kanopi.controller.history.html5 :as history]
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.model.ref-cursors :as ref-cursors]
             [kanopi.model.state :as state]

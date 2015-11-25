@@ -4,7 +4,7 @@
              :refer-macros (log trace debug info warn error fatal report)]
 
             [kanopi.aether.core :as aether]
-            [kanopi.controller.history :as history]
+            [kanopi.controller.history.html5 :as history]
             [kanopi.model.message :as msg]
             
             [kanopi.util.core :as util]))
