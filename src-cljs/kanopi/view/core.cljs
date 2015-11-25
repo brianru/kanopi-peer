@@ -16,7 +16,6 @@
             [kanopi.view.pages.teams :as teams]
             [kanopi.view.pages.user :as user]
             [kanopi.aether.core :as aether]
-            [kanopi.controller.handlers :as handlers]
             [kanopi.util.browser :as browser]
             [ajax.core :as http]
             [cljs.core.async :as async]

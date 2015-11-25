@@ -1,7 +1,7 @@
 (ns kanopi.view.datum-dev
   (:require-macros [devcards.core :as dc :refer (defcard deftest)])
   (:require [sablono.core :as sab]
-            [quile.component :as component]
+            [com.stuartsierra.component :as component]
             [kanopi.util-dev :as dev-util]
             [om.core :as om]
             [kanopi.view.datum :as datum]

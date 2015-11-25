@@ -9,6 +9,7 @@
      Regardless, request from server.
      => where are these tasks performed?
   
+  TODO: kanopi.controller.router
   "
   (:require [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre
@@ -34,12 +35,12 @@
   component/Lifecycle
   (start [this]
     (let [hist (pushy/pushy (partial send-set-page-msg! aether)
-                            (partial bidi/match-route model/client-routes))]
+                            (partial bidi/match-route routes/client-routes))]
       (info "start html5 history")
       (pushy/start! hist)
       (assoc this :history hist
-             :routes default-routes
-             :route-for (partial bidi/path-for default-routes)
+             :routes    routes/client-routes
+             :route-for (partial bidi/path-for routes/client-routes)
              :set-page! (partial pushy/set-token! hist))))
 
   (stop [this]

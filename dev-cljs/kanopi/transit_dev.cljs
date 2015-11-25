@@ -1,7 +1,7 @@
 (ns kanopi.transit-dev
   (:require-macros [devcards.core :as dc :refer (defcard deftest)]
                    [cljs.test :refer (testing is)])
-  (:require [quile.component :as component]
+  (:require [com.stuartsierra.component :as component]
             [cognitect.transit :as t]))
 
 (defn roundtrip [x]

@@ -1,11 +1,9 @@
-(ns kanopi.model.state
-  "This is session state. Outside the client it is always referred to as session data."
+(ns kanopi.model.state.web
   (:require [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [goog.net.cookies :as cookies]
             [cemerick.url :as url]
-            [cognitect.transit :as transit]
             [schema.core :as s]
             [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
@@ -37,7 +35,6 @@
       (->> (. js/JSON parse))
       (js->clj :keywordize-keys true)))
 
-;; TODO: local storage should be stored per user
 (defrecord LocalStorageAppState [config local-storage app-state]
   component/Lifecycle
   (start [this]
@@ -103,37 +100,3 @@
 
 (defn new-app-state [config]
   (map->LocalStorageAppState {:config config}))
-
-(defrecord DevAppState [config app-state]
-  component/Lifecycle
-  (start [this]
-    (let [{:keys [mode]} config
-          atm (atom
-               {:mode mode
-                :user (if (= :spa.unauthenticated/online mode)
-                        {}
-                        {:ent-id 42
-                         :identity "brian"
-                         :username "brian"
-                         :current-team {:db/id 27, :team/id "brian"}
-                         :teams [{:db/id 27, :team/id "brian"}
-                                 {:db/id 28, :team/id "hannah"}
-                                 {:db/id 29, :team/id "cookie dough"}]
-                         })
-                :page {}
-                :datum {:context-datums []
-                        :similar-datums []
-                        :datum          {}}
-                :most-viewed-datums []
-                :most-edited-datums []
-                :recent-datums      []
-                :cache {}
-                :search-results {}
-                :error-messages []})]
-      (assoc this :app-state atm)))
-
-  (stop [this]
-    (assoc this :app-state nil)))
-
-(defn new-dev-app-state [config]
-  (map->DevAppState {:config config}))

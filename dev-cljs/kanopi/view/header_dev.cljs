@@ -2,7 +2,7 @@
   (:require-macros [devcards.core :as dc :refer (defcard deftest)])
   (:require [sablono.core :as sab]
             [om.core :as om]
-            [quile.component :as component]
+            [com.stuartsierra.component :as component]
             [kanopi.view.header :as header]
             [kanopi.util-dev :as dev-util]
             ))

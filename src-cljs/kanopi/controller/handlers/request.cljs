@@ -5,7 +5,6 @@
             [kanopi.controller.history :as history]
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
-
             [kanopi.util.core :as util]
             ))
 

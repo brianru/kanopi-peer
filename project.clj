@@ -28,6 +28,8 @@
                  [bidi "1.22.1"]
                  [kibu/pushy "0.3.6"]
 
+                 ; Added http stuff to ensure we're using the right
+                 ; versions for cljs-ajax. It's not pretty.
                  [cljs-ajax "0.5.1"]
                  [org.apache.httpcomponents/httpasyncclient "4.1"]
                  [org.apache.httpcomponents/httpcore "4.4.3"]

@@ -5,7 +5,7 @@
   modes or demonstration and authenticated modes."
   (:require [com.stuartsierra.component :as component]
             [kanopi.view.core :as view]
-            [kanopi.model.state :as state]
+            [kanopi.model.state.web :as state]
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.controller.history :as history]
             [kanopi.aether.core :as aether]

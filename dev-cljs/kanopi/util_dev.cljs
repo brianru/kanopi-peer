@@ -1,5 +1,5 @@
 (ns kanopi.util-dev
-  (:require [quile.component :as component]
+  (:require [com.stuartsierra.component :as component]
             [kanopi.aether.core :as aether]
             [kanopi.controller.history :as history]
             [kanopi.controller.dispatch :as dispatch]
@@ -26,7 +26,7 @@
      {:aether :aether})
 
     :app-state
-    (state/new-dev-app-state config)
+    (state/new-app-state config)
 
     :dispatcher
     (component/using

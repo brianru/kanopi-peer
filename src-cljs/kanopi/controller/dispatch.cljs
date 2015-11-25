@@ -7,7 +7,6 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
-            [kanopi.controller.handlers :as handlers]
             [kanopi.controller.handlers.request :as request-handlers]
             [kanopi.controller.handlers.response :as response-handlers]
             [kanopi.model.message :as msg]
@@ -110,7 +109,47 @@
              #{}
              }}})
 
-(defrecord Dispatcher [config aether history app-state kill-channel]
+(defprotocol IDispatcher
+  "Dynamic message-oriented api."
+  (transmit! [this msg]))
+
+(defrecord AetherDispatcher [config aether history app-state kill-channel]
+  IDispatcher
+  (transmit! [this {:keys [noun verb context] :as msg}]
+    (let [root-crsr (om/root-cursor (:app-state app-state))
+          mode      (get @root-crsr :mode)
+          verbs     (mode-verbs)
+          local-request-verbs  (get-in verbs [mode :local :request])
+          local-response-verbs (get-in verbs [mode :local :response])
+          remote-request-verbs (get-in verbs [mode :remote :request])
+          ]
+      ; TODO: considerably more sophisticated
+      ; exception handling. at least log them!
+      (when (contains? local-request-verbs verb)
+        (try
+         (request-handlers/local-request-handler
+          aether history root-crsr msg)
+         (catch js/Object e
+           (info e))))
+      (when (contains? local-response-verbs verb)
+        (try
+         (response-handlers/local-response-handler
+          aether history root-crsr msg)
+         (catch js/Object e
+           (info e))))
+      (when (contains? remote-request-verbs verb)
+        (try
+         (->> (client-msg/local->remote history root-crsr msg)
+              ;; NOTE: sent with special verb that
+              ;; gets picked up by http spout
+              ;;
+              ;; spout can feed response back into
+              ;; aether so it'll be picked up by
+              ;; local-response-handler
+              (aether/send! aether)) 
+         (catch js/Object e
+           (info e))))
+      ))
   component/Lifecycle
   (start [this]
     (info "start dispatcher" (get config :mode))
@@ -120,49 +159,10 @@
                    (if (= ch kill-ch)
                      (do
                       (async/close! kill-ch))
-                     (let [{:keys [noun verb context]} v
-                           root-crsr    (om/root-cursor (:app-state app-state))
-                           mode         (get @root-crsr :mode)
-                           verbs        (mode-verbs)
-                           local-request-verbs  (get-in verbs [mode :local :request])
-                           local-response-verbs (get-in verbs [mode :local :response])
-                           remote-request-verbs (get-in verbs [mode :remote :request])]
+                     (do
                        ;; first run v is nil
-                       ;; TODO: considerably more sophisticated
-                       ;; exception handling. at least log them!
                        (when v
-                         ;; NOTE: a verb can belong to both
-                         ;; local-verbs and remote-verbs.
-                         ;; In that case the message is handled twice:
-                         ;; once locally, once remotely.
-                         (when (contains? local-request-verbs verb)
-                           (try
-                            (request-handlers/local-request-handler
-                             aether history root-crsr v)
-                            (catch js/Object e
-                              (println e))))
-
-                         (when (contains? local-response-verbs verb)
-                           (try
-                            (response-handlers/local-response-handler
-                             aether history root-crsr v)
-                            (catch js/Object e
-                              (println e))))
-
-                         (when (contains? remote-request-verbs verb)
-                           (try
-                            (->> (client-msg/local->remote history root-crsr v)
-                                 ;; NOTE: sent with special verb that
-                                 ;; gets picked up by http spout
-                                 ;;
-                                 ;; spout can feed response back into
-                                 ;; aether so it'll be picked up by
-                                 ;; local-response-handler
-                                 (aether/send! aether)) 
-                            (catch js/Object e
-                              (println e))))
-                         )
-
+                         (transmit! this v))
                        (recur (async/alts! [listener kill-ch]))))))
       (assoc this :kill-channel kill-ch)))
 
@@ -173,4 +173,4 @@
 (defn new-dispatcher
   ([] (new-dispatcher {}))
   ([config]
-   (map->Dispatcher {:config config})))
+   (map->AetherDispatcher {:config config})))
