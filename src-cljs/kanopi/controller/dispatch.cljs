@@ -128,7 +128,7 @@
       (when (contains? local-request-verbs verb)
         (try
          (request-handlers/local-request-handler
-          aether history root-crsr msg)
+          aether root-crsr msg)
          (catch js/Object e
            (info e))))
       (when (contains? local-response-verbs verb)

@@ -2,26 +2,18 @@
   (:require [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
-            [kanopi.controller.history :as history]
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
             ))
 
 (defmulti local-request-handler
-  (fn [_ _ _ msg]
+  (fn [_ _ msg]
     (info msg)
     (get msg :verb)))
 
-;; TODO: should this be in the response namespace? is there anything
-;; to be done here but fwd it?
-;; I could just pass it on, keeping the noun the same or transforming
-;; it into something more useful or annotate it.
-;; OR
-;; I could do the work of matching inputs to routes here, instead of
-;; passing the history component around via shared state.
 (defmethod local-request-handler :spa/navigate
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [{:keys [handler] :as page'} (get-in msg [:noun])]
     (->> (msg/navigate-success page')
          (aether/send! aether))
@@ -37,7 +29,7 @@
             (aether/send! aether))))))
 
 (defmethod local-request-handler :spa/switch-team
-  [aether history app-state {team-id :noun :as msg}]
+  [aether app-state {team-id :noun :as msg}]
   (let [user' (update @app-state :user
                       (fn [user]
                         (if-let [team' (->> (get user :teams)
@@ -87,7 +79,7 @@
          (vec))))
 
 (defmethod local-request-handler :spa.navigate/search
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [{:keys [query-string entity-type]} (get msg :noun)
         results (local-fulltext-search @app-state query-string entity-type)
         ]
@@ -230,7 +222,7 @@
               :new-entities new-entities)))
 
 (defmethod local-request-handler :datum/create
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [dtm {:datum/label (get-in msg [:noun :label])
              :datum/team  (get-in app-state [:user :current-team :db/id])
              :db/id       (util/random-uuid)}
@@ -249,19 +241,19 @@
     (parse-input-fact datum fact)))
 
 (defmethod local-request-handler :datum.fact/add
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
     (->> (msg/add-fact-success datum new-entities)
          (aether/send! aether))))
 
 (defmethod local-request-handler :datum.fact/update
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
     (->> (msg/update-fact-success datum new-entities)
          (aether/send! aether))))
 
 (defmethod local-request-handler :datum.label/update
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [datum-id (get-in msg [:noun :existing-entity :db/id])
         new-label (get-in msg [:noun :new-label])
         datum    (get-in app-state [:cache datum-id])
@@ -270,20 +262,20 @@
          (aether/send! aether))))
 
 (defmethod local-request-handler :datum/get
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [user-datum (build-datum-data app-state (get msg :noun))]
     (->> (msg/get-datum-success user-datum)
          (aether/send! aether))))
 
 (defmethod local-request-handler :literal/get
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [user-literal (build-literal-data app-state (get msg :noun))]
       (->> (msg/get-literal-success user-literal)
            (aether/send! aether))))
 
 ; FIXME: what if update converts literal to datum?
 (defmethod local-request-handler :literal/update
-  [aether history app-state msg]
+  [aether app-state msg]
   (let [literal-id (get-in msg [:noun :literal-id])
         {:keys [new-type new-value]} (get msg :noun)
         literal (get-in app-state [:cache literal-id])
