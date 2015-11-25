@@ -1,6 +1,6 @@
 (ns kanopi.controller.handlers.request
   (:require [taoensso.timbre :as timbre
-             :refer-macros (log trace debug info warn error fatal report)]
+             #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]

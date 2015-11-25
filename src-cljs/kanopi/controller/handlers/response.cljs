@@ -9,9 +9,25 @@
             
             [kanopi.util.core :as util]))
 
-(def transact!
-  #(:clj  swap!
-    :cljs om/transact!))
+; #?(:cljs
+;    (defn transact!
+;      ([crsr f]
+;       (om/transact! crsr f))
+;      ([crsr korks f]
+;       (om/transact! crsr korks f)))
+;    :clj
+;    (defn transact!
+;      ([atm f]
+;       (swap! atm f))
+;      ([atm korks f]
+;       (let [update-fn (if (coll? korks) update-in update)]
+;         (swap! m #(update-fn % korks f))))))
+
+(defn transact!
+  ([crsr f]
+   (om/transact! crsr f))
+  ([crsr korks f]
+   (om/transact! crsr korks f)))
 
 (defmulti local-response-handler
   (fn [_ _ _ msg]
