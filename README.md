@@ -17,13 +17,10 @@ complexity of our world as we lack both the tools and the time to rapidly
 scalably simplify the new. Kanopi is an attempt to fight complexity at
 scale.
 
-## Usage
+## Usage: TODO
 
 FIXME
 
-## License
+## License: TODO
 
-Copyright © 2015 FIXME
-
-Distributed under the Eclipse Public License either version 1.0 or (at
-your option) any later version.
+Copyright © 2015 Duhsoft

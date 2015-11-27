@@ -5,8 +5,6 @@
 
             [kanopi.aether.core :as aether]
             [kanopi.controller.history :as history]
-            ; #?(:cljs [kanopi.controller.history.html5  :as history]
-            ;    :clj  [kanopi.controller.history.memory :as history]) 
             [kanopi.model.message :as msg]
             
             [kanopi.util.core :as util]))
