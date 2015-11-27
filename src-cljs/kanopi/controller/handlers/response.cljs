@@ -29,6 +29,10 @@
   ([crsr korks f]
    (om/transact! crsr korks f)))
 
+(defn update!
+  ([crsr v])
+  ([crsr korks v]))
+
 (defmulti local-response-handler
   (fn [_ _ _ msg]
     (info msg)

@@ -14,6 +14,7 @@
   (:require [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
+            [kanopi.controller.history :as history]
             [kanopi.aether.core :as aether]
             [kanopi.model.message :as msg]
             [kanopi.model.routes :as routes]
@@ -27,33 +28,26 @@
   (->> (msg/navigate match)
        (aether/send! aether)))
 
-(defprotocol INavigator
-  (navigate-to! [this path])
-  (get-route-for [this path]))
-
-(defrecord Html5History [config routes route-for set-page! history aether]
+(defrecord Html5History [config routes history aether]
   component/Lifecycle
   (start [this]
     (let [hist (pushy/pushy (partial send-set-page-msg! aether)
                             (partial bidi/match-route routes/client-routes))]
       (info "start html5 history")
       (pushy/start! hist)
-      (assoc this :history hist
-             :routes    routes/client-routes
-             :route-for (partial bidi/path-for routes/client-routes)
-             :set-page! (partial pushy/set-token! hist))))
+      (assoc this :history hist :routes routes/client-routes)))
 
   (stop [this]
     (pushy/stop! history)
     (assoc this :history nil, :routes nil, :route-for (constantly nil)))
   
-  INavigator
+  history/INavigator
   (get-route-for [this path]
     (let [path (if (coll? path) path [path])]
-      (apply route-for path)))
+      (apply bidi/path-for routes path)))
 
   (navigate-to! [this path]
-    ((get this :set-page!) (get-route-for this path))))
+    (pushy/set-token! history (get-route-for this path))))
 
 (defn new-html5-history [config]
   (map->Html5History {:config config}))
