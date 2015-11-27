@@ -1,37 +1,41 @@
 (ns kanopi.controller.handlers.response
-  (:require [om.core :as om]
+  (:require #?(:cljs [om.core :as om]) 
             [taoensso.timbre :as timbre
-             :refer-macros (log trace debug info warn error fatal report)]
+             #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
 
             [kanopi.aether.core :as aether]
-            [kanopi.controller.history.html5 :as history]
+            [kanopi.controller.history :as history]
+            ; #?(:cljs [kanopi.controller.history.html5  :as history]
+            ;    :clj  [kanopi.controller.history.memory :as history]) 
             [kanopi.model.message :as msg]
             
             [kanopi.util.core :as util]))
 
-; #?(:cljs
-;    (defn transact!
-;      ([crsr f]
-;       (om/transact! crsr f))
-;      ([crsr korks f]
-;       (om/transact! crsr korks f)))
-;    :clj
-;    (defn transact!
-;      ([atm f]
-;       (swap! atm f))
-;      ([atm korks f]
-;       (let [update-fn (if (coll? korks) update-in update)]
-;         (swap! m #(update-fn % korks f))))))
+#?(:cljs
+   (defn transact!
+     ([crsr f]
+      (om/transact! crsr f))
+     ([crsr korks f]
+      (om/transact! crsr korks f)))
+   :clj
+   (defn transact!
+     ([atm f]
+      (swap! atm f))
+     ([atm korks f]
+      (let [update-fn (if (coll? korks) update-in update)]
+        (swap! atm #(update-fn % korks f))))))
 
-(defn transact!
-  ([crsr f]
-   (om/transact! crsr f))
-  ([crsr korks f]
-   (om/transact! crsr korks f)))
+; (defn transact!
+;   ([crsr f]
+;    (om/transact! crsr f))
+;   ([crsr korks f]
+;    (om/transact! crsr korks f)))
 
 (defn update!
-  ([crsr v])
-  ([crsr korks v]))
+  ([crsr v]
+   (transact! crsr (constantly v)))
+  ([crsr korks v]
+   (transact! crsr korks (constantly v))))
 
 (defmulti local-response-handler
   (fn [_ _ _ msg]
@@ -44,7 +48,7 @@
 
 (defmethod local-response-handler :spa.navigate/success
   [aether history app-state msg]
-  (om/update! app-state :page (get msg :noun)))
+  (update! app-state :page (get msg :noun)))
 
 (defn- incorporate-user-datum!
   [app-state user-datum]
