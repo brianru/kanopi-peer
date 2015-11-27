@@ -137,7 +137,7 @@
                            :output-dir "resources/public/js/out"
                            ;; NOTE: yes leading slash here for a reason!
                            :asset-path "/js/out"
-                           :main kanopi.core
+                           :main kanopi.main
                            :optimizations :none
                            :pretty-print true
                            :source-map "resources/public/js/source_map.js"}}

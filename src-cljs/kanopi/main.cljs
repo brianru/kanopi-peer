@@ -1,4 +1,4 @@
-(ns kanopi.core
+(ns kanopi.main
   (:require [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
