@@ -111,7 +111,7 @@
              }}})
 
 (defn- handle-message
-  [mode verbs atm msg]
+  [mode verbs history atm {:keys [noun verb context] :as msg}]
   (let [local-request-verbs  (get-in verbs [mode :local :request])
         local-response-verbs (get-in verbs [mode :local :response])
         remote-request-verbs (get-in verbs [mode :remote :request])
@@ -157,7 +157,7 @@
                       :clj  identity)     (:app-state app-state))
           mode    (get @atm :mode)
           verbs   (mode-verbs)
-          results (handle-message mode verbs root-crsr atm)
+          results (handle-message mode verbs history atm msg)
           ]
       (when-let [msgs (not-empty (:messages results))]
         (dorun
@@ -170,7 +170,7 @@
                               :clj  identity)     (:app-state app-state))
           mode      (get @root-crsr :mode)
           verbs     (mode-verbs)
-          results   (handle-message mode verbs root-crsr msg)
+          results   (handle-message mode verbs history root-crsr msg)
           ]
       (aether/send-many! aether (remove nil? (get results :messages)))
       ; TODO: considerably more sophisticated
