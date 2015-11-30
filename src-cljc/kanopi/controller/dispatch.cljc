@@ -1,17 +1,18 @@
 (ns kanopi.controller.dispatch
   "Route messages traveling in the aether to local event handlers
   and/or spouts for external processing."
-  (:require-macros [cljs.core.async.macros :as asyncm])
+  #?(:cljs (:require-macros [cljs.core.async.macros :refer (go)])) 
   (:require [com.stuartsierra.component :as component]
-            [cljs.core.async :as async]
+            #?(:clj  [clojure.core.async :as async :refer (go)]
+               :cljs [cljs.core.async :as async])
             [taoensso.timbre :as timbre
-             :refer-macros (log trace debug info warn error fatal report)]
+             #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
             [kanopi.controller.handlers.request :as request-handlers]
             [kanopi.controller.handlers.response :as response-handlers]
             [kanopi.model.message :as msg]
             [kanopi.model.message.client :as client-msg]
-            [om.core :as om]
+            #?(:cljs [om.core :as om])
             ))
 
 (defn- same-verbs-in-each-mode [modal-verbs]
@@ -128,7 +129,8 @@
 (defrecord AetherDispatcher [config aether history app-state kill-channel]
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]
-    (let [root-crsr (om/root-cursor (:app-state app-state))
+    (let [root-crsr (#?(:cljs om/root-cursor
+                        :clj  identity)     (:app-state app-state))
           mode      (get @root-crsr :mode)
           verbs     (mode-verbs)
           local-request-verbs  (get-in verbs [mode :local :request])
@@ -142,7 +144,7 @@
                         (try
                          (request-handlers/local-request-handler
                           aether root-crsr msg)
-                         (catch js/Object e
+                         (catch #?(:cljs js/Object :clj Exception) e
                            (info e)
                            {:messages []})))
             (contains? local-response-verbs verb)
@@ -150,7 +152,7 @@
                         (try
                          (response-handlers/local-response-handler
                           aether history root-crsr msg)
-                         (catch js/Object e
+                         (catch #?(:cljs js/Object :clj Exception) e
                            (info e)
                            {:messages []})))
 
@@ -173,7 +175,7 @@
     (info "start dispatcher" (get config :mode))
     (let [kill-ch  (async/chan 1)
           listener (aether/replicate! aether)]
-      (asyncm/go (loop [[v ch] (repeat nil)]
+      (go (loop [[v ch] (repeat nil)]
                    (if (= ch kill-ch)
                      (do
                       (async/close! kill-ch))

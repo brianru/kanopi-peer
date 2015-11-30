@@ -1,9 +1,8 @@
 (ns kanopi.model.message.client
-  (:require [om.core :as om]
-            [schema.core :as s]
+  (:require [schema.core :as s]
 
             [taoensso.timbre :as timbre
-             :refer-macros (log trace debug info warn error fatal report)]
+             #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
 
             [ajax.core :as ajax]
 
