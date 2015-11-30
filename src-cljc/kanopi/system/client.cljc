@@ -99,5 +99,4 @@
   ([] (new-system {}))
   ([config]
    #?(:clj  (client-library config)
-           :cljs (web-app        config))
-   ))
+      :cljs (web-app        config))))
