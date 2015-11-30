@@ -4,7 +4,7 @@
   (:require [com.stuartsierra.component :as component]
             [kanopi.util-dev :as dev-util]
             
-            [kanopi.controller.history.html5 :as history]))
+            [kanopi.controller.history :as history]))
 
 (defonce system
   (component/start (dev-util/new-system)))
