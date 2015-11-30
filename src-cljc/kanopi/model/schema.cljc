@@ -319,8 +319,8 @@
    :user    User
    :page    s/Any
    :intent  s/Any
-   :datum   CurrentDatum
-   :literal CurrentLiteral
+   :datum   (s/maybe CurrentDatum)
+   :literal (s/maybe CurrentLiteral)
    :most-viewed-datums [s/Any]
    :most-edited-datums [s/Any]
    :recent-datums      [s/Any]

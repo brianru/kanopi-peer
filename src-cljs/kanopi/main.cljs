@@ -7,7 +7,6 @@
 
 (enable-console-print!)
 
-;; TODO: split up config by category or intended recipient component
 (def dev-config
   {:container-id "app-container"
    :dimensions [:noun :verb]

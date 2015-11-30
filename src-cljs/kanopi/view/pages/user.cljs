@@ -1,6 +1,4 @@
 (ns kanopi.view.pages.user
-  "TODO: refactor to use aether and ajax spout for initiating GET/POST requests.
-  "
   (:require [sablono.core :refer-macros [html] :include-macros true]
             [om.core :as om]
             [kanopi.util.browser :as browser]

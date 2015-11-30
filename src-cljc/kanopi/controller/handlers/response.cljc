@@ -221,14 +221,12 @@
 (defmethod local-response-handler :spa.switch-team/success
   [history app-state msg]
   (let [user' (get msg :noun)]
-    (transact! app-state (fn [app-state]
-                           (assoc app-state :user (get msg :noun))))
+    (update! app-state :user (get msg :noun))
     ;; NOTE: user changed, therefore creds changed, therefore must
     ;; reinitialize => could have a current-datum which is not
     ;; accessible from the new creds
     (history/navigate-to! history :home)
-    (hash-map :messages [(msg/initialize-client-state user')])
-    ))
+    (hash-map :messages [(msg/initialize-client-state user')])))
 
 (defn incorporate-updated-literal! [app-state literal]
   (println "incorporate-literal:" literal)

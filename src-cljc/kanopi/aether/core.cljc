@@ -155,6 +155,8 @@
   (replicate! [this] [this destination-chan])
   )
 
+(def default-dimensions [:noun :verb])
+
 ;; TODO: move aether contents into this record instead of the extra
 ;; layer of nesting.
 (defrecord Aether [config aether]
@@ -162,8 +164,9 @@
   (start [this]
     (if aether
       this
-      (let [aethr (apply mk-aether (:dimensions config))]
-        (info "start aether" (:dimensions config))
+      (let [dimensions (get config :dimensions default-dimensions)
+            aethr (apply mk-aether dimensions)]
+        (info "start aether" dimensions)
         (when (get config :aether-log)
           (go (loop [v (async/<! (get aethr :log))]
                 (when v

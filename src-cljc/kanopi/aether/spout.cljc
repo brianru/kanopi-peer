@@ -243,11 +243,10 @@
     (doall (map component/stop workers))
     (async/put! kill-ch :kill!)
     (assoc this
-           :queue     (swap! queue #(set {}))
+           :queue     (swap! queue (constantly (set {})))
            :notify-ch (async/close! notify-ch)
            :kill-ch   (async/close! kill-ch)
-           :workers   (doall (map component/stop workers))))
-  )
+           :workers   (doall (map component/stop workers)))))
 
 (defn new-http-spout
   "Handle all default configuration values here.
