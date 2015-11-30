@@ -110,6 +110,38 @@
              #{}
              }}})
 
+(defn- handle-message
+  [mode verbs atm msg]
+  (let [local-request-verbs  (get-in verbs [mode :local :request])
+        local-response-verbs (get-in verbs [mode :local :response])
+        remote-request-verbs (get-in verbs [mode :remote :request])
+        ]
+    (cond->> {:messages []}
+      (contains? local-request-verbs verb)
+      (merge-with concat
+                  (try
+                   (request-handlers/local-request-handler atm msg)
+                   (catch #?(:cljs js/Object :clj Exception) e
+                     (info e)
+                     {:messages []})))
+      (contains? local-response-verbs verb)
+      (merge-with concat
+                  (try
+                   (response-handlers/local-response-handler history atm msg)
+                   (catch #?(:cljs js/Object :clj Exception) e
+                     (info e)
+                     {:messages []})))
+
+      ;; NOTE: sent with special verb that
+      ;; gets picked up by http spout
+      ;;
+      ;; spout can feed response back into
+      ;; aether so it'll be picked up by
+      ;; local-response-handler
+      (contains? remote-request-verbs verb)
+      (merge-with concat
+                  {:messages [(client-msg/local->remote history atm msg)]}))))
+
 (defprotocol IDispatcher
   "Dynamic message-oriented api."
   (transmit! [this msg]))
@@ -117,54 +149,28 @@
 (defrecord FunctionDispatcher [config history app-state]
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]
-    (let [atm   (get app-state :app-state)
-          mode  (get @atm :mode)
-          verbs (mode-verbs)
-          local-request-verbs  (get-in verbs [mode :local :request])
-          local-response-verbs (get-in verbs [mode :local :response])
-          remote-request-verbs (get-in verbs [mode :remote :request])
+    ; NOTE: this decision of whether to hook into Om should not be
+    ; made here. The State component may have to be aware of this and
+    ; offer a protocol fn to provide access to the deref-able thing,
+    ; whether it be an atom or an Om cursor.
+    (let [atm     (#?(:cljs om/root-cursor
+                      :clj  identity)     (:app-state app-state))
+          mode    (get @atm :mode)
+          verbs   (mode-verbs)
+          results (handle-message mode verbs root-crsr atm)
           ]
-      )))
+      (when-let [msgs (not-empty (:messages results))]
+        (dorun
+         (map (partial transmit! this) msgs))))))
 
 (defrecord AetherDispatcher [config aether history app-state kill-channel]
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]
     (let [root-crsr (#?(:cljs om/root-cursor
-                        :clj  identity)     (:app-state app-state))
+                              :clj  identity)     (:app-state app-state))
           mode      (get @root-crsr :mode)
           verbs     (mode-verbs)
-          local-request-verbs  (get-in verbs [mode :local :request])
-          local-response-verbs (get-in verbs [mode :local :response])
-          remote-request-verbs (get-in verbs [mode :remote :request])
-
-          results
-          (cond->> {:messages []}
-            (contains? local-request-verbs verb)
-            (merge-with concat
-                        (try
-                         (request-handlers/local-request-handler
-                          aether root-crsr msg)
-                         (catch #?(:cljs js/Object :clj Exception) e
-                           (info e)
-                           {:messages []})))
-            (contains? local-response-verbs verb)
-            (merge-with concat
-                        (try
-                         (response-handlers/local-response-handler
-                          aether history root-crsr msg)
-                         (catch #?(:cljs js/Object :clj Exception) e
-                           (info e)
-                           {:messages []})))
-
-            ;; NOTE: sent with special verb that
-            ;; gets picked up by http spout
-            ;;
-            ;; spout can feed response back into
-            ;; aether so it'll be picked up by
-            ;; local-response-handler
-            (contains? remote-request-verbs verb)
-            (merge-with concat
-                        {:messages [(client-msg/local->remote history root-crsr msg)]}))
+          results   (handle-message mode verbs root-crsr msg)
           ]
       (aether/send-many! aether (remove nil? (get results :messages)))
       ; TODO: considerably more sophisticated
