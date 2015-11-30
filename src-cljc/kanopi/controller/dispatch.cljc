@@ -146,6 +146,11 @@
   "Dynamic message-oriented api."
   (transmit! [this msg]))
 
+; NOTE: this still needs access to an HTTPSpout to work. Right now
+; that's only done via an aether listen* call, so that'll have to be
+; refactored.
+; FIXME: actually, I broke this by using handle-message for
+; everything. LOVELY!!!
 (defrecord FunctionDispatcher [config history app-state]
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]

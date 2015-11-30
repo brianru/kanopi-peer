@@ -3,16 +3,16 @@
             [kanopi.controller.history :as history]
             ))
 
-(defn history [owner]
+(defn get-history [owner]
   (om/get-shared owner [:history]))
 
 (defn route-for [owner & args]
-  (history/get-route-for (history owner) args))
+  (history/get-route-for (get-history owner) args))
 
 (defn set-page! [owner path]
   (cond
    (string? path)
-   (history/navigate-to! (history owner) path)
+   (history/navigate-to! (get-history owner) path)
 
    (coll? path)
    (set-page! owner (apply route-for owner path))

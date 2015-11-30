@@ -316,7 +316,7 @@
 (s/defschema AppState
   {
    :mode    s/Keyword
-   :user    User
+   :user    (s/maybe User)
    :page    s/Any
    :intent  s/Any
    :datum   (s/maybe CurrentDatum)
