@@ -111,7 +111,7 @@
              }}})
 
 (defn- handle-message
-  [mode verbs history atm {:keys [noun verb context] :as msg}]
+  [mode verbs history app-state {:keys [noun verb context] :as msg}]
   (let [local-request-verbs  (get-in verbs [mode :local :request])
         local-response-verbs (get-in verbs [mode :local :response])
         remote-request-verbs (get-in verbs [mode :remote :request])
@@ -120,14 +120,14 @@
       (contains? local-request-verbs verb)
       (merge-with concat
                   (try
-                   (request-handlers/local-request-handler atm msg)
+                   (request-handlers/local-request-handler app-state msg)
                    (catch #?(:cljs js/Object :clj Exception) e
                      (info e)
                      {:messages []})))
       (contains? local-response-verbs verb)
       (merge-with concat
                   (try
-                   (response-handlers/local-response-handler history atm msg)
+                   (response-handlers/local-response-handler history app-state msg)
                    (catch #?(:cljs js/Object :clj Exception) e
                      (info e)
                      {:messages []})))
@@ -140,7 +140,7 @@
       ;; local-response-handler
       (contains? remote-request-verbs verb)
       (merge-with concat
-                  {:messages [(client-msg/local->remote history atm msg)]}))))
+                  {:messages [(client-msg/local->remote history app-state msg)]}))))
 
 (defprotocol IDispatcher
   "Dynamic message-oriented api."
@@ -167,7 +167,7 @@
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]
     (let [root-crsr (#?(:cljs om/root-cursor
-                              :clj  identity)     (:app-state app-state))
+                        :clj  identity)     (:app-state app-state))
           mode      (get @root-crsr :mode)
           verbs     (mode-verbs)
           results   (handle-message mode verbs history root-crsr msg)

@@ -132,7 +132,7 @@
                ;; lein cljsbuild once to run otherwise
                {:id "dev"
                 :source-paths ["src-cljc" "src-cljs"]
-                :figwheel {:on-jsload "kanopi.core/reload-om"}
+                :figwheel {:on-jsload "kanopi.main/reload-om"}
                 :compiler {:output-to "resources/public/js/main.js"
                            :output-dir "resources/public/js/out"
                            ;; NOTE: yes leading slash here for a reason!

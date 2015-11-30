@@ -9,7 +9,7 @@
             ))
 
 (defmulti local-request-handler
-  (fn [_ _ msg]
+  (fn [_ msg]
     (info msg)
     (get msg :verb)))
 
