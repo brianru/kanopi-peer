@@ -3,7 +3,6 @@
   dispatcher handle them. These fns should be medium agnostic."
   (:require [taoensso.timbre :as timbre
              #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
-            ; [kanopi.aether.core :as aether]
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
@@ -237,39 +236,34 @@
 (defmethod local-request-handler :datum.fact/add
   [app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
-    (->> (msg/add-fact-success datum new-entities)
-         (aether/send! aether))))
+    (hash-map :messages [(msg/add-fact-success datum new-entities)])))
 
 (defmethod local-request-handler :datum.fact/update
-  [aether app-state msg]
+  [app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
-    (->> (msg/update-fact-success datum new-entities)
-         (aether/send! aether))))
+    (hash-map :messages [(msg/update-fact-success datum new-entities)])))
 
 (defmethod local-request-handler :datum.label/update
-  [aether app-state msg]
+  [app-state msg]
   (let [datum-id (get-in msg [:noun :existing-entity :db/id])
         new-label (get-in msg [:noun :new-label])
         datum    (get-in app-state [:cache datum-id])
         datum'   (assoc datum :datum/label new-label)]
-    (->> (msg/update-datum-label-success datum')
-         (aether/send! aether))))
+    (hash-map :messages [(msg/update-datum-label-success datum')])))
 
 (defmethod local-request-handler :datum/get
-  [aether app-state msg]
+  [app-state msg]
   (let [user-datum (build-datum-data app-state (get msg :noun))]
-    (->> (msg/get-datum-success user-datum)
-         (aether/send! aether))))
+    (hash-map :messages [(msg/get-datum-success user-datum)])))
 
 (defmethod local-request-handler :literal/get
-  [aether app-state msg]
+  [app-state msg]
   (let [user-literal (build-literal-data app-state (get msg :noun))]
-      (->> (msg/get-literal-success user-literal)
-           (aether/send! aether))))
+    (hash-map :messages [(msg/get-literal-success user-literal)])))
 
 ; FIXME: what if update converts literal to datum?
 (defmethod local-request-handler :literal/update
-  [aether app-state msg]
+  [app-state msg]
   (let [literal-id (get-in msg [:noun :literal-id])
         {:keys [new-type new-value]} (get msg :noun)
         literal (get-in app-state [:cache literal-id])
@@ -277,6 +271,5 @@
                      (select-keys schema/literal-meta-keys)
                      (assoc new-type new-value))
         ]
-    (->> (msg/update-literal-success literal')
-         (aether/send! aether))))
+    (hash-map :messages [(msg/update-literal-success literal')])))
 

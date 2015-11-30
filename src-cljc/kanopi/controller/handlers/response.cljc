@@ -5,7 +5,6 @@
             [taoensso.timbre :as timbre
              #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
 
-            [kanopi.aether.core :as aether]
             [kanopi.controller.history :as history]
             [kanopi.model.message :as msg]
             
@@ -47,8 +46,9 @@
   (transact! app-state :error-messages #(conj % msg)))
 
 (defmethod local-response-handler :spa.navigate/success
-  [aether history app-state msg]
-  (update! app-state :page (get msg :noun)))
+  [history app-state msg]
+  (update! app-state :page (get msg :noun))
+  (hash-map :messages []))
 
 (defn- incorporate-user-datum!
   [app-state user-datum]
@@ -75,61 +75,73 @@
                  app-state'))))
 
 (defmethod local-response-handler :datum.fact.add/success
-  [aether history app-state msg]
-  (incorporate-updated-datum! app-state (get msg :noun)))
+  [history app-state msg]
+  (incorporate-updated-datum! app-state (get msg :noun))
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.fact.add/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.fact.update/success
-  [aether history app-state msg]
-  (incorporate-updated-datum! app-state (get msg :noun)))
+  [history app-state msg]
+  (incorporate-updated-datum! app-state (get msg :noun))
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.fact.update/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.label.update/success
-  [aether history app-state msg]
+  [history app-state msg]
   (incorporate-updated-datum! app-state {:datum (get msg :noun)
-                                         :new-entities []}))
+                                         :new-entities []})
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.label.update/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.create/success
-  [aether history app-state msg]
+  [history app-state msg]
   (let [dtm (get-in msg [:noun :datum])]
     (incorporate-user-datum! app-state (get msg :noun))
-    (history/navigate-to! history [:datum :id (get dtm :db/id)])))
+    (history/navigate-to! history [:datum :id (get dtm :db/id)]))
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.create/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.get/success
-  [aether history app-state msg]
-  (incorporate-user-datum! app-state (get msg :noun)))
+  [history app-state msg]
+  (incorporate-user-datum! app-state (get msg :noun))
+  (hash-map :messages []))
 
 (defmethod local-response-handler :datum.get/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.navigate.search/success
-  [aether history app-state msg]
+  [history app-state msg]
   (let [{:keys [query-string results]} (get msg :noun)]
     (transact! app-state :search-results
                (fn [search-results]
-                 (assoc search-results query-string results)))))
+                 (assoc search-results query-string results))))
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.navigate.search/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.register/success
-  [aether history app-state {:keys [noun] :as msg}]
+  [history app-state {:keys [noun] :as msg}]
   (let []
     (transact! app-state
                (fn [app-state]
@@ -143,15 +155,15 @@
                         :cache {}
                         :error-messages [])))
     (history/navigate-to! history :home)
-    (->> (msg/initialize-client-state noun)
-         (aether/send! aether))))
+    (hash-map :messages [(msg/initialize-client-state noun)])))
 
 (defmethod local-response-handler :spa.register/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.login/success
-  [aether history app-state {:keys [noun] :as msg}]
+  [history app-state {:keys [noun] :as msg}]
   (let []
     (transact! app-state
                (fn [app-state]
@@ -165,15 +177,15 @@
                         :cache {}
                         :error-messages [])))
     (history/navigate-to! history :home)
-    (->> (msg/initialize-client-state noun)
-         (aether/send! aether))))
+    (hash-map :messages [(msg/initialize-client-state noun)])))
 
 (defmethod local-response-handler :spa.login/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.logout/success
-  [aether history app-state msg]
+  [history app-state msg]
   (let []
     (transact! app-state
                (fn [app-state]
@@ -186,34 +198,38 @@
                                 :similar-datums []}
                         :error-messages []
                         :cache {})))
-    (history/navigate-to! history :home)))
+    (history/navigate-to! history :home))
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.logout/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.state.initialize/success
-  [aether history app-state msg]
+  [history app-state msg]
   (let []
     (transact! app-state
                (fn [app-state]
-                 (merge app-state (get msg :noun))))))
+                 (merge app-state (get msg :noun)))))
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.state.initialize/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 (defmethod local-response-handler :spa.switch-team/success
-  [aether history app-state msg]
+  [history app-state msg]
   (let [user' (get msg :noun)]
     (transact! app-state (fn [app-state]
                            (assoc app-state :user (get msg :noun))))
     ;; NOTE: user changed, therefore creds changed, therefore must
     ;; reinitialize => could have a current-datum which is not
     ;; accessible from the new creds
-    (->> (msg/initialize-client-state user')
-         (aether/send! aether))
-    (history/navigate-to! history :home)))
+    (history/navigate-to! history :home)
+    (hash-map :messages [(msg/initialize-client-state user')])
+    ))
 
 (defn incorporate-updated-literal! [app-state literal]
   (println "incorporate-literal:" literal)
@@ -234,18 +250,22 @@
                  ))))
 
 (defmethod local-response-handler :literal.get/success
-  [aether history app-state msg]
+  [history app-state msg]
   (let [literal (get-in msg [:noun])]
-    (incorporate-user-literal! app-state literal)))
+    (incorporate-user-literal! app-state literal))
+  (hash-map :messages []))
 (defmethod local-response-handler :literal.get/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
 
 ; FIXME: what if update converts literal to datum?
 (defmethod local-response-handler :literal.update/success
-  [aether history app-state msg]
+  [history app-state msg]
   (let [literal (get-in msg [:noun])]
-    (incorporate-updated-literal! app-state literal)))
+    (incorporate-updated-literal! app-state literal))
+  (hash-map :messages []))
 (defmethod local-response-handler :literal.update/failure
-  [aether history app-state msg]
-  (record-error-message app-state msg))
+  [history app-state msg]
+  (record-error-message app-state msg)
+  (hash-map :messages []))
