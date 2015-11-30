@@ -113,6 +113,18 @@
   "Dynamic message-oriented api."
   (transmit! [this msg]))
 
+(defrecord FunctionDispatcher [config history app-state]
+  IDispatcher
+  (transmit! [this {:keys [noun verb context] :as msg}]
+    (let [atm   (get app-state :app-state)
+          mode  (get @atm :mode)
+          verbs (mode-verbs)
+          local-request-verbs  (get-in verbs [mode :local :request])
+          local-response-verbs (get-in verbs [mode :local :response])
+          remote-request-verbs (get-in verbs [mode :remote :request])
+          ]
+      )))
+
 (defrecord AetherDispatcher [config aether history app-state kill-channel]
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]
@@ -122,33 +134,39 @@
           local-request-verbs  (get-in verbs [mode :local :request])
           local-response-verbs (get-in verbs [mode :local :response])
           remote-request-verbs (get-in verbs [mode :remote :request])
+
+          results
+          (cond->> {:messages []}
+            (contains? local-request-verbs verb)
+            (merge-with concat
+                        (try
+                         (request-handlers/local-request-handler
+                          aether root-crsr msg)
+                         (catch js/Object e
+                           (info e)
+                           {:messages []})))
+            (contains? local-response-verbs verb)
+            (merge-with concat
+                        (try
+                         (response-handlers/local-response-handler
+                          aether history root-crsr msg)
+                         (catch js/Object e
+                           (info e)
+                           {:messages []})))
+
+            ;; NOTE: sent with special verb that
+            ;; gets picked up by http spout
+            ;;
+            ;; spout can feed response back into
+            ;; aether so it'll be picked up by
+            ;; local-response-handler
+            (contains? remote-request-verbs verb)
+            (merge-with concat
+                        {:messages [(client-msg/local->remote history root-crsr msg)]}))
           ]
+      (aether/send-many! aether (remove nil? (get results :messages)))
       ; TODO: considerably more sophisticated
       ; exception handling. at least log them!
-      (when (contains? local-request-verbs verb)
-        (try
-         (request-handlers/local-request-handler
-          aether root-crsr msg)
-         (catch js/Object e
-           (info e))))
-      (when (contains? local-response-verbs verb)
-        (try
-         (response-handlers/local-response-handler
-          aether history root-crsr msg)
-         (catch js/Object e
-           (info e))))
-      (when (contains? remote-request-verbs verb)
-        (try
-         (->> (client-msg/local->remote history root-crsr msg)
-              ;; NOTE: sent with special verb that
-              ;; gets picked up by http spout
-              ;;
-              ;; spout can feed response back into
-              ;; aether so it'll be picked up by
-              ;; local-response-handler
-              (aether/send! aether)) 
-         (catch js/Object e
-           (info e))))
       ))
   component/Lifecycle
   (start [this]
@@ -160,10 +178,10 @@
                      (do
                       (async/close! kill-ch))
                      (do
-                       ;; first run v is nil
-                       (when v
-                         (transmit! this v))
-                       (recur (async/alts! [listener kill-ch]))))))
+                      ;; first run v is nil
+                      (when v
+                        (transmit! this v))
+                      (recur (async/alts! [listener kill-ch]))))))
       (assoc this :kill-channel kill-ch)))
 
   (stop [this]

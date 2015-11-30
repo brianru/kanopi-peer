@@ -105,7 +105,7 @@
   (om/build input-field/decimal literal
             {:init-state
              {:on-submit (fn [value]
-                           (->> (msg/update-literal (:db/id literal) :literal/integer value)
+                           (->> (msg/update-literal (:db/id literal) :literal/decimal value)
                                 (msg/send! owner)))}}))
 
 (comment

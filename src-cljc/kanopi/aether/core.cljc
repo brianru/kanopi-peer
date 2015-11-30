@@ -149,6 +149,7 @@
 
 (defprotocol IBroadcast
   (send! [this msg])
+  (send-many! [this msg-coll])
   ;; TODO: move listen! and maybe listen* to this protocol
   ;; (listen! [this dimension value opts])
   (replicate! [this] [this destination-chan])
@@ -181,6 +182,8 @@
   IBroadcast
   (send! [this msg]
     (async/put! (get-in this [:aether :publisher]) msg))
+  (send-many! [this msg-coll]
+    (async/onto-chan (get-in this [:aether :publisher]) msg-coll false))
   (replicate! [this]
     (replicate! this (async/chan 100)))
   (replicate! [this destination-ch]

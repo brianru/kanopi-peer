@@ -1,7 +1,9 @@
 (ns kanopi.controller.handlers.request
+  "TODO: refactor to return a collection of messages. Let the
+  dispatcher handle them. These fns should be medium agnostic."
   (:require [taoensso.timbre :as timbre
              #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
-            [kanopi.aether.core :as aether]
+            ; [kanopi.aether.core :as aether]
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
@@ -13,23 +15,19 @@
     (get msg :verb)))
 
 (defmethod local-request-handler :spa/navigate
-  [aether app-state msg]
-  (let [{:keys [handler] :as page'} (get-in msg [:noun])]
-    (->> (msg/navigate-success page')
-         (aether/send! aether))
-    (cond
-     (= :datum handler)
-     (let [datum-id (util/read-entity-id (get-in msg [:noun :route-params :id]))]
-       (->> (msg/get-datum datum-id)
-            (aether/send! aether)))
-     
-     (= :literal handler)
-     (let [literal-id (util/read-entity-id (get-in msg [:noun :route-params :id]))]
-       (->> (msg/get-literal literal-id)
-            (aether/send! aether))))))
+  [app-state msg]
+  (let [{:keys [handler route-params] :as page'} (get-in msg [:noun])
+        msgs (cond-> [(msg/navigate-success page')]
+               (= :datum handler)
+               (conj (msg/get-datum (util/read-entity-id (:id route-params))))
+               
+               (= :literal handler)
+               (conj (msg/get-literal (util/read-entity-id (:id route-params))))
+               )]
+    (hash-map :messages msgs)))
 
 (defmethod local-request-handler :spa/switch-team
-  [aether app-state {team-id :noun :as msg}]
+  [app-state {team-id :noun :as msg}]
   (let [user' (update @app-state :user
                       (fn [user]
                         (if-let [team' (->> (get user :teams)
@@ -37,9 +35,7 @@
                                             (first))]
                           (assoc user :current-team team')
                           user)))]
-    (->> (msg/switch-team-success user')
-         (aether/send! aether))
-    ))
+    (hash-map :messages [(msg/switch-team-success user')])))
 
 (defn- fuzzy-search-entity [q ent]
   (when (every? not-empty [q ent])
@@ -79,12 +75,11 @@
          (vec))))
 
 (defmethod local-request-handler :spa.navigate/search
-  [aether app-state msg]
+  [app-state msg]
   (let [{:keys [query-string entity-type]} (get msg :noun)
         results (local-fulltext-search @app-state query-string entity-type)
         ]
-    (->> (msg/navigate-search-success query-string results)
-         (aether/send! aether))))
+    (hash-map :messages [(msg/navigate-search-success query-string results)])))
 
 (defn- current-datum [props]
   (get-in props [:datum :datum :db/id]))
@@ -222,15 +217,14 @@
               :new-entities new-entities)))
 
 (defmethod local-request-handler :datum/create
-  [aether app-state msg]
+  [app-state msg]
   (let [dtm {:datum/label (get-in msg [:noun :label])
              :datum/team  (get-in app-state [:user :current-team :db/id])
              :db/id       (util/random-uuid)}
         st' (assoc-in @app-state [:cache (get dtm :db/id)] dtm)
         user-datum (build-datum-data st' (get dtm :db/id))
         ]
-    (->> (msg/create-datum-success user-datum)
-         (aether/send! aether))))
+    (hash-map :messages [(msg/create-datum-success user-datum)])))
 
 (defn- handle-fact-add-or-update
   [app-state msg]
@@ -241,7 +235,7 @@
     (parse-input-fact datum fact)))
 
 (defmethod local-request-handler :datum.fact/add
-  [aether app-state msg]
+  [app-state msg]
   (let [{:keys [datum new-entities]} (handle-fact-add-or-update app-state msg)]
     (->> (msg/add-fact-success datum new-entities)
          (aether/send! aether))))
