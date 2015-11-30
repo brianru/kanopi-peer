@@ -2,9 +2,7 @@
   (:require [com.stuartsierra.component :as component]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
-            [kanopi.system :as sys]
-            [om.core :as om :include-macros true]
-            [sablono.core :refer-macros [html] :include-macros true]
+            [kanopi.system.client :as sys]
             ))
 
 (enable-console-print!)

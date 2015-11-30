@@ -24,3 +24,6 @@
 
   (navigate-to! [this path]
     (swap! history conj path)))
+
+(defn new-mem-history [config]
+  (map->InMemoryHistory {:config config}))
