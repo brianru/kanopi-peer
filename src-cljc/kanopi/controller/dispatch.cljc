@@ -153,8 +153,7 @@
     ; made here. The State component may have to be aware of this and
     ; offer a protocol fn to provide access to the deref-able thing,
     ; whether it be an atom or an Om cursor.
-    (let [atm     (#?(:cljs om/root-cursor
-                      :clj  identity)     (:app-state app-state))
+    (let [atm     (:app-state app-state)
           mode    (get @atm :mode)
           verbs   (mode-verbs)
           results (handle-message mode verbs history atm msg)
@@ -166,8 +165,8 @@
 (defrecord AetherDispatcher [config aether history app-state kill-channel]
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]
-    (let [root-crsr (#?(:cljs om/root-cursor
-                        :clj  identity)     (:app-state app-state))
+    (let [root-crsr #? (:cljs (om/root-cursor (:app-state app-state))
+                        :clj  (:app-state app-state)) 
           mode      (get @root-crsr :mode)
           verbs     (mode-verbs)
           results   (handle-message mode verbs history root-crsr msg)

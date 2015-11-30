@@ -15,9 +15,6 @@
      ([crsr f]
       (om/transact! crsr f))
      ([crsr korks f]
-      (println "cljs transact!" korks)
-      (println @crsr)
-      (println (type crsr))
       (om/transact! crsr korks f)))
    :clj
    (defn transact!
@@ -31,7 +28,6 @@
   ([crsr v]
    (transact! crsr (fn [_] v)))
   ([crsr korks v]
-   (println "update!" korks v)
    (transact! crsr korks (fn [_] v))))
 
 (defmulti local-response-handler
@@ -45,7 +41,6 @@
 
 (defmethod local-response-handler :spa.navigate/success
   [history app-state msg]
-  (println "navigate-success" msg)
   (update! app-state :page (get msg :noun))
   (hash-map :messages []))
 

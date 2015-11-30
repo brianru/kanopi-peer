@@ -3,6 +3,7 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
+            [kanopi.controller.history :as history]
             [kanopi.model.ref-cursors :as ref-cursors]
             [kanopi.model.message :as msg]
             [kanopi.view.modal  :as modal]
@@ -97,9 +98,9 @@
 
       ;; NOTE: when starting component if page is set it must be the
       ;; full string path: e.g. "/datum/<datum-id>"
-       (when-let [page (not-empty (-> app-state :app-state (deref) :page))]
-         (when (string? page)
-           ((get history :set-page!) page)))
+      (when-let [page (not-empty (-> app-state :app-state (deref) :page))]
+        (when (string? page)
+          (history/navigate-to! history page)))
 
       (info "mount om root" (:container-id config))
       (mount-root! (:app-state app-state) container aether history (:ref-cursors config))
