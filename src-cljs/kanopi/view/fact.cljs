@@ -20,7 +20,6 @@
              :refer-macros (log trace debug info warn error fatal report)]
             [kanopi.model.schema :as schema]
             [kanopi.model.message :as msg]
-            [kanopi.model.text :as text]
             [kanopi.view.icons :as icons]
             [kanopi.aether.core :as aether]
             [kanopi.view.widgets.input-field :as input-field]

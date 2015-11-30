@@ -47,7 +47,7 @@
       (apply bidi/path-for routes path)))
 
   (navigate-to! [this path]
-    (pushy/set-token! history (get-route-for this path))))
+    (pushy/set-token! history (history/get-route-for this path))))
 
 (defn new-html5-history [config]
   (map->Html5History {:config config}))
