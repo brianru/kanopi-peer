@@ -2,18 +2,18 @@
   (:require [com.stuartsierra.component :as component]
             [clojure.data.codec.base64 :as base64]
             [kanopi.main :refer (default-config)]
-            [kanopi.controller.system :refer (new-system)]
+            [kanopi.system.server :as server]
             [kanopi.model.storage.datomic :as datomic]
             [datomic.api :as d]
             [kanopi.util.core :as util]
             [ring.mock.request :as mock]))
 
 (defn system-excl-web []
-  (-> (new-system default-config)
+  (-> (server/new-system default-config)
       (dissoc :web-app :web-server)))
 
 (defn system-excl-web-server []
-  (-> (new-system default-config)
+  (-> (server/new-system default-config)
       (dissoc :web-server)))
 
 (defn mk-basic-auth-header [{:keys [username password] :as creds}]

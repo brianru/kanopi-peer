@@ -5,13 +5,13 @@
             [com.stuartsierra.component :as component]
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [environ.core :refer [env]]
-            [kanopi.controller.system :as sys]
+            [kanopi.system.server :as server]
             [kanopi.main]))
 
 (defonce system nil)
 
 (defn init []
-  (alter-var-root #'system (constantly (sys/new-system (kanopi.main/system-config)))))
+  (alter-var-root #'system (constantly (server/new-system (kanopi.main/system-config)))))
 
 (defn start []
   (alter-var-root #'system component/start))

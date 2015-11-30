@@ -1,7 +1,7 @@
 (ns kanopi.main
   (:gen-class)
   (:require [com.stuartsierra.component :as component]
-            [kanopi.controller.system :refer [new-system]]
+            [kanopi.system.server :as server]
             [kanopi.view.routes :as routes]
             [environ.core :refer [env]]))
 
@@ -28,7 +28,7 @@
 
 (defn -main [& args]
   "Default application entry point."
-  (let [sys (new-system default-config)]
+  (let [sys (server/new-system default-config)]
     (println "starting system")
     (clojure.pprint/pprint env)
     (component/start sys)))

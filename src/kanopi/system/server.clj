@@ -1,4 +1,4 @@
-(ns kanopi.controller.system
+(ns kanopi.system.server
   (:require [com.stuartsierra.component :as component]
             [kanopi.model.storage.datomic :refer (datomic-peer)]
             [kanopi.model.data :refer (data-service)]
