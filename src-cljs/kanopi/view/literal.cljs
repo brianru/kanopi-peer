@@ -127,22 +127,22 @@
   [owner context-entities]
   [:div.literal-context
    (for [{:keys [datum/id datum/label fact/attribute]} context-entities]
-     [:div {:react-key label}
+     [:div.literal-context-datum {:react-key label}
       [:a {:href (when id (browser/route-for owner :datum :id id))}
-       [:div.context-entity-label.row
+       [:div.context-entity-label
         [:span label]]
-       [:div.context-entity-fact.row
-        [:div.mini-fact-handle.inline-10-percent.col-xs-1
+       [:div.context-entity-fact
+        [:div.mini-fact-handle
          [:svg {:width "12px" :height "12px"}
           [:g.handle-borders
            {:transform "translate(2, 2)"}
            [:path {:d "m 0 4 v -4 h 4"
-                   :stroke "#dddddd"
+                   :stroke "#666"
                    :fill "transparent"}]
            [:path {:d "m 7 4 v 4 h -4"
-                   :stroke "#dddddd"
+                   :stroke "#666"
                    :fill "transparent"}]]]]
-        [:div.context-entity-attribute.inline-90-percent.col-xs-11
+        [:div.context-entity-attribute
          [:span.context-entity-attribute attribute]]]]])])
 
 (defn literal-types
@@ -191,7 +191,7 @@
            ; TODO: consider adjusted design for narrow screens.
            [:div.col-md-2.literal-context
             (literal-context owner (get props :context [{:datum/label "Test label"
-                                                         :fact/attribute "the attribute"}]))]
+                                                         :fact/attribute "the attribute oh yes it's the attribute"}]))]
            [:div.col-md-8.literal-content
             (literal-editor owner (get props :literal))
             (when (contains? schema/renderable-types current-type)

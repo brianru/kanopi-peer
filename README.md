@@ -1,6 +1,6 @@
 # Kanopi
 
-Express, explore, analyze, discover.
+Record, explore, analyze, discover.
 
 Targeting a new sweet spot between 
 

@@ -11,20 +11,22 @@
 - prototype UI
 - generative tests
 - authorization
-- math (latex) literals
 - DDB-backed Datomic
 - ECS (AWS Docker) Transactor
-- uri literals
 
 #### TODO:
-- continuous integration
+- continuous integration (circleci)
 - simulation tests
 - literal UI (incl codemirror and prosemirror)
-- team support
-- user invitations instead of registration
+- math (latex) literals
+- uri literals
+- teams
+- user invitations instead of registration (for now)
 - cloudwatch metrics and log gathering
 
-
 ### 0.2 - The Beta 
-- zookeeper, kafka and onyx -> s3 for log persistence
 - kanopi.io landing page
+- zookeeper, kafka and onyx -> s3 for log persistence
+- move handlers out of peer, into separate repo
+- onyx or peer can refer to them
+- om next?
