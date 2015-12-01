@@ -1,7 +1,5 @@
 (ns kanopi.devcards
-  (:require [sablono.core :as sab]
-
-            [kanopi.om-next]
+  (:require [kanopi.om-next]
             [kanopi.transit-dev]
 
             [kanopi.aether.core-dev]
@@ -9,6 +7,7 @@
             [kanopi.view.fact-dev]
             [kanopi.view.datum-dev]
             [kanopi.view.header-dev]
+            [kanopi.view.literal-dev]
             [kanopi.view.widgets.typeahead-dev]
             [kanopi.view.widgets.input-field-dev]
 

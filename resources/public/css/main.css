@@ -40,6 +40,17 @@ input.validated:invalid {
 input.validated:valid {
     border-bottom-color: green;
 }
+textarea {
+    border-left: none !important;
+    border-right: none !important;
+    border-bottom: none !important;
+    border-top: 1px solid lightgrey;
+    -webkit-appearance: none;
+    background-color: inherit;
+}
+textarea:focus {
+    outline: none;
+}
 *, .btn {
     -webkit-transition: opacity 0.3s, border-color 0.3s, fill 0.3s;
     transition: opacity 0.3s, border-color 0.3s, fill 0.3s;
@@ -294,6 +305,10 @@ a.navbar-brand:focus {
 .input-textarea {
     font-size: 12px;
 }
+.text-editor {
+    width: 100%;
+    resize: none;
+}
 .editable-text-icon {
     padding-right: 0.5rem;
     cursor: pointer;
@@ -373,7 +388,12 @@ a.navbar-brand:focus {
 .literal-types {
     text-align: left;
 }
-.available-literal-type:hover {
+.literal-type-container,
+.literal-type-container > .available-literal-type {
+    width: 100%;
+    cursor: pointer;
+}
+.literal-type-container:hover > .available-literal-type {
     text-decoration: underline !important;
 }
 .available-literal-type.current {

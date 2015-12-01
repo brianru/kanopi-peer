@@ -21,27 +21,21 @@
       :app-state
       (state/new-app-state config)
 
-      :aether
-      (aether/new-aether config)
-
       :history
-      (component/using
-       (history/new-mem-history config)
-       {:aether :aether})
+      (history/new-mem-history config)
 
       :dispatcher
       (component/using
-       (dispatch/new-dispatcher config)
-       {:aether    :aether
-        :history   :history
+       (dispatch/new-fn-dispatcher config)
+       {:history   :history
         :app-state :app-state})
 
       ;; synchronous (useful responses)
-      :request-spout
-      (component/using
-       (aether-spout/new-http-spout :verb :request {:xform (fn [msg] (get msg :noun))})
-       {:aether    :aether
-        :app-state :app-state})
+      ; :request-spout
+      ; (component/using
+      ;  (aether-spout/new-http-spout :verb :request {:xform (fn [msg] (get msg :noun))})
+      ;  {:aether    :aether
+      ;   :app-state :app-state})
 
       )))
 #?(:cljs

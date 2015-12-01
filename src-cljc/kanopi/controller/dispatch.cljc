@@ -116,6 +116,7 @@
         local-response-verbs (get-in verbs [mode :local :response])
         remote-request-verbs (get-in verbs [mode :remote :request])
         ]
+    (info "handle-message" msg)
     (cond->> {:messages []}
       (contains? local-request-verbs verb)
       (merge-with concat
@@ -151,7 +152,7 @@
 ; refactored.
 ; FIXME: actually, I broke this by using handle-message for
 ; everything. LOVELY!!!
-(defrecord FunctionDispatcher [config history app-state]
+(defrecord FunctionDispatcher [config verbs history app-state]
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]
     ; NOTE: this decision of whether to hook into Om should not be
@@ -160,12 +161,17 @@
     ; whether it be an atom or an Om cursor.
     (let [atm     (:app-state app-state)
           mode    (get @atm :mode)
-          verbs   (mode-verbs)
           results (handle-message mode verbs history atm msg)
           ]
       (when-let [msgs (not-empty (:messages results))]
-        (dorun
-         (map (partial transmit! this) msgs))))))
+        (println "HERE" msgs)
+        (doseq [msg msgs]
+          (transmit! this msg)))))
+  component/Lifecycle
+  (start [this]
+    (assoc this :verbs (mode-verbs)))
+  (stop [this]
+    (assoc this :verbs nil)))
 
 (defrecord AetherDispatcher [config aether history app-state kill-channel]
   IDispatcher
@@ -199,6 +205,10 @@
   (stop [this]
     (async/put! kill-channel :kill)
     (assoc this :kill-channel nil)))
+
+(defn new-fn-dispatcher
+  ([config]
+   (map->FunctionDispatcher {:config config})))
 
 (defn new-dispatcher
   ([] (new-dispatcher {}))

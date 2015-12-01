@@ -58,7 +58,7 @@
     (render-state [_ {:keys [edit-key new-value on-submit] :as state}]
       (let [current-value (or new-value (get props edit-key))]
         (html
-         [:textarea
+         [:textarea.text-editor.rich-text-editor
           ; TODO: save periodically, without the user exiting.
           {:value current-value
            :placeholder (get state :placeholder)
@@ -92,6 +92,6 @@
     (render-state [_ state]
       (let []
         (html
-         [:textarea
+         [:textarea.text-editor.code-text-editor
           {:default-value ""}
           ])))))

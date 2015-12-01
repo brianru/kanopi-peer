@@ -129,13 +129,21 @@
    (for [{:keys [datum/id datum/label fact/attribute]} context-entities]
      [:div {:react-key label}
       [:a {:href (when id (browser/route-for owner :datum :id id))}
-       [:div.context-entity-label
+       [:div.context-entity-label.row
         [:span label]]
-       [:div.context-entity-fact
-        [:span.handle]
-        [:span.context-entity-attribute
-         attribute]]]
-      ])])
+       [:div.context-entity-fact.row
+        [:div.mini-fact-handle.inline-10-percent.col-xs-1
+         [:svg {:width "12px" :height "12px"}
+          [:g.handle-borders
+           {:transform "translate(2, 2)"}
+           [:path {:d "m 0 4 v -4 h 4"
+                   :stroke "#dddddd"
+                   :fill "transparent"}]
+           [:path {:d "m 7 4 v 4 h -4"
+                   :stroke "#dddddd"
+                   :fill "transparent"}]]]]
+        [:div.context-entity-attribute.inline-90-percent.col-xs-11
+         [:span.context-entity-attribute attribute]]]]])])
 
 (defn literal-types
   "Triggers for switching the current literal's type."
@@ -148,14 +156,14 @@
     [:div.literal-types
      (for [{:keys [ident label] :as tp} type-list
            :let [current? (= (:ident current-type) ident)]]
-       [:div {:react-key ident}
+       [:div.literal-type-container {:react-key ident}
         [:a.available-literal-type
-         {:on-click (fn [_]
-                      (->> (msg/update-literal (:db/id literal) ident (schema/get-value literal))
-                           (msg/send! owner)))
+         {:on-click
+          (fn [_]
+            (->> (msg/update-literal (:db/id literal) ident (schema/get-value literal))
+                 (msg/send! owner)))
           :class [(when current? "current")]}
-         [:span label]]])])
-  )
+         [:span label]]])]))
 
 (defn container
   "The whole page. Splitting it into three columns. I might allow the
@@ -169,7 +177,6 @@
 
     om/IRender
     (render [_]
-      (println "RENDER LITERAL" props)
       (let [type-ordering (get schema/input-types-ordered-by-fact-part-preference
                                :fact/attribute)
             available-types (->> props :literal

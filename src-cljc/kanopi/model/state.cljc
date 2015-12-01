@@ -28,7 +28,8 @@
                 :error-messages []
                 :log []
                 }
-               :validator (partial s/validate schema/AppState))]
+               ; :validator (partial s/validate schema/AppState)
+               )]
       (assoc this :app-state atm)))
 
   (stop [this]
