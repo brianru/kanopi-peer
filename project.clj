@@ -71,8 +71,8 @@
                  ]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
-                                   :username "brian@kanopi.io"
-                                   :password "04fd123f-c4c5-4bb5-939b-18f41be8a18f"
+                                   :username :env/datomic-username
+                                   :password :env/datomic-password
                                    }}
   :source-paths ["src-cljc" "src"]
   :test-paths ["src-cljc" "src" "test-cljc" "test"]
