@@ -7,8 +7,11 @@
 
             [kanopi.model.message :as msg]
             [kanopi.util.browser :as browser]
+
+            ; https://github.com/cljsjs/packages/tree/master/codemirror#modes
             cljsjs.codemirror
             cljsjs.codemirror.mode.clojure
+            cljsjs.codemirror.mode.stex
             ))
 
 (defn- on-change [state e]
@@ -85,9 +88,10 @@
       (let [editor (.fromTextArea js/CodeMirror
                                   (om/get-node owner)
                                   #js {:lineNumbers true
-                                       :mode "clojure"})]
+                                       :mode "clojure"})
+            doc    (.getDoc editor)]
         (register-event-handlers! editor (om/get-state owner))
-        (om/set-state! owner :editor editor)))
+        (om/update-state! owner #(assoc % :editor editor :document doc))))
 
     om/IWillUnmount
     (will-unmount [_]

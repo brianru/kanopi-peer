@@ -24,9 +24,9 @@
     :predicate string?
     :parser identity}
 
-   :literal/code
-   {:ident :literal/code
-    :label "code"
+   :literal/math
+   {:ident :literal/math
+    :label "math"
     :predicate string?
     :parser identity}
 

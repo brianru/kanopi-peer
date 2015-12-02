@@ -114,12 +114,12 @@
 ;; :db/id #db/id[:db.part/db]
 ;; :db.install/_attribute :db.part/db}
 
-{:db/ident :literal/email-address
- :db/valueType :db.type/string
- :db/cardinality :db.cardinality/one
- :db/fulltext true
- :db/id #db/id [:db.part/db]
- :db.install/_attribute :db.part/db}
+; {:db/ident :literal/email-address
+;  :db/valueType :db.type/string
+;  :db/cardinality :db.cardinality/one
+;  :db/fulltext true
+;  :db/id #db/id [:db.part/db]
+;  :db.install/_attribute :db.part/db}
 
 ;;{:db/ident :literal/sms-number
 ;; :db/valueType :db.type/long
@@ -150,6 +150,13 @@
 
 {:db/ident :literal/decimal
  :db/valueType :db.type/double
+ :db/cardinality :db.cardinality/one
+ :db/fulltext true
+ :db/id #db/id[:db.part/db]
+ :db.install/_attribute :db.part/db}
+
+{:db/ident :literal/math
+ :db/valueType :db.type/string
  :db/cardinality :db.cardinality/one
  :db/fulltext true
  :db/id #db/id[:db.part/db]
