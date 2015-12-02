@@ -250,3 +250,90 @@
               [:a {:on-click (partial handle-result-click owner res)}
                [:span (display-fn res)]]])]
           ])))))
+
+(def ^:private search-required-args
+  [:result-display-fn :result-href-fn :result-on-click])
+
+(def ^:private search-optional-args
+  [:tab-index :placeholder])
+
+(defn search-config*
+  [required-args optional-args]
+  (let [{:keys [result-display-fn
+                result-href-fn
+                result-on-click]}
+        required-args
+        ]
+    (assert (some fn? [result-href-fn result-on-click])
+            "At least one result click handler must be provided.")
+    (hash-map
+     :init-state (merge optional-args
+                        (cond-> {:display-fn result-display-fn
+                                 :clear-on-click true}
+                          result-href-fn
+                          (assoc :href-fn  result-href-fn)
+                          result-on-click
+                          (assoc :on-click result-on-click))
+                        ))))
+
+(defn search-config
+  "State constructor fn for the set of knobs required for using the
+  typeahead widget as a search field. The value of the input field is
+  generally ignored, instead, result selection is the goal."
+  ([& args]
+   (let [argmap (apply hash-map args)]
+     (search-config* (select-keys argmap search-required-args)
+                     (select-keys argmap search-optional-args)))))
+
+(def ^:private editor-required-args
+  [:element-type :input-value
+   :input-on-change :input-on-blur :input-on-focus
+   :result-display-fn :result-on-click :on-submit 
+   ])
+(def ^:private editor-optional-args
+  [:tab-index :placeholder])
+
+(defn editor-config*
+  [required-args optional-args]
+  (let [{:keys [on-submit
+                input-value
+                input-on-change
+                input-on-blur
+                input-on-focus
+                result-display-fn
+                result-on-click
+                element-type]}
+        required-args]
+    (assert (every? fn? [input-on-change input-on-blur input-on-focus
+                         result-display-fn result-on-click on-submit])
+            "Missing required functions.")
+    (assert (contains? #{:input :typeahead} element-type))
+    (hash-map
+     :state      {:input-value input-value
+                  }
+     :init-state (merge optional-args
+                        {:element-type        element-type
+                         :initial-input-value input-value
+                         :clear-on-click      false
+
+                         :on-focus   input-on-focus
+                         :on-blur    input-on-blur
+                         :on-change  input-on-change
+
+                         :display-fn result-display-fn
+                         :on-click   result-on-click
+
+                         :on-submit  on-submit
+                         }) )))
+
+(defn editor-config
+  "State constructor fn for the knobs required when using the
+  typeahead widget as a fancy editor for user data. Generally this
+  means any use-case where the value of the input field matters at all
+  times. Result selection only matters as far as it is used to change
+  the value of the input field. The primary goal is to help the user
+  modify the value."
+  ([& args]
+   (let [argmap (apply hash-map args)]
+     (editor-config* (select-keys argmap editor-required-args)
+                     (select-keys argmap editor-optional-args)))))

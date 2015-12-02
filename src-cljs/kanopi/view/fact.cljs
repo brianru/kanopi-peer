@@ -22,7 +22,6 @@
             [kanopi.model.message :as msg]
             [kanopi.view.icons :as icons]
             [kanopi.aether.core :as aether]
-            [kanopi.view.widgets.input-field :as input-field]
             [kanopi.view.widgets.selector.dropdown :as dropdown]
             [kanopi.view.widgets.selector.pills :as pills]
             [kanopi.view.widgets.typeahead :as typeahead]
@@ -242,45 +241,38 @@
      [:div.view-fact-part.row
       [:div.inline-90-percent.col-xs-11
        (om/build typeahead/typeahead fact-part
-                 {:react-key (str "view-fact-part" "-" part-key)
-                  :state
-                  {:element-type :input
-                   :fact-part part-key
-                   :input-value (get fact-part :input-value)
-                   :classes []
-                   }
+                 (merge {:react-key (str "view-fact-part" "-" part-key)}
+                        (typeahead/editor-config
+                         :element-type      :input
+                         :input-value       (get fact-part :input-value)
+                         :input-placeholder (name part-key)
+                         :input-on-change
+                         (fn [input-value]
+                           (om/update-state! owner part-key
+                                             #(update-fact-part % part-key input-value)))
+                         :input-on-blur
+                         (fn [v]
+                           (om/update-state! owner :editing
+                                             (fn [existing]
+                                               (if (= part-key existing)
+                                                 nil existing))))
+                         :input-on-focus
+                         (fn [v] (om/set-state! owner :editing part-key))
 
-                  :init-state
-                  {:initial-input-value (get fact-part :input-value)
-                   ;; NOTE: prevents typeahead dropdown from appearing
-                   ;; when there are no matches. it just gets in the
-                   ;; way and a no-match does not need to be
-                   ;; displayed.
-                   :empty-result nil
-                   :placeholder (name part-key) 
-                   :display-fn schema/display-entity
-                   :on-focus  (fn [v]
-                                (om/set-state! owner :editing part-key)) 
-                   :on-blur   (fn [v]
-                                (om/update-state! owner :editing
-                                                  (fn [existing]
-                                                    (if (= part-key existing)
-                                                      nil existing))))
-
-                   :on-change (fn [input-value]
-                                (om/update-state! owner part-key
-                                                  #(update-fact-part % part-key input-value)))
-                   :on-click  (fn [result]
+                         :result-display-fn
+                         schema/display-entity
+                         :result-on-click
+                         (fn [result]
                                 (println "HANDLE THIS!!!" result)
-                                (println "MUST extend fact-part to take datums as inputs")
-                                )
-                   :on-submit (fn [v]
-                                (handle-submission! owner part-key
-                                                    (update-fact-part
-                                                     (om/get-state owner part-key)
-                                                     part-key v)
-                                                    :editing nil))
-                   }})
+                                (println "MUST extend fact-part to take datums as inputs"))
+                         :on-submit
+                         (fn [v]
+                           (handle-submission! owner part-key
+                                               (update-fact-part
+                                                (om/get-state owner part-key)
+                                                part-key v)
+                                               :editing nil))
+                         )))
        [:div.fact-part-metadata
         (om/build pills/horizontal fact-part
                   {:state {:current-item

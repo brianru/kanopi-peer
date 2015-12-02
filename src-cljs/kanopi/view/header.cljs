@@ -26,23 +26,18 @@
         ;; search.
         [:span.search
          (om/build typeahead/typeahead props
-                   {:init-state
-                    {:display-fn schema/display-entity
-                     :placeholder "" ; "search"
-                     :empty-result []
-                     :href-fn  (fn [result]
-                                   (when-let [id (:db/id result)]
-                                     (case (schema/describe-entity result)
-                                       :datum
-                                       (browser/route-for owner :datum :id id)
-                                       :literal
-                                       (browser/route-for owner :literal :id id)
-                                       ; default
-                                       nil
-                                       ))) 
-                     :on-click (constantly nil)
-                     :clear-on-click true
-                     :tab-index 1}})]
+                   (typeahead/search-config
+                    :result-display-fn schema/display-entity
+                    :result-href-fn  (fn [result]
+                                       (when-let [id (:db/id result)]
+                                         (case (schema/describe-entity result)
+                                           :datum
+                                           (browser/route-for owner :datum :id id)
+                                           :literal
+                                           (browser/route-for owner :literal :id id)
+                                           ; default
+                                           nil)))
+                    ))]
         ]))))
 
 (defn- team->menu-item [owner team]
