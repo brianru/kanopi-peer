@@ -286,6 +286,8 @@
                                           :datum/label "DIZZLE")]
         (is (= "DIZZLE" (get literal' :datum/label)))
         (is (= :datum (schema/describe-entity literal')))
-        (is (empty? (-> literal' keys (map namespace) (filter #(= "literal")))))))
+        (is (empty? (->> literal' keys
+                         (filter #(= "literal" (namespace %)))
+                         (remove #{:literal/team}))))))
     (component/stop system)))
 
