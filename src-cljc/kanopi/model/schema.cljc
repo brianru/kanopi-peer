@@ -12,7 +12,11 @@
                  )
             ))
 
-;; TODO: can I use transit to improve my parsing of these values?
+; TODO: can I use transit to improve my parsing of these values?
+; TODO: consider modifying predicate to return useful error messages
+; by separating error modes and checking each one instead of
+; short-circuiting at the first failure, then return the set of error
+; messages
 (def literal-types
   {:literal/text
    {:ident :literal/text

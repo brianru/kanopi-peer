@@ -7,6 +7,8 @@
 
             [kanopi.model.message :as msg]
             [kanopi.util.browser :as browser]
+            cljsjs.codemirror
+            cljsjs.codemirror.mode.clojure
             ))
 
 (defn- on-change [state e]
@@ -69,6 +71,9 @@
            :on-blur     #(end-edit % owner on-submit)}])))))
 
 (defn code
+  "NOTE: Root dom node must be a textarea for simple mounting of
+  CodeMirror editor. See fromTextArea call in did-mount, particularly
+  the call to om/get-node."
   [props owner opts]
   (reify
     om/IDisplayName
@@ -79,14 +84,16 @@
     (did-mount [_]
       (let [editor (.fromTextArea js/CodeMirror
                                   (om/get-node owner)
-                                  #js {:lineNumbers true})]
+                                  #js {:lineNumbers true
+                                       :mode "clojure"})]
         (register-event-handlers! editor (om/get-state owner))
         (om/set-state! owner :editor editor)))
 
     om/IWillUnmount
     (will-unmount [_]
       ; removes CodeMirror from DOM
-      (.toTextArea (om/get-state owner :editor)))
+      (when-let [editor (om/get-state owner :editor)]
+        (.toTextArea editor)))
 
     om/IRenderState
     (render-state [_ state]

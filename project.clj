@@ -22,9 +22,8 @@
 
                  ;; Client
                  [org.clojure/clojurescript "1.7.170"]
-                 [org.omcljs/om "1.0.0-alpha14"
-                  :exclusions [cljsjs/react cljsjs/react-with-addons]]
-                 [cljsjs/react-with-addons "0.14.0-0"]
+                 [org.omcljs/om "1.0.0-alpha14"]
+                 ; [cljsjs/react-with-addons "0.14.0-0"]
                  [bidi "1.22.1"]
                  [kibu/pushy "0.3.6"]
 
@@ -37,9 +36,8 @@
                  [com.andrewmcveigh/cljs-time "0.3.14"]
                  [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
                  [com.cemerick/url "0.1.1"]
-                 [sablono "0.4.0"
-                  :exclusions [cljsjs/react cljsjs/react-with-addons]]
-                 ; [cljsjs/codemirror "5.7.0-3"]
+                 [sablono "0.4.0"]
+                 [cljsjs/codemirror "5.8.0-0"]
 
                  ; Dev
                  [devcards "0.2.1"]

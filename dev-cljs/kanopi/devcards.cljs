@@ -8,6 +8,7 @@
             [kanopi.view.datum-dev]
             [kanopi.view.header-dev]
             [kanopi.view.literal-dev]
+            [kanopi.view.widgets.text-editor-dev]
             [kanopi.view.widgets.typeahead-dev]
             [kanopi.view.widgets.input-field-dev]
 
