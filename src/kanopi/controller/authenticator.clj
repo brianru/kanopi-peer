@@ -122,7 +122,6 @@
       (verify-creds this username new-password)))
 
   component/Lifecycle
-
   (start [this]
     (let [init-data (some-> (get config :init-user-data)
                             (slurp)

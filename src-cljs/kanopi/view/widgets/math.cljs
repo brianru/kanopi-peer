@@ -16,7 +16,7 @@
    (render-katex! owner katex-opts))
   ([owner opts]
    (when-let [v (om/get-state owner :input-value)]
-    (. js/katex render v (om/get-node owner) (clj->js katex-opts)))))
+     (. js/katex render v (om/get-node owner) (clj->js katex-opts)))))
 
 (defn katex
   [props owner opts]

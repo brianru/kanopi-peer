@@ -7,17 +7,20 @@
             
             [kanopi.view.literal :as literal]))
 
-(defonce system
-  (component/start (dev-util/new-system)))
+; (defonce system
+;   (component/start (dev-util/new-system)))
 
 (defcard empty-literal
-  (dc/om-root literal/container {:shared (dev-util/shared-state system)})
+  (dc/om-root literal/container {;:shared (dev-util/shared-state system)
+                                 })
   {}
   {:inspect-data true, :history true}
   )
 
-(defcard text-literal
-  (dc/om-root literal/container {:shared (dev-util/shared-state system)})
-  {}
+(defcard math-literal
+  (dc/om-root literal/container {;:shared (dev-util/shared-state system)
+                                 :init-state {}
+                                 :state {}})
+  {:literal {:literal/math ""}}
   {:inspect-data true, :history true}
   )

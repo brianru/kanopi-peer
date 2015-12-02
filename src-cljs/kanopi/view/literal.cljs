@@ -44,7 +44,7 @@
             (name)
             (keyword))))
 
-(defmethod literal-renderer :literal/math
+(defmethod literal-renderer :math
   [owner literal]
   (om/build math/katex literal {:state {:input-value (om/get-state owner [:input-value])}}))
 
@@ -76,6 +76,8 @@
             (text-editor/code-editor-config
               :edit-key   :literal/math
               :input-type :literal/math
+              :on-change  (fn [value]
+                            (om/set-state! owner :input-value value))
               :on-submit  (fn [value]
                             (->> (msg/update-literal (:db/id literal) :literal/math value)
                                  (msg/send! owner))))
@@ -192,7 +194,7 @@
                                                          :fact/attribute "the attribute oh yes it's the attribute"}]))]
            [:div.col-md-8.literal-content
             (literal-editor owner (get props :literal))
-            (when (contains? schema/renderable-types current-type)
+            (when (contains? schema/renderable-types (get current-type :ident))
               (literal-renderer owner (get props :literal))) ]
 
            [:div.col-md-2.literal-types

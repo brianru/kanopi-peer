@@ -23,7 +23,6 @@
                  ;; Client
                  [org.clojure/clojurescript "1.7.170"]
                  [org.omcljs/om "1.0.0-alpha14"]
-                 ; [cljsjs/react-with-addons "0.14.0-0"]
                  [bidi "1.22.1"]
                  [kibu/pushy "0.3.6"]
 

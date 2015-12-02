@@ -14,17 +14,19 @@
             cljsjs.codemirror.mode.stex
             ))
 
-(defn- on-change [{:keys [on-change] :as state} e]
-  (on-change (.getValue e)))
+(defn- change-handler [owner e]
+  (let [on-change (om/get-state owner :on-change)]
+    (on-change (.getValue e))))
 
-(defn- blur [{:keys [on-submit document]} e]
-  (on-submit (.getValue document)))
+(defn- blur-handler [owner e]
+  (let [{:keys [on-submit document]} (om/get-state owner)]
+    (on-submit (.getValue document))))
 
 (defn- register-event-handlers!
-  [editor {:keys [on-submit] :as state}]
+  [editor owner]
   (doto editor
-    (.on "change"     (partial on-change state))
-    (.on "blur"       (partial blur state))))
+    (.on "change"     (partial change-handler owner))
+    (.on "blur"       (partial blur-handler owner))))
 
 (defn- handle-change [e owner korks]
   (om/set-state! owner korks (.. e -target -value)))
@@ -90,7 +92,7 @@
                                   #js {:lineNumbers true
                                        :mode (get state :language-mode)})
             doc    (.getDoc editor)]
-        (register-event-handlers! editor state)
+        (register-event-handlers! editor owner)
         (om/update-state! owner #(assoc % :editor editor :document doc))))
 
     om/IWillUnmount

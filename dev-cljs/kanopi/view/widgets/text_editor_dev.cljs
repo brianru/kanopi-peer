@@ -18,11 +18,11 @@
   {:inspect-data true, :history true})
 
 (defcard latex
-  (dc/om-root text-editor/code {})
+  (dc/om-root text-editor/code {:init-state {:language-mode "stex"}})
   {}
   {:inspect-data true, :history true})
 
 (defcard clojure
-  (dc/om-root text-editor/code {})
+  (dc/om-root text-editor/code {:init-state {:language-mode "clojure"}})
   {}
   {:inspect-data true, :history true})
