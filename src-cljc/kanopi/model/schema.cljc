@@ -74,7 +74,7 @@
           :parser identity}))
 
 (def renderable-types
-  #{:literal/math :literal/code})
+  #{:literal/math})
 
 (def fact-attribute-input-ordering
   (list :datum/label :literal/text))
@@ -114,7 +114,6 @@
 
 (def literal-meta-keys
   #{:db/id :literal/team})
-
 
 (defn get-value-key
   ([ent]

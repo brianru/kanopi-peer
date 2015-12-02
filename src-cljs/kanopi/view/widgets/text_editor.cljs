@@ -14,22 +14,16 @@
             cljsjs.codemirror.mode.stex
             ))
 
-(defn- on-change [state e]
-  (println "change event" e)
-  #_(on-submit (.getValue e))
-  )
+(defn- on-change [{:keys [on-change] :as state} e]
+  (on-change (.getValue e)))
 
-(defn- key-handled [state e]
-  (println "keyHandled event" e))
-
-(defn- blur [state e]
-  (println "blur event" e))
+(defn- blur [{:keys [on-submit document]} e]
+  (on-submit (.getValue document)))
 
 (defn- register-event-handlers!
   [editor {:keys [on-submit] :as state}]
   (doto editor
     (.on "change"     (partial on-change state))
-    (.on "keyHandled" (partial key-handled state))
     (.on "blur"       (partial blur state))))
 
 (defn- handle-change [e owner korks]
@@ -69,7 +63,7 @@
            :placeholder (get state :placeholder)
            :tab-index   (get state :tab-index)
            :on-change   #(handle-change % owner :new-value)
-           :on-key-down #(when (= (.-key %) "Enter")
+           :on-key-down #(when (= (.-key %) "Escape")
                            (.blur (.-target %)))
            :on-blur     #(end-edit % owner on-submit)}])))))
 
@@ -82,15 +76,21 @@
     om/IDisplayName
     (display-name [_]
       (str "code-editor-" props))
+
+    om/IInitState
+    (init-state [_]
+      {
+       })
     
     om/IDidMount
     (did-mount [_]
-      (let [editor (.fromTextArea js/CodeMirror
+      (let [state  (om/get-state owner)
+            editor (.fromTextArea js/CodeMirror
                                   (om/get-node owner)
                                   #js {:lineNumbers true
-                                       :mode "clojure"})
+                                       :mode (get state :language-mode)})
             doc    (.getDoc editor)]
-        (register-event-handlers! editor (om/get-state owner))
+        (register-event-handlers! editor state)
         (om/update-state! owner #(assoc % :editor editor :document doc))))
 
     om/IWillUnmount
@@ -106,3 +106,34 @@
          [:textarea.text-editor.code-text-editor
           {:default-value ""}
           ])))))
+
+(def ^:private required-code-editor-args
+  [:on-change :on-submit :edit-key])
+(def ^:private optional-code-editor-args
+  [:on-change :placeholder :tab-index :input-type :keymap])
+
+(defn input-type->language-mode
+  "Fn because I think this mapping should be elsewhere, maybe more complex.
+  I feel weird about putting this in schema.cljc because it's specific
+  to CodeMirror."
+  [tp]
+  (get {:literal/math "stex"} tp))
+
+(defn code-editor-config*
+  [required-args optional-args]
+  (let [{:keys [edit-key input-type on-change on-submit]}
+        required-args]
+    (hash-map
+     :state      {}
+     :init-state (merge optional-args
+                        {:edit-key      edit-key
+                         :language-mode (input-type->language-mode input-type)
+                         :on-change     on-change
+                         :on-submit     on-submit}) 
+     )))
+
+(defn code-editor-config [& args]
+  (let [argmap (apply hash-map args)]
+    (code-editor-config*
+      (select-keys argmap required-code-editor-args)
+      (select-keys argmap optional-code-editor-args))))

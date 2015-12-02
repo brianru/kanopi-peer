@@ -1,6 +1,7 @@
 (ns kanopi.transit-dev
   (:require-macros [devcards.core :as dc :refer (defcard deftest)])
-  (:require [com.stuartsierra.component :as component]
+  (:require devcards.core
+            [com.stuartsierra.component :as component]
             [cljs.test :refer-macros (testing is)]
             [cognitect.transit :as t]))
 

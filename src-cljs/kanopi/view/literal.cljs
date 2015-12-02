@@ -26,6 +26,7 @@
 
             [kanopi.view.widgets.text-editor :as text-editor]
             [kanopi.view.widgets.input-field :as input-field]
+            [kanopi.view.widgets.math :as math]
 
             [kanopi.model.message :as msg]
             [kanopi.model.schema :as schema]
@@ -45,11 +46,7 @@
 
 (defmethod literal-renderer :literal/math
   [owner literal]
-  )
-
-(defmethod literal-renderer :literal/code
-  [owner literal]
-  )
+  (om/build math/katex literal {:state {:input-value (om/get-state owner [:input-value])}}))
 
 (defmulti literal-editor
   "
@@ -73,15 +70,16 @@
             (keyword)))
   :default :text)
 
-(defmethod literal-editor :code
+(defmethod literal-editor :math
   [owner literal]
   (om/build text-editor/code literal
-            {:init-state
-             {:edit-key :literal/code
-              :on-submit (fn [value]
-                           (->> (msg/update-literal (:db/id literal) :literal/code value)
-                                (msg/send! owner)))
-              }}))
+            (text-editor/code-editor-config
+              :edit-key   :literal/math
+              :input-type :literal/math
+              :on-submit  (fn [value]
+                            (->> (msg/update-literal (:db/id literal) :literal/math value)
+                                 (msg/send! owner))))
+            ))
 
 (defmethod literal-editor :text
   [owner literal]
