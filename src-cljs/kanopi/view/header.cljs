@@ -40,13 +40,12 @@
                     ))]
         ]))))
 
-(defn- team->menu-item [owner team]
+(defn- team->menu-item [owner current-team team]
   (hash-map :type     :link
             :on-click (fn [_]
                         (->> (msg/switch-team (:team/id team))
                              (msg/send! owner)))
-            :label    (get team :team/id)
-            ))
+            :label    (get team :team/id)))
 
 (defn- manage-teams-menu-item [owner]
   (hash-map :type :link
@@ -91,8 +90,9 @@
                                                (msg/send! owner)))
                        :toggle-label (:team/id current-team)
                        :menu-items (conj
-                                    (mapv (partial team->menu-item owner)
+                                    (mapv (partial team->menu-item owner current-team)
                                           (get-in props [:user :teams]))
+                                    (dropdown/divider-item)
                                     (manage-teams-menu-item owner))}
                       })]
           ]))
@@ -156,7 +156,7 @@
                                   :label   (str "Signed in as" " ")
                                   :content (get-in props [:user :identity])}
 
-                                 {:type  :divider}
+                                 (dropdown/divider-item)
 
                                  {:type  :link
                                   :href  ""
@@ -168,7 +168,7 @@
                                   :href  ""
                                   :label "Help"}
 
-                                 {:type  :divider}
+                                 (dropdown/divider-item)
 
                                  {:type  :link
                                   :href  (browser/route-for owner :settings)

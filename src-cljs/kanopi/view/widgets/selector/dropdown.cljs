@@ -65,6 +65,9 @@
     (when-let [b (get itm :content)]
       [:b b])]])
 
+(defn divider-item []
+  (hash-map :type :divider))
+
 (defn dropdown-menu [owner]
   ;; FIXME: do something different when there's only 1 menu
   ;; item. no reason to let user expand menu.

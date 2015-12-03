@@ -231,6 +231,17 @@ a.navbar-brand:focus {
     user-select: none;
 }
 
+.navbar .dropdown-menu {
+    margin-top: 4px;
+    border: 1px solid #ccc;
+}
+.navbar-right .dropdown-menu {
+    right: 1rem;
+}
+.navbar-header .dropdown-menu {
+    left: 1rem;
+}
+
 .prompt {
     margin-bottom: 20px;
     text-align: center;
