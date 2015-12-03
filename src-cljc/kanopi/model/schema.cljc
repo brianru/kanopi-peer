@@ -180,13 +180,17 @@
 ;; TODO: flesh this out based on lucene search syntax
 (s/defschema QueryString (s/conditional not-empty s/Str))
 
+(def user-id-min-length 3)
 (s/defschema UserId
-  (s/conditional #(>= (count %) 3) s/Str))
+  (s/conditional #(>= (count %) user-id-min-length)
+                 s/Str))
 
 (s/defschema TeamId UserId)
 
+(def user-password-min-length 8)
 (s/defschema UserPassword
-  (s/conditional #(>= (count %) 8) s/Str))
+  (s/conditional #(>= (count %) user-password-min-length)
+                 s/Str))
 
 (s/defschema InputCredentials
   [(s/one UserId "id") (s/one UserPassword "pw")])

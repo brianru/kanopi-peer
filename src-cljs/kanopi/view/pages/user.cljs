@@ -1,8 +1,10 @@
 (ns kanopi.view.pages.user
   (:require [sablono.core :refer-macros [html] :include-macros true]
             [om.core :as om]
-            [kanopi.util.browser :as browser]
+            [schema.core :as s]
+            [kanopi.model.schema :as schema]
             [kanopi.model.message :as msg]
+            [kanopi.util.browser :as browser]
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]))
 
@@ -17,9 +19,11 @@
 
 (defn- username-field [owner username-key submit-fn submittable]
   [:div.form-group
-   [:input.form-control
+   [:input.form-control.validated
     {:type        "text"
      :placeholder "username"
+     :required    true
+     :min-length  schema/user-id-min-length
      :value       (om/get-state owner username-key)
      :on-change   (fn [evt]
                     (om/set-state! owner username-key (.. evt -target -value))) 
@@ -28,9 +32,11 @@
 
 (defn- password-field [owner password-key submit-fn submittable]
   [:div.form-group
-   [:input.form-control
+   [:input.form-control.validated
     {:type        "password"
      :placeholder "password"
+     :required    true
+     :min-length  schema/user-password-min-length
      :value       (om/get-state owner password-key)
      :on-change   #(om/set-state! owner password-key (.. % -target -value))
      :on-key-down (partial handle-key-down owner submit-fn submittable)
@@ -89,7 +95,8 @@
                                 :login    login-fn
                                 :logout   logout-fn
                                 )
-            submittable (not (some empty? [username password]))]
+            submittable (every? nil? [(s/check schema/UserId       username)
+                                      (s/check schema/UserPassword password)])]
         (html
          [:div.container-fluid
           [:div.row
