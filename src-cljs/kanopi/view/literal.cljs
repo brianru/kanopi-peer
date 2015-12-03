@@ -88,6 +88,8 @@
   (om/build text-editor/rich-text literal
             {:init-state
              {:edit-key :literal/text
+              :on-change (fn [value]
+                           (om/set-state! owner :input-value value))
               :on-submit (fn [value]
                            (->> (msg/update-literal (:db/id literal) :literal/text value)
                                 (msg/send! owner)))}}))
@@ -96,7 +98,10 @@
   [owner literal]
   (om/build input-field/integer literal
             {:init-state
-             {:on-submit (fn [value]
+             {:edit-key  :literal/integer
+              :on-change (fn [value]
+                           (om/set-state! owner :input-value value))
+              :on-submit (fn [value]
                            (->> (msg/update-literal (:db/id literal) :literal/integer value)
                                 (msg/send! owner)))}}))
 
@@ -104,17 +109,14 @@
   [owner literal]
   (om/build input-field/decimal literal
             {:init-state
-             {:on-submit (fn [value]
+             {:edit-key :literal/decimal
+              :on-change (fn [value]
+                           (om/set-state! owner :input-value value))
+              :on-submit (fn [value]
                            (->> (msg/update-literal (:db/id literal) :literal/decimal value)
                                 (msg/send! owner)))}}))
 
 (comment
- 
- ; https://github.com/Khan/KaTeX
- (defmethod literal-editor :math
-   []
-   )
- 
  (defmethod literal-editor :markdown
    []
    )

@@ -32,7 +32,7 @@
           ; This is not how I want to pull in JS/CSS dependencies.
           ; TODO: figure out a better way. CLJS/JS does not work with
           ; CSS when using Leiningen.
-          ; (include-css "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css")
+          (include-css "https://cdnjs.cloudflare.com/ajax/libs/codemirror/5.8.0/codemirror.min.css")
           
           ))
 
