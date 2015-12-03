@@ -88,6 +88,8 @@
                                     "resources/public/js/out"
                                     "resources/public/js/out_devcards"]
 
+  :test2junit-output-dir ~(or (System/getenv "CIRCLE_TEST_REPORTS") "target/test2junit")
+
   :profiles {:dev
              {:jvm-opts ["-XX:MaxPermSize=128M"]
               :plugins [
@@ -100,7 +102,7 @@
                              [ring/ring-mock "0.3.0"]
                              [org.clojure/data.codec "0.1.0"]
                              [org.clojure/data.csv "0.1.3"]
-                             
+
                              ;; use client lib for testing
                              [http-kit "2.1.19"]
                              ]
@@ -116,7 +118,7 @@
                              [ring/ring-mock "0.3.0"]
                              [org.clojure/data.codec "0.1.0"]
                              [org.clojure/data.csv "0.1.3"]
-                             
+
                              ;; use client lib for testing
                              [http-kit "2.1.19"]
                              ]
@@ -124,36 +126,36 @@
               :source-paths ["dev"]
               :repl-options {:init-ns user}}}
 
-  :figwheel {;:server-logfile "target/logs/figwheel.log"
-             :css-dirs ["resources/public/css"]}
+:figwheel {;:server-logfile "target/logs/figwheel.log"
+           :css-dirs ["resources/public/css"]}
 
-  :cljsbuild {:builds
-              [
-               ;; lein figwheel to run with auto-reloading
-               ;; lein cljsbuild once to run otherwise
-               {:id "dev"
-                :source-paths ["src-cljc" "src-cljs"]
-                :figwheel {:on-jsload "kanopi.main/reload-om"}
-                :compiler {:output-to "resources/public/js/main.js"
-                           :output-dir "resources/public/js/out"
-                           ;; NOTE: yes leading slash here for a reason!
-                           :asset-path "/js/out"
-                           :main kanopi.main
-                           :optimizations :none
-                           :pretty-print true
-                           :source-map "resources/public/js/source_map.js"}}
+:cljsbuild {:builds
+            [
+             ;; lein figwheel to run with auto-reloading
+             ;; lein cljsbuild once to run otherwise
+             {:id "dev"
+              :source-paths ["src-cljc" "src-cljs"]
+              :figwheel {:on-jsload "kanopi.main/reload-om"}
+              :compiler {:output-to "resources/public/js/main.js"
+                         :output-dir "resources/public/js/out"
+                         ;; NOTE: yes leading slash here for a reason!
+                         :asset-path "/js/out"
+                         :main kanopi.main
+                         :optimizations :none
+                         :pretty-print true
+                         :source-map "resources/public/js/source_map.js"}}
 
-               ;; lein figwheel devcards to run
-               {:id "devcards"
-                :source-paths ["src-cljc" "src-cljs" "dev-cljs"]
-                :figwheel {:devcards true}
-                :compiler {:output-to "resources/public/js/main_devcards.js"
-                           :output-dir "resources/public/js/out_devcards"
-                           ;; NOTE: no leading slash here for a reason!
-                           :asset-path "js/out_devcards"
-                           :main kanopi.devcards
-                           :optimizations :none
-                           :pretty-print true
-                           :source-map "resources/public/js/source_map_devcards.js"}}
-               ]
-              })
+             ;; lein figwheel devcards to run
+             {:id "devcards"
+              :source-paths ["src-cljc" "src-cljs" "dev-cljs"]
+              :figwheel {:devcards true}
+              :compiler {:output-to "resources/public/js/main_devcards.js"
+                         :output-dir "resources/public/js/out_devcards"
+                         ;; NOTE: no leading slash here for a reason!
+                         :asset-path "js/out_devcards"
+                         :main kanopi.devcards
+                         :optimizations :none
+                         :pretty-print true
+                         :source-map "resources/public/js/source_map_devcards.js"}}
+             ]
+            })
