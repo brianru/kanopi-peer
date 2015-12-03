@@ -68,14 +68,15 @@
                  ]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
-                                   :username :env/datomic-username
-                                   :password :env/datomic-password
+                                   :username [:env/kanopi_datomic_username]
+                                   :password [:env/kanopi_datomic_password]
                                    }}
   :source-paths ["src-cljc" "src"]
   :test-paths ["src-cljc" "src" "test-cljc" "test"]
   :main kanopi.main
 
-  :plugins [[lein-marginalia "0.8.0"
+  :plugins [[lein-environ "1.0.1"]
+            [lein-marginalia "0.8.0"
              :exclusions [org.clojure/clojurescript org.clojure/clojure]
              ]
             [lein-cljsbuild "1.1.1"]
@@ -89,7 +90,7 @@
 
   :profiles {:dev
              {:jvm-opts ["-XX:MaxPermSize=128M"]
-              :plugins [[lein-environ "1.0.1"]
+              :plugins [
                         [lein-ancient "0.6.6"
                          :exclusions [org.clojure/tools.reader]]]
               :dependencies [[org.clojure/tools.nrepl "0.2.12"]

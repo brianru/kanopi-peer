@@ -19,6 +19,12 @@ scale with the only system that works at scale: learning.
 
 ## Usage: TODO
 
+### The following environment variables must be set:
+
+#### Credentials for accessing my.datomic.com
+- KANOPI_DATOMIC_USERNAME
+- KANOPI_DATOMIC_PASSWORD
+
 FIXME: This is pre-alpha. Nothing is guaranteed to ever work. Clever
 branching strategies come later.
 
