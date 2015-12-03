@@ -111,8 +111,6 @@
   (let [{:keys [tab-index expanded toggle-label button-on-click]}
         (om/get-state owner)]
     [:div.btn-group
-     {:on-mouse-enter #(start-hover! owner)
-      :on-mouse-leave #(close-dropdown! owner)}
      [:button.btn
       {:type "button"
        :on-click button-on-click}
@@ -124,8 +122,8 @@
        :aria-expanded expanded
        :on-click #(toggle-dropdown! owner)
        :tab-index tab-index
-       ; :on-mouse-enter #(start-hover! owner)
-       ; :on-mouse-leave #(close-dropdown! owner)
+       :on-mouse-enter #(start-hover! owner)
+       :on-mouse-leave #(close-dropdown! owner)
        }
       [:span.caret]
       [:span.sr-only

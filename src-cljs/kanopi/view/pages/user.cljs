@@ -153,7 +153,7 @@
                 :logout
                 [:div
                  [:span "Are you sure you want to leave? "]
-                 [:a {:href (browser/route-for owner :home)} "Home"]]
+                 [:a {:href (browser/route-for owner :home)} "Not really."]]
                 )
 
               ]]

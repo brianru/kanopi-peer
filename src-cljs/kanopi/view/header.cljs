@@ -27,16 +27,17 @@
         [:span.search
          (om/build typeahead/typeahead props
                    (typeahead/search-config
+                    :placeholder       ""
                     :result-display-fn schema/display-entity
-                    :result-href-fn  (fn [result]
-                                       (when-let [id (:db/id result)]
-                                         (case (schema/describe-entity result)
-                                           :datum
-                                           (browser/route-for owner :datum :id id)
-                                           :literal
-                                           (browser/route-for owner :literal :id id)
-                                           ; default
-                                           nil)))
+                    :result-href-fn    (fn [result]
+                                         (when-let [id (:db/id result)]
+                                           (case (schema/describe-entity result)
+                                             :datum
+                                             (browser/route-for owner :datum :id id)
+                                             :literal
+                                             (browser/route-for owner :literal :id id)
+                                             ; default
+                                             nil)))
                     ))]
         ]))))
 
@@ -85,9 +86,7 @@
                        :toggle-type :split-button}
                       :state
                       {
-                       :button-on-click (fn [_]
-                                          (->> (msg/switch-team (:team/id current-team))
-                                               (msg/send! owner)))
+                       :button-on-click (fn [_] (browser/set-page! owner [:home]))
                        :toggle-label (:team/id current-team)
                        :menu-items (conj
                                     (mapv (partial team->menu-item owner current-team)
