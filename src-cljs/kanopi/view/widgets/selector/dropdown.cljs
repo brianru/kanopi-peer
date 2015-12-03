@@ -56,6 +56,15 @@
   [owner idx itm]
   [:li.divider {:role "separator", :react-key idx}])
 
+(defmethod dropdown-menu-item :text
+  [owner idx itm]
+  [:li.dropdown-menu-item
+   {:react-key idx}
+   [:a.text-dropdown-menu-item {}
+    [:span (get itm :label)]
+    (when-let [b (get itm :content)]
+      [:b b])]])
+
 (defn dropdown-menu [owner]
   ;; FIXME: do something different when there's only 1 menu
   ;; item. no reason to let user expand menu.

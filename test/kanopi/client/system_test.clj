@@ -33,4 +33,3 @@
       (is (= current-datum (get-in @app-state [:datum])))
       )
     (component/stop system)))
-

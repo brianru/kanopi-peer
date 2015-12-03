@@ -131,7 +131,7 @@
               (case mode
                 :enter
                 [:div
-                 [:span "Welcoem to Kanopi!"]]
+                 [:span "Welcome to Kanopi!"]]
 
                 :register
                 [:div

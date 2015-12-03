@@ -151,9 +151,10 @@
                     :classes ["navbar-brand"]
                     :caret? true
                     :tab-index -1
-                    :menu-items [{:type  :link
-                                  :href  (browser/route-for owner :settings)
-                                  :label "Settings"}
+                    :menu-items [
+                                 {:type    :text
+                                  :label   (str "Signed in as" " ")
+                                  :content (get-in props [:user :identity])}
 
                                  {:type  :divider}
 
@@ -168,6 +169,10 @@
                                   :label "Help"}
 
                                  {:type  :divider}
+
+                                 {:type  :link
+                                  :href  (browser/route-for owner :settings)
+                                  :label "Settings"}
 
                                  {:type  :link
                                   :href  (browser/route-for owner :logout)

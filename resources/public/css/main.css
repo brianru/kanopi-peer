@@ -111,6 +111,7 @@ a {
     color: inherit !important;
     cursor: pointer;
 }
+.nav .glyphicon,
 a .glyphicon {
     color: #777;
 }
@@ -201,6 +202,13 @@ a.navbar-brand:focus {
 .dropdown-menu-item > a {
     text-overflow: ellipsis;
     overflow: hidden;
+}
+.dropdown-menu-item > .text-dropdown-menu-item {
+    cursor: pointer;
+}
+.dropdown-menu-item > .text-dropdown-menu-item:hover {
+    background-color: inherit;
+    cursor: text;
 }
 .dropdown-menu-item {
     cursor: pointer;
