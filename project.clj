@@ -91,6 +91,7 @@
   :profiles {:dev
              {:jvm-opts ["-XX:MaxPermSize=128M"]
               :plugins [
+                        [test2junit "1.1.3"]
                         [lein-ancient "0.6.6"
                          :exclusions [org.clojure/tools.reader]]]
               :dependencies [[org.clojure/tools.nrepl "0.2.12"]

@@ -8,6 +8,8 @@
 *.log
 pom.xml
 pom.xml.asc
+build.xml
+/test2junit
 *.jar
 *.class
 /.lein-*
