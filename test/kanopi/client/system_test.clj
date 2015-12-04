@@ -15,7 +15,7 @@
   (let [system (component/start (client/new-system {}))]
     (is (not-empty system))
     (is (not (s/check schema/AppState @(get-in system [:app-state :app-state]))))
-    
+
     (component/stop system)))
 
 (deftest create-and-get-datum

@@ -42,6 +42,8 @@
                  [devcards "0.2.1"]
 
                  ;; Database
+                 ; NOTE: add AWS DDB sdk when upgrading datomic
+                 ; http://docs.datomic.com/storage.html#provisioning-dynamo
                  [com.datomic/datomic-pro "0.9.5327"
                   :exclusions [joda-time]]
 
@@ -72,7 +74,7 @@
                                    :password [:env/kanopi_datomic_password]
                                    }}
   :source-paths ["src-cljc" "src"]
-  :test-paths ["src-cljc" "src" "test-cljc" "test"]
+  :test-paths ["src-cljc" "test-cljc" "src" "test"]
   :main kanopi.main
 
   :plugins [[lein-environ "1.0.1"]

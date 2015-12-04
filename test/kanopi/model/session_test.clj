@@ -29,7 +29,7 @@
         (is (not-empty (get ses :page)))
         (is (not-empty (get ses :datum)))
         (is (->> ses
-                 ((juxt :most-viewed-datums :most-edited-datums :recent-datums))
+                 ((juxt :most-edited-datums :recent-datums))
                  (every? empty?)))))
 
     (testing "registered user"
@@ -39,7 +39,7 @@
         (is (not-empty (get ses :user)))
         (is (= creds (get ses :user)))
         (is (->> ses
-                 ((juxt :most-viewed-datums :most-edited-datums :recent-datums))
+                 ((juxt :most-edited-datums :recent-datums))
                  (every? not-empty)))
         ))
     (component/stop system)))

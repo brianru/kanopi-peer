@@ -11,7 +11,6 @@
             ))
 
 (defn get-cookie [id]
-  (println "foo" (cookies/get id))
   (-> (cookies/get id)
       (url/query->map)
       (get "init")

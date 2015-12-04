@@ -164,7 +164,6 @@
           results (handle-message mode verbs history atm msg)
           ]
       (when-let [msgs (not-empty (:messages results))]
-        (println "HERE" msgs)
         (doseq [msg msgs]
           (transmit! this msg)))))
   component/Lifecycle
