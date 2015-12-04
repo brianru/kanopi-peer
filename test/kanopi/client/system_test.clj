@@ -23,12 +23,12 @@
         (component/start (client/new-system {}))
         app-state (get-in system [:app-state :app-state])
         ]
+    (is (not-empty (get-in @app-state [:user])))
     (dispatch/transmit! dispatcher (message/create-datum))
     (is (not-empty (get-in @app-state [:datum])))
     (is (not (s/check schema/CurrentDatum (get-in @app-state [:datum]))))
 
-    (let [current-datum (get-in @app-state [:datum])
-          ]
+    (let [current-datum (get-in @app-state [:datum])]
       (dispatch/transmit! dispatcher (message/get-datum (get-in current-datum [:datum :db/id])))
       (is (= current-datum (get-in @app-state [:datum])))
       )

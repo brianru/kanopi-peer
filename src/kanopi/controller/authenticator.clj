@@ -52,8 +52,7 @@
                    ))]
      (when (and validate? creds')
        (assert (s/validate schema/Credentials creds') "Invalid credential map."))
-     creds') )
-  )
+     creds')))
 
 (defrecord AuthenticationService [config init-data database user-lookup-fn]
 

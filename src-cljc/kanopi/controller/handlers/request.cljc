@@ -148,9 +148,9 @@
         similar (similar-datums (-> props :cache vals) datum-id)
         datum   (lookup-id props datum-id)]
     (hash-map
-     :context-datums [(lookup-id props -1008)]
+     :context-datums []
      :datum datum
-     :similar-datums [(lookup-id props -1016)])))
+     :similar-datums [])))
 
 (defn- build-literal-data
   ""
@@ -218,10 +218,11 @@
 (defmethod local-request-handler :datum/create
   [app-state msg]
   (let [dtm {:datum/label (get-in msg [:noun :label])
-             :datum/team  (get-in app-state [:user :current-team :db/id])
+             :datum/team  (get-in @app-state [:user :current-team])
              :db/id       (util/random-uuid)}
-        st' (assoc-in @app-state [:cache (get dtm :db/id)] dtm)
-        user-datum (build-datum-data st' (get dtm :db/id))
+        user-datum (hash-map :context-datums []
+                             :datum dtm
+                             :similar-datums [])
         ]
     (hash-map :messages [(msg/create-datum-success user-datum)])))
 
@@ -253,7 +254,7 @@
 
 (defmethod local-request-handler :datum/get
   [app-state msg]
-  (let [user-datum (build-datum-data app-state (get msg :noun))]
+  (let [user-datum (build-datum-data @app-state (get msg :noun))]
     (hash-map :messages [(msg/get-datum-success user-datum)])))
 
 (defmethod local-request-handler :literal/get

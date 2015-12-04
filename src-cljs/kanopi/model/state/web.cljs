@@ -70,7 +70,7 @@
                  ;; implement a map that only stores the last n
                  ;; entries, everything else gets dropped off the
                  ;; back
-                 :search-results {"foo" [[0.75 "food"] [0.42 "baffoon"]]}
+                 :search-results {} ;{"foo" [[0.75 "food"] [0.42 "baffoon"]]}
                  :error-messages []
                  :log []
                  }

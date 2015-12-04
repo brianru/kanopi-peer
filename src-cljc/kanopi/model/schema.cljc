@@ -197,22 +197,22 @@
 
 (s/defschema UserTeam
   {
-   :db/id   (s/maybe DatomicId)
+   :db/id   (s/maybe (s/cond-pre DatomicId s/Str))
    :team/id TeamId
    })
 
 (s/defschema Credentials
   {
-   :ent-id   DatomicId
+   :ent-id   (s/cond-pre DatomicId s/Str)
    :username UserId
-   :password UserPassword
+   (s/optional-key :password) UserPassword
    :teams    [UserTeam]
    :current-team UserTeam
    })
 
 (s/defschema User
   {
-   :db/id         (s/maybe DatomicId)
+   :db/id         (s/maybe (s/cond-pre DatomicId s/Str))
    :user/id       UserId
    :user/password UserPassword
    :user/team     UserTeam
@@ -234,7 +234,7 @@
 
 (s/defschema Datum
   ""
-  {:db/id       (s/maybe DatomicId)
+  {:db/id       (s/maybe (s/cond-pre DatomicId s/Str))
    :datum/team  UserTeam
    :datum/label (s/maybe s/Str)
    (s/optional-key :datum/fact)  [(s/recursive #'Fact)]
@@ -323,7 +323,7 @@
 (s/defschema AppState
   {
    :mode    s/Keyword
-   :user    (s/maybe User)
+   :user    (s/maybe Credentials)
    :page    s/Any
    :intent  s/Any
    :datum   (s/maybe CurrentDatum)

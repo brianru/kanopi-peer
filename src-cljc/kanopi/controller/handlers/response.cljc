@@ -57,8 +57,6 @@
   [app-state {:keys [datum new-entities]}]
   (transact! app-state
              (fn [app-state]
-               (println "incorporate updated datum" (get datum :datum/fact))
-               (println new-entities)
                (let [datum-id (get datum :db/id)
                      cache-delta (->> (conj new-entities datum)
                                       (map (comp vec (juxt :db/id identity)))
