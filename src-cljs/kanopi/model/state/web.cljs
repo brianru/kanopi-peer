@@ -29,10 +29,13 @@
     c))
 
 (defn get-init-session []
-  (-> (js/document.getElementById "kanopi-init")
-      (. -textContent)
-      (->> (. js/JSON parse))
-      (js->clj :keywordize-keys true)))
+  (let [v (-> (js/document.getElementById "kanopi-init")
+              (. -textContent)
+              (util/transit-read)
+              )]
+    (info "init-session")
+    (info v)
+    v))
 
 (defrecord LocalStorageAppState [config local-storage app-state]
   component/Lifecycle

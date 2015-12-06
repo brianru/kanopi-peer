@@ -2,7 +2,8 @@
   #?(:cljs (:refer-clojure :exclude (random-uuid)))
   #?(:cljs (:require [cljs-uuid-utils.core :as uuid]
                      cljs.reader
-                     clojure.string)
+                     clojure.string
+                     [cognitect.transit :as transit])
      :clj  (:require [cognitect.transit :as transit]
                      clojure.string))
   #?(:clj  (:import java.util.UUID
@@ -164,4 +165,15 @@
             (let [in (ByteArrayInputStream. (.getBytes string))
                   reader (transit/reader in :json)]
               (transit/read reader))))))
-    ))
+    )
+   :cljs
+   (do
+    
+    (defn transit-write [data]
+      (let [writer (transit/writer :json)]
+        (transit/write writer data)))
+    
+    (defn transit-read [data]
+      (let [reader (transit/reader :json)]
+        (transit/read reader data)))))
+

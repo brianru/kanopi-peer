@@ -10,11 +10,11 @@
 (defn include-om []
   (include-js "/js/main.js"))
 
-(defn include-json [json]
+(defn include-data [plain-text-data]
   [:script
-   {:type "text/javascript"
+   {:type "text/plain"
     :id "kanopi-init"}
-   json])
+   plain-text-data])
 
 (defn header [title]
   (vector :head
@@ -49,7 +49,7 @@
        (header title)
        [:body
         (when session-state
-          (include-json (json/generate-string session-state))) 
+          (include-data (util/transit-write session-state))) 
         [:div#app-container]
         (include-om)])
       })))
