@@ -25,7 +25,6 @@
       (component/using
        (state/new-app-state config)
        {:local-storage :local-storage})
-      
 
       :history
       (history/new-mem-history config)

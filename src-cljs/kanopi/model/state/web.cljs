@@ -53,7 +53,6 @@
                  ;; used by header to do fancy modal stuff
                  :intent {:id :spa.unauthenticated/navigate}
 
-                 ;; TODO: rename to current-datum
                  :datum (get init-session :datum
                              {:context-datums []
                               :similar-datums []
