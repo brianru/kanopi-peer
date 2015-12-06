@@ -12,9 +12,10 @@
      [?datum :datum/fact ?e]]
     [(related ?datum ?e)
      [?datum :datum/fact ?fact]
-     (or
-      [?fact :fact/attribute ?e]
-      [?fact :fact/value     ?e])]
+     [?fact :fact/attribute ?e]]
+    [(related ?datum ?e)
+     [?datum :datum/fact ?fact]
+     [?fact :fact/value ?e]]
     ])
 
 (declare describe-value-literal)
