@@ -5,6 +5,7 @@
             [schema.core :as s]
             [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
+            [kanopi.util.local-storage :as local-stoage]
             ))
 
 (def ^:private default-config
@@ -22,11 +23,12 @@
             :teams [team]
             :current-team team})))
 
-(defrecord AppState [config app-state]
+(defrecord AppState [config local-storage app-state]
   component/Lifecycle
   (start [this]
     (let [{:keys [mode]} (merge default-config config)
           init-session default-init-session
+          stored-app-state {} ; (local-storage/get! local-storage {})
           atm (atom
                {:mode    mode
                 :user    (get init-session :user)
@@ -47,6 +49,8 @@
       (assoc this :app-state atm)))
 
   (stop [this]
+    (info "save app state to local storage")
+    ; (local-storage/commit! local-storage @app-state)
     (assoc this :app-state nil)))
 
 (defn new-app-state [config]

@@ -1,6 +1,8 @@
 (ns kanopi.main
   (:gen-class)
   (:require [com.stuartsierra.component :as component]
+            [taoensso.timbre :as timbre
+             :refer (log trace debug info warn error fatal report)]
             [kanopi.system.server :as server]
             [kanopi.view.routes :as routes]
             [environ.core :refer [env]]))
@@ -18,6 +20,8 @@
                 :schema  ["resources/schema.edn"]
                 :data    ["resources/test-data.edn"]}
    :auth       {:init-user-data "resources/init-data.edn"}
+   :local-storage {:directory   "target"
+                   :content-key "kanopi"}
    :dev true})
 
 (defn system-config
@@ -29,6 +33,6 @@
 (defn -main [& args]
   "Default application entry point."
   (let [sys (server/new-system default-config)]
-    (println "starting system")
+    (info "starting system")
     (clojure.pprint/pprint env)
     (component/start sys)))

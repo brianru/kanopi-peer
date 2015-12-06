@@ -2,12 +2,12 @@
   (:require [com.stuartsierra.component :as component]
 
             #?(:cljs [kanopi.view.core :as view])
-            #?(:cljs [kanopi.util.local-storage :as local-storage])
-
             #?(:cljs [kanopi.model.state.web :as state]
                :clj  [kanopi.model.state     :as state])
             #?(:cljs [kanopi.controller.history.html5  :as history]
                :clj  [kanopi.controller.history.memory :as history])
+
+            [kanopi.util.local-storage :as local-storage]
 
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.aether.core :as aether]
@@ -18,8 +18,14 @@
    (defn client-library [config]
      (component/system-map
       
+      :local-storage
+      (local-storage/new-local-storage (get config :local-storage))
+
       :app-state
-      (state/new-app-state config)
+      (component/using
+       (state/new-app-state config)
+       {:local-storage :local-storage})
+      
 
       :history
       (history/new-mem-history config)
@@ -50,7 +56,8 @@
         :history   :history})
 
       :local-storage
-      (local-storage/new-local-storage (get config :local-storage-key "kanopi"))
+      (local-storage/new-local-storage
+       {:content-key (get config :local-storage-key "kanopi")})
 
       :app-state
       (component/using

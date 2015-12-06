@@ -5,17 +5,16 @@
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :min-lein-version "2.5.0"
   :dependencies [[org.clojure/clojure "1.7.0"]
-                 [com.stuartsierra/component "0.3.0"]
-                 [com.taoensso/timbre "4.1.4"]
-                 [environ "1.0.1"]
                  [com.cognitect/transit-clj "0.8.285"]
-
-                 ;; Core libraries
                  [org.clojure/core.async "0.2.374"]
                  [com.cognitect/transit-cljs "0.8.232"]
                  ;; resolves a dependency issue with figwheel and
                  ;; core.async
                  [org.clojure/core.memoize "0.5.8"]
+
+                 [com.stuartsierra/component "0.3.0"]
+                 [com.taoensso/timbre "4.1.4"]
+                 [environ "1.0.1"]
 
                  ;; Fuzzy string matching
                  [clj-fuzzy "0.3.1"]
@@ -25,6 +24,11 @@
                  [org.omcljs/om "1.0.0-alpha14"]
                  [bidi "1.22.1"]
                  [kibu/pushy "0.3.6"]
+                 [com.andrewmcveigh/cljs-time "0.3.14"]
+                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
+                 [com.cemerick/url "0.1.1"]
+                 [sablono "0.4.0"]
+                 [cljsjs/codemirror "5.8.0-0"]
 
                  ; Added http stuff to ensure we're using the right
                  ; versions for cljs-ajax. It's not pretty.
@@ -32,11 +36,6 @@
                  [org.apache.httpcomponents/httpasyncclient "4.1"]
                  [org.apache.httpcomponents/httpcore "4.4.3"]
 
-                 [com.andrewmcveigh/cljs-time "0.3.14"]
-                 [com.lucasbradstreet/cljs-uuid-utils "1.0.2"]
-                 [com.cemerick/url "0.1.1"]
-                 [sablono "0.4.0"]
-                 [cljsjs/codemirror "5.8.0-0"]
 
                  ; Dev
                  [devcards "0.2.1"]
@@ -46,8 +45,9 @@
                  ; http://docs.datomic.com/storage.html#provisioning-dynamo
                  [com.datomic/datomic-pro "0.9.5327"
                   :exclusions [joda-time]]
+                 [alandipert/enduro "1.2.0"]
 
-                 ;; Web
+                 ;; Web App
                  [org.immutant/web "2.1.1"]
                  [compojure "1.4.0"]
                  [liberator "0.13"]
@@ -64,8 +64,8 @@
 
                  [ring/ring-devel "1.4.0"]
 
+                 ;; Specification and Testing
                  [prismatic/schema "1.0.3"]
-                 ;; Test
                  [org.clojure/test.check "0.9.0"]
                  ]
 
@@ -82,14 +82,13 @@
              :exclusions [org.clojure/clojurescript org.clojure/clojure]
              ]
             [lein-cljsbuild "1.1.1"]
-            [lein-figwheel "0.5.0-1"
-             ; :exclusions [org.clojure/core.async]
-             ]]
+            [lein-figwheel "0.5.0-1"]]
 
   :clean-targets ^{:protect false} [:target-path
                                     "resources/public/js/out"
                                     "resources/public/js/out_devcards"]
 
+  ; https://github.com/ruedigergad/test2junit
   :test2junit-output-dir ~(or (System/getenv "CIRCLE_TEST_REPORTS") "target/test2junit")
 
   :profiles {:dev
