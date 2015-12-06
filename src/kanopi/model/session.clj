@@ -64,12 +64,9 @@
                                 :where [?e :datum/label "Welcome to Kanopi!"]] db)
           ]
       (hash-map
-       :user  creds
+       :user  (dissoc creds :password)
        :page  (str "/datum/" welcome-ent-id)
        :datum (data/user-datum* db welcome-ent-id)
-       :most-viewed-datums []
-       :most-edited-datums []
-       :recent-datums      []
        :cache (hash-map welcome-ent-id
                         (data-impl/get-datum* db welcome-ent-id))
        )))
@@ -81,7 +78,7 @@
                                 :where [?e :datum/label "Welcome to Kanopi!"]] db)
           ]
       (hash-map
-       :user creds
+       :user (dissoc creds :password)
        ; :page  (str "/datum/" welcome-ent-id)
        ; :datum (data/user-datum* db welcome-ent-id)
        :most-viewed-datums (data/most-viewed-datums data-service creds)

@@ -93,6 +93,12 @@
   (if-not (map? m) :unknown
     (let [ks (keys m)]
       (cond
+       (some #{:user/id} ks)
+       :user
+
+       (some #{:team/id} ks)
+       :team
+
        (some #{:datum/fact :datum/label :datum/team} ks)
        :datum
 
@@ -177,6 +183,8 @@
 
 (s/defschema DatomicId s/Int)
 
+(s/defschema DatomicIdInclTemp (s/cond-pre DatomicId s/Str))
+
 ;; TODO: flesh this out based on lucene search syntax
 (s/defschema QueryString (s/conditional not-empty s/Str))
 
@@ -197,13 +205,13 @@
 
 (s/defschema UserTeam
   {
-   :db/id   (s/maybe (s/cond-pre DatomicId s/Str))
+   :db/id   (s/maybe DatomicIdInclTemp)
    :team/id TeamId
    })
 
 (s/defschema Credentials
   {
-   :ent-id   (s/cond-pre DatomicId s/Str)
+   :ent-id   DatomicIdInclTemp
    :username UserId
    (s/optional-key :password) UserPassword
    :teams    [UserTeam]
@@ -212,7 +220,7 @@
 
 (s/defschema User
   {
-   :db/id         (s/maybe (s/cond-pre DatomicId s/Str))
+   :db/id         (s/maybe DatomicIdInclTemp)
    :user/id       UserId
    :user/password UserPassword
    :user/team     UserTeam
@@ -234,7 +242,7 @@
 
 (s/defschema Datum
   ""
-  {:db/id       (s/maybe (s/cond-pre DatomicId s/Str))
+  {:db/id       (s/maybe DatomicIdInclTemp)
    :datum/team  UserTeam
    :datum/label (s/maybe s/Str)
    (s/optional-key :datum/fact)  [(s/recursive #'Fact)]
@@ -320,6 +328,10 @@
    :tx/id s/Str
    })
 
+(s/defschema ClientCache
+  {DatomicIdInclTemp
+   (s/cond-pre NormalizedDatum NormalizedFact Literal UserTeam)})
+
 (s/defschema AppState
   {
    :mode    s/Keyword
@@ -331,10 +343,16 @@
    :most-viewed-datums [s/Any]
    :most-edited-datums [s/Any]
    :recent-datums      [s/Any]
-   :cache {s/Any s/Any}
-   ; :cache {DatomicId (s/cond-pre NormalizedDatum NormalizedFact Literal}
+   :cache ClientCache
 
    :search-results {s/Str [s/Any]}
    :error-messages [s/Any]
    :log [s/Any]
+   })
+
+(s/defschema ClientSession
+  {:user Credentials
+   :page s/Str
+   :datum CurrentDatum
+   :cache ClientCache
    })

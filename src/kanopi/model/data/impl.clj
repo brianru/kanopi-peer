@@ -4,6 +4,19 @@
             [kanopi.model.schema :as schema]
             [kanopi.model.storage.datomic :as datomic]))
 
+(def query-rules
+  '[
+    [(related ?datum ?e)
+     [?datum :datum/team ?e]]
+    [(related ?datum ?e)
+     [?datum :datum/fact ?e]]
+    [(related ?datum ?e)
+     [?datum :datum/fact ?fact]
+     (or
+      [?fact :fact/attribute ?e]
+      [?fact :fact/value     ?e])]
+    ])
+
 (declare describe-value-literal)
 
 (defn entity->input [ent]
@@ -146,6 +159,14 @@
     (if (empty? (dissoc ent :db/id))
       nil
       ent)))
+
+(defn get-related-entity-ids [db ent-id]
+  (let [ids (d/q '[:find ?e
+                   :in $ % ?root-e
+                   :where (related ?root-e ?e)
+                   ]
+                 db query-rules ent-id)]
+    ids))
 
 (defn mk-literal
   ""

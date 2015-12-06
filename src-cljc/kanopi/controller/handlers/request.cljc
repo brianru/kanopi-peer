@@ -83,41 +83,53 @@
 (defn- current-datum [props]
   (get-in props [:datum :datum :db/id]))
 
-(defn- lookup-id
-  ([props id]
-   (lookup-id props 0 id))
-  ([props depth id]
-   ;; FIXME: there is a correct depth cut-off. I don't know if this is
-   ;; it. I'm not thinking too clearly right now.
-   (cond
-    (> depth 10)
-    id
-    
-    ; NOTE: this is ugly. essentially, denormalized data gets into the
-    ; cache, which is bad.
-    (map? id)
-    id
-    
-    :default
-    (->> (get-in props [:cache id])
-          (reduce (fn [acc [k v]]
-                    (cond
-                     (= k :datum/fact)
-                     (assoc acc k (mapv (partial lookup-id props (inc depth)) v))
-                     (= k :fact/attribute)
-                     (assoc acc k (mapv (partial lookup-id props (inc depth)) v))
-                     (= k :fact/value)
-                     (assoc acc k (mapv (partial lookup-id props (inc depth)) v))
+(defmulti lookup-entity
+  (fn [app-state id]
+    (schema/describe-entity (get-in app-state [:cache id]))))
 
-                     :default
-                     (assoc acc k v)))
-                  {})))
-   ))
+(defmethod lookup-entity :unknown
+  [app-state id]
+  (info "unknown-entity: " id)
+  nil)
+
+(defmethod lookup-entity :fact
+  [app-state id]
+  (when-let [{:keys [fact/attribute fact/value] :as normalized-fact}
+             (get-in app-state [:cache id])]
+    (assoc normalized-fact
+           :fact/attribute
+           (lookup-entity app-state attribute)
+           
+           :fact/value
+           (lookup-entity app-state value)
+           
+           )))
+
+(defmethod lookup-entity :team
+  [app-state id]
+  (when-let [normalized-team (get-in app-state [:cache id])]
+    normalized-team))
+
+(defmethod lookup-entity :literal [app-state id]
+  (when-let [normalized-literal (get-in app-state [:cache id])]
+    normalized-literal))
+
+(defmethod lookup-entity :datum [app-state id]
+  (when-let [{:keys [datum/fact datum/team] :as normalized-datum}
+             (get-in app-state [:cache id])]
+    (info "datum:" normalized-datum)
+    (assoc normalized-datum
+           :datum/fact
+           (mapv (partial lookup-entity app-state) fact)
+           
+           :datum/team
+           (lookup-entity app-state team)
+           )))
 
 (defn- references-datum? [props base-id ent]
   (->> ent
        :db/id
-       (lookup-id props)
+       (lookup-entity props)
        :datum/fact))
 
 (defn- context-datums
@@ -146,7 +158,7 @@
   {:pre [(or (integer? datum-id) (string? datum-id))]}
   (let [context (context-datums (-> props :cache vals) datum-id)
         similar (similar-datums (-> props :cache vals) datum-id)
-        datum   (lookup-id props datum-id)]
+        datum   (lookup-entity props datum-id)]
     (hash-map
      :context-datums []
      :datum datum
@@ -155,7 +167,7 @@
 (defn- build-literal-data
   ""
   [props literal-id]
-  (let [literal (lookup-id props literal-id)
+  (let [literal (lookup-entity props literal-id)
         context (context-datums (-> props :cache vals) literal-id)]
     (hash-map
      :literal literal

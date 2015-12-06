@@ -12,6 +12,7 @@
     (when-let [txdata (not-empty (read-string (slurp file-path)))]
       @(d/transact conn txdata))))
 
+; FIXME: this should be in another ns.
 (def auth-rules
   '[
     ;; Datums

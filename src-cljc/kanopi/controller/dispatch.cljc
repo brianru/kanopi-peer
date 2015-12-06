@@ -116,7 +116,6 @@
         local-response-verbs (get-in verbs [mode :local :response])
         remote-request-verbs (get-in verbs [mode :remote :request])
         ]
-    (info "handle-message" msg)
     (cond->> {:messages []}
       (contains? local-request-verbs verb)
       (merge-with concat

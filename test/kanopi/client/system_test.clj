@@ -30,6 +30,5 @@
 
     (let [current-datum (get-in @app-state [:datum])]
       (dispatch/transmit! dispatcher (message/get-datum (get-in current-datum [:datum :db/id])))
-      (is (= current-datum (get-in @app-state [:datum])))
-      )
+      (is (= current-datum (get-in @app-state [:datum]))))
     (component/stop system)))
