@@ -50,13 +50,17 @@
                        (re-find #"^[0-9]?[0-9]*\.+[0-9]*$" v))))
     :parser (comp double #?(:clj  read-string
                             :cljs cljs.reader/read-string))
+
+    :literal/uri
+    {:ident :literal/uri
+     :label "uri"
+     ; TODO: serious validation.
+     :predicate (fn [v]
+                  (and (string? v)
+                       true))
+     :parser identity}
   
     }
-
-   ;; TODO: implement.
-   ; :literal/uri
-   ; {:ident :literal/uri
-   ;  :predicate (constantly nil)}
 
    ;; TODO: implement.
    ; :literal/email-address
@@ -280,10 +284,15 @@
    :literal/team UserTeam
    :literal/text s/Str})
 
-(s/defschema CodeLiteral
+(s/defschema MathLiteral
   {:db/id (s/maybe DatomicId)
    :literal/team UserTeam
-   :literal/code s/Str})
+   :literal/math s/Str})
+
+(s/defschema UriLiteral
+  {:db/id (s/maybe DatomicId)
+   :literal/team UserTeam
+   :literal/uri s/Str})
 
 (s/defschema IntegerLiteral
   {:db/id (s/maybe DatomicId)
@@ -298,7 +307,7 @@
 (s/defschema Literal
   (s/conditional
    #(find % :literal/text)    TextLiteral
-   #(find % :literal/code)    CodeLiteral
+   #(find % :literal/math)    MathLiteral
    #(find % :literal/integer) IntegerLiteral
    #(find % :literal/decimal) DecimalLiteral))
 

@@ -99,16 +99,16 @@
   :db.install/_attribute :db.part/db}
 
  ;; TODO: internationalization and localization via additional
- ;; attributes on literal entities
+;; attributes on literal entities
 
- ;;{:db/ident :literal/uri
- ;; :db/valueType :db.type/uri
- ;; :db/cardinality :db.cardinality/one
- ;; :db/fulltext true
- ;; :db/id #db/id[:db.part/db]
- ;; :db.install/_attribute :db.part/db}
+{:db/ident :literal/uri
+ :db/valueType :db.type/uri
+ :db/cardinality :db.cardinality/one
+ :db/fulltext true
+ :db/id #db/id[:db.part/db]
+ :db.install/_attribute :db.part/db}
 
-;;{:db/ident :literal/image-uri
+;;{:db/ident :literal/image
 ;; :db/valueType :db.type/uri
 ;; :db/cardinality :db.cardinality/one
 ;; :db/id #db/id[:db.part/db]
