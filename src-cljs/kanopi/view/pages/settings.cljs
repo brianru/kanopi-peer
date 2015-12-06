@@ -7,6 +7,8 @@
             [taoensso.timbre :as timbre
              :refer-macros (log trace debug info warn error fatal report)]
             [sablono.core :refer-macros [html] :include-macros true]
+
+            [kanopi.view.widgets.selector.list :as list]
             ))
 
 (defn settings [props owner opts]
@@ -19,4 +21,22 @@
     (render [_]
       (let []
         (html
-         [:div.settings])))))
+         [:div.settings.container-fluid
+          [:div.row
+           [:div.col-md-3.settings-pane-selector
+            [:div.panel.panel-default
+             [:div.panel-heading
+              [:h3.panel-title ""]]
+             [:div.panel-body
+              (om/build list/vertical props {:state {}})
+              ]
+             ]]
+
+           [:div.col-md-9.settings-panel
+            [:div.panel.panel-default
+             [:div.panel-heading
+              [:h2.panel-title ""
+               ]
+              ]
+             [:div.panel-body
+              ]]]]])))))

@@ -333,6 +333,9 @@ a.navbar-brand:focus {
     width: 100%;
     resize: none;
 }
+.rich-text-editor {
+    min-height: 40rem;
+}
 .editable-text-icon {
     padding-right: 0.5rem;
     cursor: pointer;

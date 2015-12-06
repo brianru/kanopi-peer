@@ -54,6 +54,7 @@
             ;;_ (assert (get props :db/id)
             ;;          "Gotta have an id to be here.")
             ]
+        (println @props)
         (html
          [:div.row
           [:div.datum-body.col-xs-offset-1.col-md-offset-3.col-xs-10.col-md-6
@@ -135,8 +136,6 @@
 
     om/IWillMount
     (will-mount [_]
-      (println "WILL MOUNT DATUM")
-      (println props)
       (when-not (get-in props [:datum :db/id])
         (println "Datum going to mount without enough data.")
         (println props)
