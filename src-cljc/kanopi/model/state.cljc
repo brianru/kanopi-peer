@@ -32,19 +32,20 @@
           atm (atom
                (util/deep-merge
                  {:mode    mode
-                  :user    (get init-session :user)
-                  :page    nil
-                  :intent  nil
-                  :datum   (get init-session :datum)
-                  :literal (get init-session :literal)
-                  :most-viewed-datums []
-                  :most-edited-datums []
-                  :recent-datums      []
-                  :cache (get init-session :cache {})
-                  :search-results {}
-                  :error-messages []
-                  :log []
+                  :user    {}
+                  :page    ""
+                  ; :intent  nil
+                  ; :datum   (get init-session :datum)
+                  ; :literal (get init-session :literal)
+                  ; :most-viewed-datums []
+                  ; :most-edited-datums []
+                  ; :recent-datums      []
+                  :cache {}
+                  ; :search-results {}
+                  ; :error-messages []
+                  ; :log []
                   }
+                 init-session
                  stored-app-state)
                ; :validator (partial s/validate schema/AppState)
                )]

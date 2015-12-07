@@ -3,7 +3,9 @@
             [clojure.data.codec.base64 :as base64]
             [kanopi.main :refer (default-config)]
             [kanopi.system.server :as server]
+            [kanopi.system.client :as client]
             [kanopi.model.storage.datomic :as datomic]
+            [kanopi.model.session :as session]
             [datomic.api :as d]
             [kanopi.util.core :as util]
             [ring.mock.request :as mock]))
@@ -54,3 +56,25 @@
   (mock-request! system :post "/register" creds
                  :accept "application/transit+json"))
 
+(defn initialized-client-system
+  ([config]
+   (let [server-system (component/start (system-excl-web))
+         anon-session  (session/init-anonymous-session (:session-service server-system))
+         client-system (-> (util/deep-merge
+                             config {:app-state {:initial-value anon-session}})
+                           (client/new-system)) 
+         ]
+     (component/stop server-system)
+     client-system))
+
+  ([config username password]
+   (let [server-system (component/start (system-excl-web))
+         creds (let [auth-svc (:authenticator server-system)]
+                 (authenticator/register! auth-svc username password)
+                 (authenticator/credentials auth-svc username)) 
+         user-session (session/init-session (:session-service server-system) creds)
+         client-system (-> (util/deep-merge
+                             config {:app-state {:initial-value user-session}}))
+         ]
+     (component/stop server-system)
+     client-system)))

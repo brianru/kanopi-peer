@@ -29,7 +29,7 @@
         ]
 
     (is (not (s/check schema/ClientSession anonymous-session))) 
-    (is (not (s/check schema/ClientSession @client-app-state)))
+    (is (not (s/check schema/ClientSession client-app-state)))
 
     (component/stop server-system)
     (component/stop client-system)
@@ -42,7 +42,7 @@
                   (authenticator/credentials auth-svc "brian"))
         user-session (session/init-session (get server-system :session-service) creds)
 
-        client-system (-> (client/new-system {:local-storage {:initial-value user-session}})
+        client-system (-> (client/new-system {:app-state {:initial-value user-session}})
                           (component/start)) 
         client-app-state (-> client-system :app-state :app-state (deref))
         ]

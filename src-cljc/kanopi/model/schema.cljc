@@ -360,8 +360,9 @@
    })
 
 (s/defschema ClientSession
-  {:user Credentials
+  {(s/optional-key :mode) s/Keyword
+   :user Credentials
    :page s/Str
-   :datum CurrentDatum
+   (s/optional-key :datum) CurrentDatum
    :cache ClientCache
    })

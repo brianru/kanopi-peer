@@ -81,9 +81,9 @@
        :user (dissoc creds :password)
        :page "/"
        ; :datum (data/user-datum* db welcome-ent-id)
-       :most-viewed-datums (data/most-viewed-datums data-service creds)
-       :most-edited-datums (data/most-edited-datums data-service creds)
-       :recent-datums      (data/recent-datums data-service creds)
+       ; :most-viewed-datums (data/most-viewed-datums data-service creds)
+       ; :most-edited-datums (data/most-edited-datums data-service creds)
+       ; :recent-datums      (data/recent-datums data-service creds)
        :cache {}
        ))))
 
