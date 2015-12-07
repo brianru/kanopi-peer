@@ -44,40 +44,40 @@
           stored-app-state {} ;(local-storage/get! local-storage {})
           atm (atom
                (util/deep-merge
-                {
-                 :mode :spa.unauthenticated/online
-                 :user (get init-session :user {})
-                 ;; I don't want to use the URI as a place to
-                 ;; store state. All state is here.
-                 :page (get init-session :page nil)
-                 ;; used by header to do fancy modal stuff
-                 :intent {:id :spa.unauthenticated/navigate}
+                 {
+                  :mode :spa.unauthenticated/online
+                  :user (get init-session :user {})
+                  ;; I don't want to use the URI as a place to
+                  ;; store state. All state is here.
+                  :page (get init-session :page nil)
+                  ;; used by header to do fancy modal stuff
+                  :intent {:id :spa.unauthenticated/navigate}
 
-                 :datum (get init-session :datum
-                             {:context-datums []
-                              :similar-datums []
-                              :datum          {}}) 
-                 :literal {:literal {}
-                           :context-datums []}
+                  :datum (get init-session :datum
+                              {:context-datums []
+                               :similar-datums []
+                               :datum          {}}) 
+                  :literal {:literal {}
+                            :context-datums []}
 
-                 :most-viewed-datums []
-                 :most-edited-datums []
-                 :recent-datums      []
+                  :most-viewed-datums []
+                  :most-edited-datums []
+                  :recent-datums      []
 
-                 ;; local cache
-                 ;; {<ent-id> <entity>}
-                 :cache (get init-session :cache {})
+                  ;; local cache
+                  ;; {<ent-id> <entity>}
+                  :cache (get init-session :cache {})
 
-                 ;; TODO: this map grows too fast.
-                 ;; implement a map that only stores the last n
-                 ;; entries, everything else gets dropped off the
-                 ;; back
-                 :search-results {} ;{"foo" [[0.75 "food"] [0.42 "baffoon"]]}
-                 :error-messages []
-                 :log []
-                 }
-                ; stored-app-state
-                ))]
+                  ;; TODO: this map grows too fast.
+                  ;; implement a map that only stores the last n
+                  ;; entries, everything else gets dropped off the
+                  ;; back
+                  :search-results {} ;{"foo" [[0.75 "food"] [0.42 "baffoon"]]}
+                  :error-messages []
+                  :log []
+                  }
+                 stored-app-state
+                 ))]
       #_(add-watch atm :validator (fn [_key _ref old-value new-value]
                                   (println "HERE")
                                   (when-let [errors (s/check schema/AppState new-value)]

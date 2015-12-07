@@ -4,8 +4,8 @@
              #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
             [schema.core :as s]
             [kanopi.model.schema :as schema]
+            [kanopi.util.local-storage :as local-storage]
             [kanopi.util.core :as util]
-            [kanopi.util.local-storage :as local-stoage]
             ))
 
 (def ^:private default-config
@@ -27,30 +27,32 @@
   component/Lifecycle
   (start [this]
     (let [{:keys [mode]} (merge default-config config)
-          init-session default-init-session
-          stored-app-state {} ; (local-storage/get! local-storage {})
+          init-session (get config :initial-state default-init-session)
+          stored-app-state (local-storage/get! local-storage {})
           atm (atom
-               {:mode    mode
-                :user    (get init-session :user)
-                :page    nil
-                :intent  nil
-                :datum   (get init-session :datum)
-                :literal (get init-session :literal)
-                :most-viewed-datums []
-                :most-edited-datums []
-                :recent-datums      []
-                :cache (get init-session :cache {})
-                :search-results {}
-                :error-messages []
-                :log []
-                }
+               (util/deep-merge
+                 {:mode    mode
+                  :user    (get init-session :user)
+                  :page    nil
+                  :intent  nil
+                  :datum   (get init-session :datum)
+                  :literal (get init-session :literal)
+                  :most-viewed-datums []
+                  :most-edited-datums []
+                  :recent-datums      []
+                  :cache (get init-session :cache {})
+                  :search-results {}
+                  :error-messages []
+                  :log []
+                  }
+                 stored-app-state)
                ; :validator (partial s/validate schema/AppState)
                )]
       (assoc this :app-state atm)))
 
   (stop [this]
     (info "save app state to local storage")
-    ; (local-storage/commit! local-storage @app-state)
+    (local-storage/commit! local-storage @app-state)
     (assoc this :app-state nil)))
 
 (defn new-app-state [config]

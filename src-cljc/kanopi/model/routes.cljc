@@ -1,5 +1,6 @@
 (ns kanopi.model.routes
-  (:require [bidi.bidi :as bidi]))
+  (:require [bidi.bidi :as bidi]
+            #?(:clj [bidi.ring :as ring])))
 
 ; IDEA: first part indicates team
 (def client-routes
@@ -20,18 +21,20 @@
 
 ; NOTE: I don't know if this is correct. Experimenting with bidi.
 ; TODO: test.
-(def server-routes
-  ["/"
-   {:get {(bidi/alts ["enter" "register" "login" "logout"
-                      "" "teams" "settings"
-                      {"datum/" [:id ""]} {"literal" [:id ""]}])
-          :single-page-app}
-    :post {"register" :registration
-           "login"    :login
-           "logout"   :logout
-           }
-    "api" :api
-    "" (bidi/->Files {:dir "resources/public"})
-    true (fn [req] {:status 200 :body "<h1>Page not found</h1>"})
+#?(:clj
+   (def server-routes
+     ["/"
+      {:get {(bidi/alts ["enter" "register" "login" "logout"
+                         "" "teams" "settings"
+                         {"datum/" [:id ""]} {"literal" [:id ""]}])
+             :single-page-app}
+       :post {"register" :registration
+              "login"    :login
+              "logout"   :logout
+              }
+       "api" :api
+       "" (ring/files {:dir "resources/public"})
+       true (fn [req] {:status 200 :body "<h1>Page not found</h1>"})
 
-    }])
+       }])
+   )

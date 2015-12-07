@@ -19,13 +19,17 @@
             [kanopi.test-util :as test-util]))
 
 (deftest well-formed-anonymous-session
-  (let [server-system (component/start (test-util/system-excl-web))
-        client-system (component/start (client/new-system {}))
-        
+  (let [server-system     (component/start (test-util/system-excl-web))
         anonymous-session (session/init-anonymous-session (get server-system :session-service))
+
+        client-system (-> (client/new-system {:app-state
+                                              {:initial-value anonymous-session}})
+                          (component/start)) 
+        client-app-state (-> client-system :app-state :app-state (deref))
         ]
 
     (is (not (s/check schema/ClientSession anonymous-session))) 
+    (is (not (s/check schema/ClientSession @client-app-state)))
 
     (component/stop server-system)
     (component/stop client-system)
@@ -33,16 +37,18 @@
 
 (deftest well-formed-authenticated-session
   (let [server-system (component/start (test-util/system-excl-web))
-        client-system (component/start (client/new-system {}))
-
         creds (let [auth-svc (:authenticator server-system)]
                   (authenticator/register! auth-svc "brian" "rubinton")
                   (authenticator/credentials auth-svc "brian"))
-
         user-session (session/init-session (get server-system :session-service) creds)
+
+        client-system (-> (client/new-system {:local-storage {:initial-value user-session}})
+                          (component/start)) 
+        client-app-state (-> client-system :app-state :app-state (deref))
         ]
 
     (is (not (s/check schema/ClientSession user-session)))
+    (is (not (s/check schema/ClientSession client-app-state)))
 
     (component/stop server-system)
     (component/stop client-system)))

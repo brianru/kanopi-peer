@@ -23,7 +23,7 @@
 
       :app-state
       (component/using
-       (state/new-app-state config)
+       (state/new-app-state (get config :app-state))
        {:local-storage :local-storage})
 
       :history
