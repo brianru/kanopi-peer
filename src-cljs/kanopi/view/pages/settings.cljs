@@ -52,30 +52,36 @@
        {:type "submit"}
        "Delete your account"]]]))
 
+(def user-settings-items
+  [{:ident :settings/account
+    :label "Account settings"}
+   {:ident :settings/emails
+    :label "Emails"}
+   ])
+
 (defn settings [props owner opts]
   (reify
     om/IDisplayName
     (display-name [_]
       "Settings")
+
+    om/IInitState
+    (init-state [_]
+      {:settings-items user-settings-items})
     
-    om/IRender
-    (render [_]
+    om/IRenderState
+    (render-state [_ state]
       (let [current :settings/account]
         (html
          [:div.settings.container
           [:div.row
            [:div.col-md-3.settings-pane-selector
-            [:nav.menu
-             [:h3.menu-heading "Personal settings"]
-             [:a.menu-item
-              {:class [(when (= :settings/account current)
-                         "selected")]}
-              "Account settings"]
-             [:a.menu-item
-              {:class [(when (= :settings/emails current)
-                         "selected")]}
-              "Emails"]]
-            ]
+            (list/vertical-menu "Personal settings"
+                                current
+                                (get state :settings-items)
+                                (fn [selected-item]
+                                  (info "implement this" selected-item)
+                                  ))]
 
            [:div.col-md-9.settings-panel
             (change-password-template)

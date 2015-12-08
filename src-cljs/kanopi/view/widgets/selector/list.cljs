@@ -5,17 +5,14 @@
              :refer-macros (log trace debug info warn error fatal report)]
             ))
 
-(defn vertical
-  [props owner opts]
-  (reify
-    om/IDisplayName
-    (display-name [_]
-      "vertical-list-selector")
-    
-    om/IRenderState
-    (render-state [_ state]
-      (let [
-            ]
-        (html
-         [:div
-          ])))))
+(defn vertical-menu [heading current-item items on-click]
+  (let []
+    (apply conj
+           [:nav.menu]
+           [:h3.menu-heading heading]
+           (for [{id :ident :as itm} items]
+             [:a.menu-item
+              {:class [(when (= id current-item)
+                         "selected")]
+               :on-click #(on-click id)}
+              (get itm :label)]))))
