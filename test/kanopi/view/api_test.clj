@@ -182,3 +182,14 @@
         (is (= :spa.navigate.search/success (:verb body)))
         (is (not-empty (:noun body)))))))
 
+(deftest change-password
+  (let [system (component/start (test-util/system-excl-web-server))
+        creds {:username "brian" :password "rubinton"}
+
+        ]
+    (testing "failure-conditions"
+      (let []
+        ))
+    (testing "success"
+      (let []
+        ))))
