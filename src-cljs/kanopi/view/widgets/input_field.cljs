@@ -76,7 +76,7 @@
             :value       (or (get state :new-value) current-value)
             :tab-index   (get state :tab-index)
             :placeholder (get state :placeholder)
-            :on-focus    #(println "focus input")
+            ; :on-focus    #(println "focus input")
             :on-change   #(handle-change % owner :new-value)
             :on-key-down #(when (= (.-key %) "Enter")
                             ;; NOTE: this triggers on-blur, which

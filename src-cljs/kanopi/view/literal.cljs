@@ -70,7 +70,8 @@
             (get :ident)
             (name)
             (keyword)))
-  :default :text)
+   :default :text
+  )
 
 (defmethod literal-editor :math
   [owner literal]
@@ -125,7 +126,7 @@
   [owner literal]
   (om/build input-field/editable-value literal
             {:init-state
-             {:edit-key :literal/uri
+             {:edit-key     :literal/uri
               :submit-value (fn [value]
                               (->> (msg/update-literal (:db/id literal) :literal/uri value)
                                    (msg/send! owner)))

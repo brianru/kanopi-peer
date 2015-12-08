@@ -49,8 +49,7 @@
                   (and (string? v)
                        (re-find #"^[0-9]?[0-9]*\.+[0-9]*$" v))))
     :parser (comp double #?(:clj  read-string
-                            :cljs cljs.reader/read-string))
-
+                            :cljs cljs.reader/read-string))}
     :literal/uri
     {:ident :literal/uri
      :label "uri"
@@ -58,16 +57,7 @@
      :predicate (fn [v]
                   (and (string? v)
                        true))
-     :parser identity}
-  
-    }
-
-   ;; TODO: implement.
-   ; :literal/email-address
-   ; {:ident :literal/email-address
-   ;  :predicate (constantly nil)
-   ;  }
-   })
+     :parser identity}}) 
 
 (def input-types
   (assoc literal-types
@@ -309,7 +299,8 @@
    #(find % :literal/text)    TextLiteral
    #(find % :literal/math)    MathLiteral
    #(find % :literal/integer) IntegerLiteral
-   #(find % :literal/decimal) DecimalLiteral))
+   #(find % :literal/decimal) DecimalLiteral
+   #(find % :literal/uri)     UriLiteral))
 
 (s/defschema Noun s/Any)
 
