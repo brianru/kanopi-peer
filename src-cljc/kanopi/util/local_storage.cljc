@@ -12,6 +12,7 @@
    (defrecord LocalStorage [storage content-key]
      component/Lifecycle
      (start [this]
+       (println "LOCAL STORAGE" content-key)
        (assoc this :storage (.-localStorage js/window)))
      (stop [this]
        (assoc this :storage nil))

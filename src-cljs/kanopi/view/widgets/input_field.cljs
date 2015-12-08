@@ -58,9 +58,8 @@
           ; alter its interactions when not 'editing'?
           [:span.view-editable-text
              {:style {
-                      ; :color (when (empty? current-value)
-                      ;          "#dddddd")
-                      :display (when editing "none")}
+                      :display (when editing "none")
+                      }
               :class [(when hovering "bold-text")
                       (when (empty? current-value) "placeholder")]
               :on-click #(start-edit % owner :editing)}
@@ -84,12 +83,6 @@
                             ;; calls the submit-value handler fn.
                             (om/set-state! owner :editing false))
             :on-blur     #(end-edit % owner :editing submit-value)}]
-          #_(when (get state :edit-icon-enabled)
-              (icons/edit-in-place {:style {:display (when (or (not hovering)
-                                                               editing)
-                                                       "none")}
-                                    :class "editable-text-icon"
-                                    :on-click #(start-edit % owner :editing)}))
 
           ])))))
 

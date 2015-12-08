@@ -11,11 +11,15 @@
             [kanopi.system.server :as server]
             [kanopi.system.client :as client]
             
+            [kanopi.test-util :as test-util]
+            [kanopi.test.core :as util]
             ))
 
-(deftest access-initial-session
-  (let []
-    ))
+(deftest access-anon-session
+  (let [client-system (component/start (test-util/initialized-client-system))
+        ]
+
+    (component/stop client-system)))
 
 (deftest create-data
   (let []

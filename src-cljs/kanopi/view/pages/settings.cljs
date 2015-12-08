@@ -9,6 +9,7 @@
             [sablono.core :refer-macros [html] :include-macros true]
 
             [kanopi.view.widgets.selector.list :as list]
+            [kanopi.view.widgets.input-field :as input-field]
             ))
 
 (defn settings [props owner opts]
@@ -35,8 +36,7 @@
            [:div.col-md-9.settings-panel
             [:div.panel.panel-default
              [:div.panel-heading
-              [:h2.panel-title ""
-               ]
-              ]
+              [:h2.panel-title "Change Password"]]
              [:div.panel-body
-              ]]]]])))))
+              [:div.edit-password
+               ]]]]]])))))

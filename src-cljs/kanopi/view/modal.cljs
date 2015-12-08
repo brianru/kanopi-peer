@@ -1,13 +1,13 @@
 (ns kanopi.view.modal
   (:require [om.core :as om]))
 
-(defn modal-template [spec]
+(defn modal-template [{:keys [title body]}]
   [:div.modal
    [:div.modal-dialog
     [:div.modal-content
      [:div.modal-header
-      [:h4.modal-title (get spec :title)]]
+      [:h4.modal-title title]]
      [:div.modal-body
-      ]
+      body]
      [:div.modal-footer
       ]]]])

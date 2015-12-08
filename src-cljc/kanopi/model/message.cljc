@@ -46,7 +46,7 @@
          :or {noun {} context {}}}
         (apply hash-map args)]
     (hash-map
-     ; :tx/id (util/random-uuid)
+     ; :saga/id (util/random-uuid)
      :noun noun
      :verb verb
      :context context)))

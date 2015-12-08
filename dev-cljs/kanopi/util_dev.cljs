@@ -1,6 +1,7 @@
 (ns kanopi.util-dev
   (:require [com.stuartsierra.component :as component]
             [kanopi.aether.core :as aether]
+            [kanopi.util.local-storage :as local-storage]
             [kanopi.controller.history.html5 :as history]
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.model.ref-cursors :as ref-cursors]
@@ -25,8 +26,14 @@
      (history/new-html5-history config)
      {:aether :aether})
 
+    :local-storage
+    (local-storage/new-local-storage
+     {:content-key (get config :local-storage-key "kanopi")})
+
     :app-state
-    (state/new-app-state config)
+    (component/using
+     (state/new-app-state config)
+     {:local-storage :local-storage})
 
     :dispatcher
     (component/using
