@@ -70,22 +70,20 @@
             (get :ident)
             (name)
             (keyword)))
-   :default :text
-  )
+   :default :text)
 
 (defmethod literal-editor :math
   [owner literal]
   (om/build text-editor/code literal
             (text-editor/code-editor-config
-              :edit-key   :literal/math
-              :input-type :literal/math
+              :edit-key    :literal/math
+              :input-type  :literal/math
               :input-value (get literal :literal/math)
-              :on-change  (fn [value]
-                            (om/set-state! owner :input-value value))
-              :on-submit  (fn [value]
-                            (->> (msg/update-literal (:db/id literal) :literal/math value)
-                                 (msg/send! owner))))
-            ))
+              :on-change   (fn [value]
+                             (om/set-state! owner :input-value value))
+              :on-submit   (fn [value]
+                             (->> (msg/update-literal (:db/id literal) :literal/math value)
+                                  (msg/send! owner))))))
 
 (defmethod literal-editor :text
   [owner literal]

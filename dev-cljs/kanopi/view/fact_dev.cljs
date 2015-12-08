@@ -62,6 +62,16 @@
    :fact/value     {:db/id 901
                     :datum/label "lantern in the fog"}})
 
+(defcard math-fact
+  (dc/om-root fact/fact-next {:shared (dev-util/shared-state system)
+                              :init-state {:datum-id 42}
+                              :state {:fact-count 1}})
+  {:db/id 710
+   :fact/attribute {:db/id 810
+                    :literal/text "equation!"}
+   :fact/value     {:db/id 901
+                    :literal/math "f(x) = x^{\\pi}"}})
+
 (deftest correct-handle-states
   (is (fact/handle-fill :empty nil)          "red")
   (is (fact/handle-fill :empty :attribute)   "red")
