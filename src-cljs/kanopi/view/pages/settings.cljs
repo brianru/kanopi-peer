@@ -13,30 +13,47 @@
             [kanopi.view.widgets.input-field :as input-field]
             ))
 
-(defn change-password-template []
-  (panel/default "Change password"
-    [:form
-     [:div.form-group
-      [:label {:for "currentPassword"}
-       "Old password"]
-      [:input.form-control
-       {:id "currentPassword"
-        :type "password"}]]
-     [:div.form-group
-      [:label {:for "newPassword"}
-       "New password"]
-      [:input.form-control
-       {:id "newPassword"
-        :type "password"}]]
-     [:div.form-group
-      [:label {:for "confirmNewPassword"}
-       "Confirm new password"]
-      [:input.form-control
-       {:id "confirmNewPassword"
-        :type "password"}]]
-     [:button.btn.btn-default
-      {:type "submit"}
-      "Submit"]]))
+(defn change-password-template
+  [owner state on-submit]
+  (let [{:keys [current-password new-password confirm-new-password]} state
+        ready-to-submit (and (every? not-empty [current-password
+                                                new-password
+                                                confirm-new-password])
+                             )]
+    (panel/default "Change password"
+      [:form
+       [:div.form-group
+        [:label {:for "currentPassword"}
+         "Old password"]
+        [:input.form-control
+         {:id   "currentPassword"
+          :type "password"
+          :value current-password
+          :on-change #(om/set-state! owner :current-password
+                                     (.. % -target -value))}]]
+       [:div.form-group
+        [:label {:for "newPassword"}
+         "New password"]
+        [:input.form-control
+         {:id   "newPassword"
+          :type "password"
+          :value new-password
+          :on-change #(om/set-state! owner :new-password
+                                     (.. % -target -value))}]]
+       [:div.form-group
+        [:label {:for "confirmNewPassword"}
+         "Confirm new password"]
+        [:input.form-control
+         {:id   "confirmNewPassword"
+          :type "password"
+          :value confirm-new-password
+          :on-change #(om/set-state! owner :confirm-new-password
+                                     (.. % -target -value))}]]
+       [:button.btn.btn-default
+        {:type    "submit"
+         :disabled (not ready-to-submit)
+         :on-click #(on-submit current-password new-password confirm-new-password)}
+        "Submit"]])))
 
 (defn delete-account-template []
   (panel/default "Delete account"
@@ -83,13 +100,14 @@
             (case (get state :current-item-id)
               :settings/account
               [:div.selected-settings-pane
-               (change-password-template)
+               (change-password-template owner state
+                                         (fn [cur-pw new-pw new-pw']
+                                           ))
                (delete-account-template)]
 
               :settings/emails
               [:div.selected-settings-pane
-               (email-template)
-               ]
+               (email-template)]
               
               ;default
               nil)
