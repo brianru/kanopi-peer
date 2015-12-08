@@ -12,6 +12,46 @@
             [kanopi.view.widgets.input-field :as input-field]
             ))
 
+(defn change-password-template []
+  (let []
+    [:div.panel.panel-default
+     [:div.panel-heading
+      [:h2.panel-title "Change password"]]
+     [:div.panel-body
+      [:form
+       [:div.form-group
+        [:label {:for "currentPassword"}
+         "Old password"]
+        [:input.form-control
+         {:id "currentPassword"
+          :type "password"}]]
+       [:div.form-group
+        [:label {:for "newPassword"}
+         "New password"]
+        [:input.form-control
+         {:id "newPassword"
+          :type "password"}]]
+       [:div.form-group
+        [:label {:for "confirmNewPassword"}
+         "Confirm new password"]
+        [:input.form-control
+         {:id "confirmNewPassword"
+          :type "password"}]]
+       [:button.btn.btn-default
+        {:type "submit"}
+        "Submit"]]
+      ]]))
+
+(defn delete-account-template []
+  (let []
+    [:div.panel.panel-danger
+     [:div.panel-heading
+      [:h2.panel-title "Delete account"]]
+     [:div.panel-body
+      [:button.btn.btn-danger
+       {:type "submit"}
+       "Delete your account"]]]))
+
 (defn settings [props owner opts]
   (reify
     om/IDisplayName
@@ -20,23 +60,25 @@
     
     om/IRender
     (render [_]
-      (let []
+      (let [current :settings/account]
         (html
-         [:div.settings.container-fluid
+         [:div.settings.container
           [:div.row
            [:div.col-md-3.settings-pane-selector
-            [:div.panel.panel-default
-             [:div.panel-heading
-              [:h3.panel-title ""]]
-             [:div.panel-body
-              (om/build list/vertical props {:state {}})
-              ]
-             ]]
+            [:nav.menu
+             [:h3.menu-heading "Personal settings"]
+             [:a.menu-item
+              {:class [(when (= :settings/account current)
+                         "selected")]}
+              "Account settings"]
+             [:a.menu-item
+              {:class [(when (= :settings/emails current)
+                         "selected")]}
+              "Emails"]]
+            ]
 
            [:div.col-md-9.settings-panel
-            [:div.panel.panel-default
-             [:div.panel-heading
-              [:h2.panel-title "Change Password"]]
-             [:div.panel-body
-              [:div.edit-password
-               ]]]]]])))))
+            (change-password-template)
+            (delete-account-template)
+            
+            ]]])))))

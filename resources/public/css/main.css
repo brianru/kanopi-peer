@@ -16,6 +16,11 @@ body {
     justify-content: center;
 }
 
+.glyphicon {
+    -webkit-transition: color 0.3s;
+    transition: color 0.3s;
+}
+
 input {
     border: none;
     border-left: none !important;
@@ -27,8 +32,8 @@ input {
     display: inline-block;
     line-height: 2rem !important;
     margin: 0 0.5rem !important;
-    -webkit-transition: border-bottom-color: 0.3s;
-    transition: border-bottom-color: 0.3s;
+    -webkit-transition: border-bottom-color 0.3s;
+    transition: border-bottom-color 0.3s;
 }
 input[placeholder],
 :-moz-placeholder,
@@ -44,6 +49,15 @@ input.validated:invalid {
 input.validated:focus:valid,
 input.validated:valid {
     border-bottom-color: green;
+}
+.form-control {
+    padding: 6px 0 !important;
+    height: 30px !important;
+}
+label {
+    margin-left: 5px;
+    font-weight: normal;
+    font-size: 1.25rem;
 }
 textarea {
     border-left: none !important;
@@ -444,4 +458,53 @@ a.navbar-brand:focus {
 }
 .available-literal-type.current {
     font-weight: 500;
+}
+.menu {
+    margin-bottom: 15px;
+    list-style: none;
+    background-color: "";
+    border: 1px solid #d8d8d8;
+    border-radius: 3px;
+}
+.menu-heading {
+    display: block;
+    padding: 8px 10px;
+    margin-top: 0;
+    margin-bottom: 0;
+    font-size: 13px;
+    font-weight: bold;
+    line-height: 20px;
+    color #555;
+    background-color: #f7f7f7;
+    border-bottom: 1px solid #eee;
+}
+.menu-heading:first-child {
+    border-top-right-radius: 2px;
+    border-top-left-radius: 2px;
+}
+.menu-item {
+    position: relative;
+    display: block;
+    padding: 8px 10px;
+    text-shadow: 0 1px 0 #fff;
+    border-bottom: 1px solid #eee;
+}
+.menu-item.selected {
+    font-weight: bold;
+    color #222;
+    cursor: default;
+    background-color: #fff;
+}
+.menu-item.selected:before {
+    position: absolute;
+    top: 0;
+    left: 0;
+    bottom: 0;
+    width: 2px;
+    content: "";
+    background-color: green;
+}
+.menu-item:hover {
+    text-decoration: none;
+    background-color: #f9f9f9;
 }
