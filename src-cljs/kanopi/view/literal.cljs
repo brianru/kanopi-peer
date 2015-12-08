@@ -46,7 +46,9 @@
 
 (defmethod literal-renderer :math
   [owner literal]
-  (om/build math/katex literal {:state {:input-value (om/get-state owner [:input-value])}}))
+  (om/build math/katex literal
+            {:state {:input-value (or (om/get-state owner [:input-value])
+                                      (get literal :literal/math))}}))
 
 (defmulti literal-editor
   "
@@ -76,6 +78,7 @@
             (text-editor/code-editor-config
               :edit-key   :literal/math
               :input-type :literal/math
+              :input-value (get literal :literal/math)
               :on-change  (fn [value]
                             (om/set-state! owner :input-value value))
               :on-submit  (fn [value]
@@ -88,6 +91,8 @@
   (om/build text-editor/rich-text literal
             {:init-state
              {:edit-key :literal/text
+              :input-type :literal/text
+              :input-value (get literal :literal/text)
               :on-change (fn [value]
                            (om/set-state! owner :input-value value))
               :on-submit (fn [value]
@@ -98,7 +103,7 @@
   [owner literal]
   (om/build input-field/integer literal
             {:init-state
-             {:edit-key  :literal/integer
+             {:initial-input-value (get literal :literal/integer)
               :on-change (fn [value]
                            (om/set-state! owner :input-value value))
               :on-submit (fn [value]
@@ -109,18 +114,22 @@
   [owner literal]
   (om/build input-field/decimal literal
             {:init-state
-             {:edit-key :literal/decimal
+             {:initial-input-value (get literal :literal/decimal)
               :on-change (fn [value]
                            (om/set-state! owner :input-value value))
               :on-submit (fn [value]
                            (->> (msg/update-literal (:db/id literal) :literal/decimal value)
                                 (msg/send! owner)))}}))
 
-(comment
- (defmethod literal-editor :markdown
-   []
-   )
- )
+(defmethod literal-editor :uri
+  [owner literal]
+  (om/build input-field/editable-value literal
+            {:init-state
+             {:edit-key :literal/uri
+              :submit-value (fn [value]
+                              (->> (msg/update-literal (:db/id literal) :literal/uri value)
+                                   (msg/send! owner)))
+              }}))
 
 (defn literal-context
   "A vertical list of somewhat stylized relating entities. Each is a
@@ -197,7 +206,7 @@
            [:div.col-md-8.literal-content
             (literal-editor owner (get props :literal))
             (when (contains? schema/renderable-types (get current-type :ident))
-              (literal-renderer owner (get props :literal))) ]
+              (literal-renderer owner (get props :literal)))]
 
            [:div.col-md-2.literal-types
             (literal-types (get props :literal) owner current-type available-types)]]

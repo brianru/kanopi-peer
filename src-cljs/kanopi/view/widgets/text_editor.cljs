@@ -89,8 +89,11 @@
       (let [state  (om/get-state owner)
             editor (.fromTextArea js/CodeMirror
                                   (om/get-node owner)
+                                  ; NOTE: CodeMirror config
+                                  ; https://codemirror.net/doc/manual.html#config
                                   #js {:lineNumbers true
-                                       :mode (get state :language-mode)})
+                                       :mode  (get state :language-mode)
+                                       :value (get state :input-value "")})
             doc    (.getDoc editor)]
         (register-event-handlers! editor owner)
         (om/update-state! owner #(assoc % :editor editor :document doc))))
@@ -106,13 +109,15 @@
       (let []
         (html
          [:textarea.text-editor.code-text-editor
-          {:default-value ""}
+          {:default-value ""
+           :value (get state :input-value)
+           }
           ])))))
 
 (def ^:private required-code-editor-args
   [:on-change :on-submit :edit-key])
 (def ^:private optional-code-editor-args
-  [:on-change :placeholder :tab-index :input-type :keymap])
+  [:on-change :placeholder :tab-index :input-type :keymap :input-value])
 
 (defn input-type->language-mode
   "Fn because I think this mapping should be elsewhere, maybe more complex.

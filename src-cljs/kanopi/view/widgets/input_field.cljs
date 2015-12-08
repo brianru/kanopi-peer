@@ -86,45 +86,6 @@
 
           ])))))
 
-#_(defn input-field [props owner opts]
-  (reify
-    om/IInitState
-    (init-state [_]
-      {})
-
-    om/IRenderState
-    (render-state [_ {:keys [submit-value] :as state}]
-      (let []
-        (html
-         [:input.edit-editable-text
-          {:ref         "text-field"
-           :type        "text"
-           :tab-index   (get state :tab-index -1)
-           :value       (get state :new-value)
-           :placeholder (get state :placeholder)
-           :on-change   #(handle-change % owner :new-value)
-           :on-key-down (constantly nil)
-           :on-blur     #(end-edit % owner :editing submit-value)
-           }])))))
-
-#_(defn textarea [props owner opts]
-  (reify
-    om/IRenderState
-    (render-state [_ {:keys [submit-value] :as state}]
-      (let []
-        (html
-         [:textarea.input-textarea
-          {:value       (get state :new-value)
-           :tab-index   (get state :tab-index -1)
-           :rows 3
-           :cols 32
-           :placeholder (get state :placeholder)
-           :on-change   #(handle-change % owner :new-value)
-           :on-key-down (constantly nil)
-           :on-blur     #(end-edit % owner :editing submit-value)
-           }
-          ])))))
-
 (defn integer [props owner opts]
   (reify
     om/IInitState
@@ -139,15 +100,16 @@
     (render-state [_ {:keys [on-submit] :as state}]
       (html
        [:input.validated
-        {
-         :on-change #(handle-change % owner :new-value)
-         :tab-index (get state :tab-index)
+        {:type "number" :step "1"
+         :value       (or (get state :new-value) (get state :initial-input-value))
+         :on-change   #(handle-change % owner :new-value)
+         :tab-index   (get state :tab-index)
          :placeholder (get state :placeholder)
          :on-key-down #(when (= (.-key %) "Enter")
                          (.blur (.-target %)))
          :on-blur     #(end-edit % owner on-submit)
          ; TODO: get pattern from kanopi.model.schema/literal-types
-         :pattern "^[0-9]*$"}]))))
+         :pattern     "^[0-9]*$"}]))))
 
 (defn decimal [props owner opts]
   (reify
@@ -163,11 +125,13 @@
       (html
        [:input.validated
         {
-         :on-change #(handle-change % owner :new-value)
-         :tab-index (get state :tab-index)
+         :type "number" :step "any"
+         :value       (or (get state :new-value) (get state :initial-input-value))
+         :on-change   #(handle-change % owner :new-value)
+         :tab-index   (get state :tab-index)
          :placeholder (get state :placeholder)
          :on-key-down #(when (= (.-key %) "Enter")
                          (.blur (.-target %)))
          :on-blur     #(end-edit % owner on-submit)
-         :pattern "^[0-9]?[0-9]*.+[0-9]*$"}]
+         :pattern     "^[0-9]?[0-9]*.?+[0-9]*$"}]
        ))))

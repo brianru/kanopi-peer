@@ -47,9 +47,9 @@
 (defn prepare-fact [fact-state]
   (let [{:keys [fact/attribute fact/value]} fact-state]
     (assert (get attribute :parsed-value)
-            "Must have a value!")
+            "Fact attribute must have a value!")
     (assert (get value     :parsed-value)
-            "Must have a value!")
+            "Fact value must have a value!")
     (cond-> {}
       (get fact-state :db/id)
       (assoc :db/id (get fact-state :db/id))
