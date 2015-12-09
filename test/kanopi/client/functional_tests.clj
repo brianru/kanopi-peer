@@ -12,7 +12,7 @@
             [kanopi.system.client :as client]
             
             [kanopi.test-util :as test-util]
-            [kanopi.util :as util]
+            [kanopi.util.core :as util]
             ))
 
 (deftest access-anon-session
