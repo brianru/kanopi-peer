@@ -145,7 +145,6 @@
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Transit helpers // should be CLJC, but not needed right now.
-; kanopi.util.local-storage actually re-implements this in CLJS.
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 #?(:clj
    (do
@@ -177,3 +176,12 @@
       (let [reader (transit/reader :json)]
         (transit/read reader data)))))
 
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+; Keyword helper fns
+;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn- namespace-string [& args]
+  (apply str (interpose "." (remove nil? args))))
+
+(defn keyword-conj [kw x]
+  (keyword (namespace-string (namespace kw) (name kw))
+           x))

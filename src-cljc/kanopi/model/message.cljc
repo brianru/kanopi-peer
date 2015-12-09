@@ -28,8 +28,11 @@
                        [kanopi.util.core :as util]
                        ])))
 
-;; Pure cross-compiled message generators
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+(defn success-verb [verb]
+  (util/keyword-conj verb "success"))
+
+(defn failure-verb [verb]
+  (util/keyword-conj verb "failure"))
 
 (s/defschema Message
   (abstract-map/abstract-map-schema
@@ -54,14 +57,16 @@
 ; NOTE: for implementation of 'sagas' throughout the system to
 ; representing transaction semantics for user intentions
 (s/defn response :- Message
-  [request & args]
+  [request success? & args]
   (let [{:keys [noun verb context]
          :or {noun {} context {}}}
         (apply hash-map args)]
     (hash-map
      ; :saga/id (get request :saga/id)
      :noun noun
-     :verb verb
+     :verb (if (success? noun)
+             (success-verb verb)
+             (failure-verb verb))
      :context context
      )))
 

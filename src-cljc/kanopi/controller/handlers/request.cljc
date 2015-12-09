@@ -3,7 +3,7 @@
   dispatcher handle them. These fns should be medium agnostic."
   (:require [taoensso.timbre :as timbre
              #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
-            [kanopi.model.message :as msg]
+            [kanopi.model.message :as msg :refer (success-verb failure-verb)]
             [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]
             ))

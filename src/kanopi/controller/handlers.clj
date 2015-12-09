@@ -1,7 +1,7 @@
 (ns kanopi.controller.handlers
   "NOTE: should really be kanopi.controller.handlers.request
   but there are currently no response handlers in the server."
-  (:require [kanopi.model.message :as msg]
+  (:require [kanopi.model.message :as msg :refer (success-verb failure-verb)]
             [kanopi.model.data :as data]
             [kanopi.util.core :as util]
             ))
@@ -53,8 +53,8 @@
     (hash-map
      :noun    data
      :verb    (if (-> all-datum-ids not-empty)
-                :spa.state.initialize/success
-                :spa.state.initialize/failure)
+                (success-verb (:verb message))
+                (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :spa.navigate/search
@@ -72,8 +72,8 @@
      ;; that does not determine failure as in the other handlers. in
      ;; this case as long as the search ran let's return success.
      :verb    (if-not (nil? results)
-                :spa.navigate.search/success
-                :spa.navigate.search/failure)
+                (success-verb (:verb message))
+                (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :user/change-password
@@ -83,8 +83,8 @@
     (hash-map
      :noun data
      :verb (if data
-             :user.change-password/success
-             :user.change-password/failure)
+             (success-verb (:verb message))
+             (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :datum/create
@@ -96,8 +96,8 @@
     (hash-map
      :noun data
      :verb (if (get-in data [:datum :db/id])
-             :datum.create/success
-             :datum.create/failure)
+             (success-verb (:verb message))
+             (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :datum/get
@@ -108,8 +108,8 @@
     (hash-map
      :noun    (or data {})
      :verb    (if (not-empty (get-in data [:datum]))
-                :datum.get/success
-                :datum.get/failure)
+                (success-verb (:verb message))
+                (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :datum.label/update
@@ -123,8 +123,8 @@
     (hash-map
      :noun data
      :verb (if data
-             :datum.label.update/success
-             :datum.label.update/failure)
+             (success-verb (:verb message))
+             (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :datum.fact/add
@@ -139,8 +139,8 @@
      :noun {:datum datum'
             :new-entites []}
      :verb (if result
-             :datum.fact.add/success
-             :datum.fact.add/failure)
+             (success-verb (:verb message))
+             (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :datum.fact/update
@@ -156,8 +156,8 @@
      :noun {:datum datum'
             :new-entities []}
      :verb (if result
-             :datum.fact.update/success
-             :datum.fact.update/failure)
+             (success-verb (:verb message))
+             (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :literal/get
@@ -168,8 +168,8 @@
     (hash-map
      :noun (or data {})
      :verb (if (not-empty (get data :literal))
-             :literal.get/success
-             :literal.get/failure)
+             (success-verb (:verb message))
+             (failure-verb (:verb message)))
      :context {})))
 
 (defmethod request-handler :literal/update
@@ -182,6 +182,6 @@
     (hash-map
      :noun nil
      :verb (if (not-empty data)
-             :literal.update/success
-             :literal.update/failure)
+             (success-verb (:verb message))
+             (failure-verb (:verb message)))
      :context {})))
