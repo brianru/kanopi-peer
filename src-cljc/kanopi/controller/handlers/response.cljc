@@ -259,3 +259,12 @@
   [history app-state msg]
   (record-error-message app-state msg)
   (hash-map :messages []))
+
+(defmethod local-response-handler :user.change-password/success
+  [history app-state msg]
+  (let []
+    (hash-map :messages [])))
+(defmethod local-response-handler :user.change-password/failure
+  [history app-state msg]
+  (let []
+    (hash-map :messages [])))

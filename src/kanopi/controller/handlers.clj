@@ -76,6 +76,17 @@
                 :spa.navigate.search/failure)
      :context {})))
 
+(defmethod request-handler :user/change-password
+  [request-context message]
+  (let [data nil]
+    ; TODO: implement me.
+    (hash-map
+     :noun data
+     :verb (if data
+             :user.change-password/success
+             :user.change-password/failure)
+     :context {})))
+
 (defmethod request-handler :datum/create
   [request-context message]
   (let [data-svc (util/get-data-service request-context)

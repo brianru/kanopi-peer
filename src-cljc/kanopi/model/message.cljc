@@ -37,7 +37,7 @@
    {:noun    schema/Noun
     :verb    schema/Verb
     :context schema/Context
-    ; :tx/id   s/Str
+    ; :saga/id   s/Str
     }))
 
 (s/defn message :- Message
@@ -50,6 +50,20 @@
      :noun noun
      :verb verb
      :context context)))
+
+; NOTE: for implementation of 'sagas' throughout the system to
+; representing transaction semantics for user intentions
+(s/defn response :- Message
+  [request & args]
+  (let [{:keys [noun verb context]
+         :or {noun {} context {}}}
+        (apply hash-map args)]
+    (hash-map
+     ; :saga/id (get request :saga/id)
+     :noun noun
+     :verb verb
+     :context context
+     )))
 
 (abstract-map/extend-schema GetDatum Message
   [:datum/get]
@@ -232,6 +246,15 @@
   {:noun schema/Credentials})
 (defn switch-team-success [user']
   (message :noun user' :verb :spa.switch-team/success))
+(defn change-password [current-password new-password confirm-new-password]
+  (message :noun {}
+           :verb :user/change-password))
+(defn change-password-success []
+  (message :noun {}
+           :verb :user.change-password/success))
+(defn change-password-failure []
+  (message :noun {}
+           :verb :user.change-password/failure))
 
 (defn register [creds]
   (message :noun creds :verb :spa/register))
@@ -276,17 +299,21 @@
       an aether map, an aether record, etc"
       ([owner msg]
        (async/put! (publisher owner) msg)
+       ; NOTE: for sagas!
+       (om/update-state! owner ::sagas #(conj % (:saga/id msg)))
        ;; NOTE: js evt handlers don't like `false` as a return value, which
        ;; async/put! often returns. So we add a nil.
        nil)
       ([owner & msgs]
        (async/onto-chan (publisher owner) msgs false)
+       ; NOTE: for sagas!
+       (om/update-state! owner ::sagas #(apply conj % (map :sada/id msgs)))
        ))
 
-    (defn register-intent!
-      "Ex: (->> (msg/update-label) (msg/register-intent! owner))"
-      [owner msg]
-      (send! owner (message :noun (get msg :verb)
-                            :verb :intent/register
-                            :context (get msg :context))))
+    ; (defn register-intent!
+    ;   "Ex: (->> (msg/update-label) (msg/register-intent! owner))"
+    ;   [owner msg]
+    ;   (send! owner (message :noun (get msg :verb)
+    ;                         :verb :intent/register
+    ;                         :context (get msg :context))))
     ))

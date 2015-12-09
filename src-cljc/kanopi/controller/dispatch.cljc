@@ -17,6 +17,10 @@
 
 (defn- same-verbs-in-each-mode [modal-verbs]
   (let []
+    ; FIXME: actually, :user/change-passsword should not be in every
+    ; mode. think about this more carefully.
+    ; also, login, logout and register:
+    ; login/register are exclusive of logout. duh.
     true))
 
 (defn- every-verb-has-matching-success-and-failure-verbs [modal-verbs]
@@ -43,7 +47,6 @@
              :response
              #{
                :spa.login/success    :spa.login/failure
-               :spa.logout/success   :spa.logout/failure
                :spa.register/success :spa.register/failure
 
                :spa.navigate/success            :spa.navigate/failure
@@ -59,10 +62,11 @@
                :literal.update/success          :literal.update/failure
                }}
     :remote {:request
-             #{:spa/login :spa/logout :spa/register
+             #{:spa/login :spa/register
                }
              :response
-             #{}}}
+             #{
+               }}}
 
    :spa.authenticated/online
    {:local  {:request
@@ -70,10 +74,9 @@
                :spa/switch-team
                }
              :response
-             #{:spa.login/success    :spa.login/failure
-               :spa.logout/success   :spa.logout/failure
-               :spa.register/success :spa.register/failure
+             #{:spa.logout/success   :spa.logout/failure
 
+               :user.change-password/success    :user.change-password/failure
 
                :spa.navigate/success            :spa.navigate/failure
                :spa.navigate.search/success     :spa.navigate.search/failure
@@ -91,7 +94,8 @@
                }}
     :remote {:request
              #{
-               :spa/login :spa/logout :spa/register
+               :spa/logout
+               :user/change-password
 
                :spa.navigate/search
 

@@ -95,38 +95,29 @@
 
 (defmethod local->remote :default
   [history app-state msg]
-  (hash-map 
-   :noun {:uri  (history/get-route-for history :api)
-          :body msg
-          :method :post
-          :response-format :transit
-          :response-method :aether
-          :error-method    :aether
-          }
-   :verb :request
-   :context {}))
-
-(defmethod local->remote :spa.state/initialize
-  [history app-state msg]
   (standard-api-post history msg))
 
-(defmethod local->remote :spa.navigate/search
-  [history app-state msg]
-  (standard-api-post history msg))
+; (defmethod local->remote :spa.state/initialize
+;   [history app-state msg]
+;   (standard-api-post history msg))
 
-(defmethod local->remote :datum/create
-  [history app-state msg]
-  (standard-api-post history msg))
+; (defmethod local->remote :spa.navigate/search
+;   [history app-state msg]
+;   (standard-api-post history msg))
 
-(defmethod local->remote :datum/get
-  [history app-state msg]
-  (standard-api-post history msg))
+; (defmethod local->remote :datum/create
+;   [history app-state msg]
+;   (standard-api-post history msg))
 
-(defmethod local->remote :datum.label/update
-  [history app-state msg]
-  (standard-api-post history msg))
+; (defmethod local->remote :datum/get
+;   [history app-state msg]
+;   (standard-api-post history msg))
 
-(defmethod local->remote :datum.fact/update
-  [history app-state msg]
-  (standard-api-post history msg))
+; (defmethod local->remote :datum.label/update
+;   [history app-state msg]
+;   (standard-api-post history msg))
+
+; (defmethod local->remote :datum.fact/update
+;   [history app-state msg]
+;   (standard-api-post history msg))
 
