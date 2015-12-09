@@ -11,6 +11,8 @@
             [kanopi.view.widgets.panel :as panel]
             [kanopi.view.widgets.selector.list :as list]
             [kanopi.view.widgets.input-field :as input-field]
+
+            [kanopi.model.message :as msg]
             ))
 
 (defn change-password-template
@@ -22,6 +24,7 @@
                              )]
     (panel/default "Change password"
       [:form
+       {:on-submit #(. % preventDefault)}
        [:div.form-group
         [:label {:for "currentPassword"}
          "Old password"]
@@ -50,7 +53,7 @@
           :on-change #(om/set-state! owner :confirm-new-password
                                      (.. % -target -value))}]]
        [:button.btn.btn-default
-        {:type    "submit"
+        {:type "button"
          :disabled (not ready-to-submit)
          :on-click #(on-submit current-password new-password confirm-new-password)}
         "Submit"]])))
@@ -102,7 +105,8 @@
               [:div.selected-settings-pane
                (change-password-template owner state
                                          (fn [cur-pw new-pw new-pw']
-                                           ))
+                                           (->> (msg/change-password cur-pw new-pw new-pw')
+                                                (msg/send! owner))))
                (delete-account-template)]
 
               :settings/emails
