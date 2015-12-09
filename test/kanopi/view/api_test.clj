@@ -184,12 +184,40 @@
 
 (deftest change-password
   (let [system (component/start (test-util/system-excl-web-server))
-        creds {:username "brian" :password "rubinton"}
-
+        username        "brian"
+        first-password  "rubinton"
+        second-password "applebottom"
+        creds {:username username :password first-password}
         ]
+    (test-util/mock-register system creds)
     (testing "failure-conditions"
-      (let []
+      (let [message (msg/change-password first-password second-password first-password)
+            {:keys [body] :as resp}
+            (test-util/mock-request! system :post "/api" (util/transit-write message)
+                                     :creds creds
+                                     :content-type "application/transit+json")
+            login-resp
+            (test-util/mock-login system {:username username :password second-password})
+            ]
+        (is (= 200 (:status resp)))
+        (is (= :user.change-password/failure (:verb body)))
+
+        (is (= 401 (:status login-resp)))
         ))
+
     (testing "success"
-      (let []
-        ))))
+      (let [message (msg/change-password
+                     first-password second-password second-password)
+            {:keys [body] :as resp}
+            (test-util/mock-request! system :post "/api" (util/transit-write message)
+                                     :creds creds
+                                     :content-type "application/transit+json")
+            login-resp
+            (test-util/mock-login system {:username username :password second-password})]
+        (is (= 200 (:status resp)))
+        (is (= :user.change-password/success (:verb body)))
+
+        (is (= 200 (:status login-resp)))
+
+        ))
+    (component/stop system)))

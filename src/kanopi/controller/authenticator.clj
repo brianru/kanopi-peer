@@ -17,7 +17,8 @@
   (credentials  [this username])
   (verify-creds [this input-creds]
                 [this username password])
-  (change-password! [this username current-password new-password]))
+  (change-password! [this username current-password new-password]
+                    [this username current-password new-password confirm-new-password]))
 
 (defn valid-credentials? [creds]
   (s/validate schema/Credentials creds))
@@ -105,6 +106,10 @@
                (remove nil?))
           report @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-temp-id)))
+
+  (change-password! [this username current-password new-password confirm-new-password]
+    (when (= new-password confirm-new-password)
+      (change-password! this username current-password new-password)))
 
   (change-password! [this username current-password new-password]
     (assert (and (not= current-password new-password)

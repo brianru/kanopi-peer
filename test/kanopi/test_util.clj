@@ -4,6 +4,7 @@
             [kanopi.main :refer (default-config)]
             [kanopi.system.server :as server]
             [kanopi.system.client :as client]
+            [kanopi.controller.authenticator :as authenticator]
             [kanopi.model.storage.datomic :as datomic]
             [kanopi.model.session :as session]
             [datomic.api :as d]
@@ -55,6 +56,15 @@
 (defn mock-register [system creds]
   (mock-request! system :post "/register" creds
                  :accept "application/transit+json"))
+
+(defn mock-login [system creds]
+  (mock-request! system :post "/login" creds
+                 :accept "application/transit+json"))
+
+(defn api-req! [system creds msg]
+  (mock-request! system :post "/api" (util/transit-write msg)
+                 :creds creds
+                 :content-type "application/transit+json"))
 
 (defn initialized-client-system
   ([config]

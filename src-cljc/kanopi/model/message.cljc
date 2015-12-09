@@ -252,14 +252,17 @@
 (defn switch-team-success [user']
   (message :noun user' :verb :spa.switch-team/success))
 (defn change-password [current-password new-password confirm-new-password]
-  (message :noun {}
+  (message :noun {:current-password     current-password
+                  :new-password         new-password
+                  :confirm-new-password confirm-new-password}
            :verb :user/change-password))
-(defn change-password-success []
-  (message :noun {}
-           :verb :user.change-password/success))
-(defn change-password-failure []
-  (message :noun {}
-           :verb :user.change-password/failure))
+; NOTE: not using these in handler
+; (defn change-password-success []
+;   (message :noun {}
+;            :verb :user.change-password/success))
+; (defn change-password-failure []
+;   (message :noun {}
+;            :verb :user.change-password/failure))
 
 (defn register [creds]
   (message :noun creds :verb :spa/register))

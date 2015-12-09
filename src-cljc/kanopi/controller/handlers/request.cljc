@@ -2,7 +2,8 @@
   "TODO: refactor to return a collection of messages. Let the
   dispatcher handle them. These fns should be medium agnostic."
   (:require [taoensso.timbre :as timbre
-             #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
+             #?(:clj :refer :cljs :refer-macros)
+             (log trace debug info warn error fatal report)]
             [kanopi.model.message :as msg :refer (success-verb failure-verb)]
             [kanopi.model.schema :as schema]
             [kanopi.util.core :as util]

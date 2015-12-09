@@ -3,11 +3,16 @@
   but there are currently no response handlers in the server."
   (:require [kanopi.model.message :as msg :refer (success-verb failure-verb)]
             [kanopi.model.data :as data]
+            [kanopi.controller.authenticator :as authenticator]
             [kanopi.util.core :as util]
+            [taoensso.timbre :as timbre
+             :refer (log trace debug info warn error fatal report)]
             ))
 
 (defmulti request-handler
   (fn [request-context message]
+    (when (= (:verb message) :user/change-password)
+      (info "REQUEST HANDLER" message))
     (get message :verb))
   :default :echo)
 
@@ -77,14 +82,19 @@
      :context {})))
 
 (defmethod request-handler :user/change-password
-  [request-context message]
-  (let [data nil]
-    ; TODO: implement me.
+  [request-context {:keys [noun verb] :as message}]
+  (let [{:keys [current-password new-password confirm-new-password]} noun
+        ; NOTE: must get username from creds. cannot trust anything
+        ; user sends in message. must come from session.
+        {:keys [username]} (get-in message [:context :creds])
+        data (authenticator/change-password!
+              (util/get-authenticator request-context)
+              username current-password new-password confirm-new-password)]
     (hash-map
      :noun data
      :verb (if data
-             (success-verb (:verb message))
-             (failure-verb (:verb message)))
+             (success-verb verb)
+             (failure-verb verb))
      :context {})))
 
 (defmethod request-handler :datum/create
