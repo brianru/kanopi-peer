@@ -38,7 +38,7 @@
 
 
                  ; Dev
-                 [devcards "0.2.1"]
+                 [devcards "0.2.1-2"]
 
                  ;; Database
                  ; NOTE: add AWS DDB sdk when upgrading datomic
@@ -84,9 +84,7 @@
             [lein-cljsbuild "1.1.1"]
             [lein-figwheel "0.5.0-1"]]
 
-  :clean-targets ^{:protect false} [:target-path
-                                    ; "resources/public/js/"
-                                    "resources/public/js/"]
+  :clean-targets ^{:protect false} [:target-path "resources/public/js/"]
 
   ; https://github.com/ruedigergad/test2junit
   :test2junit-output-dir ~(or (System/getenv "CIRCLE_TEST_REPORTS") "target/test2junit")
@@ -136,9 +134,6 @@
              {:id "prod"
               :source-paths ["src-cljc" "src-cljs"]
               :compiler {:output-to "resources/public/js/main_prod.js"
-                         ; :output-dir "resources/public/js/out_prod"
-                         ; :source-map "resources/public/js/source_map_prod.js"
-                         ; :main "kanopi.main"
                          :optimizations :advanced
                          :parallel-build true
                          }}
@@ -153,6 +148,7 @@
                          :asset-path "/js/out"
                          :main "kanopi.main"
                          :optimizations :none
+                         :parallel-build true
                          :pretty-print true
                          :source-map "resources/public/js/source_map.js"}}
 
@@ -166,6 +162,7 @@
                          :asset-path "js/out_devcards"
                          :main "kanopi.devcards"
                          :optimizations :none
+                         :parallel-build true
                          :pretty-print true
                          :source-map "resources/public/js/source_map_devcards.js"}}
              ]

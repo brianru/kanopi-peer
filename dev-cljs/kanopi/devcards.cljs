@@ -1,6 +1,7 @@
 (ns kanopi.devcards
   (:require [kanopi.om-next]
             [kanopi.transit-dev]
+            [kanopi.closure]
 
             [kanopi.aether.core-dev]
 
