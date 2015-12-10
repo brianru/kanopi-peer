@@ -1,3 +1,10 @@
 test:
     override:
         - lein test2junit
+
+deployment:
+    development:
+        branch: master
+        commands:
+            - docker login tutum.co -e $TUTUM_EMAIL -u $TUTUM_USER -p $TUTUM_PASSWORD
+            - ./scripts/deploy_dev.sh $CIRCLE_SHA1

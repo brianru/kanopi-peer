@@ -13,18 +13,20 @@
 - authorization
 - DDB-backed Datomic
 - ECS (AWS Docker) Transactor
-
-#### TODO:
 - continuous integration (circleci)
-- simulation tests
-- literal UI (incl codemirror and prosemirror)
 - math (latex) literals
 - uri literals
-- teams
+- literal UI (incl codemirror)
+
+#### TODO:
+- continuous deployment (cicleci => elastic beanstalk)
+- simulation tests
+- literal UI (incl prosemirror)
 - user invitations instead of registration (for now)
 - cloudwatch metrics and log gathering
 
 ### 0.2 - The Beta 
+- teams
 - kanopi.io landing page
 - zookeeper, kafka and onyx -> s3 for log persistence
 - move handlers out of peer, into separate repo
