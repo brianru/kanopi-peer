@@ -204,7 +204,8 @@
    (message :noun {:goal txt}
             :verb :goal/create)))
 
-(defn record-insight
+; TODO: make sure this follows pattern of navigation
+(defn capture-insight
   ([]
    (message :verb :insight.modal/open))
   ([txt]

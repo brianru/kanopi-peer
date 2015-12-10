@@ -1,4 +1,4 @@
-(ns kanopi.view.modal
+(ns kanopi.view.widgets.modal
   (:require [om.core :as om]))
 
 (defn modal-template [{:keys [title body]}]

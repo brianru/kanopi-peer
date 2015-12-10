@@ -6,7 +6,7 @@
             [kanopi.controller.history :as history]
             [kanopi.model.ref-cursors :as ref-cursors]
             [kanopi.model.message :as msg]
-            [kanopi.view.modal  :as modal]
+            [kanopi.view.modals.insight  :as insight]
             [kanopi.view.header :as header]
             [kanopi.view.prompt :as prompt]
             [kanopi.view.footer :as footer]
@@ -41,8 +41,7 @@
          (om/build header/header props)]
         [:div.page-container
          {:class [(when (get props :modal)
-                    "fade-out-page")
-                  ]}
+                    "fade-out-page")]}
          [:div.prompt-container
           (om/build prompt/prompt props)]
          (case (get-in props [:page :handler])
@@ -67,7 +66,13 @@
         [:div.modal-container
          {:style {:display (when (get props :modal)
                              "inherit" "none")}}
-         (modal/modal-template (get props :modal))]
+         (case (get-in props [:modal :type])
+           :insight
+           (om/build insight/capture (get props :modal))
+           
+           ;default
+           nil)
+         ]
         ]
        ))))
 
