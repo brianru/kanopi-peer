@@ -18,6 +18,7 @@
 (defn change-password-template
   [owner state on-submit]
   (let [{:keys [current-password new-password confirm-new-password]} state
+        ; FIXME: i have so many tools to do this right. use them.
         ready-to-submit (and (every? not-empty [current-password
                                                 new-password
                                                 confirm-new-password])
