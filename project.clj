@@ -85,13 +85,17 @@
             [lein-figwheel "0.5.0-1"]]
 
   :clean-targets ^{:protect false} [:target-path
-                                    "resources/public/js/out"
-                                    "resources/public/js/out_devcards"]
+                                    ; "resources/public/js/"
+                                    "resources/public/js/"]
 
   ; https://github.com/ruedigergad/test2junit
   :test2junit-output-dir ~(or (System/getenv "CIRCLE_TEST_REPORTS") "target/test2junit")
 
-  :profiles {:dev
+  :profiles {:prod
+             {:jvm-opts ["-XX:MaxPermSize=128M"]
+              :env {:dev false}}
+
+             :dev
              {:jvm-opts ["-XX:MaxPermSize=128M"]
               :plugins [
                         [test2junit "1.1.3"]
@@ -103,9 +107,6 @@
                              [ring/ring-mock "0.3.0"]
                              [org.clojure/data.codec "0.1.0"]
                              [org.clojure/data.csv "0.1.3"]
-
-                             ;; use client lib for testing
-                             [http-kit "2.1.19"]
                              ]
               :env {:dev true}
               :source-paths ["dev"]
@@ -132,6 +133,15 @@
 
 :cljsbuild {:builds
             [
+             {:id "prod"
+              :source-paths ["src-cljc" "src-cljs"]
+              :compiler {:output-to "resources/public/js/main_prod.js"
+                         ; :output-dir "resources/public/js/out_prod"
+                         ; :source-map "resources/public/js/source_map_prod.js"
+                         ; :main "kanopi.main"
+                         :optimizations :advanced
+                         :parallel-build true
+                         }}
              ;; lein figwheel to run with auto-reloading
              ;; lein cljsbuild once to run otherwise
              {:id "dev"
@@ -141,7 +151,7 @@
                          :output-dir "resources/public/js/out"
                          ;; NOTE: yes leading slash here for a reason!
                          :asset-path "/js/out"
-                         :main kanopi.main
+                         :main "kanopi.main"
                          :optimizations :none
                          :pretty-print true
                          :source-map "resources/public/js/source_map.js"}}
@@ -154,7 +164,7 @@
                          :output-dir "resources/public/js/out_devcards"
                          ;; NOTE: no leading slash here for a reason!
                          :asset-path "js/out_devcards"
-                         :main kanopi.devcards
+                         :main "kanopi.devcards"
                          :optimizations :none
                          :pretty-print true
                          :source-map "resources/public/js/source_map_devcards.js"}}

@@ -2,13 +2,16 @@
   (:require [hiccup.page :refer (html5 include-js include-css)]
             [liberator.representation :as rep]
             [cheshire.core :as json]
+            [environ.core :refer (env)]
             [kanopi.util.core :as util]))
 
 (defn include-bootstrap []
   (include-css "/css/bootstrap.3.3.5.min.css"))
 
-(defn include-om []
-  (include-js "/js/main.js"))
+(defn include-spa [dev]
+  (include-js (if dev
+                "/js/main.js"
+                "/js/main_prod.js")))
 
 (defn include-data [plain-text-data]
   [:script
@@ -51,5 +54,5 @@
         (when session-state
           (include-data (util/transit-write session-state))) 
         [:div#app-container]
-        (include-om)])
+        (include-spa (env :dev))])
       })))
