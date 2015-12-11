@@ -1,10 +1,11 @@
 # deploy_dev.sh
 #! /bin/bash
 
-COMMIT_SHA = $1
+COMMIT_SHA=$1
 
-docker build -t $TUTUM_USER/kanopi-peer:$COMMIT_SHA
-docker push $TUTUM_USER/kanopi-peer:$COMMIT_SHA
+lein build!
+docker build -t tutum.co/$TUTUM_USER/kanopi-peer:$COMMIT_SHA .
+docker push tutum.co/$TUTUM_USER/kanopi-peer:$COMMIT_SHA
 
 # 
 # EB_DOCKERRUN_FILE = system-spec/dev-dockerrun.aws.json

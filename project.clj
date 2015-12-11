@@ -84,14 +84,26 @@
             [lein-cljsbuild "1.1.1"]
             [lein-figwheel "0.5.0-1"]]
 
-  :clean-targets ^{:protect false} [:target-path "resources/public/js/"]
+  :clean-targets ^{:protect false} [:target-path "resources/public/js/*.js"]
 
   ; https://github.com/ruedigergad/test2junit
   :test2junit-output-dir ~(or (System/getenv "CIRCLE_TEST_REPORTS") "target/test2junit")
 
+  :aliases {"build!" ["do" "clean"
+                      ["with-profile" "prod" "cljsbuild" "once"]
+                      ["with-profile" "prod" "uberjar"]]}
+
   :profiles {:prod
              {:jvm-opts ["-XX:MaxPermSize=128M"]
               :env {:dev false}}
+
+             :uberjar
+             {:uberjar-name "kanopi-uberjar.jar"
+              :aot :all
+              ; this is done as part of build! alias. otherwise
+              ; uberjar calls 'clean' which wipes out the compiled js
+              ; resources
+              :auto-clean false}
 
              :dev
              {:jvm-opts ["-XX:MaxPermSize=128M"]

@@ -6,6 +6,7 @@
             [kanopi.model.schema :as schema]
             [kanopi.model.storage.datomic :as datomic]
             [kanopi.util.core :as util]
+            [clojure.java.io :as io]
             ))
 
 (defprotocol IAuthenticate
@@ -128,6 +129,7 @@
   component/Lifecycle
   (start [this]
     (let [init-data (some-> (get config :init-user-data)
+                            (io/resource)
                             (slurp)
                             (read-string))]
       (assoc this

@@ -1,13 +1,8 @@
-FROM clojure:onbuild
+FROM java:8
 MAINTAINER Brian James Rubinton <brian@kanopi.io>
-
-# NOTE: prefix in below env var value comes from alias used to link
-# transactor container to kanopi-peer container
 
 EXPOSE 8080
 
-RUN ["lein", "cljsbuild", "once"]
+ADD target/kanopi-uberjar.jar /kanopi-uberjar.jar
 
-# TODO build uberjar and run via java directly
-
-CMD ["lein", "run"]
+CMD "java" "-jar" "kanopi-uberjar.jar"

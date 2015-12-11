@@ -17,9 +17,9 @@
                 :db-name (or (env :datomic-database-env-database-name)
                              (env :datomic-database-name)
                              "kanopi42")
-                :schema  ["resources/schema.edn"]
-                :data    ["resources/test-data.edn"]}
-   :auth       {:init-user-data "resources/init-data.edn"}
+                :schema  ["schema.edn"]
+                :data    ["test-data.edn"]}
+   :auth       {:init-user-data "init-data.edn"}
    :local-storage {:directory   "target"
                    :content-key "kanopi"}
    :dev true})

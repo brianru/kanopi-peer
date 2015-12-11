@@ -1,7 +1,8 @@
 (ns kanopi.model.storage.datomic
   "Datomic database component and datomic-specific helper functions."
   (:require [datomic.api :as d]
-            [com.stuartsierra.component :as component])
+            [com.stuartsierra.component :as component]
+            [clojure.java.io :as io])
   (:import datomic.Datom))
 
 ;; FIXME: add tx datums including txInstant, set to last modified for
@@ -9,7 +10,7 @@
 (defn- load-files! [conn files]
   (doseq [file-path files]
     (println "loading " file-path)
-    (when-let [txdata (not-empty (read-string (slurp file-path)))]
+    (when-let [txdata (not-empty (read-string (slurp (io/resource file-path))))]
       @(d/transact conn txdata))))
 
 ; FIXME: this should be in another ns.
