@@ -7,7 +7,6 @@
 
             [liberator.dev]
             [ring.mock.request :as mock]
-            [org.httpkit.client :as http]
 
             [cheshire.core :as json]
             [clj-time.core :as time]
