@@ -67,6 +67,8 @@
                  :content-type "application/transit+json"))
 
 (defn initialized-client-system
+  ([]
+   (initialized-client-system {}))
   ([config]
    (let [server-system (component/start (system-excl-web))
          anon-session  (session/init-anonymous-session (:session-service server-system))

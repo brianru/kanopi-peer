@@ -13,6 +13,8 @@
             ))
 
 ; TODO: can I use transit to improve my parsing of these values?
+; TODO: why 2 fns? should the predicate be the parser, returning
+; a map with either the value or the error type and relevant feedback
 ; TODO: consider modifying predicate to return useful error messages
 ; by separating error modes and checking each one instead of
 ; short-circuiting at the first failure, then return the set of error
@@ -244,14 +246,14 @@
 
 (s/defschema NormalizedFact
   {:db/id DatomicId
-   :fact/attribute DatomicId
-   :fact/value DatomicId})
+   :fact/attribute DatomicIdInclTemp
+   :fact/value DatomicIdInclTemp})
 
 (s/defschema NormalizedDatum
-  {:db/id (s/maybe DatomicId)
-   :datum/team DatomicId
+  {:db/id (s/maybe DatomicIdInclTemp)
+   :datum/team DatomicIdInclTemp
    :datum/label (s/maybe s/Str)
-   :datum/fact [DatomicId]
+   :datum/fact [DatomicIdInclTemp]
    })
 
 (s/defschema CurrentDatum
@@ -270,27 +272,27 @@
 ;; encode this information twice. it only confuses things as datomic
 ;; requires typed attributes.
 (s/defschema TextLiteral
-  {:db/id (s/maybe DatomicId)
+  {:db/id (s/maybe DatomicIdInclTemp)
    :literal/team UserTeam
    :literal/text s/Str})
 
 (s/defschema MathLiteral
-  {:db/id (s/maybe DatomicId)
+  {:db/id (s/maybe DatomicIdInclTemp)
    :literal/team UserTeam
    :literal/math s/Str})
 
 (s/defschema UriLiteral
-  {:db/id (s/maybe DatomicId)
+  {:db/id (s/maybe DatomicIdInclTemp)
    :literal/team UserTeam
    :literal/uri s/Str})
 
 (s/defschema IntegerLiteral
-  {:db/id (s/maybe DatomicId)
+  {:db/id (s/maybe DatomicIdInclTemp)
    :literal/team UserTeam
    :literal/integer s/Int})
 
 (s/defschema DecimalLiteral
-  {:db/id (s/maybe DatomicId)
+  {:db/id (s/maybe DatomicIdInclTemp)
    :literal/team UserTeam
    :literal/decimal s/Num})
 
