@@ -66,21 +66,18 @@
 
                  ;; Specification and Testing
                  [prismatic/schema "1.0.3"]
-                 [org.clojure/test.check "0.9.0"]
-                 ]
+                 [org.clojure/test.check "0.9.0"]]
 
   :repositories {"my.datomic.com" {:url "https://my.datomic.com/repo"
                                    :username [:env/kanopi_datomic_username]
-                                   :password [:env/kanopi_datomic_password]
-                                   }}
+                                   :password [:env/kanopi_datomic_password]}}
   :source-paths ["src-cljc" "src"]
   :test-paths ["src-cljc" "test-cljc" "src" "test"]
   :main kanopi.main
 
   :plugins [[lein-environ "1.0.1"]
             [lein-marginalia "0.8.0"
-             :exclusions [org.clojure/clojurescript org.clojure/clojure]
-             ]
+             :exclusions [org.clojure/clojurescript org.clojure/clojure]]
             [lein-cljsbuild "1.1.1"]
             [lein-figwheel "0.5.0-1"]]
 
@@ -147,8 +144,7 @@
               :source-paths ["src-cljc" "src-cljs"]
               :compiler {:output-to "resources/public/js/main_prod.js"
                          :optimizations :advanced
-                         :parallel-build true
-                         }}
+                         :parallel-build true}}
              ;; lein figwheel to run with auto-reloading
              ;; lein cljsbuild once to run otherwise
              {:id "dev"

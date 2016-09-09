@@ -9,8 +9,7 @@
                         [schema.experimental.abstract-map :as m :include-macros true]
                         clojure.set
                         cljs.reader]
-                 )
-            ))
+                 )))
 
 ; TODO: can I use transit to improve my parsing of these values?
 ; TODO: why 2 fns? should the predicate be the parser, returning
@@ -107,12 +106,9 @@
        :default
        :unknown))))
 
-(defn datum? [m]
-  (= :datum (describe-entity m)))
-(defn fact? [m]
-  (= :fact (describe-entity m)))
-(defn literal? [m]
-  (= :literal (describe-entity m)))
+(defn datum?   [m] (= :datum   (describe-entity m)))
+(defn fact?    [m] (= :fact    (describe-entity m)))
+(defn literal? [m] (= :literal (describe-entity m)))
 
 (def literal-meta-keys
   #{:db/id :literal/team})
@@ -130,7 +126,7 @@
 
     :literal
     (-> (apply dissoc ent literal-meta-keys) (keys) (first) (or default))
-    
+
     :unknown
     default)))
 
@@ -231,7 +227,7 @@
    :fact/attribute
    (s/conditional #(= :datum   (describe-entity %)) (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
-   :fact/value    
+   :fact/value
    (s/conditional #(= :datum   (describe-entity %)) (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
    })

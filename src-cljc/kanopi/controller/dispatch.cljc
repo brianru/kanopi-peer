@@ -118,8 +118,7 @@
   [mode verbs history app-state {:keys [noun verb context] :as msg}]
   (let [local-request-verbs  (get-in verbs [mode :local :request])
         local-response-verbs (get-in verbs [mode :local :response])
-        remote-request-verbs (get-in verbs [mode :remote :request])
-        ]
+        remote-request-verbs (get-in verbs [mode :remote :request])]
     (cond->> {:messages []}
       (contains? local-request-verbs verb)
       (merge-with concat
@@ -164,11 +163,10 @@
     ; whether it be an atom or an Om cursor.
     (let [atm     (:app-state app-state)
           mode    (get @atm :mode)
-          results (handle-message mode verbs history atm msg)
-          ]
-      (when-let [msgs (not-empty (:messages results))]
-        (doseq [msg msgs]
-          (transmit! this msg)))))
+          results (handle-message mode verbs history atm msg)]
+      (some->> (:messages results)
+               (not-empty)
+               (run! (partial transmit! this)))))
   component/Lifecycle
   (start [this]
     (assoc this :verbs (mode-verbs)))

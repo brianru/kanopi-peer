@@ -25,6 +25,24 @@ scale with the only system that works at scale: learning.
 - KANOPI_DATOMIC_USERNAME
 - KANOPI_DATOMIC_PASSWORD
 
+### Running Tests
+
+$ lein test
+$ lein test <namespace>
+$ lein test :only <namespace>/<test-fn>
+
+### Front-Env Development
+
+#### DevCards
+
+#### FigWheel
+
+### Back-End Development
+
+$ lein repl
+user> (go)
+
+
 FIXME: This is pre-alpha. Nothing is guaranteed to ever work. Clever
 branching strategies come later.
 

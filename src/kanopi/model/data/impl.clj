@@ -164,8 +164,7 @@
 (defn get-related-entity-ids [db ent-id]
   (let [ids (d/q '[:find ?e
                    :in $ % ?root-e
-                   :where (related ?root-e ?e)
-                   ]
+                   :where (related ?root-e ?e)]
                  db query-rules ent-id)]
     ids))
 

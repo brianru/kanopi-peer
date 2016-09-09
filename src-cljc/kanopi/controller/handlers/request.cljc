@@ -20,7 +20,7 @@
         msgs (cond-> [(msg/navigate-success page')]
                (= :datum handler)
                (conj (msg/get-datum (util/read-entity-id (:id route-params))))
-               
+
                (= :literal handler)
                (conj (msg/get-literal (util/read-entity-id (:id route-params))))
                )]
@@ -86,6 +86,7 @@
 
 (defmulti lookup-entity
   (fn [app-state id]
+    (println "LOOKUP ENTITY" id (get-in app-state [:cache id]))
     (schema/describe-entity (get-in app-state [:cache id]))))
 
 (defmethod lookup-entity :unknown
@@ -235,8 +236,8 @@
              :db/id       (util/random-uuid)}
         user-datum (hash-map :context-datums []
                              :datum dtm
-                             :similar-datums [])
-        ]
+                             :similar-datums [])]
+    (println "DATUM/CREATE HANDLER" (get-in @app-state [:user]))
     (hash-map :messages [(msg/create-datum-success user-datum)])))
 
 (defn- handle-fact-add-or-update
