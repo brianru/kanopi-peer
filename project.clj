@@ -4,23 +4,23 @@
   :license {:name "Eclipse Public License"
             :url "http://www.eclipse.org/legal/epl-v10.html"}
   :min-lein-version "2.5.0"
-  :dependencies [[org.clojure/clojure "1.7.0"]
-                 [com.cognitect/transit-clj "0.8.285"]
-                 [org.clojure/core.async "0.2.374"]
-                 [com.cognitect/transit-cljs "0.8.232"]
+  :dependencies [[org.clojure/clojure "1.9.0-alpha12"]
+                 [com.cognitect/transit-clj "0.8.288"]
+                 [org.clojure/core.async "0.2.391"]
+                 [com.cognitect/transit-cljs "0.8.239"]
                  ;; resolves a dependency issue with figwheel and
                  ;; core.async
                  [org.clojure/core.memoize "0.5.8"]
 
-                 [com.stuartsierra/component "0.3.0"]
-                 [com.taoensso/timbre "4.1.4"]
-                 [environ "1.0.1"]
+                 [com.stuartsierra/component "0.3.1"]
+                 [com.taoensso/timbre "4.7.4"]
+                 [environ "1.1.0"]
 
                  ;; Fuzzy string matching
                  [clj-fuzzy "0.3.1"]
 
                  ;; Client
-                 [org.clojure/clojurescript "1.7.170"]
+                 [org.clojure/clojurescript "1.9.229"]
                  [org.omcljs/om "1.0.0-alpha14"]
                  [bidi "1.22.1"]
                  [kibu/pushy "0.3.6"]
