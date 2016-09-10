@@ -1,4 +1,4 @@
-(ns kanopi.client.system-test
+(ns kanopi.system.client-test
   (:require [com.stuartsierra.component :as component]
             [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
