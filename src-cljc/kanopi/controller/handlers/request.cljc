@@ -6,8 +6,7 @@
              (log trace debug info warn error fatal report)]
             [kanopi.model.message :as msg :refer (success-verb failure-verb)]
             [kanopi.model.schema :as schema]
-            [kanopi.util.core :as util]
-            ))
+            [kanopi.util.core :as util]))
 
 (defmulti local-request-handler
   (fn [_ msg]
@@ -15,26 +14,26 @@
     (get msg :verb)))
 
 (defmethod local-request-handler :spa/navigate
-  [app-state msg]
+  [_ msg]
   (let [{:keys [handler route-params] :as page'} (get-in msg [:noun])
         msgs (cond-> [(msg/navigate-success page')]
                (= :datum handler)
                (conj (msg/get-datum (util/read-entity-id (:id route-params))))
 
                (= :literal handler)
-               (conj (msg/get-literal (util/read-entity-id (:id route-params))))
-               )]
+               (conj (msg/get-literal (util/read-entity-id (:id route-params)))))]
     (hash-map :messages msgs)))
 
 (defmethod local-request-handler :spa/switch-team
   [app-state {team-id :noun :as msg}]
-  (let [user' (update @app-state :user
-                      (fn [user]
-                        (if-let [team' (->> (get user :teams)
-                                            (filter #(= (:team/id %) team-id))
-                                            (first))]
-                          (assoc user :current-team team')
-                          user)))]
+  (let [{user' :user}
+        (update @app-state :user
+                (fn [user]
+                  (if-let [team' (->> (get user :teams)
+                                      (filter #(= (:team/id %) team-id))
+                                      (first))]
+                    (assoc user :current-team team')
+                    user)))]
     (hash-map :messages [(msg/switch-team-success user')])))
 
 (defn- fuzzy-search-entity [q ent]
@@ -101,10 +100,10 @@
     (assoc normalized-fact
            :fact/attribute
            (lookup-entity app-state attribute)
-           
+
            :fact/value
            (lookup-entity app-state value)
-           
+
            )))
 
 (defmethod lookup-entity :team
@@ -179,10 +178,10 @@
   (cond
    (map? ent)
    (nil? (:db/id ent))
-   
+
    (integer? ent)
    false
-   
+
    :default
    true))
 
