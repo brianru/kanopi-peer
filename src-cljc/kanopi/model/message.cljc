@@ -235,10 +235,12 @@
 (abstract-map/extend-schema NavigateSearchSuccess Message
   [:spa.navigate.search/success]
   {:noun {:query-string s/Str
+          :entity-type (s/maybe s/Keyword)
           :results [s/Any]}})
 (defn navigate-search-success
-  [query-string results]
+  [query-string entity-type results]
   (message :noun {:query-string query-string
+                  :entity-type entity-type
                   :results results}
            :verb :spa.navigate.search/success))
 

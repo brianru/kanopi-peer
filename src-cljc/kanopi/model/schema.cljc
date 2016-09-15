@@ -121,6 +121,9 @@
     :datum
     :datum/label
 
+    ;; FIXME: this doesn't work. it's tricky, an attribute can either be a
+    ;; literal or a datum, this is recursive, but is that data available at this
+    ;; point?
     :fact
     :fact
 

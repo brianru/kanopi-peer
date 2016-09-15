@@ -7,19 +7,20 @@
 
 (defn fuzzy-search-entity [q ent]
   (when (every? not-empty [q ent])
-    (let [base-string (-> ent
-                          (schema/get-value)
-                          (str)
-                          (or ""))
-          query-string (str/lower-case q)
-          match-string (re-find (re-pattern query-string) base-string)]
+    (println "FUZZY" q ent)
+    (let [base-string (-> ent (schema/get-value) (str) (or ""))
+          ;; query-string (str/lower-case q)
+          match-string (or (re-find (re-pattern q) base-string)
+                           (re-find (re-pattern q) (str/lower-case base-string)))]
+      (println "FUZZY MATCH" match-string)
       (when-not (or (str/blank? base-string)
                     (str/blank? match-string))
         (list (/ (count base-string) (count match-string))
               ent)))))
 
-; TODO: refactor "entity-type" to "input-type" and use
-; schema/get-input-type to pull that from each entity
+;; TODO: refactor "entity-type" to "input-type" and use
+;; schema/get-input-type to pull that from each entity
+;; TODO: why?
 (defn matching-entity-type [tp ent]
   (if-not tp true
     (= tp (schema/describe-entity ent))))
@@ -31,10 +32,9 @@
   TODO: only show x many
   TODO: deal with empty q better
   "
-  [app-state q tp]
+  [entities q tp]
   (let []
-    (->> (get-in app-state [:cache])
-         (vals)
+    (->> entities
          ;(filter (partial matching-entity-type tp))
          (map    (partial fuzzy-search-entity q))
          (remove nil?)

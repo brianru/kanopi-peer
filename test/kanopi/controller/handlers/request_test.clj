@@ -2,7 +2,8 @@
   "Test methods for kanopi.controller.handlers.request/local-request-handler"
   (:require [clojure.test :refer :all]
             [kanopi.controller.handlers.request :refer :all]
-            [kanopi.model.message :as msg]))
+            [kanopi.model.message :as msg]
+            [kanopi.model.schema :as schema]))
 
 (deftest spa-navigate
   (let [app-state {}]
@@ -46,10 +47,72 @@
                (-> app-state deref :user :current-team :team/id)))))))
 
 (deftest spa-navigate-search
-  (testing "empty cache")
-  (testing "sort by match quality")
-  (testing "case insensitive")
-  (testing "optionally limit number of results")
-  (testing "empty query string")
-  (testing "unique results")
-  (let [app-state (atom {:cache {}})]))
+  (let [empty-app-state {:cache {}}
+        small-app-state {:cache {:foo {:datum/label "the people talk"
+                                       :db/id "tempid1"}
+                                 :bar {:literal/math "x_y = 4 - 7^24^y"
+                                       :db/id 42}
+                                 :baz {:fact/attribute "has"
+                                       :fact/value "corned beef hash"
+                                       :db/id "six"}}}]
+    (testing "empty cache"
+      (let [app-state (atom empty-app-state)
+            [query-string entity-type :as query] ["*" nil]
+            msg (msg/search query-string entity-type)]
+        (is (= [(msg/navigate-search-success query-string entity-type [])]
+               (:messages (local-request-handler app-state msg))))))
+    (testing "empty query string"
+      (let [app-state (atom small-app-state)
+            [query-string entity-type] ["" nil]
+            msg (msg/search query-string entity-type)]
+        (is (= [(msg/navigate-search-success query-string entity-type [])]
+               (:messages (local-request-handler app-state msg))))))
+    (testing "exact match datum"
+      (let [app-state (atom small-app-state)
+            [query-string entity-type] ["the people talk" nil]
+            msg (msg/search query-string entity-type)]
+        (is (= [(msg/navigate-search-success
+                 query-string entity-type
+                 [(1 {:datum/label "the people talk" :db/id "tempid1"})])]
+               (:messages (local-request-handler app-state msg))))))
+    ;; FIXME: failing. something to do with regex with that formula? works when
+    ;; value is `foobar'
+    (testing "exact match literal"
+      (doseq [literal-type (keys schema/literal-types)]
+        (let [value "x_y = 4 - 7^24^y" ;; "foobar"
+              app-state (atom (assoc-in small-app-state [:cache :bar]
+                                        {literal-type value :db/id 42}))
+              [query-string entity-type] [value nil]
+              msg (msg/search query-string entity-type)]
+          (is (= [(msg/navigate-search-success
+                   query-string entity-type
+                   [(list 1 {literal-type value :db/id 42})])]
+                 (:messages (local-request-handler app-state msg)))))))
+    ;; FIXME: failing
+    (testing "exact match fact"
+      (let [app-state (atom small-app-state)
+            [query-string entity-type] ["corned beef hash" nil]
+            msg (msg/search query-string entity-type)]
+        (is (= [(msg/navigate-search-success
+                 query-string entity-type
+                 [(list 1 {})])]
+               (:messages (local-request-handler app-state msg))))))
+    (testing "entity type filter datum"
+      (let [app-state (atom small-app-state)
+            [query-string entity-type] [nil :datum]
+            msg (msg/search query-string entity-type)]
+        (is (= [(msg/navigate-search-success query-string entity-type
+                                             [(list )])]
+               (:messages (local-request-handler app-state msg))))))
+    (testing "entity type filter literal"
+      (let [app-state (atom small-app-state)
+            [query-string entity-type] [nil :literal]]
+        ))
+    (testing "entity type filter fact"
+      (let [app-state (atom small-app-state)
+            [query-string entity-type] [nil :fact]]
+        ))
+    (testing "sort by match quality")
+    (testing "case insensitive")
+    (testing "optionally limit number of results")
+    (testing "unique results")))

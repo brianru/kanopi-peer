@@ -40,8 +40,9 @@
 (defmethod local-request-handler :spa.navigate/search
   [app-state msg]
   (let [{:keys [query-string entity-type]} (get msg :noun)
-        results (search/local-fulltext-search @app-state query-string entity-type)]
-    (hash-map :messages [(msg/navigate-search-success query-string results)])))
+        results (-> app-state (deref) :cache (vals)
+                    (search/local-fulltext-search query-string entity-type))]
+    (hash-map :messages [(msg/navigate-search-success query-string entity-type results)])))
 
 (defn- current-datum [props]
   (get-in props [:datum :datum :db/id]))
