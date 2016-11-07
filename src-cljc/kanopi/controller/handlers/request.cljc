@@ -20,7 +20,7 @@
         msgs (cond-> [(msg/navigate-success page')]
                (= :datum handler)
                (conj (msg/get-datum (util/read-entity-id (:id route-params))))
-               
+
                (= :literal handler)
                (conj (msg/get-literal (util/read-entity-id (:id route-params))))
                )]

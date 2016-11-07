@@ -1,6 +1,6 @@
 ## Currently:
 
-### 0.1 - The Alpha (ETA: 01 January 2016)
+### 0.1 - The Alpha (ETA: 01 January 2017)
 #### Done:
 - authentication
 - fluid literal<->thunk conversion

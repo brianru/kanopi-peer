@@ -3,7 +3,7 @@
   embedding JSON in html"
   (:require [clojure.test :refer :all]
             [clojure.pprint :refer (pprint)]
-            
+
             [com.stuartsierra.component :as component]
             [cemerick.url :as url]
             [cheshire.core :as json]
@@ -12,7 +12,7 @@
             [ring.mock.request :as mock]
 
             [kanopi.model.schema :as schema]
-            
+
             [kanopi.util.core :as util]
             [kanopi.test-util :as test-util]
             ))

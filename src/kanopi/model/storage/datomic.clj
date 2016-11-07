@@ -13,7 +13,7 @@
     (when-let [txdata (not-empty (read-string (slurp (io/resource file-path))))]
       @(d/transact conn txdata))))
 
-; FIXME: this should be in another ns.
+;; FIXME: this should be in another ns.
 (def auth-rules
   '[
     ;; Datums
@@ -33,15 +33,15 @@
      [?literal _ ?e]]
 
     ;; Transactions
-     [(readable ?team ?e)
-      [or
-       [?ent :datum/team ?team]
-       [?ent :literal/team ?team]]
-      [?ent _ _ ?e]]
+    [(readable ?team ?e)
+     [or
+      [?ent :datum/team ?team]
+      [?ent :literal/team ?team]]
+     [?ent _ _ ?e]]
 
     ])
 
-(defn authorized-entities 
+(defn authorized-entities
   ([base-db creds]
    (authorized-entities auth-rules base-db creds))
   ([rules base-db creds]
@@ -66,11 +66,12 @@
 (defprotocol ISecureDatomic
   "Provide secured Datomic api fns based on provided credentials."
   (db [this creds] [this creds as-of]
-      "API Consumers must think in terms of Peer processes instead of connection objects.
-      NOTE: remember user registration case (creds are nil)")
+    "API Consumers must think in terms of Peer processes instead of connection
+    objects.
+    NOTE: remember user registration case (creds are nil)")
   (transact [this creds txdata]
-            "Abstract from transact and transact-async. Pick one.
-            NOTE: remember user registration case (creds are nil)")
+    "Abstract from transact and transact-async. Pick one.
+    NOTE: remember user registration case (creds are nil)")
   (entity [this creds ent-id]))
 
 (defrecord DatomicPeer [config connection db-mode]
@@ -101,8 +102,8 @@
     (if-not connection
       this
       (do
-       (d/release connection)
-       (assoc this :connection nil :db-mode nil))))
+        (d/release connection)
+        (assoc this :connection nil :db-mode nil))))
 
   ;; TODO: implement authorization controls
   ;; TODO: 2 ways to filter db, 1 for authenticated user, 1 for anonymous user

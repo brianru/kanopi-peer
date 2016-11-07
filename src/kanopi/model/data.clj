@@ -77,9 +77,9 @@
   (init-datum [this creds])
   (update-datum-label [this creds datum-id label])
   (get-datum [this creds datum-id]
-             [this creds as-of datum-id])
+    [this creds as-of datum-id])
   (-get-fact [this creds fact-id]
-             "Not sure whether this should be here. Do any DataService
+    "Not sure whether this should be here. Do any DataService
              consumers call it or should this facility only be
              available through the impl namespace as a helper fn?")
   (search-datums [this creds search])
@@ -87,14 +87,14 @@
   ;; the client sends the facts. the extra arity would just parse the
   ;; entity map into the attr/value input shape [_tag_ _value_]]
   (add-fact [this creds datum-id]
-            [this creds datum-id fact]
-            [this creds datum-id attribute value])
+    [this creds datum-id fact]
+    [this creds datum-id attribute value])
   (update-fact [this creds fact]
-               [this creds fact-id attribute value]
-               "attribute and value can be nil.")
+    [this creds fact-id attribute value]
+    "attribute and value can be nil.")
 
   (retract-datum [this creds ent-id]
-                 "Assumes only 1 user has access, and thus retracting totally retracts it.
+    "Assumes only 1 user has access, and thus retracting totally retracts it.
                  If more than 1 user has that access this must only retract the appropriate
                  team(s) from the entity.")
   ;; TODO: implement remove-fact
@@ -103,12 +103,12 @@
 
 (defprotocol ILiteralService
   (-init-literal [this creds]
-                 "I don't know if we actually want this. Currently,
+    "I don't know if we actually want this. Currently,
                  all literals are created when creating fact parts
                  with a literal type.")
   (get-literal [this creds literal-id])
   (update-literal [this creds literal-id input]
-                  [this creds literal-id tp value]))
+    [this creds literal-id tp value]))
 
 (defprotocol IUserDataService
   (context-datums [this creds datum-id])
@@ -231,46 +231,46 @@
   (similar-datums [this creds ent-id]
     (similar-datums* (datomic/db datomic-peer creds) ent-id))
 
-(user-datum [this creds datum-id]
-            (user-datum* (datomic/db datomic-peer creds) datum-id))
+  (user-datum [this creds datum-id]
+    (user-datum* (datomic/db datomic-peer creds) datum-id))
 
-(most-edited-datums [this creds]
-                    (let [user-teams (->> creds :teams (mapv :db/id))
-                          results (->> (d/q '[:find ?e (count-distinct ?tx)
-                                              :in $ [?user-team ...]
-                                              :where
-                                              [?e :datum/team ?user-team]
-                                              [?e _ _ ?tx]]
-                                            (datomic/db datomic-peer creds)
-                                            user-teams)
-                                       (take 10))]
-                      (mapv (fn [[datum-id cnt]]
-                              (vector (get-datum this creds datum-id) cnt))
-                            results)))
+  (most-edited-datums [this creds]
+    (let [user-teams (->> creds :teams (mapv :db/id))
+          results (->> (d/q '[:find ?e (count-distinct ?tx)
+                              :in $ [?user-team ...]
+                              :where
+                              [?e :datum/team ?user-team]
+                              [?e _ _ ?tx]]
+                            (datomic/db datomic-peer creds)
+                            user-teams)
+                       (take 10))]
+      (mapv (fn [[datum-id cnt]]
+              (vector (get-datum this creds datum-id) cnt))
+            results)))
 
-(most-viewed-datums [this creds]
-                    (let []
-                      []))
+  (most-viewed-datums [this creds]
+    (let []
+      []))
 
-;; TODO: filter by recency
-(recent-datums [this creds]
-               (let [user-teams (->> creds :teams (mapv :db/id))
-                     results    (->> (d/q '[:find ?e ?time ?tx
-                                            :in $ [?user-team ...]
-                                            :where
-                                            [?e :datum/team ?user-team]
-                                            [?e _ _ ?tx]
-                                            [?tx :db/txInstant ?time]
-                                            ]
-                                          (datomic/db datomic-peer creds)
-                                          user-teams)
-                                     )]
-                 (mapv (fn [[datum-id tm tx]]
-                         (vector (get-datum this creds datum-id) tm tx))
-                       results)))
-(user-literal [this creds literal-id]
-              (user-literal* (datomic/db datomic-peer creds) literal-id))
-)
+  ;; TODO: filter by recency
+  (recent-datums [this creds]
+    (let [user-teams (->> creds :teams (mapv :db/id))
+          results    (->> (d/q '[:find ?e ?time ?tx
+                                 :in $ [?user-team ...]
+                                 :where
+                                 [?e :datum/team ?user-team]
+                                 [?e _ _ ?tx]
+                                 [?tx :db/txInstant ?time]
+                                 ]
+                               (datomic/db datomic-peer creds)
+                               user-teams)
+                          )]
+      (mapv (fn [[datum-id tm tx]]
+              (vector (get-datum this creds datum-id) tm tx))
+            results)))
+  (user-literal [this creds literal-id]
+    (user-literal* (datomic/db datomic-peer creds) literal-id))
+  )
 
 (defn data-service []
   (map->DatomicDataService {:config nil}))

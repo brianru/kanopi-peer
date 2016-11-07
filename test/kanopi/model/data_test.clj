@@ -26,7 +26,7 @@
 
     (testing "init datum returns the datum's entity id"
       (is (s/validate schema/DatomicId ent-id)))
-    
+
     (testing "datum has user's default team"
       (is (= (schema/user-default-team creds) (-> ent :datum/team :db/id))))
 
@@ -91,7 +91,7 @@
       (let [lbl' "new label dude!"
             datum' (data/update-datum-label (:data-service system) creds ent-id lbl')]
         (is (= lbl' (get datum' :datum/label)))))
-    
+
     (is (s/validate schema/Datum (data/get-datum (:data-service system) creds ent-id))
         "No longer valid!")
 
@@ -107,7 +107,7 @@
         (is (not-empty datum'))
         (is (= ["pattern" "skirt steak"]
                (-> datum' :datum/fact (first) (util/fact-entity->tuple))))))
-    
+
     (component/stop system)))
 
 (deftest literal-types
@@ -138,8 +138,7 @@
     (testing "tagged uri literal")
     (testing "tagged email-address literal")
 
-    (component/stop system)
-    ))
+    (component/stop system)))
 
 (deftest search-datums
   (let [system  (component/start (test-util/system-excl-web))
@@ -241,8 +240,7 @@
 
           creds (auth/credentials (:authenticator system) "hannah")
           results (data/recent-datums data-svc creds)
-          db (get-db system)
-          ]
+          db (get-db system)]
       ; (is (not-empty results))
       (component/stop system)))
 
@@ -251,10 +249,9 @@
         (component/start (test-util/system-excl-web))
         creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
                    (auth/credentials (:authenticator system) "brian"))
-        
+
         literal-id (data/-init-literal data-svc creds)
-        literal    (data/get-literal data-svc creds literal-id)
-        ]
+        literal    (data/get-literal data-svc creds literal-id)]
     (is (not (s/check schema/DatomicId literal-id)))
     (is (not (s/check schema/Literal literal)))
     (component/stop system)))
@@ -290,4 +287,3 @@
                          (filter #(= "literal" (namespace %)))
                          (remove #{:literal/team}))))))
     (component/stop system)))
-

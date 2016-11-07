@@ -3,7 +3,6 @@
                    [cljs.test :refer (testing is)])
   (:require [com.stuartsierra.component :as component]
             [kanopi.util-dev :as dev-util]
-            
             [kanopi.controller.history :as history]))
 
 (defonce system

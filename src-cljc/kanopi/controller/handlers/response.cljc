@@ -1,13 +1,13 @@
 (ns kanopi.controller.handlers.response
   "TODO: refactor to return a collection of messages when necessary.
   The dispatcher should handle message delivery."
-  (:require #?(:cljs [om.core :as om]) 
+  (:require #?(:cljs [om.core :as om])
             [taoensso.timbre :as timbre
              #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
 
             [kanopi.controller.history :as history]
             [kanopi.model.message :as msg]
-            
+
             [kanopi.util.core :as util]))
 
 #?(:cljs

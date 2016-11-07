@@ -7,7 +7,7 @@ lein build!
 docker build -t tutum.co/$TUTUM_USER/kanopi-peer:$COMMIT_SHA .
 docker push tutum.co/$TUTUM_USER/kanopi-peer:$COMMIT_SHA
 
-# 
+#
 # EB_DOCKERRUN_FILE = system-spec/dev-dockerrun.aws.json
 
 # aws elasticbeanstalk create-application-version \

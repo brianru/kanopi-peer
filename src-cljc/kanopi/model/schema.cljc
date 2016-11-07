@@ -1,5 +1,5 @@
 (ns kanopi.model.schema
-  (:require 
+  (:require
              #?@(:clj  [[schema.core :as s]
                         [schema.experimental.complete :as c]
                         [schema.experimental.generators :as g]
@@ -130,7 +130,7 @@
 
     :literal
     (-> (apply dissoc ent literal-meta-keys) (keys) (first) (or default))
-    
+
     :unknown
     default)))
 
@@ -231,7 +231,7 @@
    :fact/attribute
    (s/conditional #(= :datum   (describe-entity %)) (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
-   :fact/value    
+   :fact/value
    (s/conditional #(= :datum   (describe-entity %)) (s/recursive #'Datum)
                   #(= :literal (describe-entity %)) Literal)
    })

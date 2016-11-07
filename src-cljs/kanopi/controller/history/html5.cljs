@@ -8,7 +8,7 @@
      Try to initialize from cache.
      Regardless, request from server.
      => where are these tasks performed?
-  
+
   TODO: kanopi.controller.router
   "
   (:require [com.stuartsierra.component :as component]
@@ -40,7 +40,7 @@
   (stop [this]
     (pushy/stop! history)
     (assoc this :history nil, :routes nil, :route-for (constantly nil)))
-  
+
   history/INavigator
   (get-route-for [this path]
     (let [path (if (coll? path) path [path])]

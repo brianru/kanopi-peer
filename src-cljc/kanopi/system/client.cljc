@@ -17,7 +17,7 @@
 #?(:clj
    (defn client-library [config]
      (component/system-map
-      
+
       :local-storage
       (local-storage/new-local-storage (get config :local-storage))
 
@@ -43,6 +43,7 @@
       ;   :app-state :app-state})
 
       )))
+
 #?(:cljs
    (defn web-app [config]
      (component/system-map
