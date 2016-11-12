@@ -73,7 +73,7 @@
             msg (msg/search query-string entity-type)]
         (is (= [(msg/navigate-search-success
                  query-string entity-type
-                 [(1 {:datum/label "the people talk" :db/id "tempid1"})])]
+                 [(list 1 {:datum/label "the people talk" :db/id "tempid1"})])]
                (:messages (local-request-handler app-state msg))))))
     ;; FIXME: failing. something to do with regex with that formula? works when
     ;; value is `foobar'
@@ -101,17 +101,25 @@
       (let [app-state (atom small-app-state)
             [query-string entity-type] [nil :datum]
             msg (msg/search query-string entity-type)]
-        (is (= [(msg/navigate-search-success query-string entity-type
-                                             [(list )])]
+        (is (= [(msg/navigate-search-success
+                 query-string entity-type
+                 [(list 1 (get-in small-app-state [:cache :foo]))])]
                (:messages (local-request-handler app-state msg))))))
     (testing "entity type filter literal"
       (let [app-state (atom small-app-state)
-            [query-string entity-type] [nil :literal]]
-        ))
+            [query-string entity-type] [nil :literal]
+            msg (msg/search query-string entity-type)]
+        (is (= [(msg/navigate-search-success
+                 query-string entity-type
+                 [(list 1 (get-in small-app-state [:cache :bar]))])]
+               (:messages (local-request-handler app-state msg))))))
     (testing "entity type filter fact"
       (let [app-state (atom small-app-state)
-            [query-string entity-type] [nil :fact]]
-        ))
+            [query-string entity-type] [nil :fact]
+            msg (msg/search query-string entity-type)]
+        (is (= [(msg/navigate-search-success
+                 query-string entity-type
+                 [(list 1 (get-in small-app-state [:cache :baz]))])]))))
     (testing "sort by match quality")
     (testing "case insensitive")
     (testing "optionally limit number of results")
