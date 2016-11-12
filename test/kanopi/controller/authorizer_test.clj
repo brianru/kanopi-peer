@@ -44,8 +44,6 @@
                       :where [?e _ ?team]]
                     filtered-db (schema/current-team creds2)))))
 
-
-
     (component/stop sys)))
 
 (deftest only-see-my-data
@@ -62,6 +60,7 @@
         _ (create-team! authorizer creds1 teamname3)
         creds2 (register-and-get-creds! sys "hannah" "rubinton")
         ]
+    ;; TODO: implement
 
     (component/stop sys)))
 
@@ -72,7 +71,8 @@
         creds2 (register-and-get-creds! sys "hannah" "rubinton")
         personal-team (get creds1 :team)]
     (is (thrown? java.lang.AssertionError
-                 (add-to-team! (:authorizer sys) creds1 "brian" (get creds2 :username))))
+                 (add-to-team! (:authorizer sys) creds1 "brian"
+                               (get creds2 :username))))
     (component/stop sys)))
 
 (deftest can-create-team

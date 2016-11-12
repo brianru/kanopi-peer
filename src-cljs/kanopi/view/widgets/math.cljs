@@ -2,7 +2,7 @@
   "I do not like the name of this namespace. Not sure if there should
   be a namespace for rendering all sorts of stuff, but for now all I
   have are these math-as-latex literals.
-  
+
   TODO: consider switching to mathjax for broader input support."
   (:require [om.core :as om]
             [sablono.core :refer-macros (html)]
@@ -51,7 +51,7 @@
     (did-update [_ prev-props prev-state]
       (when (not= (get prev-state :input-value) (om/get-state owner :input-value))
         (render-katex! owner)))
-    
+
     om/IRenderState
     (render-state [_ {:keys [parse-error] :as state}]
       (html

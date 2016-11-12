@@ -156,8 +156,4 @@
                  [:a {:href (browser/route-for owner :home)} "Not really."]]
                 )
 
-              ]]
-            ]]]
-         ))
-      ))
-  )
+              ]]]]])))))

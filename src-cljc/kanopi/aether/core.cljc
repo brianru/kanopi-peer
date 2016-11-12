@@ -181,7 +181,7 @@
        (info "stop aether")
        ;; FIXME: kill aether
        (assoc this :aether nil))))
-  
+
   IBroadcast
   (send! [this msg]
     (async/put! (get-in this [:aether :publisher]) msg))

@@ -57,7 +57,7 @@
            :settings
            (om/build settings/settings (get props :user))
 
-           :teams 
+           :teams
            (om/build teams/manage-teams (get props :user))
 
            ;; default
@@ -69,7 +69,7 @@
          (case (get-in props [:modal :type])
            :insight
            (om/build insight/capture (get props :modal))
-           
+
            ;default
            nil)
          ]

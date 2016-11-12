@@ -15,11 +15,11 @@
     om/IDisplayName
     (display-name [_]
       "insight-capture-modal")
-    
+
     om/IInitState
     (init-state [_]
       {})
-    
+
     om/IRenderState
     (render-state [_ state]
       (let []

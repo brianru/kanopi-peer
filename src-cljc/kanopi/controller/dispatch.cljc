@@ -29,8 +29,7 @@
 
 (defn mode-verbs []
   {:post [(same-verbs-in-each-mode %)
-          (every-verb-has-matching-success-and-failure-verbs %)
-          ]}
+          (every-verb-has-matching-success-and-failure-verbs %)]}
   {:spa.unauthenticated/online
    {:local  {:request
              #{:spa/navigate
@@ -62,11 +61,9 @@
                :literal.update/success          :literal.update/failure
                }}
     :remote {:request
-             #{:spa/login :spa/register
-               }
+             #{:spa/login :spa/register}
              :response
-             #{
-               }}}
+             #{}}}
 
    :spa.authenticated/online
    {:local  {:request

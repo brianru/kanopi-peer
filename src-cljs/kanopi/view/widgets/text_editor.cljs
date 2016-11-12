@@ -41,7 +41,7 @@
     om/IDisplayName
     (display-name [_]
       (str "rich-text-editor-" props))
-    
+
     om/IInitState
     (init-state [_]
       {:placeholder nil
@@ -83,7 +83,7 @@
     (init-state [_]
       {
        })
-    
+
     om/IDidMount
     (did-mount [_]
       (let [state  (om/get-state owner)

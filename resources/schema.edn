@@ -1,5 +1,6 @@
 [
  ;; Partitions
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/id #db/id [:db.part/db]
   :db/ident :db.part/users
   :db.install/_partition :db.part/db}
@@ -9,6 +10,7 @@
   :db.install/_partition :db.part/db}
 
  ;; Users
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/ident :user/id
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
@@ -31,6 +33,7 @@
   :db.install/_attribute :db.part/db}
 
  ;; Teams
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/ident :team/id
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
@@ -40,6 +43,7 @@
   :db.install/_attribute :db.part/db}
 
  ;; Datums
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/ident :datum/label
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
@@ -64,6 +68,7 @@
   :db.install/_attribute :db.part/db}
 
  ;; Facts
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/ident :fact/attribute
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
@@ -90,6 +95,7 @@
  ;; :db.install/_attribute :db.part/db}
 
  ;; Literals
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/ident :literal/team
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one

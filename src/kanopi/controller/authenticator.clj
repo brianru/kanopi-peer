@@ -37,7 +37,7 @@
                           {:user/team [:db/id :team/id]}
                           :user/id
                           :user/password]
-                        ent-id) 
+                        ent-id)
          ;; NOTE: the shape of creds' is largely dictated by friend
          creds' (when (not-empty (dissoc creds :db/id))
                   (hash-map
@@ -100,10 +100,10 @@
     ;; TODO: add audit datoms to the tx entity
     (let [user-temp-id    (d/tempid :db.part/users -1)
           team-temp-id    (d/tempid :db.part/users -1000)
-          txdata 
+          txdata
           (->> (concat
                 (-init-user-data this username password user-temp-id team-temp-id)
-                (-init-team-data this team-temp-id)) 
+                (-init-team-data this team-temp-id))
                (remove nil?))
           report @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-temp-id)))

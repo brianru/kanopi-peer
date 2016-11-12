@@ -274,4 +274,3 @@
 
 (defn data-service []
   (map->DatomicDataService {:config nil}))
-
