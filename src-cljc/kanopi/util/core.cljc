@@ -138,10 +138,10 @@
 (defn read-entity-id
   "Sometimes an integer, sometimes a string, never a symbol.
   Negative numbers are allowed because they represent temp ids."
-  [string]
-  (if (= string (re-find #"-?[0-9]*" string))
-    (try-read-string string)
-    string))
+  [input]
+  (if (= input (and (string? input) (re-find #"-?[0-9]*" input)))
+    (try-read-string input)
+    input))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Transit helpers // should be CLJC, but not needed right now.

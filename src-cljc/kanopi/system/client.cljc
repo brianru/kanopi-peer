@@ -11,8 +11,7 @@
 
             [kanopi.controller.dispatch :as dispatch]
             [kanopi.aether.core :as aether]
-            [kanopi.aether.spout :as aether-spout]
-            ))
+            [kanopi.aether.spout :as aether-spout]))
 
 #?(:clj
    (defn client-library [config]

@@ -6,8 +6,8 @@
              (log trace debug info warn error fatal report)]
             [kanopi.model.message :as msg :refer (success-verb failure-verb)]
             [kanopi.model.schema :as schema]
-            [kanopi.util.core :as util]
-            ))
+            [kanopi.controller.handlers.request.search :as search]
+            [kanopi.util.core :as util]))
 
 (defmulti local-request-handler
   (fn [_ msg]
@@ -15,77 +15,41 @@
     (get msg :verb)))
 
 (defmethod local-request-handler :spa/navigate
-  [app-state msg]
+  [_ msg]
   (let [{:keys [handler route-params] :as page'} (get-in msg [:noun])
         msgs (cond-> [(msg/navigate-success page')]
                (= :datum handler)
                (conj (msg/get-datum (util/read-entity-id (:id route-params))))
 
                (= :literal handler)
-               (conj (msg/get-literal (util/read-entity-id (:id route-params))))
-               )]
+               (conj (msg/get-literal (util/read-entity-id (:id route-params)))))]
     (hash-map :messages msgs)))
 
 (defmethod local-request-handler :spa/switch-team
   [app-state {team-id :noun :as msg}]
-  (let [user' (update @app-state :user
-                      (fn [user]
-                        (if-let [team' (->> (get user :teams)
-                                            (filter #(= (:team/id %) team-id))
-                                            (first))]
-                          (assoc user :current-team team')
-                          user)))]
+  (let [{user' :user}
+        (update @app-state :user
+                (fn [user]
+                  (if-let [team' (->> (get user :teams)
+                                      (filter (comp #{team-id} :team/id))
+                                      (first))]
+                    (assoc user :current-team team')
+                    user)))]
     (hash-map :messages [(msg/switch-team-success user')])))
-
-(defn- fuzzy-search-entity [q ent]
-  (when (every? not-empty [q ent])
-    (let [base-string (-> ent
-                          (schema/get-value)
-                          (str)
-                          (or ""))
-          query-string (clojure.string/lower-case q)
-          match-string (re-find (re-pattern query-string) base-string)]
-      (when-not (or (clojure.string/blank? base-string)
-                    (clojure.string/blank? match-string))
-        (list (/ (count base-string) (count match-string))
-              ent)))))
-
-; TODO: refactor "entity-type" to "input-type" and use
-; schema/get-input-type to pull that from each entity
-(defn- matching-entity-type [tp ent]
-  (if-not tp true
-    (= tp (schema/describe-entity ent))))
-
-(defn- local-fulltext-search
-  "TODO: sort by match quality
-  https://github.com/Yomguithereal/clj-fuzzy
-  TODO: handle upper- vs lower-case better
-  TODO: only show x many
-  TODO: deal with empty q better
-  "
-  [app-state q tp]
-  (let []
-    (->> (get-in app-state [:cache])
-         (vals)
-         ;(filter (partial matching-entity-type tp))
-         (map    (partial fuzzy-search-entity q))
-         (remove nil?)
-         (distinct)
-         (sort-by first)
-         (vec))))
 
 (defmethod local-request-handler :spa.navigate/search
   [app-state msg]
   (let [{:keys [query-string entity-type]} (get msg :noun)
-        results (local-fulltext-search @app-state query-string entity-type)
-        ]
-    (hash-map :messages [(msg/navigate-search-success query-string results)])))
+        results (-> app-state (deref) :cache (vals)
+                    (search/local-fulltext-search query-string entity-type))]
+    (hash-map :messages [(msg/navigate-search-success query-string entity-type results)])))
 
 (defn- current-datum [props]
   (get-in props [:datum :datum :db/id]))
 
 (defmulti lookup-entity
   (fn [app-state id]
+    (println "LOOKUP ENTITY" id (get-in app-state [:cache id]))
     (schema/describe-entity (get-in app-state [:cache id]))))
 
 (defmethod lookup-entity :unknown
@@ -100,10 +64,10 @@
     (assoc normalized-fact
            :fact/attribute
            (lookup-entity app-state attribute)
-           
+
            :fact/value
            (lookup-entity app-state value)
-           
+
            )))
 
 (defmethod lookup-entity :team
@@ -178,10 +142,10 @@
   (cond
    (map? ent)
    (nil? (:db/id ent))
-   
+
    (integer? ent)
    false
-   
+
    :default
    true))
 
@@ -235,8 +199,8 @@
              :db/id       (util/random-uuid)}
         user-datum (hash-map :context-datums []
                              :datum dtm
-                             :similar-datums [])
-        ]
+                             :similar-datums [])]
+    (println "DATUM/CREATE HANDLER" (get-in @app-state [:user]))
     (hash-map :messages [(msg/create-datum-success user-datum)])))
 
 (defn- handle-fact-add-or-update

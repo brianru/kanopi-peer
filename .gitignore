@@ -13,3 +13,4 @@ build.xml
 /.lein-*
 /.nrepl-port
 *.swp
+*.DS_STORE

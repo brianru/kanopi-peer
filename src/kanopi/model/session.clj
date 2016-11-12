@@ -58,18 +58,19 @@
 
           db (-hypothetical-db this nil txdata)
           creds (authenticator/credentials* db username false)
-          
+
           welcome-ent-id (d/q '[:find ?e .
                                 :in $
-                                :where [?e :datum/label "Welcome to Kanopi!"]] db)
-          ]
+                                :where [?e :datum/label "Welcome to Kanopi!"]]
+                              db)]
+      (println "INIT ANONYMOUS SESSION")
+      (clojure.pprint/pprint txdata)
       (hash-map
        :user  (dissoc creds :password)
        :page  (str "/datum/" welcome-ent-id)
        :datum (data/user-datum* db welcome-ent-id)
        :cache (hash-map welcome-ent-id
-                        (data-impl/get-datum* db welcome-ent-id))
-       )))
+                        (data-impl/get-datum* db welcome-ent-id)))))
 
   (init-session [this creds]
     (let [db (datomic/db datomic-peer creds)

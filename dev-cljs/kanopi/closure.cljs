@@ -3,9 +3,7 @@
  (:require [cljs.test :refer-macros (is)]
            [goog.string.linkify :as linkify])
  (:import [goog.format EmailAddress]
-          [goog Uri]
-          )
- )
+          [goog Uri]))
 
 (deftest format-email-addresses
   ""
