@@ -86,7 +86,7 @@
     (assoc normalized-datum
            :datum/fact
            (mapv (partial lookup-entity app-state) fact)
-           
+
            :datum/team
            (lookup-entity app-state team)
            )))
@@ -250,4 +250,3 @@
                      (assoc new-type new-value))
         ]
     (hash-map :messages [(msg/update-literal-success literal')])))
-

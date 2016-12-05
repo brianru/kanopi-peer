@@ -11,8 +11,8 @@
 
 (defmulti request-handler
   (fn [request-context message]
-    (when (= (:verb message) :user/change-password)
-      (info "REQUEST HANDLER" message))
+    #_(when (= (:verb message) :user/change-password)
+        (info "REQUEST HANDLER" message))
     (get message :verb))
   :default :echo)
 
@@ -36,7 +36,7 @@
         all-datum-ids (concat
                        (map first most-edited-datums)
                        (map first most-viewed-datums)
-                       (map first recent-datums)) 
+                       (map first recent-datums))
         ;; NOTE: cache is here to ensure the above datums show up in
         ;; search results -- right now search results are only local.
         ;; really that's wrong, searches should be executed on the

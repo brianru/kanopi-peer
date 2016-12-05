@@ -43,7 +43,7 @@
                  ;; Database
                  ; NOTE: add AWS DDB sdk when upgrading datomic
                  ; http://docs.datomic.com/storage.html#provisioning-dynamo
-                 [com.datomic/datomic-pro "0.9.5327"
+                 [com.datomic/datomic-pro "0.9.5407"
                   :exclusions [joda-time]]
                  [alandipert/enduro "1.2.0"]
 
