@@ -134,6 +134,7 @@
 
  ;; Literals
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ ;; FIXME should literals belong to teams?
  {:db/ident :literal/team
   :db/valueType :db.type/ref
   :db/cardinality :db.cardinality/one
