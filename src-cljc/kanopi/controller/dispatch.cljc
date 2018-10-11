@@ -3,16 +3,12 @@
   and/or spouts for external processing."
   #?(:cljs (:require-macros [cljs.core.async.macros :refer (go)])) 
   (:require [com.stuartsierra.component :as component]
-            #?(:clj  [clojure.core.async :as async :refer (go)]
-               :cljs [cljs.core.async :as async])
-            [taoensso.timbre :as timbre
-             #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
+            [clojure.core.async :as async :refer (go)]
+            [taoensso.timbre :as timbre :refer (log trace debug info warn error fatal report)]
             [kanopi.aether.core :as aether]
             [kanopi.controller.handlers.request :as request-handlers]
             [kanopi.controller.handlers.response :as response-handlers]
             [kanopi.model.message :as msg]
-            [kanopi.model.message.client :as client-msg]
-            #?(:cljs [om.core :as om])
             ))
 
 (defn- same-verbs-in-each-mode [modal-verbs]
@@ -140,7 +136,7 @@
       ;; local-response-handler
       (contains? remote-request-verbs verb)
       (merge-with concat
-                  {:messages [(client-msg/local->remote history app-state msg)]}))))
+                  {:messages []}))))
 
 (defprotocol IDispatcher
   "Dynamic message-oriented api."
@@ -173,8 +169,7 @@
 (defrecord AetherDispatcher [config aether history app-state kill-channel]
   IDispatcher
   (transmit! [this {:keys [noun verb context] :as msg}]
-    (let [root-crsr #? (:cljs (om/root-cursor (:app-state app-state))
-                        :clj  (:app-state app-state)) 
+    (let [root-crsr (:app-state app-state)
           mode      (get @root-crsr :mode)
           verbs     (mode-verbs)
           results   (handle-message mode verbs history root-crsr msg)

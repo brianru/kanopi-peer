@@ -5,7 +5,6 @@
             [taoensso.timbre :as timbre
              #?(:clj :refer :cljs :refer-macros) (log trace debug info warn error fatal report)]
 
-            [kanopi.controller.history :as history]
             [kanopi.model.message :as msg]
 
             [kanopi.util.core :as util]))
@@ -101,7 +100,7 @@
   [history app-state msg]
   (let [dtm (get-in msg [:noun :datum])]
     (incorporate-user-datum! app-state (get msg :noun))
-    (history/navigate-to! history [:datum :id (get dtm :db/id)]))
+    #_(history/navigate-to! history [:datum :id (get dtm :db/id)]))
   (hash-map :messages []))
 
 (defmethod local-response-handler :datum.create/failure
@@ -146,7 +145,7 @@
                                 :similar-datums []}
                         :cache {}
                         :error-messages [])))
-    (history/navigate-to! history :home)
+    #_(history/navigate-to! history :home)
     (hash-map :messages [(msg/initialize-client-state noun)])))
 
 (defmethod local-response-handler :spa.register/failure
@@ -168,7 +167,7 @@
                                 :similar-datums []}
                         :cache {}
                         :error-messages [])))
-    (history/navigate-to! history :home)
+    #_(history/navigate-to! history :home)
     (hash-map :messages [(msg/initialize-client-state noun)])))
 
 (defmethod local-response-handler :spa.login/failure
@@ -190,7 +189,7 @@
                                 :similar-datums []}
                         :error-messages []
                         :cache {})))
-    (history/navigate-to! history :home))
+    #_(history/navigate-to! history :home))
   (hash-map :messages []))
 
 (defmethod local-response-handler :spa.logout/failure
@@ -218,7 +217,7 @@
     ;; NOTE: user changed, therefore creds changed, therefore must
     ;; reinitialize => could have a current-datum which is not
     ;; accessible from the new creds
-    (history/navigate-to! history :home)
+    #_(history/navigate-to! history :home)
     (hash-map :messages [(msg/initialize-client-state user')])))
 
 (defn incorporate-updated-literal! [app-state literal]

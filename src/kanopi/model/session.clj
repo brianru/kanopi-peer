@@ -64,7 +64,7 @@
                                 :where [?e :datum/label "Welcome to Kanopi!"]]
                               db)]
       (println "INIT ANONYMOUS SESSION")
-      (clojure.pprint/pprint txdata)
+      ;; (clojure.pprint/pprint txdata)
       (hash-map
        :user  (dissoc creds :password)
        :page  (str "/datum/" welcome-ent-id)

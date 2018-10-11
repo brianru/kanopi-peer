@@ -1,13 +1,10 @@
 (ns kanopi.view.routes
-  "TODO: remove this namespace.
-  - push route definition into kanopi.model.routes
-  - push matching with liberator resources to kanopi.controller.web-app"
+  ""
   (:require [compojure.core  :refer (routes GET POST PUT ANY)]
             [compojure.route :as route]
             [kanopi.view.resources.auth :as auth]
             [kanopi.view.resources.api  :as api :refer (api-resource)]
-            [kanopi.view.resources.spa  :as spa :refer (spa-resource)]
-            ))
+            [kanopi.view.resources.spa  :as spa :refer (spa-resource)]))
 
 (defn app-routes []
   (->

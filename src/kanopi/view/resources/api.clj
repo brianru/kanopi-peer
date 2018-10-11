@@ -18,7 +18,7 @@
                           "application/json"]
 
   :processable? (fn [ctx]
-                  (hash-map ::message (server-msg/remote->local ctx))) 
+                  (hash-map ::message (server-msg/remote->local ctx)))
   :handle-unprocessable-entity "The request is in some way incomplete or illogical."
 
   :post! (fn [ctx]

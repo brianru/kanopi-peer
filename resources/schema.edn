@@ -9,6 +9,11 @@
   :db/ident :db.part/structure
   :db.install/_partition :db.part/db}
 
+ ;; Do I need this?
+ ;; {:db/id #db/id [:db.prat/db]
+ ;;  :db/ident :db.part/sharedSchema
+ ;;  :db.install/_partition :db.part/db}
+
  ;; Users
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/ident :user/id
@@ -37,8 +42,31 @@
  {:db/ident :team/id
   :db/valueType :db.type/string
   :db/cardinality :db.cardinality/one
-  :db/isComponent true
   :db/unique :db.unique/identity
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ ;; Namespaces
+ ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
+ {:db/ident :namespace/uri
+  :db/valueType :db.type/uri
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :namespace/prefix
+  :db/valueType :db.type/uri
+  :db/cardinality :db.cardinality/one
+  :db/fulltext true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
+ {:db/ident :namespace/team
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/isComponent true
+  :db/index true
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
@@ -67,7 +95,17 @@
   :db/id #db/id[:db.part/db]
   :db.install/_attribute :db.part/db}
 
+ {:db/ident :datum/namespace
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/isComponent true
+  :db/index true
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
  ;; Facts
+ ;;
+ ;; These are reified statements. Can be inferred, suggested.
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/ident :fact/attribute
   :db/valueType :db.type/ref
