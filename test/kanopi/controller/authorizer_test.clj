@@ -14,14 +14,12 @@
   (authenticator/credentials authenticator username))
 
 (deftest hack-the-database
-  (let [sys   (-> (test-util/system-excl-web)
-                  (component/start))
+  (let [sys    (-> (test-util/system-excl-web) (component/start))
         creds  (register-and-get-creds! sys "brian" "rubinton")
         creds2 (register-and-get-creds! sys "hannah" "rubinton")
 
         plain-db    (d/db (get-in sys [:datomic-peer :connection]))
-        filtered-db (datomic/filtered-db* plain-db creds)
-        ]
+        filtered-db (datomic/filtered-db* plain-db creds)]
     (testing "some data is available"
       (is (d/q '[:find ?e .
                  :in $
@@ -48,25 +46,21 @@
 
 (deftest only-see-my-data
   (let [{:keys [authorizer] :as sys}
-        (-> (test-util/system-excl-web)
-            (component/start))
-        
-        creds1 (register-and-get-creds! sys "brian" "rubinton")
+        (-> (test-util/system-excl-web) (component/start))
+        creds1    (register-and-get-creds! sys "brian" "rubinton")
         teamname1 "i am on the team!"
         teamname2 "whoami???"
         teamname3 "the trees!"
-        _ (create-team! authorizer creds1 teamname1)
-        _ (create-team! authorizer creds1 teamname2)
-        _ (create-team! authorizer creds1 teamname3)
-        creds2 (register-and-get-creds! sys "hannah" "rubinton")
-        ]
+        _         (create-team! authorizer creds1 teamname1)
+        _         (create-team! authorizer creds1 teamname2)
+        _         (create-team! authorizer creds1 teamname3)
+        creds2    (register-and-get-creds! sys "hannah" "rubinton")]
     ;; TODO: implement
 
     (component/stop sys)))
 
 (deftest cannot-add-user-to-personal-team
-  (let [sys    (-> (test-util/system-excl-web)
-                   (component/start))
+  (let [sys    (-> (test-util/system-excl-web) (component/start))
         creds1 (register-and-get-creds! sys "brian"  "rubinton")
         creds2 (register-and-get-creds! sys "hannah" "rubinton")
         personal-team (get creds1 :team)]
@@ -76,13 +70,11 @@
     (component/stop sys)))
 
 (deftest can-create-team
-  (let [sys      (-> (test-util/system-excl-web)
-                     (component/start))
+  (let [sys      (-> (test-util/system-excl-web) (component/start))
         creds    (register-and-get-creds! sys "brian" "rubinton")
         teamname "bananafart"
         res      (create-team! (:authorizer sys) creds teamname)
-        creds'   (authenticator/credentials (:authenticator sys) "brian")
-        ]
+        creds'   (authenticator/credentials (:authenticator sys) "brian")]
     (is (contains? (->> (get creds' :teams)
                         (map :team/id)
                         (set))
@@ -90,50 +82,42 @@
     (component/stop sys)))
 
 (deftest cannot-add-self-to-team
-  (let [sys      (-> (test-util/system-excl-web)
-                     (component/start))
+  (let [sys      (-> (test-util/system-excl-web) (component/start))
         creds1   (register-and-get-creds! sys "brian"  "rubinton")
         creds2   (register-and-get-creds! sys "hannah" "rubinton")
         teamname "foofoofoo"
-        team3    (create-team! (:authorizer sys) creds1 teamname)
-        ]
+        team3    (create-team! (:authorizer sys) creds1 teamname)]
     (is (thrown? java.lang.AssertionError
-                 (add-to-team! (:authorizer sys) creds2 teamname (get creds2 :username))))
-
+                 (add-to-team! (:authorizer sys) creds2 teamname
+                               (get creds2 :username))))
     (component/stop sys)))
 
 (deftest cannot-leave-personal-team
-  (let [sys      (-> (test-util/system-excl-web)
-                     (component/start))
-        creds1   (register-and-get-creds! sys "brian" "rubinton")
-        ]
+  (let [sys      (-> (test-util/system-excl-web) (component/start))
+        creds1   (register-and-get-creds! sys "brian" "rubinton")]
     (is (thrown? java.lang.AssertionError
                  (leave-team! (:authorizer sys) creds1 "brian")))
     (component/stop sys)))
 
 (deftest can-only-leave-current-teams
-  (let [sys      (-> (test-util/system-excl-web)
-                     (component/start))
+  (let [sys      (-> (test-util/system-excl-web) (component/start))
         creds1   (register-and-get-creds! sys "brian"  "rubinton")
         creds2   (register-and-get-creds! sys "hannah" "rubinton")
         teamname "foofoofoo"
-        team3    (create-team! (:authorizer sys) creds1 teamname)
-        ]
+        team3    (create-team! (:authorizer sys) creds1 teamname)]
     (is (thrown? java.lang.AssertionError
                  (leave-team! (:authorizer sys) creds2 teamname)))
     (component/stop sys)))
 
 (deftest teams-are-uniquely-identified
   (let [{:keys [authorizer] :as sys}
-        (-> (test-util/system-excl-web)
-            (component/start))
+        (-> (test-util/system-excl-web) (component/start))
         creds1    (register-and-get-creds! sys "brian"  "rubinton")
         creds2    (register-and-get-creds! sys "hannah" "rubinton")
         teamname3 "foofoofoo"
         teamname4 "applebottom"
         team3     (create-team! (:authorizer sys) creds1 teamname3)
-        team4     (create-team! (:authorizer sys) creds2 teamname4)
-        ]
+        team4     (create-team! (:authorizer sys) creds2 teamname4)]
     (testing "create duplicate team, creds already member of team with that name"
       (is (thrown? java.lang.AssertionError
                    (create-team! authorizer creds1 teamname3))))

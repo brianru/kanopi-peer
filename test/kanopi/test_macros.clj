@@ -7,6 +7,7 @@
    [schema.macros :as sm]
    [schema.spec.core :as spec]))
 
+
 (defmacro valid!
   "Assert that x satisfies schema s, and the walked value is equal to the original."
   [s x]

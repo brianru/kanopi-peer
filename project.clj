@@ -53,7 +53,7 @@
                                    :username [:env/kanopi_datomic_username]
                                    :password [:env/kanopi_datomic_password]}}
   :source-paths ["src" "src-cljc"]
-  :test-paths ["src" "src-cljc" "test" "test-cljc"]
+  :test-paths ["src" "src-cljc" "test"]
   :main kanopi.main
 
   :plugins [[lein-environ "1.0.1"]]

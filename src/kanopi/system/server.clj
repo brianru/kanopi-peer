@@ -8,15 +8,14 @@
             [kanopi.controller.web-server :as server]
             [kanopi.view.web-app :as app]
             [environ.core :refer [env]]
-            [kanopi.util.core :as util]
-            ))
+            [kanopi.util.core :as util]))
 
 (defn new-system
   ([] (new-system env))
   ([config]
    (let [{:keys [port env]} config
          with-dev #(util/select-with-merge config % [:dev])]
-     (println "New System")
+     ;; (println "New System")
      ;; (println "Configuration:" config)
      (component/system-map
       :datomic-peer

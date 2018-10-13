@@ -29,4 +29,16 @@
  (go)
  (reset)
 
+ (require '[datomic.api :as d])
+
+ (def db (d/db (get-in system [:datomic-peer :connection])))
+
+ (def x
+   (ffirst
+    (d/q '[:find ?e ?v :where [?e :datum/label ?v]] db)))
+
+ x
+
+ (d/pull db '[*] x)
+
  )

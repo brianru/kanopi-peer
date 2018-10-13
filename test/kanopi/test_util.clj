@@ -10,6 +10,7 @@
             [kanopi.util.core :as util]
             [ring.mock.request :as mock]))
 
+
 (defn system-excl-web []
   (-> (server/new-system default-config)
       (dissoc :web-app :web-server)))
@@ -35,22 +36,21 @@
   ([system creds]
    (datomic/db (get-in system [:datomic-peer]) creds)))
 
-
 (defn mock-request! [system method route params & opts]
   (let [handler (get-in system [:web-app :app-handler])
         opts    (apply hash-map opts)
         req     (cond-> (mock/request method route params)
                   (find opts :creds)
                   (assoc-basic-auth (get opts :creds))
+
                   (find opts :content-type)
                   (mock/content-type (get opts :content-type))
+
                   (find opts :accept)
-                  (mock/header :accept (get opts :accept))
-                  )]
+                  (mock/header :accept (get opts :accept)))]
     (-> req
         (handler)
-        (update :body util/transit-read)
-        )))
+        (update :body util/transit-read))))
 
 (defn mock-register [system creds]
   (mock-request! system :post "/register" creds

@@ -6,8 +6,7 @@
             [kanopi.model.schema :as schema]
             [kanopi.model.storage.datomic :as datomic]
             [kanopi.util.core :as util]
-            [clojure.java.io :as io]
-            ))
+            [clojure.java.io :as io]))
 
 (defprotocol IAuthenticate
   (-init-user-data [this username password user-ent-id user-team-id]
@@ -85,10 +84,8 @@
     (vector
      [:db/add team-temp-id :team/id username]
      [:db/add user-temp-id :user/id username]
-     (when password
-       [:db/add user-temp-id :user/password (creds/hash-bcrypt password)])
-     [:db/add user-temp-id :user/team team-temp-id]
-     ))
+     [:db/add user-temp-id :user/password (creds/hash-bcrypt password)]
+     [:db/add user-temp-id :user/team team-temp-id]))
 
   (register! [this username password]
     ;; TODO: should this return nil when user already exists or throw
@@ -98,14 +95,14 @@
     (assert (nil? (d/entid (datomic/db database nil) [:user/id username]))
             "This username is already taken. Please choose another.")
     ;; TODO: add audit datoms to the tx entity
-    (let [user-temp-id    (d/tempid :db.part/users -1)
-          team-temp-id    (d/tempid :db.part/users -1000)
+    (let [user-temp-id (d/tempid :db.part/users -1)
+          team-temp-id (d/tempid :db.part/users -1000)
           txdata
           (->> (concat
                 (-init-user-data this username password user-temp-id team-temp-id)
                 (-init-team-data this team-temp-id))
                (remove nil?))
-          report @(datomic/transact database nil txdata)]
+          report       @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-temp-id)))
 
   (change-password! [this username current-password new-password confirm-new-password]
@@ -119,10 +116,8 @@
     (assert (verify-creds this username current-password)
             "Current password is incorrect")
     (let [{user-ent-id :ent-id :as creds} (credentials this username)
-          txdata [
-                  [:db/retract user-ent-id :user/password current-password]
-                  [:db/add     user-ent-id :user/password (creds/hash-bcrypt new-password)]
-                  ]
+          txdata [[:db/retract user-ent-id :user/password current-password]
+                  [:db/add     user-ent-id :user/password (creds/hash-bcrypt new-password)]]
           report @(datomic/transact database creds txdata)]
       (verify-creds this username new-password)))
 

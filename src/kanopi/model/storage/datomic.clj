@@ -5,12 +5,14 @@
             [clojure.java.io :as io])
   (:import datomic.Datom))
 
+
 ;; FIXME: add tx datums including txInstant, set to last modified for
 ;; file
 (defn- load-files! [conn files]
   (doseq [file-path files]
-    (println "loading " file-path)
-    (when-let [txdata (not-empty (read-string (slurp (io/resource file-path))))]
+    ;; (println "loading " file-path)
+    (when-let [txdata (not-empty
+                       (read-string (slurp (io/resource file-path))))]
       @(d/transact conn txdata))))
 
 ;; FIXME: this should be in another ns.
@@ -77,28 +79,27 @@
 (defrecord DatomicPeer [config connection db-mode]
   component/Lifecycle
   (start [this]
-    (println "starting datomic peer")
+    ;; (println "starting datomic peer")
     (if connection
       this
       (let [uri (->> config ((juxt :uri :db-name)) (apply str))
-            db-mode (-> (re-find #"datomic:([a-z]+):" uri) (last))  
+            db-mode (-> (re-find #"datomic:([a-z]+):" uri) (last))
             _ (when (or true (= db-mode "mem"))
                 (d/delete-database uri)
                 (d/create-database uri))
-            conn (d/connect uri)
-            ]
+            conn (d/connect uri)]
         (when (or true (= db-mode "mem"))
-          (println "load schema")
+          ;; (println "load schema")
           (load-files! conn (:schema config)))
 
         (when (:dev config)
-          (println "load data")
+          ;; (println "load data")
           (load-files! conn (:data config)))
 
         (assoc this :connection conn :db-mode db-mode))))
 
   (stop [this]
-    (println "stopping datomic peer")
+    ;; (println "stopping datomic peer")
     (if-not connection
       this
       (do

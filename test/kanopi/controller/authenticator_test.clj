@@ -10,6 +10,7 @@
             [kanopi.model.schema :as schema]
             [kanopi.controller.authenticator :refer :all]))
 
+
 (deftest register
   (let [sys (-> (test-util/system-excl-web)
                 (component/start))

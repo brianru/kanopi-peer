@@ -9,24 +9,12 @@
   action the user takes stored for analysis and testing.
 
   "
-  (:require #?@(:cljs [[om.core :as om]
-                       [schema.core :as s :include-macros true]
-                       [schema.experimental.abstract-map :as abstract-map
-                        :include-macros true]
-                       [taoensso.timbre :as timbre
-                        :refer-macros (log trace debug info warn error fatal report)]
-                       [cljs.core.async :as async] 
-                       [kanopi.model.schema :as schema]
-                       [kanopi.util.core :as util]
-                       ]
-                :clj  [
-                       [schema.core :as s]
-                       [schema.experimental.abstract-map :as abstract-map]
-                       [taoensso.timbre :as timbre
-                        :refer (log trace debug info warn error fatal report)]
-                       [kanopi.model.schema :as schema]
-                       [kanopi.util.core :as util]
-                       ])))
+  (:require [[schema.core :as s]
+             [schema.experimental.abstract-map :as abstract-map]
+             [taoensso.timbre :as timbre
+              :refer (log trace debug info warn error fatal report)]
+             [kanopi.model.schema :as schema]
+             [kanopi.util.core :as util]]))
 
 (defn success-verb [verb]
   (util/keyword-conj verb "success"))
@@ -293,38 +281,3 @@
 
 (defn logout-failure [err]
   (message :noun err :verb :spa.logout/failure))
-
-;; Client only helpers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#?(:cljs
-   (do
-    (defn publisher [owner]
-      (om/get-shared owner [:aether :publisher]))
-
-    (defn send!
-      "Ex: (->> (msg/search \"foo\") (msg/send! owner))
-      TODO: allow specification of transducers or debounce msec via args
-      - otherwise user must create some extra wiring on their end,
-      which is what this fn is trying to avoid. layered abstractions.
-      TODO: make work with different first args eg. a core.async channel,
-      an aether map, an aether record, etc"
-      ([owner msg]
-       (async/put! (publisher owner) msg)
-       ; NOTE: for sagas!
-       (om/update-state! owner ::sagas #(conj % (:saga/id msg)))
-       ;; NOTE: js evt handlers don't like `false` as a return value, which
-       ;; async/put! often returns. So we add a nil.
-       nil)
-      ([owner & msgs]
-       (async/onto-chan (publisher owner) msgs false)
-       ; NOTE: for sagas!
-       (om/update-state! owner ::sagas #(apply conj % (map :sada/id msgs)))
-       ))
-
-    ; (defn register-intent!
-    ;   "Ex: (->> (msg/update-label) (msg/register-intent! owner))"
-    ;   [owner msg]
-    ;   (send! owner (message :noun (get msg :verb)
-    ;                         :verb :intent/register
-    ;                         :context (get msg :context))))
-    ))

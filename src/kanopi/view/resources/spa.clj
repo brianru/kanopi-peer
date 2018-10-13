@@ -15,9 +15,7 @@
      ctx
      {:title  "kanopi"
       :session-state (if user-data
-                       (session/init-session session-svc user-data)
-                       (session/init-anonymous-session session-svc))
-      })))
+                       (session/init-session session-svc user-data))})))
 
 (defresource spa-resource
   :allowed-methods [:get]

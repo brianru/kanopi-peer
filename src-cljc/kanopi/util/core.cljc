@@ -1,17 +1,11 @@
 (ns kanopi.util.core
-  #?(:cljs (:refer-clojure :exclude (random-uuid)))
-  #?(:cljs (:require [cljs-uuid-utils.core :as uuid]
-                     cljs.reader
-                     clojure.string
-                     [cognitect.transit :as transit])
-     :clj  (:require [cognitect.transit :as transit]
-                     clojure.string))
-  #?(:clj  (:import java.util.UUID
-                    [java.io ByteArrayInputStream ByteArrayOutputStream])))
+  (:require [cognitect.transit :as transit]
+            clojure.string)
+  (:import java.util.UUID
+           [java.io ByteArrayInputStream ByteArrayOutputStream]))
 
 (defn random-uuid []
-  #?(:cljs (str (uuid/make-random-uuid))
-     :clj  (str (java.util.UUID/randomUUID))))
+  (str (java.util.UUID/randomUUID)))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Sequential ID Creation
@@ -89,8 +83,7 @@
   [keyfn ordering coll]
   (let [vals->indexes (into {} (map-indexed (comp vec reverse list) ordering))
         compfn (fn [v1 v2]
-                 (compare (get vals->indexes v1) (get vals->indexes v2)))
-        ]
+                 (compare (get vals->indexes v1) (get vals->indexes v2)))]
     (sort-by keyfn compfn coll)))
 
 
@@ -144,37 +137,23 @@
     input))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Transit helpers // should be CLJC, but not needed right now.
+; Transit helpers
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-#?(:clj
-   (do
+(defn transit-write [data]
+  (let [out (ByteArrayOutputStream. 4096)
+        writer (transit/writer out :json)]
+    (transit/write writer data)
+    (.toString out)))
 
-    (defn transit-write [data]
-      (let [out (ByteArrayOutputStream. 4096)
-            writer (transit/writer out :json)]
-        (transit/write writer data)
-        (.toString out)))
-
-    (defn transit-read [stream]
-      ;; NOTE: type hint avoids warning when calling .getBytes below
-      (when stream
-        (let [^java.lang.String string (slurp stream)]
-          (if (or (nil? string) (clojure.string/blank? string))
-            {}
-            (let [in (ByteArrayInputStream. (.getBytes string))
-                  reader (transit/reader in :json)]
-              (transit/read reader))))))
-    )
-   :cljs
-   (do
-    
-    (defn transit-write [data]
-      (let [writer (transit/writer :json)]
-        (transit/write writer data)))
-    
-    (defn transit-read [data]
-      (let [reader (transit/reader :json)]
-        (transit/read reader data)))))
+(defn transit-read [stream]
+  ;; NOTE: type hint avoids warning when calling .getBytes below
+  (when stream
+    (let [^java.lang.String string (slurp stream)]
+      (if (or (nil? string) (clojure.string/blank? string))
+        {}
+        (let [in (ByteArrayInputStream. (.getBytes string))
+              reader (transit/reader in :json)]
+          (transit/read reader))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Keyword helper fns
