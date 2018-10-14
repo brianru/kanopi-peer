@@ -75,14 +75,16 @@
         password' "oreos123"
         _         (register! (:authenticator sys) username password)]
     (testing "before"
-      (is (verify-creds (:authenticator sys) username password)))
+      (is (verify-creds (:authenticator sys) username password))
+      (is (false? (verify-creds (:authenticator sys) username password'))))
     (testing "change password"
       (is (change-password! (:authenticator sys) username password password')))
     (testing "after"
+      (is (false? (verify-creds (:authenticator sys) username password)))
       (is (verify-creds (:authenticator sys) username password')))
 
     (component/stop sys)))
 
-(deftest register-team!
+#_(deftest register-team!
   (let []
     ))

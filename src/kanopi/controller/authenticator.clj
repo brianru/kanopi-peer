@@ -8,6 +8,7 @@
             [kanopi.util.core :as util]
             [clojure.java.io :as io]))
 
+
 (defprotocol IAuthenticate
   (-init-user-data [this username password user-ent-id user-team-id]
                    "Datoms asserting the user and team entities.")
@@ -105,10 +106,11 @@
           report       @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-temp-id)))
 
+  ;; Confirm new password arity
   (change-password! [this username current-password new-password confirm-new-password]
     (when (= new-password confirm-new-password)
       (change-password! this username current-password new-password)))
-
+  ;; Change password arity, after confirmation
   (change-password! [this username current-password new-password]
     (assert (and (not= current-password new-password)
                  (s/validate schema/UserPassword new-password))

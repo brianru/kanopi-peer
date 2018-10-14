@@ -3,11 +3,9 @@
             [environ.core :refer [env]]
             [immutant.web :as web]
             [immutant.web.middleware :as middleware]
-            [kanopi.util.core :as util]
-            ))
+            [kanopi.util.core :as util]))
 
-(defrecord WebServer
-    [config web-app server-handle]
+(defrecord WebServer [config web-app server-handle]
   component/Lifecycle
   (start [this]
     (if server-handle this

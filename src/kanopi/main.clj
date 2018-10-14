@@ -21,8 +21,6 @@
                    :schema  ["schema.edn"]
                    :data    ["test-data.edn"]}
    :auth          {:init-user-data "init-data.edn"}
-   :local-storage {:directory   "target"
-                   :content-key "kanopi"}
    :dev           true})
 
 (defn system-config

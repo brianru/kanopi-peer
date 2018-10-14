@@ -184,7 +184,7 @@
                   (-> (friend/current-authentication (get-in ctx [:request]))
                       (rep/as-response ctx)
                       (rep/ring-response))
-                  
+
                   (= media-type "text/html")
                   (-> "<h1>\"Success\"</h1>"
                       (rep/as-response ctx)
