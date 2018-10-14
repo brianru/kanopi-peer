@@ -9,12 +9,12 @@
   action the user takes stored for analysis and testing.
 
   "
-  (:require [[schema.core :as s]
-             [schema.experimental.abstract-map :as abstract-map]
-             [taoensso.timbre :as timbre
-              :refer (log trace debug info warn error fatal report)]
-             [kanopi.model.schema :as schema]
-             [kanopi.util.core :as util]]))
+  (:require [schema.core :as s]
+            [schema.experimental.abstract-map :as abstract-map]
+            [taoensso.timbre :as timbre
+             :refer (log trace debug info warn error fatal report)]
+            [kanopi.model.schema :as schema]
+            [kanopi.util.core :as util]))
 
 (defn success-verb [verb]
   (util/keyword-conj verb "success"))

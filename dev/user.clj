@@ -1,4 +1,5 @@
 (ns user
+  (:gen-class)
   (:require [clojure.repl :refer :all]
             [clojure.java.io :as io]
             [clojure.pprint :refer [pprint]]
@@ -7,6 +8,7 @@
             [environ.core :refer [env]]
             [kanopi.system.server :as server]
             [kanopi.main]))
+
 
 (defonce system nil)
 
@@ -26,19 +28,19 @@
   (refresh :after 'user/go))
 
 (comment
- (go)
- (reset)
+  (go)
+  (reset)
 
- (require '[datomic.api :as d])
+  (require '[datomic.api :as d])
 
- (def db (d/db (get-in system [:datomic-peer :connection])))
+  (def db (d/db (get-in system [:datomic-peer :connection])))
 
- (def x
-   (ffirst
-    (d/q '[:find ?e ?v :where [?e :datum/label ?v]] db)))
+  (def x
+    (ffirst
+     (d/q '[:find ?e ?v :where [?e :datum/label ?v]] db)))
 
- x
+  x
 
- (d/pull db '[*] x)
+  (d/pull db '[*] x)
 
- )
+  )

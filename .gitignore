@@ -14,3 +14,4 @@ build.xml
 /.nrepl-port
 *.swp
 *.DS_STORE
+.cpcache
