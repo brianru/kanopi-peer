@@ -13,6 +13,7 @@
          com.cemerick/friend        {:mvn/version "0.2.3"}
          ring/ring-defaults         {:mvn/version "0.3.2"}
          ring-middleware-format     {:mvn/version "0.7.2"}
+         ring-cors                  {:mvn/version "0.1.12"}
          hiccup                     {:mvn/version "2.0.0-alpha1"}
          crypto-password            {:mvn/version "0.2.0"}
          cheshire                   {:mvn/version "5.8.1"}
@@ -28,9 +29,9 @@
            ;; $ clj -Adev
            :dev  {:extra-paths ["dev" "test"]
                   :extra-deps  {org.clojure/tools.namespace {:mvn/version "0.2.11"}
-                                org.clojure/data.codec    {:mvn/version "0.1.1"}
-                                ring/ring-devel           {:mvn/version "1.7.0"}
-                                ring/ring-mock            {:mvn/version "0.3.2"}
+                                org.clojure/data.codec      {:mvn/version "0.1.1"}
+                                ring/ring-devel             {:mvn/version "1.7.0"}
+                                ring/ring-mock              {:mvn/version "0.3.2"}
                                 }}
            ;; HOW TO EXECUTE TESTS
            ;; $ clj -Atest

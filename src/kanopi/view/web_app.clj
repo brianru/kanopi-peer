@@ -6,6 +6,9 @@
             [cemerick.friend :as friend]
             [cemerick.friend.workflows :as workflows]
             [cemerick.friend.credentials :as creds]
+            [cemerick.friend.util :refer [gets]]
+            [cheshire.core :as json]
+            [ring.middleware.cors :refer [wrap-cors]]
             [ring.middleware.defaults]
             [ring.middleware.params]
             [ring.middleware.keyword-params]
@@ -13,12 +16,43 @@
             [ring.middleware.format]
             [kanopi.util.core :as util]))
 
+(defn path-info
+  "Returns the relative path of the request."
+  [request]
+  (or (:path-info request)
+      (:uri request)))
+
+(defn authentication-failed []
+  {:status 401
+   :headers {"Content-Type" "application/json;charset=UTF-8"}
+   :body (json/generate-string {:error "Unknown username or password."})})
+
+(defn authenticated [{session :session config :config}]
+  {:status 200
+   :session session
+   :headers {"location" "/app/view"}})
+
+(defn ajax-login
+  [& {:keys [login-uri credential-fn] :as wf-config}]
+  (fn [{:keys [request-method headers params] :as request}]
+    (when (and (= (gets :login-uri wf-config (::friend/auth-config request)) (path-info request))
+               (= :post request-method)
+               (.startsWith (get headers "content-type") "application/json"))
+      (if-let [{:keys [username password] :as creds} (get-in request [:params :json-params])]
+        (if-let [user-record (and username password
+                                  ((gets :credential-fn wf-config (::friend/auth-config request))
+                                   (with-meta creds {::friend/workflow :ajax-login})))]
+          (let [resp (friend/merge-authentication request (workflows/make-auth user-record))]
+            (authenticated resp))
+          (authentication-failed))))))
+
 (defn authentication-middleware
   [handler credential-fn]
   (let [friend-m
         {
-         :allow-anon?       true
+         :allow-anon?       false
          :redirect-on-auth? false
+         ;; FIXME make this credential-fn more transparent!!!! add some logs and shit!!!
          :credential-fn     (partial creds/bcrypt-credential-fn credential-fn)
 
          :default-landing-uri "/"
@@ -31,8 +65,12 @@
          :unauthorized-handler    (constantly {:status 401})
 
          :workflows [
-                     (workflows/interactive-form :redirect-on-auth? false :allow-anon? true)
-                     (workflows/http-basic :realm "/")
+                     (ajax-login)
+                     #_(workflows/interactive-form :redirect-on-auth? false
+                                                 :allow-anon? true
+                                                 :login-failure-handler
+                                                 (fn [x] (println "login failure" (:session x)) x))
+                     ;; (workflows/http-basic :realm "/")
                      ]}]
     (-> handler
         (friend/authenticate friend-m))))
@@ -64,6 +102,11 @@
 (defn wrap-add-to-req [handler k payload]
   (fn [req]
     (handler (assoc req k payload))))
+
+(defn log-handler [handler n]
+  (fn [request]
+    (println "STILL HERE " n (select-keys request [:headers :session]))
+    (handler request)))
 
 (defrecord WebApp [config data-service session-service app-handler authenticator]
 

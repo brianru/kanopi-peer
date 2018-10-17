@@ -52,6 +52,7 @@
                                                   (:team/id %)))
                                       (first))
                    ))]
+     (println "YOYO" creds')
      (when (and validate? creds')
        (assert (s/validate schema/Credentials creds') "Invalid credential map."))
      creds')))
@@ -61,11 +62,13 @@
   IAuthenticate
 
   (credentials [this username]
+    (println "CREDS" username)
     (credentials* (datomic/db database nil) username))
 
   (verify-creds [this {:keys [username password]}]
     (verify-creds this username password))
   (verify-creds [this username password]
+    (println "verify creds" username password)
     (some->> (credentials this username)
              :password
              (creds/bcrypt-verify password)))
@@ -89,6 +92,7 @@
      [:db/add user-temp-id :user/team team-temp-id]))
 
   (register! [this username password]
+    (println "HEREHERE" username password)
     ;; TODO: should this return nil when user already exists or throw
     ;; an exception? Currently it throws an exception.
     (assert (s/validate schema/InputCredentials [username password])

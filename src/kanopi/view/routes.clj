@@ -12,14 +12,14 @@
 
     ;; authentication
     (GET  "/enter" [] spa-resource)
-    (GET  "/register" [] spa-resource)
-    (POST "/register" [] auth/registration-resource)
+    ;; (GET  "/register" [] spa-resource)
+    (ANY "/register" [] auth/registration-resource)
 
-    (GET  "/login"    [] spa-resource)
+    ;; (GET  "/login"    [] spa-resource)
     ;; friend intercepts POST then passes on to here
     (POST "/login"    [] auth/ajax-login-resource)
 
-    (GET  "/logout"   [] spa-resource)
+    ;; (GET  "/logout"   [] spa-resource)
     (POST "/logout"   [] auth/ajax-logout-resource)
 
     ;; api
