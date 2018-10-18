@@ -31,21 +31,6 @@ $ lein test
 $ lein test <namespace>
 $ lein test :only <namespace>/<test-fn>
 
-### Front-Env Development
-
-#### DevCards
-
-#### FigWheel
-
-### Back-End Development
-
-$ lein repl
-user> (go)
-
-
-FIXME: This is pre-alpha. Nothing is guaranteed to ever work. Clever
-branching strategies come later.
-
 ## License: TODO
 
-Copyright © 2015 Duhsoft
+Copyright © 2018 Duhsoft
