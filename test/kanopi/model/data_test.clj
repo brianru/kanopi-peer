@@ -16,6 +16,7 @@
             [kanopi.test-util :as test-util :refer (get-db)]
             [com.stuartsierra.component :as component]))
 
+
 (deftest init-datum
   (let [system (component/start (test-util/system-excl-web))
 
@@ -216,33 +217,7 @@
                (map #(schema/get-value % nil))
                (every? identity))))
 
-    (component/stop system)
-    ))
-
-(deftest most-edited-datums
-  (let [
-        system (component/start (test-util/system-excl-web))
-        creds  (do (auth/register!   (:authenticator system) "brian" "rubinton")
-                   (auth/credentials (:authenticator system) "brian"))
-        ]
-    ;(is false)
-    (component/stop system)
-    ))
-
-(deftest most-viewed-datums
-  (let []
-    ;(is false)
-    ))
-
-(deftest recent-datums
-    (let [{data-svc :data-service :as system}
-          (component/start (test-util/system-excl-web))
-
-          creds (auth/credentials (:authenticator system) "hannah")
-          results (data/recent-datums data-svc creds)
-          db (get-db system)]
-      ; (is (not-empty results))
-      (component/stop system)))
+    (component/stop system)))
 
 (deftest create-literal
   (let [{data-svc :data-service :as system}
@@ -262,8 +237,8 @@
         creds (do (auth/register!   (:authenticator system) "brian" "rubinton")
                    (auth/credentials (:authenticator system) "brian"))
         literal-id (data/-init-literal data-svc creds)
-        literal    (data/get-literal data-svc creds literal-id)
-        ]
+        literal    (data/get-literal data-svc creds literal-id)]
+
     (testing "update literal by value only"
       (let [literal' (data/update-literal data-svc creds literal-id "applebottom")]
         (is (= "applebottom" (get literal' :literal/text))))

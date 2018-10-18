@@ -3,7 +3,6 @@
   refactored it into a pure transit+json flow but I left the bones of
   the old flow because at some point I'll want both to work."
   (:require [liberator.core :refer [defresource]]
-            [kanopi.util.liberator-transit]
             [cemerick.friend :as friend]
             [kanopi.controller.authenticator :as auth]
             [kanopi.util.core :as util]

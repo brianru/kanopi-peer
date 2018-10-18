@@ -16,6 +16,7 @@
             [ring.middleware.format]
             [kanopi.util.core :as util]))
 
+
 (defn path-info
   "Returns the relative path of the request."
   [request]
@@ -52,7 +53,6 @@
         {
          :allow-anon?       false
          :redirect-on-auth? false
-         ;; FIXME make this credential-fn more transparent!!!! add some logs and shit!!!
          :credential-fn     (partial creds/bcrypt-credential-fn credential-fn)
 
          :default-landing-uri "/"
@@ -64,14 +64,7 @@
          :unauthenticated-handler (constantly {:status 401})
          :unauthorized-handler    (constantly {:status 401})
 
-         :workflows [
-                     (ajax-login)
-                     #_(workflows/interactive-form :redirect-on-auth? false
-                                                 :allow-anon? true
-                                                 :login-failure-handler
-                                                 (fn [x] (println "login failure" (:session x)) x))
-                     ;; (workflows/http-basic :realm "/")
-                     ]}]
+         :workflows [(ajax-login)]}]
     (-> handler
         (friend/authenticate friend-m))))
 

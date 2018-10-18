@@ -36,8 +36,7 @@
            ;; HOW TO EXECUTE TESTS
            ;; $ clj -Atest
            :test {:extra-paths ["test"]
-                  :extra-deps  {
-                                org.clojure/data.codec    {:mvn/version "0.1.1"}
+                  :extra-deps  {org.clojure/data.codec    {:mvn/version "0.1.1"}
                                 ring/ring-devel           {:mvn/version "1.7.0"}
                                 ring/ring-mock            {:mvn/version "0.3.2"}
                                 com.cognitect/test-runner {:git/url "https://github.com/cognitect-labs/test-runner.git"

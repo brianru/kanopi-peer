@@ -57,10 +57,10 @@
 
    (string? value)
    [:literal/text value]
-   
+
    (valid-tagged-literal? value)
    value
-   
+
    :default
    [(-> value schema/compatible-input-types first :ident)
     value]))
@@ -75,7 +75,7 @@
 
    (value-literal? input)
    ::literal
-   
+
    :default
    ::retract))
 
@@ -86,13 +86,15 @@
 (defmulti add-fact->txdata
   "Generate transaction data for asserting the given [eid attr value].
 
-  Consumers will pass either literals of entity refs to attr and value. The methods should take those inputs and generate the necessary transaction data (including nested entities, as necessary).
+  Consumers will pass either literals of entity refs to attr and value. The
+  methods should take those inputs and generate the necessary transaction data
+  (including nested entities, as necessary).
 
   NOTE: at this stage we're only working with references and strings.
-  
-  NOTE: purpose did not implement ::retract methods. Facts must be
-  created with both an attribute and a value. Otherwise it is not a fact.
-  See kanopi.model.schema/Fact"
+
+  NOTE: purpose did not implement ::retract methods. Facts must be created with
+  both an attribute and a value. Otherwise it is not a fact. See
+  kanopi.model.schema/Fact"
   (fn [datomic-peer creds ent-id attribute value]
     (mapv (partial describe-input datomic-peer creds)
           [attribute value])))
