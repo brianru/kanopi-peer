@@ -122,10 +122,8 @@
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 (defn try-read-string [string]
   (try
-   (#?(:cljs cljs.reader/read-string
-       :clj  read-string)
-            string)
-   (catch #?(:cljs js/Object :clj Exception) e
+   (read-string string)
+   (catch Exception e
      string)))
 
 (defn read-entity-id

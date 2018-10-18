@@ -1,15 +1,9 @@
 (ns kanopi.model.schema
-  (:require
-             #?@(:clj  [[schema.core :as s]
-                        [schema.experimental.complete :as c]
-                        [schema.experimental.generators :as g]
-                        clojure.set
-                        [schema.experimental.abstract-map :as m]]
-                 :cljs [[schema.core :as s :include-macros true]
-                        [schema.experimental.abstract-map :as m :include-macros true]
-                        clojure.set
-                        cljs.reader]
-                 )))
+  (:require [schema.core :as s]
+            [schema.experimental.complete :as c]
+            [schema.experimental.generators :as g]
+            clojure.set
+            [schema.experimental.abstract-map :as m]))
 
 ; TODO: can I use transit to improve my parsing of these values?
 ; TODO: why 2 fns? should the predicate be the parser, returning
@@ -37,20 +31,17 @@
     :predicate (fn [v]
                 (or (integer? v)
                     (and (string? v) (re-find #"^[0-9]*$" v))))
-    :parser    (comp int #?(:clj  read-string
-                            :cljs cljs.reader/read-string))}
+    :parser    (comp int read-string)}
 
    :literal/decimal
    {:ident :literal/decimal
     :label "decimal"
     :predicate (fn [v]
                  (or
-                  #?(:clj  (instance? java.lang.Double v)
-                     :cljs (number? v))
+                  (instance? java.lang.Double v)
                   (and (string? v)
                        (re-find #"^[0-9]?[0-9]*\.+[0-9]*$" v))))
-    :parser (comp double #?(:clj  read-string
-                            :cljs cljs.reader/read-string))}
+    :parser (comp double read-string)}
     :literal/uri
     {:ident :literal/uri
      :label "uri"
