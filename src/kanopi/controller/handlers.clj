@@ -7,48 +7,6 @@
             [taoensso.timbre :as timbre
              :refer (log trace debug info warn error fatal report)]))
 
-;; TODO: refactor to use session service
-;; this is really initialize the client's session
-#_(defmethod request-handler :spa.state/initialize
-    [request-context message]
-    (let [data-svc (util/get-data-service request-context)
-          creds    (get-in message [:context :creds])
-
-          most-edited-datums (data/most-edited-datums data-svc creds)
-          most-viewed-datums (data/most-viewed-datums data-svc creds)
-          recent-datums      (data/recent-datums data-svc creds)
-
-          ;; NOTE: map then concat because i have not settled on the
-          ;; shape of each collections' contents
-          all-datum-ids (concat
-                         (map first most-edited-datums)
-                         (map first most-viewed-datums)
-                         (map first recent-datums))
-          ;; NOTE: cache is here to ensure the above datums show up in
-          ;; search results -- right now search results are only local.
-          ;; really that's wrong, searches should be executed on the
-          ;; server. AH.
-          ;; TODO: implement server-side search.
-          ;;all-datums    (->> all-datum-ids
-          ;;                   (map (partial data/get-datum data-svc creds))
-          ;;                   (reduce (fn [acc datum]
-          ;;                             (assoc acc (:db/id datum) datum))
-          ;;                           {}))
-
-          data     (hash-map
-                    :most-edited-datums most-edited-datums
-                    :most-viewed-datums most-viewed-datums
-                    :recent-datums      recent-datums
-                    ;;:cache              all-datums
-                    )
-          ]
-      (hash-map
-       :noun    data
-       :verb    (if (-> all-datum-ids not-empty)
-                  (success-verb (:verb message))
-                  (failure-verb (:verb message)))
-       :context {})))
-
 #_(defmethod request-handler :user/change-password
     [request-context {:keys [noun verb] :as message}]
     (let [{:keys [current-password new-password confirm-new-password]} noun

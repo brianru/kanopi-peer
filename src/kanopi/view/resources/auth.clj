@@ -9,7 +9,21 @@
             [liberator.representation :as rep]
             [ring.util.response :as r]
             [cheshire.core :as json]
-            [hiccup.page :refer (html5 include-js include-css)]))
+            [hiccup.page :refer (html5 include-js include-css)]
+            [kanopi.model.data :as data]))
+
+
+;; Override liberator's json generation, which uses clojure.data.json, to use
+;; Cheshire. Fills one specific gap in clojure.data.json which is writing
+;; java.util.Date instances. There are probably other justifications as well.
+(defmethod liberator.representation/render-map-generic "applicaion/json"
+  [data context]
+  (json/generate-string data))
+
+(defmethod liberator.representation/render-seq-generic "applicaion/json"
+  [data context]
+  (json/generate-string data))
+
 
 (defn register!
   [ctx]
@@ -35,17 +49,20 @@
       {::error {:error true :message (.getMessage t)}})))
 
 (defresource ajax-login-resource
-  :allowed-methods [:options :post]
+  :allowed-methods [:post]
   :available-media-types ["application/json"]
   :new? false
   :respond-with-entity? true
   :handle-ok (fn [ctx]
-               (-> (friend/current-authentication (get-in ctx [:request]))
-                   (rep/as-response ctx)
-                   (rep/ring-response))))
+               (let [creds (friend/current-authentication (get-in ctx [:request]))
+                     payload {:user creds
+                              :transactions (data/recent-activity (util/get-data-service ctx) creds)
+                              ;; :recent-datums (data/recent-datums (util/get-data-service ctx) creds )
+                              }]
+                 (rep/ring-response payload ctx))))
 
 (defresource ajax-logout-resource
-  :allowed-methods [:options :post]
+  :allowed-methods [:post]
   :available-media-types ["application/json"]
   :new? false
   :respond-with-entity? true
@@ -54,14 +71,15 @@
                    (friend/logout*))))
 
 (defresource registration-resource
-  :allowed-methods [:options :post]
+  :allowed-methods [:post]
   :available-media-types ["application/json"]
   :post! register!
   :new? false
   :respond-with-entity? true
   :handle-ok (fn [ctx]
                (if-let [user (get ctx ::identity)]
-                 (-> (rep/as-response user (assoc ctx :status 500))
-                     (friend/merge-authentication user)
-                     (rep/ring-response))
+                 (rep/ring-response
+                  {:user user
+                   :transactions (data/recent-activity (util/get-data-service ctx) user)}
+                  (friend/merge-authentication ctx user))
                  (rep/ring-response (get ctx ::error) {:status 500}))))

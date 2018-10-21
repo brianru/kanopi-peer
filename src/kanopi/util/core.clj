@@ -1,8 +1,5 @@
 (ns kanopi.util.core
-  (:require [cognitect.transit :as transit]
-            clojure.string)
-  (:import java.util.UUID
-           [java.io ByteArrayInputStream ByteArrayOutputStream]))
+  (:import java.util.UUID))
 
 (defn random-uuid []
   (str (java.util.UUID/randomUUID)))
@@ -133,25 +130,6 @@
   (if (= input (and (string? input) (re-find #"-?[0-9]*" input)))
     (try-read-string input)
     input))
-
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-; Transit helpers
-;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
-(defn transit-write [data]
-  (let [out (ByteArrayOutputStream. 4096)
-        writer (transit/writer out :json)]
-    (transit/write writer data)
-    (.toString out)))
-
-(defn transit-read [stream]
-  ;; NOTE: type hint avoids warning when calling .getBytes below
-  (when stream
-    (let [^java.lang.String string (slurp stream)]
-      (if (or (nil? string) (clojure.string/blank? string))
-        {}
-        (let [in (ByteArrayInputStream. (.getBytes string))
-              reader (transit/reader in :json)]
-          (transit/read reader))))))
 
 ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
 ; Keyword helper fns

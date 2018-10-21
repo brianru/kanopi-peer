@@ -17,6 +17,7 @@
             [kanopi.util.core :as util]
             [kanopi.test-util :as test-util]))
 
+
 (deftest init-session
   (let [{:keys [session-service authenticator] :as system}
         (component/start (test-util/system-excl-web-server))]

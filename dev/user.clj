@@ -7,7 +7,8 @@
             [clojure.tools.namespace.repl :refer [refresh refresh-all]]
             [environ.core :refer [env]]
             [kanopi.system.server :as server]
-            [kanopi.main]))
+            [kanopi.main]
+            [datomic.api :as d]))
 
 
 (defonce system nil)
@@ -35,9 +36,28 @@
 
   (def db (d/db (get-in system [:datomic-peer :connection])))
 
+  (d/q '[:find [?t ?u ?uid] :in $ :where [?tx :tx/byUser ?u] [?u :user/id ?uid] [?tx :db/txInstant ?t]] db)
+
   (def x
-    (ffirst
-     (d/q '[:find ?e ?v :where [?e :datum/label ?v]] db)))
+    (println
+     (d/q '[:find ?user ?user-ent-id ?time ?tx
+            :in $ ?user-ent-id
+            :where
+            [?tx :tx/byUser ?user-ent-id]
+            [?user-ent-id :user/id ?user]
+            [?tx :db/txInstant ?time]
+            (or [?e :datum/label _ ?tx]
+                [?e :datum/fact _ ?tx])
+            ;; constrain the entities modified to those with a
+            ;; :datum/team, which may have been modified in a separate tx
+            ]
+          db 277076930200588))
+
+    )
+
+  (d/q '[:find ?tx :in $ :where [?tx :tx/byUser _ _]]
+       db)
+
 
   x
 

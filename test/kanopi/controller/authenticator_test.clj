@@ -12,12 +12,13 @@
 
 
 (deftest register
-  (let [sys (-> (test-util/system-excl-web)
-                (component/start))
+  (let [sys      (-> (test-util/system-excl-web)
+                     (component/start))
         username "brian"
         password "rubinton"
         res      (register!   (:authenticator sys) username password)
-        creds    (credentials (:authenticator sys) username)]
+        creds    (credentials (:authenticator sys) username)
+        db       (d/db (get-in sys [:datomic-peer :connection]))]
 
     (testing "schema"
       (is (s/validate schema/Credentials creds)))
@@ -26,9 +27,8 @@
       (is (= username (get creds :username))))
 
     (testing "user stored as datum"
-      (let [user (d/entity (d/db (get-in sys [:datomic-peer :connection]))
-                           (get creds :ent-id))]
-        (is (not-empty user))))
+      (is (= (d/pull db '[:user/id {:user/team [:team/id]}] (:ent-id creds))
+             {:user/id "brian" :user/team [{:team/id "brian"}]})))
 
     (testing "user team created"
       (let [team (-> creds :current-team)]
@@ -36,16 +36,29 @@
 
     (testing "password crypto works"
       (is (not= password (get creds :password)))
-      (is (creds/bcrypt-verify password (get creds :password))))
+      (is (= (first
+              (d/q '[:find [?password]
+                     :in $ ?entid
+                     :where [?e :user/password ?password]]
+                   db (:ent-id creds)))
+             (:password creds)))
+      (is (creds/bcrypt-verify password (:password creds))))
 
     (testing "initial data loaded"
-      (let [user-data (d/q '[:find [?e ...]
-                             :in $ ?user-team
-                             :where
-                             [?e :datum/team ?user-team]]
-                           (d/db (get-in sys [:datomic-peer :connection]))
-                           (-> creds :teams first :db/id))]
-        (is (not-empty user-data))))
+      (let [user-datum-ids (d/q '[:find [?e ...]
+                                  :in $ ?user-team
+                                  :where [?e :datum/team ?user-team]]
+                                db
+                                (-> creds :teams first :db/id))]
+
+        (println
+         (sort-by second <
+                  (d/q '[:find ?tx ?tx-instant
+                         :in $ ?ent-id
+                         :where [?ent-id _ _ ?tx] [?tx :db/txInstant ?tx-instant]]
+                       db (:ent-id creds))))
+
+        (is (not-empty user-datum-ids))))
 
     (component/stop sys)))
 

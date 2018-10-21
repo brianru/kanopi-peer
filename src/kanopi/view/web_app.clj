@@ -51,7 +51,7 @@
   [handler credential-fn]
   (let [friend-m
         {
-         :allow-anon?       false
+         :allow-anon?       true
          :redirect-on-auth? false
          :credential-fn     (partial creds/bcrypt-credential-fn credential-fn)
 

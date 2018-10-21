@@ -7,6 +7,7 @@
             [kanopi.model.storage.datomic :as datomic]
             [kanopi.model.session :as session]
             [datomic.api :as d]
+            [cheshire.core :as json]
             [kanopi.util.core :as util]
             [ring.mock.request :as mock]))
 
@@ -50,17 +51,17 @@
                   (mock/header :accept (get opts :accept)))]
     (-> req
         (handler)
-        (update :body util/transit-read))))
+        (update :body #(json/parse-string % keyword)))))
 
 (defn mock-register [system creds]
   (mock-request! system :post "/register" creds
-                 :accept "application/transit+json"))
+                 :accept "application/json"))
 
 (defn mock-login [system creds]
   (mock-request! system :post "/login" creds
-                 :accept "application/transit+json"))
+                 :accept "application/json"))
 
 (defn api-req! [system creds msg]
-  (mock-request! system :post "/api" (util/transit-write msg)
+  (mock-request! system :post "/api" (json/generate-string msg)
                  :creds creds
-                 :content-type "application/transit+json"))
+                 :content-type "application/json"))

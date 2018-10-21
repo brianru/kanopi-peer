@@ -2,8 +2,9 @@
   (:require [clojure.test :refer :all]
             [schema.core :as s]
             [kanopi.model.schema :as schema]
-            [kanopi.main :refer (default-config)]
+            [kanopi.main :refer [default-config]]
             [clojure.java.io :as io]))
+
 
 (deftest all-literals-are-covered
   (let [db-schema (-> default-config (get-in [:datomic :schema])

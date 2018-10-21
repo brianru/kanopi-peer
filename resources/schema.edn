@@ -14,6 +14,12 @@
  ;;  :db/ident :db.part/sharedSchema
  ;;  :db.install/_partition :db.part/db}
 
+ {:db/ident :tx/byUser
+  :db/valueType :db.type/ref
+  :db/cardinality :db.cardinality/one
+  :db/id #db/id[:db.part/db]
+  :db.install/_attribute :db.part/db}
+
  ;; Users
  ;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;;
  {:db/ident :user/id

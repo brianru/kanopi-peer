@@ -71,6 +71,8 @@
     "API Consumers must think in terms of Peer processes instead of connection
     objects.
     NOTE: remember user registration case (creds are nil)")
+  (tx-data [this creds]
+    "Retrieve transactions created by user in `creds`.")
   (transact [this creds txdata]
     "Abstract from transact and transact-async. Pick one.
     NOTE: remember user registration case (creds are nil)")
@@ -107,7 +109,6 @@
         (assoc this :connection nil :db-mode nil))))
 
   ;; TODO: implement authorization controls
-  ;; TODO: 2 ways to filter db, 1 for authenticated user, 1 for anonymous user
   ISecureDatomic
   (db [this creds]
     (if creds
@@ -116,6 +117,19 @@
 
   (db [this creds as-of]
     (d/as-of (db this creds)))
+
+  (tx-data [this creds]
+    (->> (d/q '[:find ?tx ?time ?e ?a ?v ?op
+                :in $ ?log ?user-ent-id
+                :where [?tx :tx/byUser ?user-ent-id]
+                [?tx :db/txInstant ?time]
+                [(tx-data ?log ?tx) [[?e ?a ?v _ ?op]]]]
+              (db this creds)
+              (d/log connection)
+              (:ent-id creds))
+         ;; reverse chronological order
+         (sort-by second (comp - compare))
+         #_(take 100)))
 
   (transact [this creds txdata]
     (d/transact connection txdata))

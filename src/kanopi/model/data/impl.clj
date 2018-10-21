@@ -156,8 +156,7 @@
                       {:literal/team [:db/id :team/id]}
                       {:datum/fact [:db/id
                                     {:fact/attribute [*]}
-                                    {:fact/value     [*]}
-                                    ]}]
+                                    {:fact/value     [*]}]}]
                     ent-id)]
     (if (empty? (dissoc ent :db/id))
       nil

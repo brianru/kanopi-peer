@@ -73,6 +73,18 @@
   (hash-map :literal        (get-literal* db literal-id)
             :context-datums (context-datums* db literal-id)))
 
+;; TODO
+(defn user-transactions [db user-entity-id]
+  (d/q '[:find [?tx ?txInstant]
+         :in $ ?user-entity-id
+         :where
+         [?tx :db.tx/byUser ?user-entity-id]
+         [?tx :db/txInstant ?txInstant]
+         ]
+       db user-entity-id))
+
+(defn user-team-transactions [db user-entity-id])
+
 (defprotocol IDatumService
   (init-datum [this creds])
   (update-datum-label [this creds datum-id label])
@@ -116,27 +128,31 @@
   (user-datum [this creds datum-id])
   (most-edited-datums [this creds])
   (most-viewed-datums [this creds])
-  (recent-datums [this creds])
+  (recent-activity [this creds])
   (user-literal [this creds literal-id])
   )
 
-
-(defn annotate-transaction
+(defn annotate-txdata
   "TODO: add tx datums
   - who did it
-  - action performed"
-  [txdata action creds]
-  txdata)
+  - action performed
+  - who what where when why how"
+  [txdata user-id]
+  (let [tx-id (d/tempid :db.part/tx)]
+    (concat txdata
+            [[:db/add tx-id :tx/byUser user-id]])))
 
 (defrecord DatomicDataService [config datomic-peer]
   IDatumService
   (init-datum [this creds]
     (let [datum  (mk-datum datomic-peer creds)
-          report @(datomic/transact datomic-peer creds (get datum :txdata))]
+          txdata (annotate-txdata (get datum :txdata) (:ent-id creds))
+          report @(datomic/transact datomic-peer creds txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) (get datum :ent-id))))
 
   (update-datum-label [this creds datum-id label]
-    (let [txdata [[:db/add datum-id :datum/label label]]
+    (let [txdata (annotate-txdata [[:db/add datum-id :datum/label label]]
+                                  (:ent-id creds))
           report @(datomic/transact datomic-peer creds txdata)]
       (get-datum* (:db-after report) datum-id)))
 
@@ -155,7 +171,7 @@
   (search-datums [this creds search]
     (when-not (s/check schema/QueryString search)
       (let [search (str search "*")
-            db (datomic/db datomic-peer creds)
+            db     (datomic/db datomic-peer creds)
             datum-results
             (d/q '[:find ?score ?entity
                    :in $ ?search
@@ -184,8 +200,9 @@
     (assert (every? identity [attribute value])
             "Must submit fact with both attribute and value.")
     (let [fact   (add-fact->txdata datomic-peer creds ent-id attribute value)
-          txdata (conj (:txdata fact)
-                       [:db/add ent-id :datum/fact (:ent-id fact)])
+          txdata (-> (:txdata fact)
+                     (conj [:db/add ent-id :datum/fact (:ent-id fact)])
+                     (annotate-txdata creds))
           report @(datomic/transact datomic-peer creds txdata)]
       (when (not-empty (get report :tx-data))
         (get-datum this creds ent-id))))
@@ -195,19 +212,23 @@
 
   (update-fact [this creds fact-id attribute value]
     (let [fact-diff (update-fact->txdata datomic-peer creds fact-id attribute value)
-          report    @(datomic/transact datomic-peer creds (:txdata fact-diff))]
+          txdata    (-> (:txdata fact-diff)
+                        (annotate-txdata (:ent-id creds)))
+          report    @(datomic/transact datomic-peer creds txdata)]
       (when (not-empty (get report :tx-data))
         (-get-fact this creds fact-id))))
 
   (retract-datum [this creds ent-id]
-    (let [{:keys [txdata]} (retract-entity->txdata datomic-peer creds ent-id)
-          report @(datomic/transact datomic-peer creds txdata)]
+    (let [retraction (retract-entity->txdata datomic-peer creds ent-id)
+          txdata     (annotate-txdata (:txdata retraction) (:ent-id creds))
+          report     @(datomic/transact datomic-peer creds txdata)]
       report))
 
   ILiteralService
   (-init-literal [this creds]
     (let [literal (mk-literal datomic-peer creds "")
-          report @(datomic/transact datomic-peer creds (get literal :txdata))]
+          txdata  (-> literal :txdata (annotate-txdata (:ent-id creds)))
+          report  @(datomic/transact datomic-peer creds txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) (get literal :ent-id))))
 
   (get-literal [this creds literal-id]
@@ -219,9 +240,10 @@
   (update-literal [this creds literal-id tp value]
     (assert (get schema/input-types tp)
             "Must provide a known input type.")
-    (let [{:keys [txdata ent-id]}
+    (let [{:keys [txdata]}
           (update-literal->txdata datomic-peer creds literal-id tp value)
-          report   @(datomic/transact datomic-peer creds txdata)]
+          txdata (annotate-txdata txdata (:ent-id creds))
+          report @(datomic/transact datomic-peer creds txdata)]
       (get-literal* (:db-after report) literal-id)))
 
   IUserDataService
@@ -236,14 +258,14 @@
 
   (most-edited-datums [this creds]
     (let [user-teams (->> creds :teams (mapv :db/id))
-          results (->> (d/q '[:find ?e (count-distinct ?tx)
-                              :in $ [?user-team ...]
-                              :where
-                              [?e :datum/team ?user-team]
-                              [?e _ _ ?tx]]
-                            (datomic/db datomic-peer creds)
-                            user-teams)
-                       (take 10))]
+          results    (->> (d/q '[:find ?e (count-distinct ?tx)
+                                 :in $ [?user-team ...]
+                                 :where
+                                 [?e :datum/team ?user-team]
+                                 [?e _ _ ?tx]]
+                               (datomic/db datomic-peer creds)
+                               user-teams)
+                          (take 10))]
       (mapv (fn [[datum-id cnt]]
               (vector (get-datum this creds datum-id) cnt))
             results)))
@@ -253,24 +275,12 @@
       []))
 
   ;; TODO: filter by recency
-  (recent-datums [this creds]
-    (let [user-teams (->> creds :teams (mapv :db/id))
-          results    (->> (d/q '[:find ?e ?time ?tx
-                                 :in $ [?user-team ...]
-                                 :where
-                                 [?e :datum/team ?user-team]
-                                 [?e _ _ ?tx]
-                                 [?tx :db/txInstant ?time]
-                                 ]
-                               (datomic/db datomic-peer creds)
-                               user-teams)
-                          )]
-      (mapv (fn [[datum-id tm tx]]
-              (vector (get-datum this creds datum-id) tm tx))
-            results)))
+  (recent-activity [this creds]
+    (let [txs (datomic/tx-data datomic-peer creds)]
+      txs))
+
   (user-literal [this creds literal-id]
-    (user-literal* (datomic/db datomic-peer creds) literal-id))
-  )
+    (user-literal* (datomic/db datomic-peer creds) literal-id)))
 
 (defn data-service []
   (map->DatomicDataService {:config nil}))

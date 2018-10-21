@@ -49,8 +49,7 @@
         ent-0  (data/get-datum (:data-service system) creds ent-id)
         fact-1 ["age" "42"]
         ent-1  (apply data/add-fact (:data-service system) creds ent-id fact-1)
-        fact-id (-> ent-1 :datum/fact first :db/id)
-        ]
+        fact-id (-> ent-1 :datum/fact first :db/id)]
 
     (testing "assert fact"
       (let [new-fact (->> (clojure.set/difference (set (get ent-1 :datum/fact))
@@ -145,8 +144,7 @@
   (let [system  (component/start (test-util/system-excl-web))
         data-svc (get system :data-service)
         creds   (do (auth/register!   (:authenticator system) "brian" "rubinton")
-                    (auth/credentials (:authenticator system) "brian"))
-        ]
+                    (auth/credentials (:authenticator system) "brian"))]
     (testing "nothing"
       (let [results (data/search-datums data-svc creds "foojahBOOHJAH")]
         (is (empty? results))))
@@ -261,4 +259,21 @@
         (is (empty? (->> literal' keys
                          (filter #(= "literal" (namespace %)))
                          (remove #{:literal/team}))))))
+    (component/stop system)))
+
+(deftest recent-data-test
+  (let [system (component/start (test-util/system-excl-web))
+
+        creds  (do (auth/register! (:authenticator system) "brian" "rubinton")
+                   (auth/credentials (:authenticator system) "brian"))
+
+
+        ent-id (data/init-datum (:data-service system) creds)
+        ]
+
+    (let [txds (datomic/tx-data (:datomic-peer system) creds)]
+      (testing "reverse chronologicla order"
+        (is (= 1 (compare (second (first txds))
+                          (second (last txds)))))))
+
     (component/stop system)))

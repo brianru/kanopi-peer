@@ -1,7 +1,6 @@
 (ns kanopi.model.helpers
   (:require [kanopi.model.schema :as schema]
-            [schema.core :as s #?@(:cljs [:include-macros true])]
-            ))
+            [schema.core :as s]))
 
 (defonce temp-id
   (atom -1))

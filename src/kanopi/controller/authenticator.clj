@@ -3,6 +3,7 @@
             [datomic.api :as d]
             [schema.core :as s]
             [cemerick.friend.credentials :as creds]
+            [kanopi.model.data :as data]
             [kanopi.model.schema :as schema]
             [kanopi.model.storage.datomic :as datomic]
             [kanopi.util.core :as util]
@@ -47,11 +48,14 @@
                    :teams    (get-in creds [:user/team])
                    ;; NOTE: DEFAULT CURRENT TEAM is the user's
                    ;; personal team. this should be changeable.
+                   ;; TODO I don't need current teams. The user is always a part
+                   ;; of all teams. Namespaces make it clear within wihch team a
+                   ;; user is acting. Namespaces are data-level, not user-level,
+                   ;; but they are owned by users. This makes so much more sense.
                    :current-team (->> (get-in creds [:user/team])
                                       (filter #(= (:user/id creds)
                                                   (:team/id %)))
-                                      (first))
-                   ))]
+                                      (first))))]
      (when (and validate? creds')
        (assert (s/validate schema/Credentials creds') "Invalid credential map."))
      creds')))
@@ -99,9 +103,11 @@
     (let [user-temp-id (d/tempid :db.part/users -1)
           team-temp-id (d/tempid :db.part/users -1000)
           txdata
-          (->> (concat
-                (-init-user-data this username password user-temp-id team-temp-id)
-                (-init-team-data this team-temp-id))
+          (->> (data/annotate-txdata
+                (concat
+                 (-init-user-data this username password user-temp-id team-temp-id)
+                 (-init-team-data this team-temp-id))
+                user-temp-id)
                (remove nil?))
           report       @(datomic/transact database nil txdata)]
       (d/resolve-tempid (:db-after report) (:tempids report) user-temp-id)))
@@ -118,9 +124,9 @@
     (assert (verify-creds this username current-password)
             "Current password is incorrect")
     (let [{user-ent-id :ent-id :as creds} (credentials this username)
-          txdata [[:db/retract user-ent-id :user/password current-password]
-                  [:db/add     user-ent-id :user/password (creds/hash-bcrypt new-password)]]
-          report @(datomic/transact database creds txdata)]
+          txdata                          [[:db/retract user-ent-id :user/password current-password]
+                                           [:db/add     user-ent-id :user/password (creds/hash-bcrypt new-password)]]
+          report                          @(datomic/transact database creds txdata)]
       (verify-creds this username new-password)))
 
   component/Lifecycle

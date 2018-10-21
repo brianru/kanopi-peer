@@ -22,7 +22,9 @@
             [kanopi.model.schema :as schema]))
 
 
-;; Test JSON/EDN/Transit auth API
+;; Test JSON auth API
+;; FIXME does not work because login relies on friend, which relies on the web
+;; server
 (deftest authentication
   (let [system  (component/start (test-util/system-excl-web-server))
         handler (get-in system [:web-app :app-handler])
@@ -34,24 +36,24 @@
 
     (testing "unauthorized-login"
       (let [req  (-> (mock/request :post "/login" creds)
-                     (mock/header :accept "application/transit+json"))
+                     (mock/header :accept "application/json"))
             resp (handler req)]
         (is (= 401 (:status resp)))))
 
-    (testing "register-transit"
+    (testing "register"
       (let [req  (-> (mock/request :post "/register" creds)
-                     (mock/header :accept "application/transit+json"))
+                     (mock/header :accept "application/json"))
             resp (handler req)
-            body (util/transit-read (:body resp))]
+            body (json/parse-string (:body resp) keyword)]
         (is (= 200 (:status resp)))
         (is (= (:username creds) (:username body)))
         (is (auth/verify-creds (:authenticator system) creds))))
 
-    (testing "login-transit"
+    (testing "login"
       (let [req   (-> (mock/request :post "/login" creds)
-                      (mock/header :accept "application/transit+json"))
+                      (mock/header :accept "application/json"))
             resp  (handler req)
-            body' (util/transit-read (:body resp))]
+            body' (json/parse-string (:body resp) keyword)]
         (is (= 200 (:status resp)))
         (is (= (:username creds) (:username body')))))
 
@@ -65,7 +67,7 @@
       (let [register (fn [[username password]]
                        (-> (mock/request :post "/register"
                                          {:username username, :password password})
-                           (mock/header :accept "text/html")))
+                           (mock/header :accept "application/json")))
             sample-creds (map vector
                               (map str (range 10000000 10000010))
                               (map str (range 20000000 20000010)))
@@ -81,47 +83,47 @@
         (is (= cookie-names #{"kanopi-session"}))
         (is (= 10 (count cookie-values)))))
 
-    (testing "register: transit+json response"
+    (testing "register: json response"
       (let [creds  {:username "minney" :password "mouse123"}
             req (-> (mock/request :post "/register" creds)
-                    (mock/header :accept "application/transit+json"))
+                    (mock/header :accept "application/json"))
             {:keys [status headers body] :as resp} (handler req)
-            body' (util/transit-read body)
+            body' (json/parse-string body keyword)
             cookie (-> (get headers "Set-Cookie") (first))
             ]
         (is (= 200 status))
         (is (= (:username creds) (:username body')))
         (is (not-empty cookie))
-        (let [msg {:noun 42
-                   :verb :fobar
-                   :context {}}
-              req (-> (mock/request :post "/api" msg)
-                      (mock/header :accept "application/transit+json")
-                      (mock/header :cookie cookie))
-              {:keys [status headers body]} (handler req)
-              body' (util/transit-read body)]
-          (is (= 200 status))
-          (is (= (select-keys msg [:noun :verb]) (select-keys body' [:noun :verb]))))))
+        #_(let [msg {:noun 42
+                     :verb :fobar
+                     :context {}}
+                req (-> (mock/request :post "/api" msg)
+                        (mock/header :accept "application/json")
+                        (mock/header :cookie cookie))
+                {:keys [status headers body]} (handler req)
+                body' (json/parse-string body keyword)]
+            (is (= 200 status))
+            (is (= (select-keys msg [:noun :verb]) (select-keys body' [:noun :verb]))))))
 
-    (testing "login: transit+json and post a message to api"
+    (testing "login: json"
       (let [creds {:username "minney" :password "mouse123"}
             req   (-> (mock/request :post "/login" creds)
-                      (mock/header :accept "application/transit+json"))
+                      (mock/header :accept "application/json"))
             {:keys [status headers body] :as resp} (handler req)
-            body' (util/transit-read body)
+            body' (json/parse-string body keyword)
             cookie (-> (get headers "Set-Cookie") (first))]
         (is (= 200 status))
         (is (:username creds) (:username body))
         (is (not-empty cookie))
-        (let [msg {:noun 42
-                   :verb :testing123}
-              req (-> (mock/request :post "/api" msg)
-                      (mock/header :accept "application/transit+json")
-                      (mock/header :cookie cookie))
-              {:keys [status headers body]} (handler req)
-              body' (util/transit-read body)]
-          (is (= 200 status))
-          (is (= (select-keys msg [:noun :verb])
-                 (select-keys body' [:noun :verb]))))))
+        #_(let [msg {:noun 42
+                     :verb :testing123}
+                req (-> (mock/request :post "/api" msg)
+                        (mock/header :accept "application/transit+json")
+                        (mock/header :cookie cookie))
+                {:keys [status headers body]} (handler req)
+                body' (util/transit-read body)]
+            (is (= 200 status))
+            (is (= (select-keys msg [:noun :verb])
+                   (select-keys body' [:noun :verb]))))))
 
     (component/stop system)))
